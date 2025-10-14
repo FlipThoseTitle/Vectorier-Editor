@@ -1,0 +1,91 @@
+// This file is generated. Do not modify by hand.
+// XML documentation file not found. To check if public methods have XML comments,
+// make sure the XML doc file is present and located next to the scraped dll
+namespace UnityEditor.Formats.Fbx.Exporter
+{
+    public static class ConvertToNestedPrefab
+    {
+        public static UnityEngine.GameObject ConvertToPrefabVariant(UnityEngine.GameObject toConvert, string fbxDirectoryFullPath = default(string), string fbxFullPath = default(string), string prefabDirectoryFullPath = default(string), string prefabFullPath = default(string), ConvertToPrefabVariantOptions convertOptions = default(ConvertToPrefabVariantOptions));
+    }
+
+    public class ConvertToPrefabVariantOptions
+    {
+        public bool AnimateSkinnedMesh { get; set; }
+        public UnityEngine.Transform AnimationDest { get; set; }
+        public UnityEngine.Transform AnimationSource { get; set; }
+        public ExportFormat ExportFormat { get; set; }
+        public bool UseMayaCompatibleNames { get; set; }
+        public ConvertToPrefabVariantOptions() {}
+    }
+
+    public enum ExportFormat
+    {
+        ASCII = 0,
+        Binary = 1,
+    }
+
+    public class ExportModelOptions
+    {
+        public bool AnimateSkinnedMesh { get; set; }
+        public UnityEngine.Transform AnimationDest { get; set; }
+        public UnityEngine.Transform AnimationSource { get; set; }
+        public bool EmbedTextures { get; set; }
+        public ExportFormat ExportFormat { get; set; }
+        public bool ExportUnrendered { get; set; }
+        public bool KeepInstances { get; set; }
+        public LODExportType LODExportType { get; set; }
+        public Include ModelAnimIncludeOption { get; set; }
+        public ObjectPosition ObjectPosition { get; set; }
+        public bool PreserveImportSettings { get; set; }
+        public bool UseMayaCompatibleNames { get; set; }
+        public ExportModelOptions() {}
+    }
+
+    public class FbxExportSettingsException : System.Exception
+    {
+    }
+
+    [UnityEditor.Recorder.RecorderSettings(typeof(FbxRecorder), @"FBX")] public class FbxRecorderSettings : UnityEditor.Recorder.RecorderSettings
+    {
+        public UnityEditor.Recorder.Input.AnimationInputSettings AnimationInputSettings { get; set; }
+        public bool ExportGeometry { get; set; }
+        protected override string Extension { get; }
+        public override System.Collections.Generic.IEnumerable<UnityEditor.Recorder.RecorderInputSettings> InputsSettings { get; }
+        public override bool IsPlatformSupported { get; }
+        public UnityEngine.Transform TransferAnimationDest { get; set; }
+        public UnityEngine.Transform TransferAnimationSource { get; set; }
+        public FbxRecorderSettings() {}
+        protected override void GetErrors(System.Collections.Generic.List<string> errors);
+        public override void OnAfterDuplicate();
+    }
+
+    public enum Include
+    {
+        Anim = 1,
+        Model = 0,
+        ModelAndAnim = 2,
+    }
+
+    public enum LODExportType
+    {
+        All = 0,
+        Highest = 1,
+        Lowest = 2,
+    }
+
+    public sealed class ModelExporter
+    {
+        public ModelExporter() {}
+        public static string ExportObject(string filePath, UnityEngine.Object singleObject);
+        public static string ExportObject(string filePath, UnityEngine.Object singleObject, ExportModelOptions exportOptions = default(ExportModelOptions));
+        public static string ExportObjects(string filePath, UnityEngine.Object[] objects = default(UnityEngine.Object[]));
+        public static string ExportObjects(string filePath, UnityEngine.Object[] objects = default(UnityEngine.Object[]), ExportModelOptions exportOptions = default(ExportModelOptions));
+    }
+
+    public enum ObjectPosition
+    {
+        LocalCentered = 0,
+        Reset = 2,
+        WorldAbsolute = 1,
+    }
+}

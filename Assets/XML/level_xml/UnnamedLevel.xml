@@ -1,0 +1,101 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Root>
+  <Music Name="music_dinamic" Volume="0.3" />
+  <Models Choice="AITriggers" Variant="CommonMode">
+    <Model Name="Player" Type="1" Color="0" BirthSpawn="PlayerSpawn" AI="0" Time="1" Trick="1" Item="1" Victory="1" Lose="1" />
+  </Models>
+  <Coins Value="50" />
+  <Objects Name="Money" />
+  <Track>
+    <Object Factor="0.05">
+      <Content>
+        <Image X="0" Y="0" ClassName="cons_container_prof" Width="512" Height="252" NativeX="512" NativeY="252">
+          <Properties>
+            <Static>
+              <StartColor Color="#FF0000FF" />
+            </Static>
+          </Properties>
+        </Image>
+      </Content>
+    </Object>
+    <Object Factor="0.5">
+      <Content>
+        <Image X="0" Y="0" ClassName="cons_container_prof" Width="512" Height="252" NativeX="512" NativeY="252">
+          <Properties>
+            <Static>
+              <StartColor Color="#00FF1FFF" />
+            </Static>
+          </Properties>
+        </Image>
+      </Content>
+    </Object>
+    <Object Factor="1">
+      <Content>
+        <Image X="1780" Y="1323.037" ClassName="cons_barrel" Width="64" Height="82" NativeX="64" NativeY="82" />
+        <Image X="1039" Y="1323.037" ClassName="cons_barrel" Width="64" Height="82" NativeX="64" NativeY="82" />
+        <Image X="388" Y="1323.037" ClassName="cons_barrel" Width="64" Height="82" NativeX="64" NativeY="82" />
+        <Image X="-349" Y="1323.037" ClassName="cons_barrel" Width="64" Height="82" NativeX="64" NativeY="82" />
+        <Image X="0" Y="0" ClassName="cons_container_prof" Width="512" Height="252" NativeX="512" NativeY="252" />
+        <Image X="-1490" Y="-2" ClassName="v_black" Width="4004.296" Height="4.62107" NativeX="50" NativeY="50">
+          <Properties>
+            <Static>
+              <Matrix A="0.000000" B="4.609375" C="-4004.296000" D="0.000000" Tx="4004.296000" Ty="0.000000" />
+            </Static>
+          </Properties>
+        </Image>
+        <Image X="509.6953" Y="-599.89" ClassName="v_black" Width="4.609375" Height="1199.789" NativeX="50" NativeY="50" />
+        <Trigger Name="TriggerZoomMax" X="1789" Y="666.5999" Width="43.0336" Height="785.3716">
+          <Content>
+            <Init>
+              <SetVariable Name="$Active" Value="1" />
+              <SetVariable Name="$Node" Value="COM" />
+              <SetVariable Name="Zoom" Value="1.1" />
+              <SetVariable Name="$AI" Value="0" />
+              <SetVariable Name="Flag1" Value="0" />
+            </Init>
+            <Template Name="CameraZoom" />
+          </Content>
+        </Trigger>
+        <Trigger Name="TriggerZoomNormal" X="1048" Y="666.5999" Width="43.0336" Height="785.3716">
+          <Content>
+            <Init>
+              <SetVariable Name="$Active" Value="1" />
+              <SetVariable Name="$Node" Value="COM" />
+              <SetVariable Name="Zoom" Value="1" />
+              <SetVariable Name="$AI" Value="0" />
+              <SetVariable Name="Flag1" Value="0" />
+            </Init>
+            <Template Name="CameraZoom" />
+          </Content>
+        </Trigger>
+        <Trigger Name="TriggerZoom80" X="397" Y="666.5999" Width="43.0336" Height="785.3716">
+          <Content>
+            <Init>
+              <SetVariable Name="$Active" Value="1" />
+              <SetVariable Name="$Node" Value="COM" />
+              <SetVariable Name="Zoom" Value="0.8" />
+              <SetVariable Name="$AI" Value="0" />
+              <SetVariable Name="Flag1" Value="0" />
+            </Init>
+            <Template Name="CameraZoom" />
+          </Content>
+        </Trigger>
+        <Trigger Name="TriggerZoomMin" X="-339" Y="666.5999" Width="43.0336" Height="785.3716">
+          <Content>
+            <Init>
+              <SetVariable Name="$Active" Value="1" />
+              <SetVariable Name="$Node" Value="COM" />
+              <SetVariable Name="Zoom" Value="0.65" />
+              <SetVariable Name="$AI" Value="0" />
+              <SetVariable Name="Flag1" Value="0" />
+            </Init>
+            <Template Name="CameraZoom" />
+          </Content>
+        </Trigger>
+        <Spawn X="-520" Y="1239" Name="PlayerSpawn" Animation="JumpOff|18" />
+        <Platform X="-500" Y="1403" Width="3350" Height="50" />
+        <Camera X="512" Y="0" />
+      </Content>
+    </Object>
+  </Track>
+</Root>

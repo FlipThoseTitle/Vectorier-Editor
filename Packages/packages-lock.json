@@ -1,5 +1,12 @@
 {
   "dependencies": {
+    "com.autodesk.fbx": {
+      "version": "5.1.1",
+      "depth": 1,
+      "source": "registry",
+      "dependencies": {},
+      "url": "https://packages.unity.com"
+    },
     "com.unity.2d.animation": {
       "version": "5.2.1",
       "depth": 0,
@@ -88,6 +95,16 @@
       "dependencies": {},
       "url": "https://packages.unity.com"
     },
+    "com.unity.formats.fbx": {
+      "version": "5.1.5",
+      "depth": 0,
+      "source": "registry",
+      "dependencies": {
+        "com.autodesk.fbx": "5.1.1",
+        "com.unity.timeline": "1.7.1"
+      },
+      "url": "https://packages.unity.com"
+    },
     "com.unity.ide.rider": {
       "version": "2.0.7",
       "depth": 0,
@@ -98,7 +115,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.ide.visualstudio": {
-      "version": "2.0.15",
+      "version": "2.0.23",
       "depth": 0,
       "source": "registry",
       "dependencies": {
@@ -120,6 +137,15 @@
       "dependencies": {},
       "url": "https://packages.unity.com"
     },
+    "com.unity.progrids": {
+      "version": "3.0.3-preview.6",
+      "depth": 0,
+      "source": "registry",
+      "dependencies": {
+        "com.unity.settings-manager": "1.0.2"
+      },
+      "url": "https://packages.unity.com"
+    },
     "com.unity.services.core": {
       "version": "1.0.1",
       "depth": 1,
@@ -127,6 +153,13 @@
       "dependencies": {
         "com.unity.modules.unitywebrequest": "1.0.0"
       },
+      "url": "https://packages.unity.com"
+    },
+    "com.unity.settings-manager": {
+      "version": "1.0.2",
+      "depth": 1,
+      "source": "registry",
+      "dependencies": {},
       "url": "https://packages.unity.com"
     },
     "com.unity.test-framework": {
@@ -150,8 +183,8 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.timeline": {
-      "version": "1.4.8",
-      "depth": 0,
+      "version": "1.7.1",
+      "depth": 1,
       "source": "registry",
       "dependencies": {
         "com.unity.modules.audio": "1.0.0",

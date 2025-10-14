@@ -3,7 +3,17 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 2
-  tags: []
+  tags:
+  - Image
+  - Trigger
+  - Area
+  - Object
+  - Trapezoid
+  - Platform
+  - Spawn
+  - Camera
+  - Item
+  - Model
   layers:
   - Default
   - TransparentFX
@@ -11,9 +21,9 @@ TagManager:
   - 
   - Water
   - UI
-  - 
-  - 
-  - 
+  - 0.05
+  - 0.5
+  - 1
   - 
   - 
   - 
