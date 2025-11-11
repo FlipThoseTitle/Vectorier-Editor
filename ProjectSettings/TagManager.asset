@@ -16,6 +16,7 @@ TagManager:
   - Model
   - Item
   - Animation
+  - Particle
   layers:
   - Default
   - TransparentFX

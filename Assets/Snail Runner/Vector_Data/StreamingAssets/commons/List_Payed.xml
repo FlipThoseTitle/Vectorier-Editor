@@ -1,0 +1,1708 @@
+<LocationList>
+	<CoinSettings>
+		<Coins Name="CoinsDefault">
+			<Coins Type="Silver" Chance="1" Nominal="10" Count="-1"/>
+			<Coins Type="Gold" Chance="0.33" Nominal="100" Count="1"/>
+			<Coins Type="Ruby" Chance="0.01" Nominal="300" Count="1"/>
+		</Coins>
+		
+		<Coins Name="CoinsAfterVideo">
+			<Coins Type="Silver" Chance="1" Nominal="10" Count="-1"/>
+			<Coins Type="Gold" Chance="1" Nominal="100" Count="1"/>
+			<Coins Type="Ruby" Chance="0.2" Nominal="300" Count="1"/>
+		</Coins>
+		
+		<Coins Name="CoinsAfterPush">
+			<Coins Type="Silver" Chance="1" Nominal="10" Count="-1"/>
+			<Coins Type="Gold" Chance="1" Nominal="100" Count="1"/>
+			<Coins Type="Ruby" Chance="0.5" Nominal="300" Count="1"/>
+		</Coins>
+	</CoinSettings>
+	<Templates>
+		<Stars Name="Stars_default">
+			<Completed/>
+			<Bonuses/>
+			<Tricks/>
+		</Stars>
+		<Stars Name="Stars_default_Hunter">
+			<Completed/>
+			<Bonuses/>
+			<Tricks/>
+		</Stars>
+		
+		<Reward Name="Reward_Downtown_Story">
+			<Stars Count="1" Coins="100"/>
+			<Stars Count="2" Coins="150"/>
+			<Stars Count="3" Coins="250"/>
+		</Reward>
+		<Reward Name="Reward_Downtown_Bonus">
+			<Stars Count="1" Coins="200"/>
+			<Stars Count="2" Coins="300"/>
+			<Stars Count="3" Coins="500"/>
+		</Reward>
+		<Reward Name="Reward_Construction_Story">
+			<Stars Count="1" Coins="150"/>
+			<Stars Count="2" Coins="250"/>
+			<Stars Count="3" Coins="400"/>
+		</Reward>
+		<Reward Name="Reward_Construction_Bonus">
+			<Stars Count="1" Coins="250"/>
+			<Stars Count="2" Coins="500"/>
+			<Stars Count="3" Coins="750"/>
+		</Reward>
+		<Reward Name="Reward_Techpark_Story">
+			<Stars Count="1" Coins="200"/>
+			<Stars Count="2" Coins="300"/>
+			<Stars Count="3" Coins="500"/>
+		</Reward>
+		<Reward Name="Reward_Techpark_Bonus">
+			<Stars Count="1" Coins="350"/>
+			<Stars Count="2" Coins="550"/>
+			<Stars Count="3" Coins="900"/>
+		</Reward>
+
+		<Reward Name="Reward_Downtown_Story_Hunter">
+			<Stars Count="1" Coins="60"/>
+			<Stars Count="2" Coins="80"/>
+			<Stars Count="3" Coins="110"/>
+		</Reward>
+		<Reward Name="Reward_Downtown_Bonus_Hunter">
+			<Stars Count="1" Coins="80"/>
+			<Stars Count="2" Coins="120"/>
+			<Stars Count="3" Coins="180"/>
+		</Reward>
+		<Reward Name="Reward_Construction_Story_Hunter">
+			<Stars Count="1" Coins="70"/>
+			<Stars Count="2" Coins="120"/>
+			<Stars Count="3" Coins="195"/>
+		</Reward>
+		<Reward Name="Reward_Construction_Bonus_Hunter">
+			<Stars Count="1" Coins="90"/>
+			<Stars Count="2" Coins="160"/>
+			<Stars Count="3" Coins="265"/>
+		</Reward>
+		<Reward Name="Reward_Techpark_Story_Hunter">
+			<Stars Count="1" Coins="80"/>
+			<Stars Count="2" Coins="160"/>
+			<Stars Count="3" Coins="280"/>
+		</Reward>
+		<Reward Name="Reward_Techpark_Bonus_Hunter">
+			<Stars Count="1" Coins="100"/>
+			<Stars Count="2" Coins="180"/>
+			<Stars Count="3" Coins="300"/>
+		</Reward>
+	</Templates>
+	<Locations>
+		<Location Name="DOWNTOWN">
+			<Groups>
+				<Group Name="STORY">
+					<Track Name="DOWNTOWN_STORY_01">
+						<Tricks>
+							<Trick Name="TRICK_JUMPTUMBLE"/>
+						</Tricks>
+						<Stars Template="Stars_default"/>
+						<Reward Template="Reward_Downtown_Story"/>
+					</Track>
+					
+					<Track Name="DOWNTOWN_STORY_02" UnlockPrice="50">
+						<Conditions>
+							<Stars Required="1" Subject="Location" Name="DOWNTOWN"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_THIEFVAULT"/>
+							<Trick Name="TRICK_SPINNINGVAULT"/>
+						</Tricks>
+						<Stars Template="Stars_default"/>
+						<Reward Template="Reward_Downtown_Story"/>
+					</Track>
+					
+					<Track Name="DOWNTOWN_STORY_03" UnlockPrice="100">
+						<Conditions>
+							<Stars Required="3" Subject="Location" Name="DOWNTOWN"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_REVERSEVAULT"/>
+							<Trick Name="TRICK_SPINNINGVAULT"/>
+							<Trick Name="TRICK_JUMPTUMBLE"/>
+						</Tricks>
+						<Stars Template="Stars_default"/>
+						<Reward Template="Reward_Downtown_Story"/>
+					</Track>
+					
+					<Track Name="DOWNTOWN_STORY_04" UnlockPrice="400">
+						<Conditions>
+							<Stars Required="5" Subject="Location" Name="DOWNTOWN"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_BACKFLIP"/>
+							<Trick Name="TRICK_REVERSEVAULT"/>
+							<Trick Name="TRICK_JUMPTUMBLE"/>
+						</Tricks>
+						<Stars Template="Stars_default"/>
+						<Reward Template="Reward_Downtown_Story"/>
+					</Track>
+					
+					<Track Name="DOWNTOWN_STORY_05" UnlockPrice="450">
+						<Conditions>
+							<Stars Required="8" Subject="Location" Name="DOWNTOWN"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_JUMPOBSTACLE"/>
+							<Trick Name="TRICK_BACKFLIP"/>
+							<Trick Name="TRICK_THIEFVAULT"/>
+						</Tricks>
+						<Stars Template="Stars_default"/>
+						<Reward Template="Reward_Downtown_Story"/>
+					</Track>
+					
+					<Track Name="DOWNTOWN_STORY_06" UnlockPrice="500">
+						<Conditions>
+							<Stars Required="10" Subject="Location" Name="DOWNTOWN"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_BARJUMPSALTOLESS"/>
+							<Trick Name="TRICK_JUMPOBSTACLE"/>
+							<Trick Name="TRICK_THIEFVAULT"/>
+						</Tricks>
+						<Stars Template="Stars_default"/>
+						<Reward Template="Reward_Downtown_Story"/>
+					</Track>
+					
+					<Track Name="DOWNTOWN_STORY_07" UnlockPrice="950">
+						<Conditions>
+							<Stars Required="12" Subject="Location" Name="DOWNTOWN"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_SCREWDRIVER"/>
+							<Trick Name="TRICK_BARJUMPSALTOLESS"/>
+							<Trick Name="TRICK_BACKFLIP"/>
+						</Tricks>
+						<Stars Template="Stars_default"/>
+						<Reward Template="Reward_Downtown_Story"/>
+					</Track>
+					
+					<Track Name="DOWNTOWN_STORY_08" UnlockPrice="1450">
+						<Conditions>
+							<Stars Required="15" Subject="Location" Name="DOWNTOWN"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_RAILFLIP"/>
+							<Trick Name="TRICK_JUMPOBSTACLE"/>
+							<Trick Name="TRICK_REVERSEVAULT"/>
+						</Tricks>
+						<Stars Template="Stars_default"/>
+						<Reward Template="Reward_Downtown_Story"/>
+					</Track>
+					
+					<Track Name="DOWNTOWN_STORY_09" UnlockPrice="2000">
+						<Conditions>
+							<Stars Required="18" Subject="Location" Name="DOWNTOWN"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_BARRELVAULT"/>
+							<Trick Name="TRICK_SCREWDRIVER"/>
+							<Trick Name="TRICK_REVERSEVAULT"/>
+						</Tricks>
+						<Stars Template="Stars_default"/>
+						<Reward Template="Reward_Downtown_Story"/>
+					</Track>
+					
+					<Track Name="DOWNTOWN_STORY_10" UnlockPrice="2600">
+						<Conditions>
+							<Stars Required="21" Subject="Location" Name="DOWNTOWN"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_OBSTACLEFRONTFLIP"/>
+							<Trick Name="TRICK_SCREWDRIVER"/>
+							<Trick Name="TRICK_THIEFVAULT"/>
+						</Tricks>
+						<Stars Template="Stars_default"/>
+						<Reward Template="Reward_Downtown_Story"/>
+					</Track>
+					
+					<Track Name="DOWNTOWN_STORY_11" UnlockPrice="5000">
+						<Conditions>
+							<Stars Required="24" Subject="Location" Name="DOWNTOWN"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_MONKEYVAULT"/>
+							<Trick Name="TRICK_OBSTACLEFRONTFLIP"/>
+							<Trick Name="TRICK_JUMPOBSTACLE"/>
+						</Tricks>
+						<Stars Template="Stars_default"/>
+						<Reward Template="Reward_Downtown_Story"/>
+					</Track>
+				</Group>
+				<Group Name="BONUS">
+					<Track Name="DOWNTOWN_BONUS_01" UnlockPrice="1250">
+						<Conditions>
+								<Stars Required="25" Subject="Location" Name="DOWNTOWN"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_VERTVAULT"/>
+							<Trick Name="TRICK_SCREWDRIVER"/>
+							<Trick Name="TRICK_BARJUMPSALTOLESS"/>
+						</Tricks>
+						<Stars Template="Stars_default"/>
+						<Reward Template="Reward_Downtown_Bonus"/>
+					</Track>
+					
+					<Track Name="DOWNTOWN_BONUS_02" UnlockPrice="1500">
+						<Conditions>
+								<Stars Required="29" Subject="Location" Name="DOWNTOWN"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_ROCKETVAULT"/>
+							<Trick Name="TRICK_RAILFLIP"/>
+							<Trick Name="TRICK_SPINNINGVAULT"/>
+						</Tricks>
+						<Stars Template="Stars_default"/>
+						<Reward Template="Reward_Downtown_Bonus"/>
+					</Track>
+					
+					<Track Name="DOWNTOWN_BONUS_03" UnlockPrice="1750">
+						<Conditions>
+								<Stars Required="33" Subject="Location" Name="DOWNTOWN"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_AIRSPIN"/>
+							<Trick Name="TRICK_OBSTACLEFRONTFLIP"/>
+							<Trick Name="TRICK_SPINNINGVAULT"/>
+						</Tricks>
+						<Stars Template="Stars_default"/>
+						<Reward Template="Reward_Downtown_Bonus"/>
+					</Track>
+					
+					<Track Name="DOWNTOWN_BONUS_04" UnlockPrice="2000">
+						<Conditions>
+								<Stars Required="37" Subject="Location" Name="DOWNTOWN"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_SIDEBOMB"/>
+							<Trick Name="TRICK_MONKEYVAULT"/>
+							<Trick Name="TRICK_JUMPOBSTACLE"/>
+						</Tricks>
+						<Stars Template="Stars_default"/>
+						<Reward Template="Reward_Downtown_Bonus"/>
+					</Track>
+
+					<Track Name="DOWNTOWN_BONUS_05" UnlockPrice="2250">
+						<Conditions>
+								<Stars Required="41" Subject="Location" Name="DOWNTOWN"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_WEBSTERWITHSALTO"/>
+							<Trick Name="TRICK_AIRSPIN"/>
+							<Trick Name="TRICK_ROCKETVAULT"/>
+							<Trick Name="TRICK_VERTVAULT"/>
+							<Trick Name="TRICK_MONKEYVAULT"/>
+							<Trick Name="TRICK_OBSTACLEFRONTFLIP"/>
+							<Trick Name="TRICK_BARRELVAULT"/>
+							<Trick Name="TRICK_RAILFLIP"/>
+							<Trick Name="TRICK_SCREWDRIVER"/>
+							<Trick Name="TRICK_BARJUMPSALTOLESS"/>
+							<Trick Name="TRICK_BACKFLIP"/>
+							<Trick Name="TRICK_REVERSEVAULT"/>
+							<Trick Name="TRICK_SPINNINGVAULT"/>
+							<Trick Name="TRICK_JUMPTUMBLE"/>
+							<Trick Name="TRICK_THIEFVAULT"/>
+						</Tricks>
+						<Stars Template="Stars_default"/>
+						<Reward Template="Reward_Downtown_Bonus"/>
+					</Track>
+					
+					<Track Name="DOWNTOWN_BONUS_06" UnlockPrice="2500">
+						<Conditions>
+								<Stars Required="45" Subject="Location" Name="DOWNTOWN"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_DASHTOFRONTFLIP"/>
+							<Trick Name="TRICK_SIDEBOMB"/>
+							<Trick Name="TRICK_SPLITONE"/>
+						</Tricks>
+						<Stars Template="Stars_default"/>
+						<Reward Template="Reward_Downtown_Bonus"/>
+					</Track>
+					
+					<Track Name="DOWNTOWN_BONUS_07" UnlockPrice="2750">
+						<Conditions>
+								<Stars Required="49" Subject="Location" Name="DOWNTOWN"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_TRIPLETRICKTOSWALLOW"/>
+							<Trick Name="TRICK_WEBSTERWITHSALTO"/>
+							<Trick Name="TRICK_SWALLOW"/>
+						</Tricks>
+						<Stars Template="Stars_default"/>
+						<Reward Template="Reward_Downtown_Bonus"/>
+					</Track>
+					
+					<Track Name="DOWNTOWN_BONUS_08" UnlockPrice="3000">
+						<Conditions>
+								<Stars Required="53" Subject="Location" Name="DOWNTOWN"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_HANDSPRING"/>
+							<Trick Name="TRICK_SWALLOW"/>
+							<Trick Name="TRICK_MONKEYVAULT"/>
+						</Tricks>
+						<Stars Template="Stars_default"/>
+						<Reward Template="Reward_Downtown_Bonus"/>
+					</Track>
+					
+					<Track Name="DOWNTOWN_BONUS_09" UnlockPrice="3250">
+						<Conditions>
+								<Stars Required="57" Subject="Location" Name="DOWNTOWN"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_THIEFVAULT"/>
+							<Trick Name="TRICK_AIRSPIN"/>
+							<Trick Name="TRICK_SIDEFLIP"/>
+						</Tricks>
+						<Stars Template="Stars_default"/>
+						<Reward Template="Reward_Downtown_Bonus"/>
+					</Track>
+				</Group>
+			</Groups>
+		</Location>
+		<Location Name="CONSTRUCTION" UnlockPrice="5000">
+			<Conditions>
+				<Stars Required="1" Subject="Track" Name="DOWNTOWN_STORY_11"/>
+			</Conditions>
+			<Groups>
+				<Group Name="STORY">
+					<Track Name="CONSTRUCTION_STORY_01">
+						<Tricks>
+							<Trick Name="TRICK_DOUBLEKONG"/>
+							<Trick Name="TRICK_OBSTACLEFRONTFLIP"/>
+							<Trick Name="TRICK_BARRELVAULT"/>
+						</Tricks>
+						<Stars Template="Stars_default"/>
+						<Reward Template="Reward_Construction_Story"/>
+					</Track>
+					
+					<Track Name="CONSTRUCTION_STORY_02" UnlockPrice="150">
+						<Conditions>
+							<Stars Required="2" Subject="Location" Name="CONSTRUCTION"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_BARJUMP"/>
+							<Trick Name="TRICK_DOUBLEKONG"/>
+							<Trick Name="TRICK_SPINNINGVAULT"/>
+						</Tricks>
+						<Stars Template="Stars_default"/>
+						<Reward Template="Reward_Construction_Story"/>
+					</Track>
+					
+					<Track Name="CONSTRUCTION_STORY_03" UnlockPrice="750">
+						<Conditions>
+							<Stars Required="4" Subject="Location" Name="CONSTRUCTION"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_DASHVAULT"/>
+							<Trick Name="TRICK_BARJUMP"/>
+							<Trick Name="TRICK_BARJUMPSALTOLESS"/>
+						</Tricks>
+						<Stars Template="Stars_default"/>
+						<Reward Template="Reward_Construction_Story"/>
+					</Track>
+					
+					<Track Name="CONSTRUCTION_STORY_04" UnlockPrice="800">
+						<Conditions>
+							<Stars Required="7" Subject="Location" Name="CONSTRUCTION"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_AIRBOMB"/>
+							<Trick Name="TRICK_DASHVAULT"/>
+							<Trick Name="TRICK_RAILFLIP"/>
+						</Tricks>
+						<Stars Template="Stars_default"/>
+						<Reward Template="Reward_Construction_Story"/>
+					</Track>
+					
+					<Track Name="CONSTRUCTION_STORY_05" UnlockPrice="850">
+						<Conditions>
+							<Stars Required="9" Subject="Location" Name="CONSTRUCTION"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_SPLITONE"/>
+							<Trick Name="TRICK_AIRBOMB"/>
+							<Trick Name="TRICK_DOUBLEKONG"/>
+						</Tricks>
+						<Stars Template="Stars_default"/>
+						<Reward Template="Reward_Construction_Story"/>
+					</Track>
+					
+					<Track Name="CONSTRUCTION_STORY_06" UnlockPrice="900">
+						<Conditions>
+							<Stars Required="11" Subject="Location" Name="CONSTRUCTION"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_DESCENTVAULT"/>
+							<Trick Name="TRICK_SPLITONE"/>
+							<Trick Name="TRICK_AIRBOMB"/>
+						</Tricks>
+						<Stars Template="Stars_default"/>
+						<Reward Template="Reward_Construction_Story"/>
+					</Track>
+					
+					<Track Name="CONSTRUCTION_STORY_07" UnlockPrice="950">
+						<Conditions>
+							<Stars Required="13" Subject="Location" Name="CONSTRUCTION"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_STRAIGHTLEGSFLIP"/>
+							<Trick Name="TRICK_DESCENTVAULT"/>
+							<Trick Name="TRICK_BARJUMP"/>
+						</Tricks>
+						<Stars Template="Stars_default"/>
+						<Reward Template="Reward_Construction_Story"/>
+					</Track>
+					
+					<Track Name="CONSTRUCTION_STORY_08" UnlockPrice="2050">
+						<Conditions>
+							<Stars Required="15" Subject="Location" Name="CONSTRUCTION"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_SWALLOW"/>
+							<Trick Name="TRICK_STRAIGHTLEGSFLIP"/>
+							<Trick Name="TRICK_DOUBLEKONG"/>
+						</Tricks>
+						<Stars Template="Stars_default"/>
+						<Reward Template="Reward_Construction_Story"/>
+					</Track>
+					
+					<Track Name="CONSTRUCTION_STORY_09" UnlockPrice="3250">
+						<Conditions>
+							<Stars Required="18" Subject="Location" Name="CONSTRUCTION"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_FOLDFLIP"/>
+							<Trick Name="TRICK_SWALLOW"/>
+							<Trick Name="TRICK_DASHVAULT"/>
+						</Tricks>
+						<Stars Template="Stars_default"/>
+						<Reward Template="Reward_Construction_Story"/>
+					</Track>
+					
+					<Track Name="CONSTRUCTION_STORY_10" UnlockPrice="4550">
+						<Conditions>
+							<Stars Required="21" Subject="Location" Name="CONSTRUCTION"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_FLIPANDROLL"/>
+							<Trick Name="TRICK_FOLDFLIP"/>
+							<Trick Name="TRICK_STRAIGHTLEGSFLIP"/>
+						</Tricks>
+						<Stars Template="Stars_default"/>
+						<Reward Template="Reward_Construction_Story"/>
+					</Track>
+					
+					<Track Name="CONSTRUCTION_STORY_11" UnlockPrice="10000">
+						<Conditions>
+							<Stars Required="24" Subject="Location" Name="CONSTRUCTION"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_BOOMBOOMSHHUH"/>
+							<Trick Name="TRICK_BARRELVAULT"/>
+							<Trick Name="TRICK_FLIPANDROLL"/>
+						</Tricks>
+						<Stars Template="Stars_default"/>
+						<Reward Template="Reward_Construction_Story"/>
+					</Track>
+				</Group>
+				<Group Name="BONUS">
+					<Track Name="CONSTRUCTION_BONUS_01" UnlockPrice="1500">
+						<Conditions>
+								<Stars Required="25" Subject="Location" Name="CONSTRUCTION"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_HANDSPRINGTOROLL"/>
+							<Trick Name="TRICK_SPLITONE"/>
+							<Trick Name="TRICK_DASHVAULT"/>
+						</Tricks>
+						<Stars Template="Stars_default"/>
+						<Reward Template="Reward_Construction_Bonus"/>
+					</Track>
+					
+					<Track Name="CONSTRUCTION_BONUS_02" UnlockPrice="2000">
+						<Conditions>
+								<Stars Required="29" Subject="Location" Name="CONSTRUCTION"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_DIVEDOWN"/>
+							<Trick Name="TRICK_HANDSPRINGTOROLL"/>
+							<Trick Name="TRICK_DASHVAULT"/>
+						</Tricks>
+						<Stars Template="Stars_default"/>
+						<Reward Template="Reward_Construction_Bonus"/>
+					</Track>
+					
+					<Track Name="CONSTRUCTION_BONUS_03" UnlockPrice="2500">
+						<Conditions>
+								<Stars Required="31" Subject="Location" Name="CONSTRUCTION"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_TRIPLEHIT"/>
+							<Trick Name="TRICK_DIVEDOWN"/>
+							<Trick Name="TRICK_SPINNINGVAULT"/>
+						</Tricks>
+						<Stars Template="Stars_default"/>
+						<Reward Template="Reward_Construction_Bonus"/>
+					</Track>
+					
+					<Track Name="CONSTRUCTION_BONUS_04" UnlockPrice="3000">
+						<Conditions>
+								<Stars Required="35" Subject="Location" Name="CONSTRUCTION"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_SIDEFLIP"/>
+							<Trick Name="TRICK_SPLITONE"/>
+							<Trick Name="TRICK_BARJUMP"/>
+						</Tricks>
+						<Stars Template="Stars_default"/>
+						<Reward Template="Reward_Construction_Bonus"/>
+					</Track>
+
+					<Track Name="CONSTRUCTION_BONUS_05" UnlockPrice="3500">
+						<Conditions>
+								<Stars Required="39" Subject="Location" Name="CONSTRUCTION"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_TRIPLESWING"/>
+							<Trick Name="TRICK_TRIPLEHIT"/>
+							<Trick Name="TRICK_FLIPANDROLL"/>
+						</Tricks>
+						<Stars Template="Stars_default"/>
+						<Reward Template="Reward_Construction_Bonus"/>
+					</Track>
+					
+					<Track Name="CONSTRUCTION_BONUS_06" UnlockPrice="4000">
+						<Conditions>
+								<Stars Required="43" Subject="Location" Name="CONSTRUCTION"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_MONKEYTOBOMB"/>
+							<Trick Name="TRICK_SIDEFLIP"/>
+							<Trick Name="TRICK_MONKEYVAULT"/>
+						</Tricks>
+						<Stars Template="Stars_default"/>
+						<Reward Template="Reward_Construction_Bonus"/>
+					</Track>
+					
+					<Track Name="CONSTRUCTION_BONUS_07" UnlockPrice="4500">
+						<Conditions>
+								<Stars Required="49" Subject="Location" Name="CONSTRUCTION"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_JUMPWHEEL"/>
+							<Trick Name="TRICK_TRIPLESWING"/>
+							<Trick Name="TRICK_DESCENTVAULT"/>
+						</Tricks>
+						<Stars Template="Stars_default"/>
+						<Reward Template="Reward_Construction_Bonus"/>
+					</Track>
+					
+					<Track Name="CONSTRUCTION_BONUS_08" UnlockPrice="5000">
+						<Conditions>
+								<Stars Required="53" Subject="Location" Name="CONSTRUCTION"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_GATEVAULT"/>
+							<Trick Name="TRICK_SWALLOW"/>
+							<Trick Name="TRICK_BARJUMPSALTOLESS"/>
+						</Tricks>
+						<Stars Template="Stars_default"/>
+						<Reward Template="Reward_Construction_Bonus"/>
+					</Track>
+
+					<Track Name="CONSTRUCTION_BONUS_09" UnlockPrice="5500">
+						<Conditions>
+								<Stars Required="57" Subject="Location" Name="CONSTRUCTION"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_DOUBLEBACK"/>
+							<Trick Name="TRICK_GATEVAULT"/>
+							<Trick Name="TRICK_DOUBLEKONG"/>
+						</Tricks>
+						<Stars Template="Stars_default"/>
+						<Reward Template="Reward_Construction_Bonus"/>
+					</Track>
+				</Group>
+			</Groups>
+		</Location>
+		<Location Name="TECHPARK" UnlockPrice="10000">
+			<Conditions>
+				<Stars Required="1" Subject="Track" Name="CONSTRUCTION_STORY_11"/>
+			</Conditions>
+			<Groups>
+				<Group Name="STORY">
+					<Track Name="TECHPARK_STORY_01">
+						<Tricks>
+							<Trick Name="TRICK_360WALLCLING"/>
+							<Trick Name="TRICK_AIRSPIN"/>
+							<Trick Name="TRICK_SPLITONE"/>
+						</Tricks>
+						<Stars Template="Stars_default"/>
+						<Reward Template="Reward_Techpark_Story"/>
+					</Track>
+					
+					<Track Name="TECHPARK_STORY_02" UnlockPrice="250">
+						<Conditions>
+							<Stars Required="2" Subject="Location" Name="TECHPARK"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_SLOWSPIN"/>
+							<Trick Name="TRICK_360WALLCLING"/>
+							<Trick Name="TRICK_DOUBLEKONG"/>
+						</Tricks>
+						<Stars Template="Stars_default"/>
+						<Reward Template="Reward_Techpark_Story"/>
+					</Track>
+					
+					<Track Name="TECHPARK_STORY_03" UnlockPrice="900">
+						<Conditions>
+							<Stars Required="4" Subject="Location" Name="TECHPARK"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_UNDERBAR"/>
+							<Trick Name="TRICK_SLOWSPIN"/>
+							<Trick Name="TRICK_360WALLCLING"/>
+						</Tricks>
+						<Stars Template="Stars_default"/>
+						<Reward Template="Reward_Techpark_Story"/>
+					</Track>
+					
+					<Track Name="TECHPARK_STORY_04" UnlockPrice="950">
+						<Conditions>
+							<Stars Required="7" Subject="Location" Name="TECHPARK"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_JUMPDOWNROLL"/>
+							<Trick Name="TRICK_UNDERBAR"/>
+							<Trick Name="TRICK_DOUBLEKONG"/>
+						</Tricks>
+						<Stars Template="Stars_default"/>
+						<Reward Template="Reward_Techpark_Story"/>
+					</Track>
+					
+					<Track Name="TECHPARK_STORY_05" UnlockPrice="1000">
+						<Conditions>
+							<Stars Required="9" Subject="Location" Name="TECHPARK"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_CHEATGAINER"/>
+							<Trick Name="TRICK_JUMPDOWNROLL"/>
+							<Trick Name="TRICK_DASHVAULT"/>
+						</Tricks>
+						<Stars Template="Stars_default"/>
+						<Reward Template="Reward_Techpark_Story"/>
+					</Track>
+					
+					<Track Name="TECHPARK_STORY_06" UnlockPrice="1050">
+						<Conditions>
+							<Stars Required="11" Subject="Location" Name="TECHPARK"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_FLYINGARROW"/>
+							<Trick Name="TRICK_CHEATGAINER"/>
+							<Trick Name="TRICK_HANDSPRINGTOROLL"/>
+						</Tricks>
+						<Stars Template="Stars_default"/>
+						<Reward Template="Reward_Techpark_Story"/>
+					</Track>
+					
+					<Track Name="TECHPARK_STORY_07" UnlockPrice="1100">
+						<Conditions>
+							<Stars Required="13" Subject="Location" Name="TECHPARK"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_DOUBLESPINVAULT"/>
+							<Trick Name="TRICK_FLYINGARROW"/>
+							<Trick Name="TRICK_JUMPOBSTACLE"/>
+						</Tricks>
+						<Stars Template="Stars_default"/>
+						<Reward Template="Reward_Techpark_Story"/>
+					</Track>
+					
+					<Track Name="TECHPARK_STORY_08" UnlockPrice="2250">
+						<Conditions>
+							<Stars Required="15" Subject="Location" Name="TECHPARK"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_SPIN360"/>
+							<Trick Name="TRICK_DOUBLESPINVAULT"/>
+							<Trick Name="TRICK_FLYINGARROW"/>
+						</Tricks>
+						<Stars Template="Stars_default"/>
+						<Reward Template="Reward_Techpark_Story"/>
+					</Track>
+					
+					<Track Name="TECHPARK_STORY_09" UnlockPrice="3500">
+						<Conditions>
+							<Stars Required="18" Subject="Location" Name="TECHPARK"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_KINGKONGJUMP"/>
+							<Trick Name="TRICK_SPIN360"/>
+							<Trick Name="TRICK_TRIPLESWING"/>
+						</Tricks>
+						<Stars Template="Stars_default"/>
+						<Reward Template="Reward_Techpark_Story"/>
+					</Track>
+					
+					<Track Name="TECHPARK_STORY_10" UnlockPrice="4850">
+						<Conditions>
+							<Stars Required="21" Subject="Location" Name="TECHPARK"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_SPINBICYCLE"/>
+							<Trick Name="TRICK_KINGKONGJUMP"/>
+							<Trick Name="TRICK_TRIPLEHIT"/>
+						</Tricks>
+						<Stars Template="Stars_default"/>
+						<Reward Template="Reward_Techpark_Story"/>
+					</Track>
+					
+					<Track Name="TECHPARK_STORY_11" UnlockPrice="15000" VideoEnd="end_video.mp4">
+						<Conditions>
+							<Stars Required="24" Subject="Location" Name="TECHPARK"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_LONGCIRCLE"/>
+							<Trick Name="TRICK_SPINBICYCLE"/>
+							<Trick Name="TRICK_SPLITONE"/>
+						</Tricks>
+						<Stars Template="Stars_default"/>
+						<Reward Template="Reward_Techpark_Story"/>
+					</Track>
+				</Group>
+        <Group Name="BONUS">
+					<Track Name="TECHPARK_BONUS_01" UnlockPrice="2000">
+						<Conditions>
+							<Stars Required="25" Subject="Location" Name="TECHPARK"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_LONGJUMPTOBARREL"/>
+							<Trick Name="TRICK_AIRSPIN"/>
+							<Trick Name="TRICK_SPINBICYCLE"/>
+						</Tricks>
+						<Stars Template="Stars_default"/>
+						<Reward Template="Reward_Techpark_Bonus"/>
+					</Track>
+					
+					<Track Name="TECHPARK_BONUS_02" UnlockPrice="2750">
+						<Conditions>
+							<Stars Required="29" Subject="Location" Name="TECHPARK"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_COOLSWING"/>
+							<Trick Name="TRICK_LONGJUMPTOBARREL"/>
+							<Trick Name="TRICK_DASHTOFRONTFLIP"/>
+						</Tricks>
+						<Stars Template="Stars_default"/>
+						<Reward Template="Reward_Techpark_Bonus"/>
+					</Track>
+					
+					<Track Name="TECHPARK_BONUS_03" UnlockPrice="3500">
+						<Conditions>
+							<Stars Required="33" Subject="Location" Name="TECHPARK"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_JUMPSPINVAULT"/>
+							<Trick Name="TRICK_COOLSWING"/>
+							<Trick Name="TRICK_DOUBLEBACK"/>
+						</Tricks>
+						<Stars Template="Stars_default"/>
+						<Reward Template="Reward_Techpark_Bonus"/>
+					</Track>
+					
+					<Track Name="TECHPARK_BONUS_04" UnlockPrice="4250">
+						<Conditions>
+							<Stars Required="37" Subject="Location" Name="TECHPARK"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_DOUBLEJUMPROLL"/>
+							<Trick Name="TRICK_JUMPSPINVAULT"/>
+							<Trick Name="TRICK_SPIN360"/>
+						</Tricks>
+						<Stars Template="Stars_default"/>
+						<Reward Template="Reward_Techpark_Bonus"/>
+					</Track>
+					
+					<Track Name="TECHPARK_BONUS_05" UnlockPrice="5000">
+						<Conditions>
+							<Stars Required="41" Subject="Location" Name="TECHPARK"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_ROLLTOSTRAIGHTLEGSFLIP"/>
+							<Trick Name="TRICK_DOUBLEJUMPROLL"/>
+							<Trick Name="TRICK_JUMPDOWNROLL"/>
+						</Tricks>
+						<Stars Template="Stars_default"/>
+						<Reward Template="Reward_Techpark_Bonus"/>
+					</Track>
+					
+					<Track Name="TECHPARK_BONUS_06" UnlockPrice="5750">
+						<Conditions>
+							<Stars Required="45" Subject="Location" Name="TECHPARK"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_MONKEYTOBACKFLIP"/>
+							<!--Trick Name="TRICK_ROLLTOSTRAIGHTLEGSFLIP"/-->
+							<Trick Name="TRICK_TRIPLETRICKTOSWALLOW"/>
+						</Tricks>
+						<Stars Template="Stars_default"/>
+						<Reward Template="Reward_Techpark_Bonus"/>
+					</Track>
+					
+					<Track Name="TECHPARK_BONUS_07" UnlockPrice="6500">
+						<Conditions>
+							<Stars Required="49" Subject="Location" Name="TECHPARK"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_WALLBACKROLL"/>
+							<Trick Name="TRICK_MONKEYTOBACKFLIP"/>
+							<Trick Name="TRICK_LONGCIRCLE"/>
+						</Tricks>
+						<Stars Template="Stars_default"/>
+						<Reward Template="Reward_Techpark_Bonus"/>
+					</Track>
+					
+					<Track Name="TECHPARK_BONUS_08" UnlockPrice="7250">
+						<Conditions>
+							<Stars Required="53" Subject="Location" Name="TECHPARK"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_KINGKONGTOBEND"/>
+							<Trick Name="TRICK_WALLBACKROLL"/>
+							<Trick Name="TRICK_MONKEYTOBOMB"/>
+						</Tricks>
+						<Stars Template="Stars_default"/>
+						<Reward Template="Reward_Techpark_Bonus"/>
+					</Track>
+					
+					<Track Name="TECHPARK_BONUS_09" UnlockPrice="8000">
+						<Conditions>
+							<Stars Required="57" Subject="Location" Name="TECHPARK"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_DOUBLESPINTOROLL"/>
+							<Trick Name="TRICK_KINGKONGTOBEND"/>
+							<Trick Name="TRICK_HANDSPRING"/>
+						</Tricks>
+						<Stars Template="Stars_default"/>
+						<Reward Template="Reward_Techpark_Bonus"/>
+					</Track>
+				</Group>
+			</Groups>
+		</Location>
+		
+		<Location Name="DOWNTOWN_HUNTER">
+			<Conditions>
+				<Stars Required="50" />
+			</Conditions>
+			<Groups>
+				<Group Name="STORY">
+					<Track Name="DOWNTOWN_STORY_01_HUNTER">
+						<Tricks>
+							<Trick Name="TRICK_JUMPTUMBLE"/>
+						</Tricks>
+						<Stars Template="Stars_default_Hunter"/>
+						<Reward Template="Reward_Downtown_Story_Hunter"/>
+					</Track>
+					
+					<Track Name="DOWNTOWN_STORY_02_HUNTER" UnlockPrice="300">
+						<Conditions>
+							<Stars Required="2" Subject="Location" Name="DOWNTOWN_HUNTER"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_THIEFVAULT"/>
+							<Trick Name="TRICK_SPINNINGVAULT"/>
+						</Tricks>
+						<Stars Template="Stars_default_Hunter"/>
+						<Reward Template="Reward_Downtown_Story_Hunter"/>
+					</Track>
+					
+					<Track Name="DOWNTOWN_STORY_03_HUNTER" UnlockPrice="600">
+						<Conditions>
+							<Stars Required="5" Subject="Location" Name="DOWNTOWN_HUNTER"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_REVERSEVAULT"/>
+							<Trick Name="TRICK_SPINNINGVAULT"/>
+							<Trick Name="TRICK_JUMPTUMBLE"/>
+						</Tricks>
+						<Stars Template="Stars_default_Hunter"/>
+						<Reward Template="Reward_Downtown_Story_Hunter"/>
+					</Track>
+					
+					<Track Name="DOWNTOWN_STORY_04_HUNTER" UnlockPrice="900">
+						<Conditions>
+							<Stars Required="7" Subject="Location" Name="DOWNTOWN_HUNTER"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_BACKFLIP"/>
+							<Trick Name="TRICK_REVERSEVAULT"/>
+							<Trick Name="TRICK_JUMPTUMBLE"/>
+						</Tricks>
+						<Stars Template="Stars_default_Hunter"/>
+						<Reward Template="Reward_Downtown_Story_Hunter"/>
+					</Track>
+					
+					<Track Name="DOWNTOWN_STORY_05_HUNTER" UnlockPrice="1200">
+						<Conditions>
+							<Stars Required="10" Subject="Location" Name="DOWNTOWN_HUNTER"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_JUMPOBSTACLE"/>
+							<Trick Name="TRICK_BACKFLIP"/>
+							<Trick Name="TRICK_THIEFVAULT"/>
+						</Tricks>
+						<Stars Template="Stars_default_Hunter"/>
+						<Reward Template="Reward_Downtown_Story_Hunter"/>
+					</Track>
+					
+					<Track Name="DOWNTOWN_STORY_06_HUNTER" UnlockPrice="1500">
+						<Conditions>
+							<Stars Required="12" Subject="Location" Name="DOWNTOWN_HUNTER"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_BARJUMPSALTOLESS"/>
+							<Trick Name="TRICK_JUMPOBSTACLE"/>
+							<Trick Name="TRICK_THIEFVAULT"/>
+						</Tricks>
+						<Stars Template="Stars_default_Hunter"/>
+						<Reward Template="Reward_Downtown_Story_Hunter"/>
+					</Track>
+					
+					<Track Name="DOWNTOWN_STORY_07_HUNTER" UnlockPrice="1800">
+						<Conditions>
+							<Stars Required="15" Subject="Location" Name="DOWNTOWN_HUNTER"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_SCREWDRIVER"/>
+							<Trick Name="TRICK_BARJUMPSALTOLESS"/>
+							<Trick Name="TRICK_BACKFLIP"/>
+						</Tricks>
+						<Stars Template="Stars_default_Hunter"/>
+						<Reward Template="Reward_Downtown_Story_Hunter"/>
+					</Track>
+					
+					<Track Name="DOWNTOWN_STORY_08_HUNTER" UnlockPrice="2100">
+						<Conditions>
+							<Stars Required="17" Subject="Location" Name="DOWNTOWN_HUNTER"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_RAILFLIP"/>
+							<Trick Name="TRICK_JUMPOBSTACLE"/>
+							<Trick Name="TRICK_REVERSEVAULT"/>
+						</Tricks>
+						<Stars Template="Stars_default_Hunter"/>
+						<Reward Template="Reward_Downtown_Story_Hunter"/>
+					</Track>
+					
+					<Track Name="DOWNTOWN_STORY_09_HUNTER" UnlockPrice="2400">
+						<Conditions>
+							<Stars Required="20" Subject="Location" Name="DOWNTOWN_HUNTER"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_BARRELVAULT"/>
+							<Trick Name="TRICK_SCREWDRIVER"/>
+							<Trick Name="TRICK_REVERSEVAULT"/>
+						</Tricks>
+						<Stars Template="Stars_default_Hunter"/>
+						<Reward Template="Reward_Downtown_Story_Hunter"/>
+					</Track>
+					
+					<Track Name="DOWNTOWN_STORY_10_HUNTER" UnlockPrice="2700">
+						<Conditions>
+							<Stars Required="22" Subject="Location" Name="DOWNTOWN_HUNTER"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_OBSTACLEFRONTFLIP"/>
+							<Trick Name="TRICK_SCREWDRIVER"/>
+							<Trick Name="TRICK_THIEFVAULT"/>
+						</Tricks>
+						<Stars Template="Stars_default_Hunter"/>
+						<Reward Template="Reward_Downtown_Story_Hunter"/>
+					</Track>
+					
+					<Track Name="DOWNTOWN_STORY_11_HUNTER" UnlockPrice="3000">
+						<Conditions>
+							<Stars Required="25" Subject="Location" Name="DOWNTOWN_HUNTER"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_MONKEYVAULT"/>
+							<Trick Name="TRICK_OBSTACLEFRONTFLIP"/>
+							<Trick Name="TRICK_JUMPOBSTACLE"/>
+						</Tricks>
+						<Stars Template="Stars_default_Hunter"/>
+						<Reward Template="Reward_Downtown_Story_Hunter"/>
+					</Track>
+				</Group>
+				<Group Name="BONUS">
+					<Track Name="DOWNTOWN_BONUS_01_HUNTER" UnlockPrice="3300">
+						<Conditions>
+								<Stars Required="26" Subject="Location" Name="DOWNTOWN_HUNTER"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_VERTVAULT"/>
+							<Trick Name="TRICK_SCREWDRIVER"/>
+							<Trick Name="TRICK_BARJUMPSALTOLESS"/>
+						</Tricks>
+						<Stars Template="Stars_default_Hunter"/>
+						<Reward Template="Reward_Downtown_Bonus_Hunter"/>
+					</Track>
+					
+					<Track Name="DOWNTOWN_BONUS_02_HUNTER" UnlockPrice="3600">
+						<Conditions>
+								<Stars Required="29" Subject="Location" Name="DOWNTOWN_HUNTER"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_ROCKETVAULT"/>
+							<Trick Name="TRICK_RAILFLIP"/>
+							<Trick Name="TRICK_SPINNINGVAULT"/>
+						</Tricks>
+						<Stars Template="Stars_default_Hunter"/>
+						<Reward Template="Reward_Downtown_Bonus_Hunter"/>
+					</Track>
+					
+					<Track Name="DOWNTOWN_BONUS_03_HUNTER" UnlockPrice="3900">
+						<Conditions>
+								<Stars Required="33" Subject="Location" Name="DOWNTOWN_HUNTER"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_AIRSPIN"/>
+							<Trick Name="TRICK_OBSTACLEFRONTFLIP"/>
+							<Trick Name="TRICK_SPINNINGVAULT"/>
+						</Tricks>
+						<Stars Template="Stars_default_Hunter"/>
+						<Reward Template="Reward_Downtown_Bonus_Hunter"/>
+					</Track>
+					
+					<Track Name="DOWNTOWN_BONUS_04_HUNTER" UnlockPrice="4200">
+						<Conditions>
+								<Stars Required="37" Subject="Location" Name="DOWNTOWN_HUNTER"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_SIDEBOMB"/>
+							<Trick Name="TRICK_MONKEYVAULT"/>
+							<Trick Name="TRICK_JUMPOBSTACLE"/>
+						</Tricks>
+						<Stars Template="Stars_default_Hunter"/>
+						<Reward Template="Reward_Downtown_Bonus_Hunter"/>
+					</Track>
+
+					<Track Name="DOWNTOWN_BONUS_05_HUNTER" UnlockPrice="4500">
+						<Conditions>
+								<Stars Required="41" Subject="Location" Name="DOWNTOWN_HUNTER"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_WEBSTERWITHSALTO"/>
+							<Trick Name="TRICK_AIRSPIN"/>
+							<Trick Name="TRICK_ROCKETVAULT"/>
+							<Trick Name="TRICK_VERTVAULT"/>
+							<Trick Name="TRICK_MONKEYVAULT"/>
+							<Trick Name="TRICK_OBSTACLEFRONTFLIP"/>
+							<Trick Name="TRICK_BARRELVAULT"/>
+							<Trick Name="TRICK_RAILFLIP"/>
+							<Trick Name="TRICK_SCREWDRIVER"/>
+							<Trick Name="TRICK_BARJUMPSALTOLESS"/>
+							<Trick Name="TRICK_BACKFLIP"/>
+							<Trick Name="TRICK_REVERSEVAULT"/>
+							<Trick Name="TRICK_SPINNINGVAULT"/>
+							<Trick Name="TRICK_JUMPTUMBLE"/>
+						</Tricks>
+						<Stars Template="Stars_default_Hunter"/>
+						<Reward Template="Reward_Downtown_Bonus_Hunter"/>
+					</Track>
+					
+					<Track Name="DOWNTOWN_BONUS_06_HUNTER" UnlockPrice="4800">
+						<Conditions>
+								<Stars Required="45" Subject="Location" Name="DOWNTOWN_HUNTER"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_DASHTOFRONTFLIP"/>
+							<Trick Name="TRICK_SIDEBOMB"/>
+							<Trick Name="TRICK_SPLITONE"/>
+						</Tricks>
+						<Stars Template="Stars_default_Hunter"/>
+						<Reward Template="Reward_Downtown_Bonus_Hunter"/>
+					</Track>
+					
+					<Track Name="DOWNTOWN_BONUS_07_HUNTER" UnlockPrice="5100">
+						<Conditions>
+								<Stars Required="49" Subject="Location" Name="DOWNTOWN_HUNTER"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_TRIPLETRICKTOSWALLOW"/>
+							<Trick Name="TRICK_WEBSTERWITHSALTO"/>
+							<Trick Name="TRICK_SWALLOW"/>
+						</Tricks>
+						<Stars Template="Stars_default_Hunter"/>
+						<Reward Template="Reward_Downtown_Bonus_Hunter"/>
+					</Track>
+					
+					<Track Name="DOWNTOWN_BONUS_08_HUNTER" UnlockPrice="5400">
+						<Conditions>
+								<Stars Required="53" Subject="Location" Name="DOWNTOWN_HUNTER"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_HANDSPRING"/>
+							<Trick Name="TRICK_SWALLOW"/>
+							<Trick Name="TRICK_MONKEYVAULT"/>
+						</Tricks>
+						<Stars Template="Stars_default_Hunter"/>
+						<Reward Template="Reward_Downtown_Bonus_Hunter"/>
+					</Track>
+					
+					<Track Name="DOWNTOWN_BONUS_09_HUNTER" UnlockPrice="5700">
+						<Conditions>
+								<Stars Required="57" Subject="Location" Name="DOWNTOWN_HUNTER"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_THIEFVAULT"/>
+							<Trick Name="TRICK_AIRSPIN"/>
+							<Trick Name="TRICK_SIDEFLIP"/>
+						</Tricks>
+						<Stars Template="Stars_default_Hunter"/>
+						<Reward Template="Reward_Downtown_Bonus_Hunter"/>
+					</Track>
+				</Group>
+			</Groups>
+		</Location>
+		<Location Name="CONSTRUCTION_HUNTER">
+			<Conditions>
+				<Payment Required="7500" />
+			</Conditions>
+			<Groups>
+				<Group Name="STORY">
+					<Track Name="CONSTRUCTION_STORY_01_HUNTER">
+						<Tricks>
+							<Trick Name="TRICK_DOUBLEKONG"/>
+							<Trick Name="TRICK_OBSTACLEFRONTFLIP"/>
+							<Trick Name="TRICK_BARRELVAULT"/>
+						</Tricks>
+						<Stars Template="Stars_default_Hunter"/>
+						<Reward Template="Reward_Construction_Story_Hunter"/>
+					</Track>
+					
+					<Track Name="CONSTRUCTION_STORY_02_HUNTER" UnlockPrice="300">
+						<Conditions>
+							<Stars Required="2" Subject="Location" Name="CONSTRUCTION_HUNTER"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_BARJUMP"/>
+							<Trick Name="TRICK_DOUBLEKONG"/>
+							<Trick Name="TRICK_SPINNINGVAULT"/>
+						</Tricks>
+						<Stars Template="Stars_default_Hunter"/>
+						<Reward Template="Reward_Construction_Story_Hunter"/>
+					</Track>
+					
+					<Track Name="CONSTRUCTION_STORY_03_HUNTER" UnlockPrice="600">
+						<Conditions>
+							<Stars Required="5" Subject="Location" Name="CONSTRUCTION_HUNTER"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_DASHVAULT"/>
+							<Trick Name="TRICK_BARJUMP"/>
+							<Trick Name="TRICK_BARJUMPSALTOLESS"/>
+						</Tricks>
+						<Stars Template="Stars_default_Hunter"/>
+						<Reward Template="Reward_Construction_Story_Hunter"/>
+					</Track>
+					
+					<Track Name="CONSTRUCTION_STORY_04_HUNTER" UnlockPrice="900">
+						<Conditions>
+							<Stars Required="7" Subject="Location" Name="CONSTRUCTION_HUNTER"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_AIRBOMB"/>
+							<Trick Name="TRICK_DASHVAULT"/>
+							<Trick Name="TRICK_RAILFLIP"/>
+						</Tricks>
+						<Stars Template="Stars_default_Hunter"/>
+						<Reward Template="Reward_Construction_Story_Hunter"/>
+					</Track>
+					
+					<Track Name="CONSTRUCTION_STORY_05_HUNTER" UnlockPrice="1200">
+						<Conditions>
+							<Stars Required="10" Subject="Location" Name="CONSTRUCTION_HUNTER"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_SPLITONE"/>
+							<Trick Name="TRICK_AIRBOMB"/>
+							<Trick Name="TRICK_DOUBLEKONG"/>
+						</Tricks>
+						<Stars Template="Stars_default_Hunter"/>
+						<Reward Template="Reward_Construction_Story_Hunter"/>
+					</Track>
+					
+					<Track Name="CONSTRUCTION_STORY_06_HUNTER" UnlockPrice="1500">
+						<Conditions>
+							<Stars Required="12" Subject="Location" Name="CONSTRUCTION_HUNTER"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_DESCENTVAULT"/>
+							<Trick Name="TRICK_SPLITONE"/>
+							<Trick Name="TRICK_AIRBOMB"/>
+						</Tricks>
+						<Stars Template="Stars_default_Hunter"/>
+						<Reward Template="Reward_Construction_Story_Hunter"/>
+					</Track>
+					
+					<Track Name="CONSTRUCTION_STORY_07_HUNTER" UnlockPrice="1800">
+						<Conditions>
+							<Stars Required="15" Subject="Location" Name="CONSTRUCTION_HUNTER"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_STRAIGHTLEGSFLIP"/>
+							<Trick Name="TRICK_DESCENTVAULT"/>
+							<Trick Name="TRICK_BARJUMP"/>
+						</Tricks>
+						<Stars Template="Stars_default_Hunter"/>
+						<Reward Template="Reward_Construction_Story_Hunter"/>
+					</Track>
+					
+					<Track Name="CONSTRUCTION_STORY_08_HUNTER" UnlockPrice="2100">
+						<Conditions>
+							<Stars Required="17" Subject="Location" Name="CONSTRUCTION_HUNTER"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_SWALLOW"/>
+							<Trick Name="TRICK_STRAIGHTLEGSFLIP"/>
+							<Trick Name="TRICK_DOUBLEKONG"/>
+						</Tricks>
+						<Stars Template="Stars_default_Hunter"/>
+						<Reward Template="Reward_Construction_Story_Hunter"/>
+					</Track>
+					
+					<Track Name="CONSTRUCTION_STORY_09_HUNTER" UnlockPrice="2400">
+						<Conditions>
+							<Stars Required="20" Subject="Location" Name="CONSTRUCTION_HUNTER"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_FOLDFLIP"/>
+							<Trick Name="TRICK_SWALLOW"/>
+							<Trick Name="TRICK_DASHVAULT"/>
+						</Tricks>
+						<Stars Template="Stars_default_Hunter"/>
+						<Reward Template="Reward_Construction_Story_Hunter"/>
+					</Track>
+					
+					<Track Name="CONSTRUCTION_STORY_10_HUNTER" UnlockPrice="2700">
+						<Conditions>
+							<Stars Required="22" Subject="Location" Name="CONSTRUCTION_HUNTER"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_FLIPANDROLL"/>
+							<Trick Name="TRICK_FOLDFLIP"/>
+							<Trick Name="TRICK_STRAIGHTLEGSFLIP"/>
+						</Tricks>
+						<Stars Template="Stars_default_Hunter"/>
+						<Reward Template="Reward_Construction_Story_Hunter"/>
+					</Track>
+					
+					<Track Name="CONSTRUCTION_STORY_11_HUNTER" UnlockPrice="3000">
+						<Conditions>
+							<Stars Required="25" Subject="Location" Name="CONSTRUCTION_HUNTER"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_BOOMBOOMSHHUH"/>
+							<Trick Name="TRICK_BARRELVAULT"/>
+							<Trick Name="TRICK_FLIPANDROLL"/>
+						</Tricks>
+						<Stars Template="Stars_default_Hunter"/>
+						<Reward Template="Reward_Construction_Story_Hunter"/>
+					</Track>
+				</Group>
+				<Group Name="BONUS">
+					<Track Name="CONSTRUCTION_BONUS_01_HUNTER" UnlockPrice="3300">
+						<Conditions>
+								<Stars Required="26" Subject="Location" Name="CONSTRUCTION_HUNTER"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_HANDSPRINGTOROLL"/>
+							<Trick Name="TRICK_SPLITONE"/>
+							<Trick Name="TRICK_DASHVAULT"/>
+						</Tricks>
+						<Stars Template="Stars_default_Hunter"/>
+						<Reward Template="Reward_Construction_Bonus_Hunter"/>
+					</Track>
+					
+					<Track Name="CONSTRUCTION_BONUS_02_HUNTER" UnlockPrice="3600">
+						<Conditions>
+								<Stars Required="29" Subject="Location" Name="CONSTRUCTION_HUNTER"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_DIVEDOWN"/>
+							<Trick Name="TRICK_HANDSPRINGTOROLL"/>
+							<Trick Name="TRICK_DASHVAULT"/>
+						</Tricks>
+						<Stars Template="Stars_default_Hunter"/>
+						<Reward Template="Reward_Construction_Bonus_Hunter"/>
+					</Track>
+					
+					<Track Name="CONSTRUCTION_BONUS_03_HUNTER" UnlockPrice="3900">
+						<Conditions>
+								<Stars Required="33" Subject="Location" Name="CONSTRUCTION_HUNTER"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_TRIPLEHIT"/>
+							<Trick Name="TRICK_DIVEDOWN"/>
+							<Trick Name="TRICK_SPINNINGVAULT"/>
+						</Tricks>
+						<Stars Template="Stars_default_Hunter"/>
+						<Reward Template="Reward_Construction_Bonus_Hunter"/>
+					</Track>
+					
+					<Track Name="CONSTRUCTION_BONUS_04_HUNTER" UnlockPrice="4200">
+						<Conditions>
+								<Stars Required="37" Subject="Location" Name="CONSTRUCTION_HUNTER"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_SIDEFLIP"/>
+							<Trick Name="TRICK_SPLITONE"/>
+							<Trick Name="TRICK_BARJUMP"/>
+						</Tricks>
+						<Stars Template="Stars_default_Hunter"/>
+						<Reward Template="Reward_Construction_Bonus_Hunter"/>
+					</Track>
+
+					<Track Name="CONSTRUCTION_BONUS_05_HUNTER" UnlockPrice="4500">
+						<Conditions>
+								<Stars Required="41" Subject="Location" Name="CONSTRUCTION_HUNTER"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_TRIPLESWING"/>
+							<Trick Name="TRICK_TRIPLEHIT"/>
+							<Trick Name="TRICK_FLIPANDROLL"/>
+						</Tricks>
+						<Stars Template="Stars_default_Hunter"/>
+						<Reward Template="Reward_Construction_Bonus_Hunter"/>
+					</Track>
+					
+					<Track Name="CONSTRUCTION_BONUS_06_HUNTER" UnlockPrice="4800">
+						<Conditions>
+								<Stars Required="45" Subject="Location" Name="CONSTRUCTION_HUNTER"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_MONKEYTOBOMB"/>
+							<Trick Name="TRICK_SIDEFLIP"/>
+							<Trick Name="TRICK_MONKEYVAULT"/>
+						</Tricks>
+						<Stars Template="Stars_default_Hunter"/>
+						<Reward Template="Reward_Construction_Bonus_Hunter"/>
+					</Track>
+					
+					<Track Name="CONSTRUCTION_BONUS_07_HUNTER" UnlockPrice="5100">
+						<Conditions>
+								<Stars Required="49" Subject="Location" Name="CONSTRUCTION_HUNTER"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_JUMPWHEEL"/>
+							<Trick Name="TRICK_TRIPLESWING"/>
+							<Trick Name="TRICK_DESCENTVAULT"/>
+						</Tricks>
+						<Stars Template="Stars_default_Hunter"/>
+						<Reward Template="Reward_Construction_Bonus_Hunter"/>
+					</Track>
+					
+					<Track Name="CONSTRUCTION_BONUS_08_HUNTER" UnlockPrice="5400">
+						<Conditions>
+								<Stars Required="53" Subject="Location" Name="CONSTRUCTION_HUNTER"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_GATEVAULT"/>
+							<Trick Name="TRICK_SWALLOW"/>
+							<Trick Name="TRICK_BARJUMPSALTOLESS"/>
+						</Tricks>
+						<Stars Template="Stars_default_Hunter"/>
+						<Reward Template="Reward_Construction_Bonus_Hunter"/>
+					</Track>
+
+					<Track Name="CONSTRUCTION_BONUS_09_HUNTER" UnlockPrice="5700">
+						<Conditions>
+								<Stars Required="57" Subject="Location" Name="CONSTRUCTION_HUNTER"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_DOUBLEBACK"/>
+							<Trick Name="TRICK_GATEVAULT"/>
+							<Trick Name="TRICK_DOUBLEKONG"/>
+						</Tricks>
+						<Stars Template="Stars_default_Hunter"/>
+						<Reward Template="Reward_Construction_Bonus_Hunter"/>
+					</Track>
+				</Group>
+			</Groups>
+		</Location>
+		<Location Name="TECHPARK_HUNTER">
+			<Conditions>
+				<Payment Required="15000" />
+			</Conditions>
+			<Groups>
+				<Group Name="STORY">
+					<Track Name="TECHPARK_STORY_01_HUNTER">
+						<Tricks>
+							<Trick Name="TRICK_360WALLCLING"/>
+							<Trick Name="TRICK_AIRSPIN"/>
+							<Trick Name="TRICK_SPLITONE"/>
+						</Tricks>
+						<Stars Template="Stars_default_Hunter"/>
+						<Reward Template="Reward_Techpark_Story_Hunter"/>
+					</Track>
+					
+					<Track Name="TECHPARK_STORY_02_HUNTER" UnlockPrice="300">
+						<Conditions>
+							<Stars Required="2" Subject="Location" Name="TECHPARK_HUNTER"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_SLOWSPIN"/>
+							<Trick Name="TRICK_360WALLCLING"/>
+							<Trick Name="TRICK_DOUBLEKONG"/>
+						</Tricks>
+						<Stars Template="Stars_default_Hunter"/>
+						<Reward Template="Reward_Techpark_Story_Hunter"/>
+					</Track>
+					
+					<Track Name="TECHPARK_STORY_03_HUNTER" UnlockPrice="600">
+						<Conditions>
+							<Stars Required="5" Subject="Location" Name="TECHPARK_HUNTER"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_UNDERBAR"/>
+							<Trick Name="TRICK_SLOWSPIN"/>
+							<Trick Name="TRICK_360WALLCLING"/>
+						</Tricks>
+						<Stars Template="Stars_default_Hunter"/>
+						<Reward Template="Reward_Techpark_Story_Hunter"/>
+					</Track>
+					
+					<Track Name="TECHPARK_STORY_04_HUNTER" UnlockPrice="900">
+						<Conditions>
+							<Stars Required="7" Subject="Location" Name="TECHPARK_HUNTER"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_JUMPDOWNROLL"/>
+							<Trick Name="TRICK_UNDERBAR"/>
+							<Trick Name="TRICK_DOUBLEKONG"/>
+						</Tricks>
+						<Stars Template="Stars_default_Hunter"/>
+						<Reward Template="Reward_Techpark_Story_Hunter"/>
+					</Track>
+					
+					<Track Name="TECHPARK_STORY_05_HUNTER" UnlockPrice="1200">
+						<Conditions>
+							<Stars Required="10" Subject="Location" Name="TECHPARK_HUNTER"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_CHEATGAINER"/>
+							<Trick Name="TRICK_JUMPDOWNROLL"/>
+							<Trick Name="TRICK_DASHVAULT"/>
+						</Tricks>
+						<Stars Template="Stars_default_Hunter"/>
+						<Reward Template="Reward_Techpark_Story_Hunter"/>
+					</Track>
+					
+					<Track Name="TECHPARK_STORY_06_HUNTER" UnlockPrice="1500">
+						<Conditions>
+							<Stars Required="12" Subject="Location" Name="TECHPARK_HUNTER"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_FLYINGARROW"/>
+							<Trick Name="TRICK_CHEATGAINER"/>
+							<Trick Name="TRICK_HANDSPRINGTOROLL"/>
+						</Tricks>
+						<Stars Template="Stars_default_Hunter"/>
+						<Reward Template="Reward_Techpark_Story_Hunter"/>
+					</Track>
+					
+					<Track Name="TECHPARK_STORY_07_HUNTER" UnlockPrice="1800">
+						<Conditions>
+							<Stars Required="15" Subject="Location" Name="TECHPARK_HUNTER"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_DOUBLESPINVAULT"/>
+							<Trick Name="TRICK_FLYINGARROW"/>
+							<Trick Name="TRICK_JUMPOBSTACLE"/>
+						</Tricks>
+						<Stars Template="Stars_default_Hunter"/>
+						<Reward Template="Reward_Techpark_Story_Hunter"/>
+					</Track>
+					
+					<Track Name="TECHPARK_STORY_08_HUNTER" UnlockPrice="2100">
+						<Conditions>
+							<Stars Required="17" Subject="Location" Name="TECHPARK_HUNTER"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_SPIN360"/>
+							<Trick Name="TRICK_DOUBLESPINVAULT"/>
+							<Trick Name="TRICK_FLYINGARROW"/>
+						</Tricks>
+						<Stars Template="Stars_default_Hunter"/>
+						<Reward Template="Reward_Techpark_Story_Hunter"/>
+					</Track>
+					
+					<Track Name="TECHPARK_STORY_09_HUNTER" UnlockPrice="2400">
+						<Conditions>
+							<Stars Required="20" Subject="Location" Name="TECHPARK_HUNTER"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_KINGKONGJUMP"/>
+							<Trick Name="TRICK_SPIN360"/>
+							<Trick Name="TRICK_TRIPLESWING"/>
+						</Tricks>
+						<Stars Template="Stars_default_Hunter"/>
+						<Reward Template="Reward_Techpark_Story_Hunter"/>
+					</Track>
+					
+					<Track Name="TECHPARK_STORY_10_HUNTER" UnlockPrice="2700">
+						<Conditions>
+							<Stars Required="22" Subject="Location" Name="TECHPARK_HUNTER"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_SPINBICYCLE"/>
+							<Trick Name="TRICK_KINGKONGJUMP"/>
+							<Trick Name="TRICK_TRIPLEHIT"/>
+						</Tricks>
+						<Stars Template="Stars_default_Hunter"/>
+						<Reward Template="Reward_Techpark_Story_Hunter"/>
+					</Track>
+					
+					<Track Name="TECHPARK_STORY_11_HUNTER" UnlockPrice="3000">
+						<Conditions>
+							<Stars Required="25" Subject="Location" Name="TECHPARK_HUNTER"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_LONGCIRCLE"/>
+							<Trick Name="TRICK_SPINBICYCLE"/>
+							<Trick Name="TRICK_SPLITONE"/>
+						</Tricks>
+						<Stars Template="Stars_default_Hunter"/>
+						<Reward Template="Reward_Techpark_Story_Hunter"/>
+					</Track>
+				</Group>
+        <Group Name="BONUS">
+					<Track Name="TECHPARK_BONUS_01_HUNTER" UnlockPrice="3300">
+						<Conditions>
+							<Stars Required="26" Subject="Location" Name="TECHPARK_HUNTER"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_LONGJUMPTOBARREL"/>
+							<Trick Name="TRICK_AIRSPIN"/>
+							<Trick Name="TRICK_SPINBICYCLE"/>
+						</Tricks>
+						<Stars Template="Stars_default"/>
+						<Reward Template="Reward_Techpark_Bonus_Hunter"/>
+					</Track>
+					
+					<Track Name="TECHPARK_BONUS_02_HUNTER" UnlockPrice="3600">
+						<Conditions>
+							<Stars Required="29" Subject="Location" Name="TECHPARK_HUNTER"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_COOLSWING"/>
+							<Trick Name="TRICK_LONGJUMPTOBARREL"/>
+							<Trick Name="TRICK_DASHTOFRONTFLIP"/>
+						</Tricks>
+						<Stars Template="Stars_default"/>
+						<Reward Template="Reward_Techpark_Bonus_Hunter"/>
+					</Track>
+					
+					<Track Name="TECHPARK_BONUS_03_HUNTER" UnlockPrice="3900">
+						<Conditions>
+							<Stars Required="33" Subject="Location" Name="TECHPARK_HUNTER"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_JUMPSPINVAULT"/>
+							<Trick Name="TRICK_COOLSWING"/>
+							<Trick Name="TRICK_DOUBLEBACK"/>
+						</Tricks>
+						<Stars Template="Stars_default"/>
+						<Reward Template="Reward_Techpark_Bonus_Hunter"/>
+					</Track>
+					
+					<Track Name="TECHPARK_BONUS_04_HUNTER" UnlockPrice="4200">
+						<Conditions>
+							<Stars Required="37" Subject="Location" Name="TECHPARK_HUNTER"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_DOUBLEJUMPROLL"/>
+							<Trick Name="TRICK_JUMPSPINVAULT"/>
+							<Trick Name="TRICK_SPIN360"/>
+						</Tricks>
+						<Stars Template="Stars_default"/>
+						<Reward Template="Reward_Techpark_Bonus_Hunter"/>
+					</Track>
+					
+					<Track Name="TECHPARK_BONUS_05_HUNTER" UnlockPrice="4500">
+						<Conditions>
+							<Stars Required="41" Subject="Location" Name="TECHPARK_HUNTER"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_ROLLTOSTRAIGHTLEGSFLIP"/>
+							<Trick Name="TRICK_DOUBLEJUMPROLL"/>
+							<Trick Name="TRICK_JUMPDOWNROLL"/>
+						</Tricks>
+						<Stars Template="Stars_default"/>
+						<Reward Template="Reward_Techpark_Bonus_Hunter"/>
+					</Track>
+					
+					<Track Name="TECHPARK_BONUS_06_HUNTER" UnlockPrice="4800">
+						<Conditions>
+							<Stars Required="45" Subject="Location" Name="TECHPARK_HUNTER"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_MONKEYTOBACKFLIP"/>
+							<Trick Name="TRICK_ROLLTOSTRAIGHTLEGSFLIP"/>
+							<Trick Name="TRICK_TRIPLETRICKTOSWALLOW"/>
+						</Tricks>
+						<Stars Template="Stars_default"/>
+						<Reward Template="Reward_Techpark_Bonus_Hunter"/>
+					</Track>
+					
+					<Track Name="TECHPARK_BONUS_07_HUNTER" UnlockPrice="5100">
+						<Conditions>
+							<Stars Required="49" Subject="Location" Name="TECHPARK_HUNTER"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_WALLBACKROLL"/>
+							<Trick Name="TRICK_MONKEYTOBACKFLIP"/>
+							<Trick Name="TRICK_LONGCIRCLE"/>
+						</Tricks>
+						<Stars Template="Stars_default"/>
+						<Reward Template="Reward_Techpark_Bonus_Hunter"/>
+					</Track>
+					
+					<Track Name="TECHPARK_BONUS_08_HUNTER" UnlockPrice="5400">
+						<Conditions>
+							<Stars Required="53" Subject="Location" Name="TECHPARK_HUNTER"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_KINGKONGTOBEND"/>
+							<Trick Name="TRICK_WALLBACKROLL"/>
+							<Trick Name="TRICK_MONKEYTOBOMB"/>
+						</Tricks>
+						<Stars Template="Stars_default"/>
+						<Reward Template="Reward_Techpark_Bonus_Hunter"/>
+					</Track>
+					
+					<Track Name="TECHPARK_BONUS_09_HUNTER" UnlockPrice="5700">
+						<Conditions>
+							<Stars Required="57" Subject="Location" Name="TECHPARK_HUNTER"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_DOUBLESPINTOROLL"/>
+							<Trick Name="TRICK_KINGKONGTOBEND"/>
+							<Trick Name="TRICK_HANDSPRING"/>
+						</Tricks>
+						<Stars Template="Stars_default"/>
+						<Reward Template="Reward_Techpark_Bonus_Hunter"/>
+					</Track>
+				</Group>
+			</Groups>
+		</Location>
+	</Locations>
+</LocationList>

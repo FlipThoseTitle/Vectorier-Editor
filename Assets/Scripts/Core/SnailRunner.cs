@@ -13,6 +13,7 @@ namespace Vectorier.Core
         private bool showPlatforms = false;
         private bool showTriggers = false;
         private bool showAreas = false;
+        private bool showDetectors = false;
 
         [MenuItem("Vectorier/Play Level")]
         public static void ShowWindow()
@@ -31,6 +32,7 @@ namespace Vectorier.Core
             showPlatforms = EditorGUILayout.Toggle("Show Platforms", showPlatforms);
             showTriggers = EditorGUILayout.Toggle("Show Triggers", showTriggers);
             showAreas = EditorGUILayout.Toggle("Show Areas", showAreas);
+            showDetectors = EditorGUILayout.Toggle("Show Detectors", showDetectors);
 
             EditorGUILayout.Space(10);
 
@@ -89,6 +91,7 @@ namespace Vectorier.Core
             if (showPlatforms) args += " -showplatforms";
             if (showTriggers) args += " -showtriggers";
             if (showAreas) args += " -showareas";
+            if (showDetectors) args += " -showdetectors";
 
             ProcessStartInfo startInfo = new ProcessStartInfo
             {

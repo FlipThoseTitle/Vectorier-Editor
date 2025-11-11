@@ -99,7 +99,7 @@ namespace Vectorier.Parallax
                                  .ToList();
 
             // Collect all matching GameObjects in the scene
-            foreach (var gameObject in FindObjectsOfType<GameObject>())
+            foreach (var gameObject in FindObjectsByType<GameObject>(FindObjectsSortMode.None))
             {
                 if (!gameObject.activeInHierarchy) continue;
                 if (tags.Count > 0 && !tags.Contains(gameObject.tag)) continue;

@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Root>
-    <Coins id="0" type="1" Value="5000" iOS="com.nekki.shadowrunner.coins100.test"  android="com.nekki.vector.pack1" samsung="000000062529"/>
-    <Coins id="1" type="1" Value="10000" iOS="com.nekki.shadowrunner.coins550.test"  android="com.nekki.vector.pack2" samsung="000000062542"/>
-    <Coins id="2" type="1" Value="15000" iOS="com.nekki.shadowrunner.coins1000.test" android="com.nekki.vector.pack3" samsung="000000062529"/>
-    <Coins id="3" type="1" Value="25000" iOS="om.nekki.shadowrunner.coins5000.test"  android="com.nekki.vector.pack4" samsung="000000062529"/>
-    
-    <Unlock id="100" type="2" Value="-1" iOS="com.nekki." android="com.nekki.vector.unlock" samsung="000000062529"/>
-</Root>

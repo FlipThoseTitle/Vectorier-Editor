@@ -1,56 +1,43 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Root>
+  <Sets>
+    <Ground FileName="objects.xml" />
+  </Sets>
   <Music Name="music_dinamic" Volume="0.3" />
   <Models Choice="AITriggers" Variant="CommonMode">
     <Model Name="Player" Type="1" Color="0" BirthSpawn="DefaultSpawn" AI="0" Time="0" Respawns="Hunter" ForceBlasts="Hunter" Trick="1" Item="1" Victory="1" Lose="1" />
   </Models>
-  <Coins Value="5" />
+  <Coins Value="40" />
   <Objects Name="Money" />
   <Track>
-    <Object Factor="0.05">
-      <Content>
-        <Image X="693.2" Y="-272" ClassName="v_bg" Width="1331.2" Height="673.4" NativeX="2048" NativeY="1036" />
-        <Image X="-638" Y="-272" ClassName="v_bg" Width="1331.2" Height="673.4" NativeX="2048" NativeY="1036" />
-      </Content>
-    </Object>
-    <Object Factor="0.2">
-      <Content>
-        <Image X="-155" Y="-239" ClassName="v_building_2" Width="512" Height="1024" NativeX="512" NativeY="1024" />
-        <Image X="593" Y="-132" ClassName="v_billboard_1" Width="165" Height="303" NativeX="165" NativeY="303" />
-        <Image X="593" Y="471.9" ClassName="v_billboard_1_pattern" Width="165" Height="303" NativeX="165" NativeY="303" />
-        <Image X="593" Y="170.4" ClassName="v_billboard_1_pattern" Width="165" Height="303" NativeX="165" NativeY="303" />
-      </Content>
-    </Object>
     <Object Factor="1">
       <Content>
-        <Object Name="SECTION_1" X="0" Y="0">
+        <Image X="-771" Y="97" ClassName="v_black" Width="2613.177" Height="241.4847" NativeX="50" NativeY="50" />
+        <Image X="1597" Y="-403" ClassName="v_slope_L" Width="1025.997" Height="512.9984" NativeX="256" NativeY="128">
+          <Properties>
+            <Static>
+              <Matrix A="-1025.997000" B="0.000000" C="0.000000" D="512.998400" Tx="1025.997000" Ty="0.000000" />
+            </Static>
+          </Properties>
+        </Image>
+        <Image X="577" Y="-403" ClassName="v_slope_L" Width="1025.997" Height="512.9984" NativeX="256" NativeY="128" />
+        <Trigger Name="trigger" X="1020" Y="-1652.82" Width="72.32" Height="3037.83">
           <Content>
-            <Image X="1922.255" Y="-119" ClassName="v_fan_1_2" Width="366" Height="91" NativeX="366" NativeY="91" />
-            <Image X="2261.5" Y="-59" ClassName="v_fence" Width="225" Height="100" NativeX="225" NativeY="100" />
-            <Image X="-182" Y="-381.27" ClassName="v_booth_1_1" Width="1458.98" Height="418.2519" NativeX="893" NativeY="256" />
-            <Image X="1815" Y="-59" ClassName="v_fence" Width="225" Height="100" NativeX="225" NativeY="100" />
-            <Image X="2037" Y="-59" ClassName="v_fence" Width="225" Height="100" NativeX="225" NativeY="100" />
-            <Image X="2483.5" Y="-58.38532" ClassName="v_fence_bar" Width="70" Height="100" NativeX="70" NativeY="100" />
-            <Image X="-188" Y="34" ClassName="v_black" Width="1481.534" Height="121.565" NativeX="50" NativeY="50" />
-            <Image X="1815" Y="34" ClassName="v_black" Width="1481.534" Height="121.565" NativeX="50" NativeY="50" />
-            <Platform X="-188" Y="34" Width="1480.388" Height="120.71" />
-            <Platform X="1815" Y="34" Width="1480.388" Height="120.71" />
-            <Trigger Name="TriggerCameraStart" X="49" Y="-436.84" Width="49.03838" Height="476.4269">
-              <Content>
-                <Init>
-                  <SetVariable Name="$Active" Value="1" />
-                  <SetVariable Name="$Node" Value="COM" />
-                  <SetVariable Name="Follow" Value="_$Model" />
-                  <SetVariable Name="$AI" Value="0" />
-                  <SetVariable Name="Flag1" Value="0" />
-                </Init>
-                <Template Name="CameraFollow" />
-              </Content>
-            </Trigger>
+            <Init>
+              <SetVariable Name="$Active" Value="1" />
+              <SetVariable Name="$Node" Value="COM" />
+              <SetVariable Name="Follow" Value="_$Model" />
+              <SetVariable Name="$AI" Value="0" />
+              <SetVariable Name="Flag1" Value="0" />
+            </Init>
+            <Template Name="CameraFollow" />
           </Content>
-        </Object>
-        <Camera X="68.99999" Y="-92" />
-        <Spawn X="-662" Y="-685" Name="DefaultSpawn" Animation="JumpOff|18" />
+        </Trigger>
+        <Platform X="-771" Y="97" Width="2616.343" Height="246.045" />
+        <Trapezoid X="1603" Y="-403" Width="1000" Height="501" Height1="1" Type="2" />
+        <Trapezoid X="603" Y="96" Width="1000" Height="1" Height1="501" Type="1" />
+        <Spawn X="777.0001" Y="-460" Name="DefaultSpawn" Animation="JumpOff|18" />
+        <Camera X="978" Y="-292" />
       </Content>
     </Object>
   </Track>

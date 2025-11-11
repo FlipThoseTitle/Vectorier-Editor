@@ -60,7 +60,7 @@ namespace Vectorier.Handler
         {
             XmlElement trackElement = xmlUtility.AddElement(rootElement, "Track");
 
-            GameObject[] allObjects = GameObject.FindObjectsOfType<GameObject>();
+            GameObject[] allObjects = GameObject.FindObjectsByType<GameObject>(FindObjectsSortMode.None);
             Dictionary<string, List<GameObject>> groupedObjects = new Dictionary<string, List<GameObject>>();
 
             foreach (GameObject gameObject in allObjects)
@@ -100,7 +100,7 @@ namespace Vectorier.Handler
         {
             XmlElement objectsRootElement = xmlUtility.AddElement(rootElement, "Objects");
 
-            GameObject[] allObjects = GameObject.FindObjectsOfType<GameObject>();
+            GameObject[] allObjects = GameObject.FindObjectsByType<GameObject>(FindObjectsSortMode.None);
 
             foreach (GameObject gameObject in allObjects)
             {
@@ -118,7 +118,7 @@ namespace Vectorier.Handler
         {
             XmlElement objectsRootElement = xmlUtility.AddElement(rootElement, "Objects");
 
-            GameObject[] allObjects = GameObject.FindObjectsOfType<GameObject>();
+            GameObject[] allObjects = GameObject.FindObjectsByType<GameObject>(FindObjectsSortMode.None);
 
             foreach (GameObject gameObject in allObjects)
             {

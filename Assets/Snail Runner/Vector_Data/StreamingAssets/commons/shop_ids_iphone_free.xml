@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Root>
-    <Coins id="0" type="1" Value="5000" iOS="com.nekki.vector.iphone.free.tier1" android="android1" />
-    <Coins id="1" type="1" Value="10000" iOS="com.nekki.vector.iphone.free.tier2" android="android2" />
-    <Coins id="2" type="1" Value="15000" iOS="com.nekki.vector.iphone.free.tier5" android="android3" />
-    <Coins id="3" type="1" Value="25000" iOS="com.nekki.vector.iphone.free.tier10" android="android4" />
-    
-    <Unlock id="100" type="2" Value="-1" iOS="com.nekki.vector.iphone.free.unlock" android="com.nekki.vector.unlock" samsung="000000065403"/>
-</Root>

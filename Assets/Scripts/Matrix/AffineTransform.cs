@@ -14,10 +14,8 @@ namespace Vectorier.Matrix
 
     public static class AffineTransformation
     {
-        /// <summary>
         /// Computes the affine matrix for a GameObject with SpriteRenderer.
         /// Returns false if no rotation or flipping is applied.
-        /// </summary>
         public static bool Compute(GameObject obj, SpriteRenderer spriteRenderer, out AffineMatrixData matrixData)
         {
             matrixData = new AffineMatrixData();

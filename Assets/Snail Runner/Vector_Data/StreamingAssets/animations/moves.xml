@@ -1778,7 +1778,7 @@
 		FileName="run_inhibition.bin" MidFrames="2" FirstFrame="1" EndFrame="117" PivotNode="DetectorH" Priority="2">
 			<Interval Start = "0" End = "80"  Groups="RunWoActions" Action="1|2|3" />
 			<Interval Start = "81" End = "97"  Groups="RunGroup" Action="1|2|3" />
-			<Interval Start = "0" End = "97">
+			<Interval Start = "0" End = "97" >
 
 				<OnEnd>
 					<Reactions>
