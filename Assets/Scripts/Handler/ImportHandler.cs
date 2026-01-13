@@ -35,7 +35,7 @@ namespace Vectorier.Handler
             // Parse ignored tags (case-insensitive)
             BuildIgnoreTags(ignoreTags);
 
-            string fullPath = System.IO.Path.Combine(directoryPath, xmlFileName);
+            string fullPath = System.IO.Path.Combine(directoryPath, xmlFileName + ".xml");
 
             if (!System.IO.File.Exists(fullPath))
             {

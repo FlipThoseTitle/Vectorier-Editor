@@ -114,17 +114,19 @@ namespace Vectorier.EditorScript.Tools
 
             SceneView.duringSceneGui -= OnSceneGUI;
 
-            if (previewSegment != null)
-            {
-                DestroyImmediate(previewSegment);
-                previewSegment = null;
-                previewRenderer = null;
-            }
+            CleanupPreview();
         }
 
         private void OnDisable()
         {
             SceneView.duringSceneGui -= OnSceneGUI;
+            CleanupPreview();
+            isDrawingActive = false;
+        }
+
+        private void OnDestroy()
+        {
+            CleanupPreview();
         }
 
         // ================= SCENE ================= //
@@ -395,6 +397,16 @@ namespace Vectorier.EditorScript.Tools
             drawingPlane.Raycast(guiRay, out float distance);
 
             return guiRay.GetPoint(distance);
+        }
+
+        private void CleanupPreview()
+        {
+            if (previewSegment != null)
+            {
+                DestroyImmediate(previewSegment);
+                previewSegment = null;
+                previewRenderer = null;
+            }
         }
     }
 }

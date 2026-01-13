@@ -21,7 +21,7 @@ namespace Vectorier.EditorScript
 
         public static void Open(ImportConfig config)
         {
-            string fullPath = Path.Combine(config.filePathDirectory, config.xmlName);
+            string fullPath = Path.Combine(config.filePathDirectory, config.xmlName + ".xml");
 
             if (!File.Exists(fullPath))
             {

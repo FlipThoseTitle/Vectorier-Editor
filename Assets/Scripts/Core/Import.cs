@@ -43,6 +43,9 @@ namespace Vectorier.Core
             EditorGUILayout.Space(10);
             if (GUILayout.Button("Import", GUILayout.Height(50)))
             {
+                if (!string.IsNullOrEmpty(config.xmlName))
+                    config.xmlName = Path.GetFileNameWithoutExtension(config.xmlName);
+
                 SaveConfig();
                 ImportHandler.Import(config.filePathDirectory, config.xmlName, config.textureFolders, config.untagChildren, config.selectedObject, config.includeBuildingsMarker, config.ignoreTags, config.applyConfig);
             }

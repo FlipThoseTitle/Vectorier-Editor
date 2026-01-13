@@ -46,8 +46,6 @@ namespace Vectorier.Parallax
             public float factor;
             public Vector3 originalPosition;
             public Vector3 originalScale;
-            public Vector3 lastAppliedPosition;
-            public bool hasBeenInitialized;
         }
 
         private class ParallaxGroup
@@ -78,6 +76,41 @@ namespace Vectorier.Parallax
         }
 
         //---------------------------------------------------------
+
+        [MenuItem("Vectorier/Tools/Toggle Parallax", false, 35)]
+        private static void ToggleParallaxFromMenu()
+        {
+            var candidates = GameObject.FindGameObjectsWithTag("Camera")
+                .Select(go => go.GetComponent<Parallax>())
+                .Where(p => p != null)
+                .ToList();
+
+            // No camera found
+            if (candidates.Count == 0)
+            {
+                EditorUtility.DisplayDialog("Parallax", "There are no camera in the scene!", "OK");
+                return;
+            }
+
+            // Multiple cameras found
+            if (candidates.Count > 1)
+            {
+                var selected = Selection.activeGameObject != null ? Selection.activeGameObject.GetComponent<Parallax>() : null;
+
+                if (selected == null || !candidates.Contains(selected))
+                {
+                    EditorUtility.DisplayDialog("Parallax", "There are multiple cameras in the scene! Select the camera to proceed", "OK");
+                    return;
+                }
+
+                selected.ToggleParallax();
+                EditorUtility.SetDirty(selected);
+                return;
+            }
+
+            candidates[0].ToggleParallax();
+            EditorUtility.SetDirty(candidates[0]);
+        }
 
         public void ToggleParallax()
         {
@@ -124,9 +157,7 @@ namespace Vectorier.Parallax
                     transform = gameObject.transform,
                     factor = factor,
                     originalPosition = gameObject.transform.position,
-                    originalScale = gameObject.transform.localScale,
-                    lastAppliedPosition = gameObject.transform.position,
-                    hasBeenInitialized = true
+                    originalScale = gameObject.transform.localScale
                 });
             }
 
@@ -207,20 +238,10 @@ namespace Vectorier.Parallax
             foreach (var target in _targets)
             {
                 if (target.transform == null) continue;
-
-                if (!_groups.TryGetValue(target.factor, out var group))
-                    continue;
-
-                if (target.hasBeenInitialized)
-                {
-                    Vector3 current = target.transform.position;
-                    if ((current - target.lastAppliedPosition).sqrMagnitude > 0.0001f)
-                        target.originalPosition = (current - group.offset) / group.frameScale;
-                }
+                if (!_groups.TryGetValue(target.factor, out var group)) continue;
 
                 target.transform.localScale = target.originalScale * group.frameScale;
                 target.transform.position = group.offset + target.originalPosition * group.frameScale;
-                target.lastAppliedPosition = target.transform.position;
             }
         }
 

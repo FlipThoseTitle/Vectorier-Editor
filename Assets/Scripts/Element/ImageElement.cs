@@ -37,7 +37,8 @@ namespace Vectorier.Element
             // Image Component
             if (gameObject.TryGetComponent<ImageComponent>(out var imageComponent))
             {
-                xmlUtility.SetAttribute(imageElement, "Type", ((int)imageComponent.Type).ToString());
+                if (imageComponent.Type != ImageComponent.ImageType.None)
+                    xmlUtility.SetAttribute(imageElement, "Type", ((int)imageComponent.Type).ToString());
 
                 if (imageComponent.depth == ImageComponent.ImageDepth.Front)
                     xmlUtility.SetAttribute(imageElement, "Depth", "0");
