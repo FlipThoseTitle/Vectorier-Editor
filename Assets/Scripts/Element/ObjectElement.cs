@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Collections.Generic;
 using System.Xml;
 using UnityEngine;
+using UnityEngine.Rendering;
 using Vectorier.XML;
 using Vectorier.Handler;
 using Vectorier.Component;
@@ -11,6 +12,13 @@ namespace Vectorier.Element
 {
     public static class ObjectElement
     {
+        private enum ImportDepthGroup
+        {
+            Back,
+            Middle,
+            Front
+        }
+
         // ================= EXPORT ================= //
 
         public static XmlElement WriteToXML(GameObject sourceObject, XmlUtility xmlUtility, XmlElement parentXmlElement, ExportHandler.ExportMode exportMode)
@@ -70,6 +78,8 @@ namespace Vectorier.Element
             GameObject gameObject = CreateObject(xmlElement, parentTransform);
             Element.ApplyLayer(gameObject, layerName);
 
+            ApplySortingGroupLayering(xmlElement, gameObject, layerName);
+
             CreateInOutMarkers(xmlElement, gameObject, includeBuildingsMarker);
             WriteSceneChildren(xmlElement, gameObject.transform, layerName, includeBuildingsMarker, xmlUtility);
             ApplyDynamic(gameObject, xmlUtility, xmlElement);
@@ -103,6 +113,39 @@ namespace Vectorier.Element
             }
         }
 
+        private static void ApplySortingGroupLayering(XmlElement xmlElement, GameObject objectRoot, string factor)
+        {
+            if (objectRoot == null)
+                return;
+
+            SortingGroup group = objectRoot.GetComponent<SortingGroup>();
+            if (group == null)
+                group = objectRoot.AddComponent<SortingGroup>();
+
+            ImportDepthGroup depth = GetDepthGroupFromXML(xmlElement);
+
+            float factorValue = float.Parse(factor, CultureInfo.InvariantCulture);
+            int factorBand = Mathf.RoundToInt(factorValue * 10000);
+
+            int sortOffset =
+                depth == ImportDepthGroup.Front ? 200 + ImportHandler.GlobalOrder_Front++ :
+                depth == ImportDepthGroup.Back ? 0 + ImportHandler.GlobalOrder_Back++ :
+                100 + ImportHandler.GlobalOrder_Middle++;
+
+            group.sortingOrder = factorBand + sortOffset;
+        }
+
+        private static ImportDepthGroup GetDepthGroupFromXML(XmlElement xmlElement)
+        {
+            if (xmlElement != null && xmlElement.HasAttribute("Depth") && int.TryParse(xmlElement.GetAttribute("Depth"), out int depthValue))
+            {
+                if (depthValue == 0) return ImportDepthGroup.Front;
+                if (depthValue == 1) return ImportDepthGroup.Back;
+            }
+
+            return ImportDepthGroup.Middle;
+        }
+
         // ================= POSITION ================= //
 
         private static Vector3 GetPosition(XmlElement xmlElement)
@@ -128,8 +171,7 @@ namespace Vectorier.Element
 
         private static void WriteChildren(GameObject parentObject, XmlUtility xmlUtility, XmlElement parentXmlElement, ExportHandler.ExportMode exportMode)
         {
-            List<GameObject> imageObjects = new List<GameObject>();
-            List<GameObject> otherObjects = new List<GameObject>();
+            List<GameObject> exportables = new List<GameObject>();
 
             foreach (Transform childTransform in parentObject.transform)
             {
@@ -141,40 +183,89 @@ namespace Vectorier.Element
                 if (string.IsNullOrEmpty(childObject.tag) || childObject.CompareTag("Untagged"))
                     continue;
 
-                if (childObject.CompareTag("Image"))
-                    imageObjects.Add(childObject);
-                else
-                    otherObjects.Add(childObject);
+                // Only things that affect ordering here r Image + Object.
+                // Everything else can be exported after.
+                exportables.Add(childObject);
             }
 
-            SortImages(imageObjects);
+            // 1) Ordered pass: Images + Objects (based on Depth + SortingOrder / SortingGroup)
+            var ordered = exportables
+                .FindAll(o => o.CompareTag("Image") || o.CompareTag("Object"));
 
-            foreach (GameObject imageObject in imageObjects)
-                ExportHandler.WriteByTag(imageObject, xmlUtility, parentXmlElement);
-
-            foreach (GameObject childObject in otherObjects)
+            ordered.Sort((a, b) =>
             {
-                if (childObject.CompareTag("Object"))
-                    WriteToXML(childObject, xmlUtility, parentXmlElement, exportMode);
-                else
-                    ExportHandler.WriteByTag(childObject, xmlUtility, parentXmlElement);
-            }
-        }
+                int aDepth = GetDepthGroup(a);
+                int bDepth = GetDepthGroup(b);
+                if (aDepth != bDepth) return aDepth.CompareTo(bDepth);
 
-        private static void SortImages(List<GameObject> imageObjects)
-        {
-            imageObjects.Sort((firstObject, secondObject) =>
-            {
-                int firstOrder = GetSortingOrder(firstObject);
-                int secondOrder = GetSortingOrder(secondObject);
-                return firstOrder.CompareTo(secondOrder);
+                int aOrder = GetEffectiveOrder(a);
+                int bOrder = GetEffectiveOrder(b);
+                if (aOrder != bOrder) return aOrder.CompareTo(bOrder);
+
+                return 0;
             });
+
+            foreach (var go in ordered)
+            {
+                if (go.CompareTag("Object"))
+                    WriteToXML(go, xmlUtility, parentXmlElement, exportMode);
+                else
+                    ExportHandler.WriteByTag(go, xmlUtility, parentXmlElement);
+            }
+
+            // 2) Unordered pass: everything else (not important for layering per request)
+            foreach (var go in exportables)
+            {
+                if (go.CompareTag("Image") || go.CompareTag("Object"))
+                    continue;
+
+                ExportHandler.WriteByTag(go, xmlUtility, parentXmlElement);
+            }
         }
 
-        private static int GetSortingOrder(GameObject gameObject)
+        private static int GetDepthGroup(GameObject gameObject)
         {
-            SpriteRenderer renderer = gameObject.GetComponent<SpriteRenderer>();
+            if (!gameObject.CompareTag("Image"))
+                return 1;
+
+            int? depth = TryGetDepthValue(gameObject);
+            if (depth == 1) return 0;   // back
+            if (depth == 0) return 2;   // front
+            return 1;                   // middle (no depth)
+        }
+
+        private static int GetEffectiveOrder(GameObject gameObject)
+        {
+            if (gameObject.CompareTag("Object"))
+            {
+                var group = gameObject.GetComponent<SortingGroup>();
+                return group != null ? group.sortingOrder : 0;
+            }
+
+            var renderer = gameObject.GetComponent<SpriteRenderer>();
             return renderer != null ? renderer.sortingOrder : 0;
+        }
+
+        private static int? TryGetDepthValue(GameObject imageObject)
+        {
+            var components = imageObject.GetComponents<ImageComponent>();
+            for (int i = 0; i < components.Length; i++)
+            {
+                var component = components[i];
+                if (component == null) continue;
+
+                var transform = component.GetType();
+
+                var prop = transform.GetProperty("Depth");
+                if (prop != null && prop.PropertyType == typeof(int))
+                    return (int)prop.GetValue(component);
+
+                var field = transform.GetField("Depth");
+                if (field != null && field.FieldType == typeof(int))
+                    return (int)field.GetValue(component);
+            }
+
+            return null;
         }
 
         // ================= BUILDINGS ================= //

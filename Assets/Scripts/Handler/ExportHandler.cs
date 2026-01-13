@@ -6,6 +6,8 @@ using UnityEngine;
 using Vectorier.XML;
 using Vectorier.Element;
 using UnityEngine.SceneManagement;
+using UnityEngine.Rendering;
+using Vectorier.Component;
 
 namespace Vectorier.Handler
 {
@@ -89,33 +91,13 @@ namespace Vectorier.Handler
             Debug.Log("[ExportHandler] Existing XML updated.");
         }
 
-        // ================= HIERARCHY ORDER ================= //
-        private static List<GameObject> GetObjectsInHierarchyOrder()
-        {
-            List<GameObject> ordered = new List<GameObject>();
-            Scene scene = SceneManager.GetActiveScene();
-
-            foreach (var root in scene.GetRootGameObjects())
-                Traverse(root, ordered);
-
-            return ordered;
-        }
-
-        private static void Traverse(GameObject obj, List<GameObject> list)
-        {
-            if (IsExportable(obj))
-                list.Add(obj);
-
-            for (int i = 0; i < obj.transform.childCount; i++)
-                Traverse(obj.transform.GetChild(i).gameObject, list);
-        }
-
         // ================= LEVEL EXPORT ================= //
         private static void WriteLevel(XmlUtility xmlUtility, XmlElement rootElement, ExportMode exportMode)
         {
             XmlElement trackElement = xmlUtility.AddElement(rootElement, "Track");
 
-            List<GameObject> allObjects = GetObjectsInHierarchyOrder();
+            GameObject[] allObjects = GameObject.FindObjectsByType<GameObject>(FindObjectsSortMode.None);
+
             Dictionary<string, List<GameObject>> groupedObjects = new Dictionary<string, List<GameObject>>();
 
             foreach (GameObject gameObject in allObjects)
@@ -138,14 +120,43 @@ namespace Vectorier.Handler
 
                 var objectsInLayer = layer.Value;
 
-                foreach (var current in objectsInLayer.Where(o => o.tag == "Object" && !IsChildOfObject(o)))
-                    ObjectElement.WriteToXML(current, xmlUtility, contentElement, exportMode);
+                // Only export top-level (avoid duplicates). Object will export its own children.
+                var topLevel = objectsInLayer.Where(o => !IsChildOfObject(o)).ToList();
 
-                foreach (var current in objectsInLayer.Where(o => o.tag == "Image" && !IsChildOfObject(o)).OrderBy(o => SortingOrder(o)))
-                    WriteByTag(current, xmlUtility, contentElement);
+                // Ordering rule applies only to Image + Object.
+                var ordered = topLevel
+                    .Where(o => o.CompareTag("Image") || o.CompareTag("Object"))
+                    .ToList();
 
-                foreach (var current in objectsInLayer.Where(o => o.tag != "Object" && o.tag != "Image" && !IsChildOfObject(o)))
-                    WriteByTag(current, xmlUtility, contentElement);
+                ordered.Sort((a, b) =>
+                {
+                    int aDepth = GetDepthGroupForLevel(a);
+                    int bDepth = GetDepthGroupForLevel(b);
+                    if (aDepth != bDepth) return aDepth.CompareTo(bDepth);
+
+                    int aOrder = GetEffectiveOrderForLevel(a);
+                    int bOrder = GetEffectiveOrderForLevel(b);
+                    if (aOrder != bOrder) return aOrder.CompareTo(bOrder);
+
+                    return 0;
+                });
+
+                foreach (var go in ordered)
+                {
+                    if (go.CompareTag("Object"))
+                        ObjectElement.WriteToXML(go, xmlUtility, contentElement, exportMode);
+                    else
+                        WriteByTag(go, xmlUtility, contentElement);
+                }
+
+                // Everything else: export after (layering not important per request)
+                foreach (var go in topLevel)
+                {
+                    if (go.CompareTag("Image") || go.CompareTag("Object"))
+                        continue;
+
+                    WriteByTag(go, xmlUtility, contentElement);
+                }
             }
         }
 
@@ -228,12 +239,6 @@ namespace Vectorier.Handler
             return false;
         }
 
-        private static int SortingOrder(GameObject gameObject)
-        {
-            var renderer = gameObject.GetComponent<SpriteRenderer>();
-            return renderer ? renderer.sortingOrder : 0;
-        }
-
         private static string GetLayerFactor(GameObject gameObject)
         {
             string layerName = LayerMask.LayerToName(gameObject.layer);
@@ -254,6 +259,51 @@ namespace Vectorier.Handler
 
             foreach (Transform child in source.transform)
                 ExportHandler.WriteByTag(child.gameObject, xml, newContent);
+        }
+
+        private static int GetDepthGroupForLevel(GameObject gameObject)
+        {
+            if (!gameObject.CompareTag("Image"))
+                return 1;
+
+            int? depth = TryGetDepthValue(gameObject);
+            if (depth == 1) return 0;
+            if (depth == 0) return 2;
+            return 1;
+        }
+
+        private static int GetEffectiveOrderForLevel(GameObject gameObject)
+        {
+            if (gameObject.CompareTag("Object"))
+            {
+                var group = gameObject.GetComponent<SortingGroup>();
+                return group != null ? group.sortingOrder : 0;
+            }
+
+            var renderer = gameObject.GetComponent<SpriteRenderer>();
+            return renderer ? renderer.sortingOrder : 0;
+        }
+
+        private static int? TryGetDepthValue(GameObject imageObject)
+        {
+            var components = imageObject.GetComponents<ImageComponent>();
+            for (int i = 0; i < components.Length; i++)
+            {
+                var c = components[i];
+                if (c == null) continue;
+
+                var t = c.GetType();
+
+                var prop = t.GetProperty("Depth");
+                if (prop != null && prop.PropertyType == typeof(int))
+                    return (int)prop.GetValue(c);
+
+                var field = t.GetField("Depth");
+                if (field != null && field.FieldType == typeof(int))
+                    return (int)field.GetValue(c);
+            }
+
+            return null;
         }
 
         private static IEnumerable<GameObject> GetExportableObjects()
