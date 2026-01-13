@@ -99,6 +99,19 @@ namespace Vectorier.Element
             string className = element.GetAttribute("ClassName");
             ImportHandler.SpriteCache.TryGetValue(className, out Sprite loadedSprite);
 
+            bool isMissingSprite = (loadedSprite == null);
+            if (isMissingSprite)
+            {
+                Debug.LogWarning($"[ImageElement] Sprite '{className}' not found in any texture folder.");
+
+                loadedSprite = Resources.Load<Sprite>("Images/Editor/Misc/red");
+                imageObject.name = "[MISSING] " + className;
+                imageObject.tag = "EditorOnly";
+
+                if (loadedSprite == null)
+                    Debug.LogWarning("[ImageElement] Fallback sprite 'Images/Editor/Misc/red' could not be loaded.");
+            }
+
             // Native Resolution
             bool hasNativeX = int.TryParse(element.GetAttribute("NativeX"), NumberStyles.Any, CultureInfo.InvariantCulture, out int nativeX);
             bool hasNativeY = int.TryParse(element.GetAttribute("NativeY"), NumberStyles.Any, CultureInfo.InvariantCulture, out int nativeY);
@@ -130,10 +143,6 @@ namespace Vectorier.Element
                     imageObject.transform.localScale = new Vector3(scaleX, scaleY, 1f);
                 }
             }
-            else
-            {
-                Debug.LogWarning($"Sprite '{className}' not found in any texture folder.");
-            }
 
 
             // ------------ COMPONENT -----------------
@@ -163,7 +172,8 @@ namespace Vectorier.Element
             imageObject.transform.localPosition = new Vector3(finalX, finalY, 0f);
 
             // Tag
-            imageObject.tag = "Image";
+            if (!isMissingSprite)
+                imageObject.tag = "Image";
 
             if (className == "v_black")
             {

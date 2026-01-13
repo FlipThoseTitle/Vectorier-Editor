@@ -119,11 +119,7 @@ namespace Vectorier.Handler
                 XmlElement contentElement = xmlUtility.AddElement(objectLayerElement, "Content");
 
                 var objectsInLayer = layer.Value;
-
-                // Only export top-level (avoid duplicates). Object will export its own children.
                 var topLevel = objectsInLayer.Where(o => !IsChildOfObject(o)).ToList();
-
-                // Ordering rule applies only to Image + Object.
                 var ordered = topLevel
                     .Where(o => o.CompareTag("Image") || o.CompareTag("Object"))
                     .ToList();
@@ -141,21 +137,20 @@ namespace Vectorier.Handler
                     return 0;
                 });
 
-                foreach (var go in ordered)
+                foreach (var gameObject in ordered)
                 {
-                    if (go.CompareTag("Object"))
-                        ObjectElement.WriteToXML(go, xmlUtility, contentElement, exportMode);
+                    if (gameObject.CompareTag("Object"))
+                        ObjectElement.WriteToXML(gameObject, xmlUtility, contentElement, exportMode);
                     else
-                        WriteByTag(go, xmlUtility, contentElement);
+                        WriteByTag(gameObject, xmlUtility, contentElement);
                 }
 
-                // Everything else: export after (layering not important per request)
-                foreach (var go in topLevel)
+                foreach (var gameObject in topLevel)
                 {
-                    if (go.CompareTag("Image") || go.CompareTag("Object"))
+                    if (gameObject.CompareTag("Image") || gameObject.CompareTag("Object"))
                         continue;
 
-                    WriteByTag(go, xmlUtility, contentElement);
+                    WriteByTag(gameObject, xmlUtility, contentElement);
                 }
             }
         }
@@ -289,18 +284,18 @@ namespace Vectorier.Handler
             var components = imageObject.GetComponents<ImageComponent>();
             for (int i = 0; i < components.Length; i++)
             {
-                var c = components[i];
-                if (c == null) continue;
+                var component = components[i];
+                if (component == null) continue;
 
-                var t = c.GetType();
+                var transform = component.GetType();
 
-                var prop = t.GetProperty("Depth");
+                var prop = transform.GetProperty("Depth");
                 if (prop != null && prop.PropertyType == typeof(int))
-                    return (int)prop.GetValue(c);
+                    return (int)prop.GetValue(component);
 
-                var field = t.GetField("Depth");
+                var field = transform.GetField("Depth");
                 if (field != null && field.FieldType == typeof(int))
-                    return (int)field.GetValue(c);
+                    return (int)field.GetValue(component);
             }
 
             return null;

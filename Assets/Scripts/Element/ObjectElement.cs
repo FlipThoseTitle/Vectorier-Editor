@@ -188,9 +188,7 @@ namespace Vectorier.Element
                 exportables.Add(childObject);
             }
 
-            // 1) Ordered pass: Images + Objects (based on Depth + SortingOrder / SortingGroup)
-            var ordered = exportables
-                .FindAll(o => o.CompareTag("Image") || o.CompareTag("Object"));
+            var ordered = exportables.FindAll(o => o.CompareTag("Image") || o.CompareTag("Object"));
 
             ordered.Sort((a, b) =>
             {
@@ -213,7 +211,6 @@ namespace Vectorier.Element
                     ExportHandler.WriteByTag(go, xmlUtility, parentXmlElement);
             }
 
-            // 2) Unordered pass: everything else (not important for layering per request)
             foreach (var go in exportables)
             {
                 if (go.CompareTag("Image") || go.CompareTag("Object"))
