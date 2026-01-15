@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace Vectorier.EditorScript.Tools
 {
-    public class PolygonTool : EditorWindow
+    public class PolylineTool : EditorWindow
     {
         // ================= EDITOR STATE ================= //
 
@@ -29,17 +29,17 @@ namespace Vectorier.EditorScript.Tools
 
         // ================= MENU ================= //
 
-        [MenuItem("Vectorier/Tools/Polygon Tool", false, 35)]
+        [MenuItem("Vectorier/Tools/Polyline Tool", false, 35)]
         public static void OpenWindow()
         {
-            GetWindow<PolygonTool>("Polygon Tool");
+            GetWindow<PolylineTool>("Polyline Tool");
         }
 
         // ================= UI ================= //
 
         private void OnGUI()
         {
-            EditorGUILayout.LabelField("Polygon Tool", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("Polyline Tool", EditorStyles.boldLabel);
             EditorGUILayout.Space();
 
             DrawSpriteSelectionFields();

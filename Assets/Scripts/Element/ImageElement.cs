@@ -104,12 +104,13 @@ namespace Vectorier.Element
             {
                 Debug.LogWarning($"[ImageElement] Sprite '{className}' not found in any texture folder.");
 
-                loadedSprite = Resources.Load<Sprite>("Images/Editor/Misc/red");
-                imageObject.name = "[MISSING] " + className;
+                loadedSprite = Resources.Load<Sprite>("Images/Editor/Misc/rect");
+                imageObject.name = className + " [MISSING]";
                 imageObject.tag = "EditorOnly";
+                renderer.color = Color.red;
 
                 if (loadedSprite == null)
-                    Debug.LogWarning("[ImageElement] Fallback sprite 'Images/Editor/Misc/red' could not be loaded.");
+                    Debug.LogWarning("[ImageElement] Fallback sprite 'Images/Editor/Misc/rect' could not be loaded.");
             }
 
             // Native Resolution

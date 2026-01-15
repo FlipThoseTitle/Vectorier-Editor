@@ -144,8 +144,8 @@ namespace Vectorier.Core
 
         private void DrawLevelConfigUI()
         {
-            config.filePathDirectory = EditorGUILayout.TextField("File Path Directory", config.filePathDirectory);
-            config.fileName = EditorGUILayout.TextField("Level Name", config.fileName);
+            DrawDirectoryFieldWithBrowse("File Path Directory", ref config.filePathDirectory);
+            DrawXmlNameFieldWithBrowse("Level Name", ref config.fileName, ref config.filePathDirectory);
 
             EditorGUILayout.Space();
             EditorGUILayout.LabelField("<Sets>", EditorStyles.boldLabel);
@@ -180,8 +180,8 @@ namespace Vectorier.Core
 
         private void DrawObjectsConfigUI()
         {
-            config.filePathDirectory = EditorGUILayout.TextField("File Path Directory", config.filePathDirectory);
-            config.fileName = EditorGUILayout.TextField("Objects Name", config.fileName);
+            DrawDirectoryFieldWithBrowse("File Path Directory", ref config.filePathDirectory);
+            DrawXmlNameFieldWithBrowse("Objects Name", ref config.fileName, ref config.filePathDirectory);
 
             EditorGUILayout.Space();
             EditorGUILayout.LabelField("<Sets>", EditorStyles.boldLabel);
@@ -195,8 +195,8 @@ namespace Vectorier.Core
 
         private void DrawBuildingsConfigUI()
         {
-            config.filePathDirectory = EditorGUILayout.TextField("File Path Directory", config.filePathDirectory);
-            config.fileName = EditorGUILayout.TextField("Buildings Name", config.fileName);
+            DrawDirectoryFieldWithBrowse("File Path Directory", ref config.filePathDirectory);
+            DrawXmlNameFieldWithBrowse("Buildings Name", ref config.fileName, ref config.filePathDirectory);
 
             EditorGUILayout.Space();
             EditorGUILayout.LabelField("<Sets>", EditorStyles.boldLabel);
@@ -269,6 +269,39 @@ namespace Vectorier.Core
         }
 
         // ================= HELPERS ================= //
+        private void DrawDirectoryFieldWithBrowse(string label, ref string directoryPath)
+        {
+            EditorGUILayout.BeginHorizontal();
+            directoryPath = EditorGUILayout.TextField(label, directoryPath);
+
+            if (GUILayout.Button("...", GUILayout.Width(28)))
+            {
+                string startPath = string.IsNullOrEmpty(directoryPath) ? Application.dataPath : directoryPath;
+                string picked = EditorUtility.OpenFolderPanel($"Select {label}", startPath, "");
+
+                if (!string.IsNullOrEmpty(picked))
+                    directoryPath = picked;
+            }
+
+            EditorGUILayout.EndHorizontal();
+        }
+
+        private void DrawXmlNameFieldWithBrowse(string label, ref string xmlName, ref string directoryPath)
+        {
+            EditorGUILayout.BeginHorizontal();
+            xmlName = EditorGUILayout.TextField(label, xmlName);
+
+            if (GUILayout.Button("...", GUILayout.Width(28)))
+            {
+                string startPath = string.IsNullOrEmpty(directoryPath) ? Application.dataPath : directoryPath;
+                string picked = EditorUtility.OpenFilePanel($"Select {label}", startPath, "xml");
+
+                if (!string.IsNullOrEmpty(picked))
+                    xmlName = Path.GetFileNameWithoutExtension(picked);
+            }
+
+            EditorGUILayout.EndHorizontal();
+        }
 
         private void EnsureDirectoryExists(string path)
         {

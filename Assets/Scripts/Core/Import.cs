@@ -80,8 +80,8 @@ namespace Vectorier.Core
 
         private void DrawImportUI()
         {
-            config.filePathDirectory = EditorGUILayout.TextField("File Path Directory", config.filePathDirectory);
-            config.xmlName = EditorGUILayout.TextField("XML Name", config.xmlName);
+            DrawDirectoryFieldWithBrowse("File Path Directory", ref config.filePathDirectory);
+            DrawXmlNameFieldWithBrowse("XML Name", ref config.xmlName, ref config.filePathDirectory);
             config.selectedObject = EditorGUILayout.TextField("Selected Objects", config.selectedObject);
             config.ignoreTags = EditorGUILayout.TextField("Ignore Tags", config.ignoreTags);
 
@@ -114,6 +114,41 @@ namespace Vectorier.Core
 
             if (GUILayout.Button("Add Texture Folder"))
                 config.textureFolders.Add("");
+        }
+
+        // ================= HELPERS ================= //
+        private void DrawDirectoryFieldWithBrowse(string label, ref string directoryPath)
+        {
+            EditorGUILayout.BeginHorizontal();
+            directoryPath = EditorGUILayout.TextField(label, directoryPath);
+
+            if (GUILayout.Button("...", GUILayout.Width(28)))
+            {
+                string startPath = string.IsNullOrEmpty(directoryPath) ? Application.dataPath : directoryPath;
+                string picked = EditorUtility.OpenFolderPanel($"Select {label}", startPath, "");
+
+                if (!string.IsNullOrEmpty(picked))
+                    directoryPath = picked;
+            }
+
+            EditorGUILayout.EndHorizontal();
+        }
+
+        private void DrawXmlNameFieldWithBrowse(string label, ref string xmlName, ref string directoryPath)
+        {
+            EditorGUILayout.BeginHorizontal();
+            xmlName = EditorGUILayout.TextField(label, xmlName);
+
+            if (GUILayout.Button("...", GUILayout.Width(28)))
+            {
+                string startPath = string.IsNullOrEmpty(directoryPath) ? Application.dataPath : directoryPath;
+                string picked = EditorUtility.OpenFilePanel($"Select {label}", startPath, "xml");
+
+                if (!string.IsNullOrEmpty(picked))
+                    xmlName = Path.GetFileNameWithoutExtension(picked);
+            }
+
+            EditorGUILayout.EndHorizontal();
         }
     }
 }

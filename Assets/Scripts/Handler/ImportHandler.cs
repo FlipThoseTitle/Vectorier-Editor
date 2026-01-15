@@ -29,9 +29,12 @@ namespace Vectorier.Handler
         private static HashSet<string> IgnoredTags = new HashSet<string>();
 
         // ================= IMPORT ================= //
+        private static bool UntagChildrenMode = false;
 
         public static void Import(string directoryPath, string xmlFileName, List<string> textureFolders, bool untagChildren, string selectedNames, bool includeBuildingsMarker, string ignoreTags, bool applyConfig)
         {
+            UntagChildrenMode = untagChildren;
+
             // Parse ignored tags (case-insensitive)
             BuildIgnoreTags(ignoreTags);
 
@@ -85,9 +88,6 @@ namespace Vectorier.Handler
 
             // Import everything under the main section
             ImportObjects(mainSection, root.transform, isLevelFile, allowedNames, includeBuildingsMarker, xml);
-
-            if (untagChildren)
-                RemoveTags(root);
 
             Debug.Log("[ImportHandler] Import Completed: " + xmlFileName);
         }
@@ -329,9 +329,15 @@ namespace Vectorier.Handler
             switch (xmlElement.Name)
             {
                 case "Object":
+                    bool isReferencedObject = (xmlElement.SelectSingleNode("Content") as XmlElement) == null;
+
                     XmlElement finalElement = GetFinalObjectElement(xmlElement);
                     GameObject objectInstance = ObjectElement.WriteToScene(finalElement, parent, factor, includeBuildingsMarker, xmlUtility);
                     objectInstance.tag = "Object";
+
+                    if (UntagChildrenMode && isReferencedObject)
+                        RemoveTagsUnder(objectInstance);
+
                     break;
 
                 case "Image": ImageElement.WriteToScene(xmlElement, parent, factor); break;
@@ -348,8 +354,8 @@ namespace Vectorier.Handler
             }
         }
 
-        // -------- UNTAG ALL CHILDREN -------- //
-        private static void RemoveTags(GameObject root)
+        // -------- UNTAG ALL CHILDREN (EXCEPT ROOT) -------- //
+        private static void RemoveTagsUnder(GameObject root)
         {
             foreach (Transform transform in root.GetComponentsInChildren<Transform>(true))
             {
