@@ -1,9 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Xml;
-using UnityEditor;
 using UnityEngine;
 using Vectorier.XML;
 
@@ -27,7 +25,7 @@ namespace Vectorier.Dynamic
 
             public Vector2 move;      // ordered pair
             public Vector2 support;   // ordered pair
-            
+
         }
 
         [Serializable]

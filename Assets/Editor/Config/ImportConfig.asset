@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: ImportConfig
   m_EditorClassIdentifier: 
   filePathDirectory: Assets/XML/level_xml
-  xmlName: DOWNTOWN_STORY_03
+  xmlName: CONSTRUCTION_STORY_11
   selectedObject: 
-  ignoreTags: 
+  ignoreTags: Platform,Trapezoid,Trigger,Area
   untagChildren: 0
   includeBuildingsMarker: 0
   applyConfig: 1

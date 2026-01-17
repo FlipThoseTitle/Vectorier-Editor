@@ -1,9 +1,12 @@
 ﻿using UnityEditor;
 using UnityEngine;
+
 using System;
 using System.IO;
-using System.Collections.Generic;
 using System.Linq;
+using System.Xml;
+using System.Globalization;
+using System.Collections.Generic;
 
 namespace Vectorier.EditorScript.Tools
 {
@@ -11,14 +14,9 @@ namespace Vectorier.EditorScript.Tools
     {
         // ================= ENUMS ================= //
 
-        enum PlacementMode
-        {
-            Movement,
-            Tricks,
-            Custom
-        }
+        enum PlacementMode { Movement, Tricks, Custom }
 
-        enum MovementType
+        public enum MovementType
         {
             Jump,
             JumpOff,
@@ -38,19 +36,19 @@ namespace Vectorier.EditorScript.Tools
             FlyCollision
         }
 
-        public enum TrickType
-        {
-            Wall_Hop_360
-        }
+        public enum TrickType { Wall_Hop_360 }
 
-        // ================= CONSTANT DATA ================= //
+        // ================= CONSTANTS ================= //
 
         const string MOVEMENT_BASE_PATH = "Assets/Editor/Tools/MoveVisualizer/Movement";
         const string TRICKS_BASE_PATH = "Assets/Editor/Tools/MoveVisualizer/Tricks";
-        public const string IMAGE_BASE_PATH = "Assets/Editor/Tools/MoveVisualizer/Image";
+        const string DEFAULT_MODEL_XML_PATH = "Assets/Editor/Tools/MoveVisualizer/runner.xml";
+        const string BLACK_MAT_PATH = "Assets/Editor/Material/Black.mat";
 
+        const float Z_OFFSET = -300f;
         const float SOURCE_FPS = 20f;
-        string pivotNodeName = "NPivot";
+
+        static readonly Vector3 ANIM_Z_PUSH_VEC = new(0f, 0f, Z_OFFSET);
 
         static readonly Dictionary<MovementType, string> MovementBins = new()
         {
@@ -72,61 +70,9 @@ namespace Vectorier.EditorScript.Tools
             { MovementType.FlyCollision, "fly_collision.bin" }
         };
 
-        static Dictionary<string, string> discoveredTrickBins;
+        // ================= UI STATE ================= //
 
-        static readonly string[] NODEPOINT_ORDER =
-        {
-            "NHip_1","NHip_2","NStomach","NChest","NNeck","NShoulder_1","NShoulder_2",
-            "NKnee_1","NKnee_2","NAnkle_1","NAnkle_2","NToe_1","NHeel_1","NToeTip_1",
-            "NToeS_1","NHeel_2","NToe_2","NToeTip_2","NToeS_2","NElbow_1","NElbow_2",
-            "NWrist_1","NWrist_2","NKnuckles_1","NFingertips_1","NKnucklesS_1",
-            "NKnuckles_2","NFingertips_2","NKnucklesS_2","NHead","NTop","NChestS_1",
-            "NChestS_2","NStomachS_1","NStomachS_2","NChestF","NStomachF",
-            "NPelvisF","NHeadS_1","NHeadS_2","NHeadF","NPivot",
-            "DetectorH","DetectorV","COM","Camera"
-        };
-
-        static readonly (string, string)[] CONNECTIONS =
-        {
-            ("NStomach","NHip_2"),("NStomach","NHip_1"),("NHip_2","NHip_1"),
-            ("NChest","NStomach"),("NNeck","NChest"),
-            ("NShoulder_1","NNeck"),("NShoulder_2","NNeck"),
-            ("NKnee_1","NHip_1"),("NKnee_2","NHip_2"),
-            ("NAnkle_1","NKnee_1"),("NAnkle_2","NKnee_2"),
-            ("NToe_1","NAnkle_1"),("NHeel_1","NAnkle_1"),("NHeel_1","NToe_1"),
-            ("NToe_1","NToeTip_1"),("NToe_1","NToeS_1"),
-            ("NToeTip_1","NToeS_1"),("NHeel_1","NToeS_1"),("NAnkle_1","NToeS_1"),
-            ("NHeel_2","NAnkle_2"),("NToe_2","NAnkle_2"),("NToe_2","NHeel_2"),
-            ("NToeTip_2","NToe_2"),("NToe_2","NToeS_2"),
-            ("NToeTip_2","NToeS_2"),("NToeS_2","NHeel_2"),("NToeS_2","NAnkle_2"),
-            ("NElbow_1","NShoulder_1"),("NWrist_1","NElbow_1"),
-            ("NKnuckles_1","NWrist_1"),("NFingertips_1","NKnuckles_1"),
-            ("NKnuckles_1","NKnucklesS_1"),("NKnucklesS_1","NWrist_1"),
-            ("NFingertips_1","NKnucklesS_1"),
-            ("NElbow_2","NShoulder_2"),("NWrist_2","NElbow_2"),
-            ("NKnuckles_2","NWrist_2"),("NFingertips_2","NKnuckles_2"),
-            ("NKnucklesS_2","NKnuckles_2"),("NKnucklesS_2","NWrist_2"),
-            ("NFingertips_2","NKnucklesS_2"),
-            ("NNeck","NHead"),("NHead","NTop"),
-            ("NChest","NChestS_1"),("NChestS_2","NChest"),
-            ("NStomach","NStomachS_1"),("NStomach","NStomachS_2"),
-            ("NNeck","NChestS_1"),("NChestS_2","NNeck"),
-            ("NStomachS_1","NChest"),("NStomachS_2","NChest"),
-            ("NChestS_2","NChestS_1"),("NStomachS_2","NStomachS_1"),
-            ("NChestS_1","NChestF"),("NChestS_2","NChestF"),
-            ("NStomachF","NStomachS_1"),("NStomachF","NStomachS_2"),
-            ("NChestF","NNeck"),("NStomachF","NChest"),
-            ("NChest","NChestF"),("NStomach","NStomachF"),
-            ("NPelvisF","NHip_1"),("NHip_2","NPelvisF"),("NStomach","NPelvisF"),
-            ("NHead","NHeadS_1"),("NHeadS_2","NHead"),("NTop","NHeadS_1"),
-            ("NHeadS_2","NTop"),("NHeadS_1","NHeadS_2"),
-            ("NHeadF","NHead"),("NHeadF","NHeadS_1"),
-            ("NHeadS_2","NHeadF"),("NHeadF","NTop"),
-            ("NStomach","NPivot"),("NPelvisF","NPivot"),
-            ("NHip_2","NPivot"),("NHip_1","NPivot")
-        };
-
-        // ================= STATE ================= //
+        string pivotNodeName = "NPivot";
 
         PlacementMode currentPlacementMode = PlacementMode.Movement;
         MovementType currentMovementType;
@@ -134,24 +80,33 @@ namespace Vectorier.EditorScript.Tools
 
         string binFolderPath;
         string binFileName;
+        string customBinPath;
+
         bool placementEnabled;
-
-        readonly Dictionary<string, Vector3> animationNodes = new();
-        readonly Dictionary<string, Vector3> previewNodes = new();
-        readonly Dictionary<string, Vector3> previewPose = new();
-
-        readonly List<Vector3[]> animationFrames = new();
-        readonly List<Vector3> centerOfMassPath = new();
-
-        int currentFrameIndex;
-        int centerOfMassNodeIndex;
-
-        double lastPlaybackTime;
-        Vector3 startOffset;
-        bool isOffsetInitialized;
-        bool isPreviewActive;
-
         bool isPlaying = true;
+
+        string modelXmlPath = DEFAULT_MODEL_XML_PATH;
+        bool renderModel = true;
+        bool renderBlack = true;
+        bool renderEdges = false;
+        bool renderTrajectory = true;
+        bool followCamera = false;
+
+        // ================= CACHED ASSETS ================= //
+
+        Material blackMat;
+        Material defaultMat;
+
+        // ================= RUNTIME DATA ================= //
+
+        static Dictionary<string, string> discoveredTrickBins;
+
+        ModelData model;          // parsed XML (nodes/edges/capsules/previewPose)
+        PlaybackState state;      // animation frames, offsets, current nodes, etc.
+
+        // Model render objects
+        GameObject modelRootGO;
+        readonly List<CapsuleRuntime> capsuleRuntimes = new();
 
         // ================= WINDOW ================= //
 
@@ -162,28 +117,115 @@ namespace Vectorier.EditorScript.Tools
         {
             SceneView.duringSceneGui += OnSceneGUI;
             EditorApplication.update += UpdatePlayback;
-            InitializePreviewPose();
+            ResetAll();
         }
 
         void OnDisable()
         {
             SceneView.duringSceneGui -= OnSceneGUI;
             EditorApplication.update -= UpdatePlayback;
-            ResetState();
+            ResetAll();
+            DestroyModelRootImmediate();
         }
+
+        void OnInspectorUpdate() => Repaint();
 
         // ================= UI ================= //
 
         void OnGUI()
         {
             GUILayout.Space(5);
+            EditorGUILayout.LabelField("Model XML", EditorStyles.boldLabel);
+            modelXmlPath = EditorGUILayout.TextField("XML Path", modelXmlPath);
+            renderModel = EditorGUILayout.Toggle("Render Model", renderModel);
+
+            if (renderModel)
+            {
+                EditorGUI.indentLevel++;
+                renderBlack = EditorGUILayout.Toggle("Render Black", renderBlack);
+                EditorGUI.indentLevel--;
+            }
+
+            if (modelRootGO != null)
+                ApplyCapsuleRenderSettings();
+
+            renderEdges = EditorGUILayout.Toggle("Render Edges", renderEdges);
+            renderTrajectory = EditorGUILayout.Toggle("Render Trajectory", renderTrajectory);
+            followCamera = EditorGUILayout.Toggle("Follow Camera", followCamera);
+
+            GUILayout.Space(10);
             currentPlacementMode = (PlacementMode)EditorGUILayout.EnumPopup("Placement Mode", currentPlacementMode);
 
+            DrawPlacementModeUI();
+
+            pivotNodeName = EditorGUILayout.TextField("Pivot Node", pivotNodeName);
+
+            GUILayout.Space(12);
+
+            if (GUILayout.Button(placementEnabled ? "Stop Placement" : "Start Placement", GUILayout.Height(60)))
+                placementEnabled = !placementEnabled;
+
+            if (GUILayout.Button("Clear", GUILayout.Height(40)))
+            {
+                ResetAll();
+                DestroyModelRootImmediate();
+            }
+
+            GUILayout.Space(10);
+
+            using (new GUILayout.HorizontalScope())
+            {
+                if (GUILayout.Button(isPlaying ? "Pause" : "Play", GUILayout.Height(30)))
+                    isPlaying = !isPlaying;
+
+                if (GUILayout.Button("Restart", GUILayout.Height(30)))
+                {
+                    state.CurrentFrameIndex = 0;
+                    ApplyFrame(0);
+                }
+            }
+
+            GUI.enabled = state.AnimationFrames.Count > 0;
+
+            int maxFrame = Mathf.Max(0, state.AnimationFrames.Count - 1);
+            int newFrame = EditorGUILayout.IntSlider("Frame", state.CurrentFrameIndex, 0, maxFrame);
+
+            if (newFrame != state.CurrentFrameIndex)
+            {
+                isPlaying = false;
+                state.CurrentFrameIndex = newFrame;
+                ApplyFrame(state.CurrentFrameIndex);
+
+                if (followCamera)
+                    FollowSceneViewCameraToNodeXY();
+            }
+
+            GUI.enabled = true;
+
+            if (!renderModel && modelRootGO != null)
+                DestroyModelRootImmediate();
+        }
+
+        void DrawPlacementModeUI()
+        {
             switch (currentPlacementMode)
             {
                 case PlacementMode.Custom:
-                    binFolderPath = EditorGUILayout.TextField("Bin Folder", binFolderPath);
-                    binFileName = EditorGUILayout.TextField("Bin Name", binFileName);
+                    using (new GUILayout.HorizontalScope())
+                    {
+                        customBinPath = EditorGUILayout.TextField("Bin Path", customBinPath);
+
+                        if (GUILayout.Button("...", GUILayout.Width(30)))
+                        {
+                            string projectRoot = Directory.GetParent(Application.dataPath).FullName;
+                            string selected = EditorUtility.OpenFilePanel("Select animation bin", projectRoot, "bin,bytes");
+                            if (!string.IsNullOrEmpty(selected))
+                                customBinPath = selected;
+                        }
+                    }
+
+                    binFolderPath = null;
+                    binFileName = null;
                     break;
 
                 case PlacementMode.Movement:
@@ -196,44 +238,6 @@ namespace Vectorier.EditorScript.Tools
                     DrawTrickSelectionUI();
                     break;
             }
-
-            pivotNodeName = EditorGUILayout.TextField("Pivot Node", pivotNodeName);
-
-            GUILayout.Space(12);
-
-            if (GUILayout.Button(placementEnabled ? "Stop Placement" : "Start Placement", GUILayout.Height(60)))
-                placementEnabled = !placementEnabled;
-
-            if (GUILayout.Button("Clear", GUILayout.Height(40)))
-                ResetState();
-
-            GUILayout.Space(10);
-
-            using (new GUILayout.HorizontalScope())
-            {
-                if (GUILayout.Button(isPlaying ? "Pause" : "Play", GUILayout.Height(30)))
-                    isPlaying = !isPlaying;
-
-                if (GUILayout.Button("Restart", GUILayout.Height(30)))
-                {
-                    currentFrameIndex = 0;
-                    ApplyFrame(currentFrameIndex);
-                }
-            }
-
-            GUI.enabled = animationFrames.Count > 0;
-
-            int maxFrame = Mathf.Max(0, animationFrames.Count - 1);
-            int newFrame = EditorGUILayout.IntSlider("Frame", currentFrameIndex, 0, maxFrame);
-
-            if (newFrame != currentFrameIndex)
-            {
-                isPlaying = false;
-                currentFrameIndex = newFrame;
-                ApplyFrame(currentFrameIndex);
-            }
-
-            GUI.enabled = true;
         }
 
         void DrawTrickSelectionUI()
@@ -243,14 +247,28 @@ namespace Vectorier.EditorScript.Tools
             if (discoveredTrickBins == null)
                 DiscoverTricks(binFolderPath);
 
-            if (string.IsNullOrEmpty(currentTrickIdentifier))
+            if (discoveredTrickBins == null || discoveredTrickBins.Count == 0)
+            {
+                EditorGUILayout.HelpBox("No trick .bin files found in the Tricks folder.", MessageType.Warning);
+                return;
+            }
+
+            if (string.IsNullOrEmpty(currentTrickIdentifier) || !discoveredTrickBins.ContainsKey(currentTrickIdentifier))
                 currentTrickIdentifier = discoveredTrickBins.Keys.First();
 
             EditorGUILayout.LabelField("Trick", currentTrickIdentifier);
 
             if (GUILayout.Button("Select Trick...", GUILayout.Height(30)))
             {
-                TrickSelectionWindow.Open(discoveredTrickBins, currentTrickIdentifier, identifier => {currentTrickIdentifier = identifier; binFileName = discoveredTrickBins[identifier];});
+                TrickSelectionWindow.Open(
+                    discoveredTrickBins,
+                    currentTrickIdentifier,
+                    identifier =>
+                    {
+                        currentTrickIdentifier = identifier;
+                        binFileName = discoveredTrickBins[identifier];
+                    }
+                );
             }
 
             binFileName = discoveredTrickBins[currentTrickIdentifier];
@@ -265,113 +283,163 @@ namespace Vectorier.EditorScript.Tools
             if (placementEnabled)
                 HandlePlacementInput();
 
-            DrawNodes();
-            DrawConnections();
-            DrawCenterOfMassPath();
+            DrawPreview();
+
+            if (renderEdges)
+            {
+                DrawAnimation();
+                DrawConnections();
+            }
+
+            if (renderTrajectory)
+                DrawCenterOfMassPath();
         }
 
         void HandlePlacementInput()
         {
-            Ray ray = HandleUtility.GUIPointToWorldRay(Event.current.mousePosition);
-            Vector3 worldPosition = ray.origin + ray.direction * 10f;
-            worldPosition.z = 0f;
+            EnsureModelLoadedForPreview();
 
-            UpdatePreview(worldPosition);
-            isPreviewActive = true;
+            Vector3 cursorWorldPosition = GetCursorWorldPositionOnZPlane();
+            UpdatePreview(cursorWorldPosition);
+            state.IsPreviewActive = true;
 
             if (Event.current.type == EventType.MouseDown && Event.current.button == 0)
             {
-                PlaceAt(worldPosition);
-                isPreviewActive = false;
+                PlaceAt(cursorWorldPosition);
+                state.IsPreviewActive = false;
                 Event.current.Use();
             }
 
             SceneView.RepaintAll();
         }
 
+        static Vector3 GetCursorWorldPositionOnZPlane()
+        {
+            Ray ray = HandleUtility.GUIPointToWorldRay(Event.current.mousePosition);
+            Vector3 world = ray.origin + ray.direction * 10f;
+            world.z = 0f;
+            return world;
+        }
+
         // ================= CORE ================= //
 
         void PlaceAt(Vector3 worldPosition)
         {
-            ResetState();
-            LoadBinaryAnimation();
-            InitializeAnimationNodes();
+            ResetRuntimeStateOnly();
+            DestroyModelRootImmediate();
 
-            centerOfMassNodeIndex = Array.IndexOf(NODEPOINT_ORDER, "COM");
+            model = ModelData.LoadOrThrow(ResolveXmlPath());
+            state.AllocateNodeBuffers(model.NodeCount);
 
-            int pivotNodeIndex = -1;
+            LoadBinaryAnimation(model.NodeCount);
 
-            if (!string.IsNullOrWhiteSpace(pivotNodeName))
-                pivotNodeIndex = Array.IndexOf(NODEPOINT_ORDER, pivotNodeName);
+            state.CenterOfMassNodeIndex = model.TryGetNodeIndex("COM", out int comIdx) ? comIdx : -1;
 
-            if (pivotNodeIndex < 0)
-                pivotNodeIndex = Array.IndexOf(NODEPOINT_ORDER, "NPivot");
+            int pivotIndex = ResolvePivotNodeIndex(pivotNodeName, model);
 
-            if (pivotNodeIndex < 0)
-                throw new Exception("NPivot node not found in NODEPOINT_ORDER");
-
-            Vector3 pivotFrameZero = ConvertAxis(animationFrames[0][pivotNodeIndex]);
-
-            startOffset = worldPosition - pivotFrameZero;
-            isOffsetInitialized = true;
+            Vector3 pivotFrameZero = state.AnimationFrames[0][pivotIndex];
+            state.StartOffset = worldPosition - pivotFrameZero;
+            state.IsOffsetInitialized = true;
 
             PrecomputeCenterOfMassPath();
 
-            currentFrameIndex = 0;
+            state.CurrentFrameIndex = 0;
             isPlaying = true;
             ApplyFrame(0);
 
-            lastPlaybackTime = EditorApplication.timeSinceStartup;
+            if (renderModel)
+                CreateModelRenderObjectsIfNeeded();
+
+            state.LastPlaybackTime = EditorApplication.timeSinceStartup;
         }
 
-        void LoadBinaryAnimation()
+        int ResolvePivotNodeIndex(string requestedPivot, ModelData m)
         {
-            animationFrames.Clear();
-            using BinaryReader reader = new(File.OpenRead(Path.Combine(binFolderPath, binFileName)));
+            if (!string.IsNullOrWhiteSpace(requestedPivot) && m.TryGetNodeIndex(requestedPivot, out int idx))
+                return idx;
+
+            if (m.TryGetNodeIndex("NPivot", out int pivotIdx))
+                return pivotIdx;
+
+            throw new Exception("Pivot node not found. Requested pivot missing, and 'NPivot' not found in XML <Nodes>.");
+        }
+
+        void LoadBinaryAnimation(int expectedNodeCount)
+        {
+            state.AnimationFrames.Clear();
+
+            string fullPath = ResolveBinFullPathOrThrow();
+            using var reader = new BinaryReader(File.OpenRead(fullPath));
 
             int frameCount = reader.ReadInt32();
 
             for (int frameIndex = 0; frameIndex < frameCount; frameIndex++)
             {
-                reader.ReadByte();
+                reader.ReadByte(); // marker
+
                 int nodeCount = reader.ReadInt32();
+                if (nodeCount != expectedNodeCount)
+                    throw new Exception($"Node count mismatch. Bin={nodeCount}, XML Nodes={expectedNodeCount}. Your bin must match XML <Nodes> order/count.");
 
-                if (nodeCount != NODEPOINT_ORDER.Length)
-                    throw new Exception("Node count mismatch");
-
-                Vector3[] frame = new Vector3[nodeCount];
+                var frame = new Vector3[nodeCount];
 
                 for (int nodeIndex = 0; nodeIndex < nodeCount; nodeIndex++)
                 {
                     float x = reader.ReadSingle();
                     float y = reader.ReadSingle();
                     float z = reader.ReadSingle();
-                    frame[nodeIndex] = new Vector3(x, -z, -y);
+                    frame[nodeIndex] = new Vector3(x, y, -z);
                 }
 
-                animationFrames.Add(frame);
+                state.AnimationFrames.Add(frame);
             }
         }
 
-        void InitializeAnimationNodes()
+        string ResolveBinFullPathOrThrow()
         {
-            animationNodes.Clear();
-            foreach (string nodeName in NODEPOINT_ORDER)
-                animationNodes[nodeName] = Vector3.zero;
+            string fullPath;
+
+            if (currentPlacementMode == PlacementMode.Custom)
+            {
+                fullPath = customBinPath;
+                if (string.IsNullOrWhiteSpace(fullPath))
+                    throw new Exception("Custom Bin Path is empty.");
+            }
+            else
+            {
+                fullPath = Path.Combine(binFolderPath ?? string.Empty, binFileName ?? string.Empty);
+            }
+
+            if (!Path.IsPathRooted(fullPath))
+            {
+                string projectRoot = Directory.GetParent(Application.dataPath).FullName;
+                fullPath = Path.GetFullPath(Path.Combine(projectRoot, fullPath));
+            }
+
+            if (!File.Exists(fullPath))
+                throw new FileNotFoundException($"Bin file not found: {fullPath}");
+
+            return fullPath;
         }
 
         void UpdatePlayback()
         {
-            if (!isOffsetInitialized || animationFrames.Count == 0 || !isPlaying)
+            if (!state.IsOffsetInitialized || state.AnimationFrames.Count == 0 || !isPlaying)
                 return;
 
-            if (EditorApplication.timeSinceStartup - lastPlaybackTime < 1f / SOURCE_FPS)
+            double now = EditorApplication.timeSinceStartup;
+            double frameInterval = 1.0 / SOURCE_FPS;
+
+            if (now - state.LastPlaybackTime < frameInterval)
                 return;
 
-            lastPlaybackTime = EditorApplication.timeSinceStartup;
-            currentFrameIndex = (currentFrameIndex + 1) % animationFrames.Count;
+            state.LastPlaybackTime = now;
 
-            ApplyFrame(currentFrameIndex);
+            state.CurrentFrameIndex = (state.CurrentFrameIndex + 1) % state.AnimationFrames.Count;
+            ApplyFrame(state.CurrentFrameIndex);
+
+            if (followCamera)
+                FollowSceneViewCameraToNodeXY();
 
             Repaint();
             SceneView.RepaintAll();
@@ -379,13 +447,16 @@ namespace Vectorier.EditorScript.Tools
 
         void ApplyFrame(int frameIndex)
         {
-            Vector3[] frame = animationFrames[frameIndex];
+            if (state.AnimationFrames.Count == 0 || state.AnimationNodes == null)
+                return;
 
-            for (int i = 0; i < NODEPOINT_ORDER.Length; i++)
-            {
-                Vector3 localPosition = ConvertAxis(frame[i]);
-                animationNodes[NODEPOINT_ORDER[i]] = localPosition + startOffset;
-            }
+            Vector3[] frame = state.AnimationFrames[frameIndex];
+
+            for (int i = 0; i < frame.Length; i++)
+                state.AnimationNodes[i] = frame[i] + state.StartOffset + ANIM_Z_PUSH_VEC;
+
+            if (renderModel)
+                UpdateCapsules(state.AnimationNodes);
 
             Repaint();
             SceneView.RepaintAll();
@@ -393,139 +464,597 @@ namespace Vectorier.EditorScript.Tools
 
         void UpdatePreview(Vector3 cursorWorldPosition)
         {
-            if (!previewPose.ContainsKey(pivotNodeName))
+            if (model == null || state.PreviewPose == null || state.PreviewNodes == null)
                 return;
 
-            Vector3 pivotLocalPosition = previewPose[pivotNodeName];
-            Vector3 offset = cursorWorldPosition - pivotLocalPosition;
+            int pivotIndex = ResolvePivotNodeIndex(pivotNodeName, model);
 
-            previewNodes.Clear();
-            foreach (var entry in previewPose)
-                previewNodes[entry.Key] = entry.Value + offset;
+            Vector3 pivotLocal = state.PreviewPose[pivotIndex];
+            Vector3 offset = cursorWorldPosition - pivotLocal;
+
+            for (int i = 0; i < state.PreviewPose.Length; i++)
+                state.PreviewNodes[i] = state.PreviewPose[i] + offset + ANIM_Z_PUSH_VEC;
         }
 
         void PrecomputeCenterOfMassPath()
         {
-            centerOfMassPath.Clear();
-            foreach (var frame in animationFrames)
+            state.CenterOfMassPath.Clear();
+
+            if (state.CenterOfMassNodeIndex < 0)
+                return;
+
+            foreach (var frame in state.AnimationFrames)
+                state.CenterOfMassPath.Add(frame[state.CenterOfMassNodeIndex] + state.StartOffset + ANIM_Z_PUSH_VEC);
+        }
+
+        void ResetAll()
+        {
+            model = null;
+            ResetRuntimeStateOnly();
+        }
+
+        void ResetRuntimeStateOnly()
+        {
+            state.Reset();
+        }
+
+        void EnsureModelLoadedForPreview()
+        {
+            string path = ResolveXmlPath();
+            if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
+                return;
+
+            if (model == null || !string.Equals(model.SourcePath, path, StringComparison.OrdinalIgnoreCase))
             {
-                Vector3 localCenterOfMass = ConvertAxis(frame[centerOfMassNodeIndex]);
-                centerOfMassPath.Add(localCenterOfMass + startOffset);
+                model = ModelData.LoadOrThrow(path);
+                state.AllocateNodeBuffers(model.NodeCount);
+                state.PreviewPose = model.PreviewPose; // share read-only pose array
+            }
+
+            if (state.PreviewPose == null || state.PreviewPose.Length == 0)
+                state.PreviewPose = model.PreviewPose;
+        }
+
+        void FollowSceneViewCameraToNodeXY()
+        {
+            if (state.AnimationNodes == null || state.AnimationNodes.Length == 0)
+                return;
+
+            if (!isPlaying)
+                return;
+
+            if (model == null || !model.TryGetNodeIndex("Camera", out int camIdx))
+                return;
+
+            if (camIdx < 0 || camIdx >= state.AnimationNodes.Length)
+                return;
+
+            Vector3 target = state.AnimationNodes[camIdx];
+
+            SceneView sv = SceneView.lastActiveSceneView;
+            if (sv == null)
+                return;
+
+            Vector3 pivot = sv.pivot;
+            pivot.x = target.x;
+            pivot.y = target.y;
+            sv.pivot = pivot;
+            sv.Repaint();
+        }
+
+        string ResolveXmlPath()
+        {
+            string p = string.IsNullOrWhiteSpace(modelXmlPath) ? DEFAULT_MODEL_XML_PATH : modelXmlPath;
+
+            if (Path.IsPathRooted(p))
+                return p;
+
+            string projectRoot = Directory.GetParent(Application.dataPath).FullName;
+            return Path.GetFullPath(Path.Combine(projectRoot, p));
+        }
+
+        Material GetBlackMaterial()
+        {
+            if (blackMat != null)
+                return blackMat;
+
+            blackMat = AssetDatabase.LoadAssetAtPath<Material>(BLACK_MAT_PATH);
+            if (blackMat == null)
+                Debug.LogWarning($"[MoveVisualizer] Black material not found at {BLACK_MAT_PATH}");
+
+            return blackMat;
+        }
+
+        // ================= XML MODEL DATA ================= //
+
+        sealed class ModelData
+        {
+            public string SourcePath { get; private set; }
+
+            public readonly List<string> NodeNamesOrdered = new();
+            public readonly Dictionary<string, int> NodeIndexByName = new(StringComparer.OrdinalIgnoreCase);
+            public readonly List<EdgeIndex> Connections = new();
+            public readonly List<CapsuleDef> Capsules = new();
+
+            public Vector3[] PreviewPose { get; private set; }
+            public int NodeCount => NodeNamesOrdered.Count;
+
+            public bool TryGetNodeIndex(string name, out int idx) => NodeIndexByName.TryGetValue(name, out idx);
+
+            public static ModelData LoadOrThrow(string path)
+            {
+                if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
+                    throw new FileNotFoundException($"Model XML not found. Resolved: '{path}'");
+
+                // Keep your existing encoding assumption
+                byte[] bytes = File.ReadAllBytes(path);
+                string xmlText = System.Text.Encoding.GetEncoding("Windows-1251").GetString(bytes);
+
+                var doc = new XmlDocument();
+                doc.LoadXml(xmlText);
+
+                XmlNode scene = doc.SelectSingleNode("/Scene") ?? throw new Exception("Invalid XML: missing <Scene> root.");
+                XmlNode nodesElem = scene.SelectSingleNode("Nodes") ?? throw new Exception("Invalid XML: missing <Nodes>.");
+
+                var m = new ModelData { SourcePath = path };
+
+                // Nodes
+                int idx = 0;
+                foreach (XmlNode n in nodesElem.ChildNodes)
+                {
+                    if (n.NodeType != XmlNodeType.Element)
+                        continue;
+
+                    string name = n.Name;
+                    m.NodeNamesOrdered.Add(name);
+                    m.NodeIndexByName[name] = idx++;
+                }
+
+                if (m.NodeCount <= 0)
+                    throw new Exception("XML <Nodes> is empty.");
+
+                // Build preview pose from nodes list
+                m.PreviewPose = new Vector3[m.NodeCount];
+                int i = 0;
+                foreach (XmlNode n in nodesElem.ChildNodes)
+                {
+                    if (n.NodeType != XmlNodeType.Element)
+                        continue;
+
+                    float x = GetFloatAttr(n, "X", 0f);
+                    float y = GetFloatAttr(n, "Y", 0f);
+                    float z = GetFloatAttr(n, "Z", 0f);
+
+                    m.PreviewPose[i++] = new Vector3(x, y, -z);
+                    if (i >= m.PreviewPose.Length)
+                        break;
+                }
+
+                // Edges
+                XmlNode edgesElem = scene.SelectSingleNode("Edges");
+                if (edgesElem != null)
+                {
+                    foreach (XmlNode e in edgesElem.ChildNodes)
+                    {
+                        if (e.NodeType != XmlNodeType.Element)
+                            continue;
+
+                        string edgeName = e.Name;
+                        string end1 = GetAttr(e, "End1");
+                        string end2 = GetAttr(e, "End2");
+
+                        if (!m.NodeIndexByName.TryGetValue(end1, out int a) || !m.NodeIndexByName.TryGetValue(end2, out int b))
+                            continue;
+
+                        m.Connections.Add(new EdgeIndex { Name = edgeName, A = a, B = b });
+                    }
+                }
+
+                // Capsules
+                XmlNode figsElem = scene.SelectSingleNode("Figures");
+                if (figsElem != null)
+                {
+                    foreach (XmlNode f in figsElem.ChildNodes)
+                    {
+                        if (f.NodeType != XmlNodeType.Element)
+                            continue;
+
+                        string type = GetAttrOrNull(f, "Type");
+                        if (!string.Equals(type, "Capsule", StringComparison.OrdinalIgnoreCase))
+                            continue;
+
+                        string capName = f.Name;
+                        string edgeName = GetAttr(f, "Edge");
+
+                        float r1 = GetFloatAttr(f, "Radius1", 1f);
+                        float r2 = GetFloatAttr(f, "Radius2", r1);
+                        float m1 = Mathf.Clamp01(GetFloatAttr(f, "Margin1", 0f));
+                        float m2 = Mathf.Clamp01(GetFloatAttr(f, "Margin2", 0f));
+
+                        // Find edge endpoints from connections
+                        int edgeIdx = m.Connections.FindIndex(x => string.Equals(x.Name, edgeName, StringComparison.OrdinalIgnoreCase));
+                        if (edgeIdx < 0)
+                            continue;
+
+                        var edge = m.Connections[edgeIdx];
+
+                        m.Capsules.Add(new CapsuleDef
+                        {
+                            Name = capName,
+                            EdgeName = edgeName,
+                            A = edge.A,
+                            B = edge.B,
+                            Radius1 = r1,
+                            Radius2 = r2,
+                            Margin1 = m1,
+                            Margin2 = m2
+                        });
+                    }
+                }
+
+                return m;
             }
         }
 
-        Vector3 ConvertAxis(Vector3 value) => new(value.x, -value.z, value.y);
+        // ================= STATE ================= //
 
-        void ResetState()
+        struct PlaybackState
         {
-            animationNodes.Clear();
-            previewNodes.Clear();
-            animationFrames.Clear();
-            centerOfMassPath.Clear();
+            public readonly List<Vector3[]> AnimationFrames;
+            public readonly List<Vector3> CenterOfMassPath;
 
-            currentFrameIndex = 0;
-            isOffsetInitialized = false;
-            isPreviewActive = false;
+            public Vector3[] AnimationNodes;
+            public Vector3[] PreviewNodes;
+            public Vector3[] PreviewPose;
+
+            public int CurrentFrameIndex;
+            public int CenterOfMassNodeIndex;
+
+            public Vector3 StartOffset;
+            public bool IsOffsetInitialized;
+            public bool IsPreviewActive;
+
+            public double LastPlaybackTime;
+
+            public PlaybackState(bool init)
+            {
+                AnimationFrames = new List<Vector3[]>();
+                CenterOfMassPath = new List<Vector3>();
+
+                AnimationNodes = null;
+                PreviewNodes = null;
+                PreviewPose = null;
+
+                CurrentFrameIndex = 0;
+                CenterOfMassNodeIndex = -1;
+
+                StartOffset = default;
+                IsOffsetInitialized = false;
+                IsPreviewActive = false;
+
+                LastPlaybackTime = 0;
+            }
+
+            public void Reset()
+            {
+                AnimationFrames.Clear();
+                CenterOfMassPath.Clear();
+
+                CurrentFrameIndex = 0;
+                CenterOfMassNodeIndex = -1;
+
+                StartOffset = default;
+                IsOffsetInitialized = false;
+                IsPreviewActive = false;
+
+                AnimationNodes = null;
+                PreviewNodes = null;
+            }
+
+            public void AllocateNodeBuffers(int nodeCount)
+            {
+                if (nodeCount <= 0)
+                    return;
+
+                AnimationNodes = new Vector3[nodeCount];
+                PreviewNodes = new Vector3[nodeCount];
+            }
+        }
+
+        MoveVisualizer()
+        {
+            state = new PlaybackState(init: true);
+        }
+
+        // ================= XML HELPERS ================= //
+
+        struct EdgeIndex { public int A; public int B; public string Name; }
+
+        struct CapsuleDef
+        {
+            public string Name;
+            public string EdgeName;
+            public int A;
+            public int B;
+            public float Radius1;
+            public float Radius2;
+            public float Margin1; // [0..1] start trim
+            public float Margin2; // [0..1] end trim
+        }
+
+        struct CapsuleRuntime
+        {
+            public CapsuleDef Def;
+            public GameObject Root;
+            public Transform Cylinder;
+            public Transform SphereA;
+            public Transform SphereB;
+        }
+
+        static string GetAttr(XmlNode node, string attr)
+        {
+            var a = node.Attributes?[attr];
+            if (a == null || string.IsNullOrWhiteSpace(a.Value))
+                throw new Exception($"XML missing attribute '{attr}' on <{node.Name}>");
+            return a.Value;
+        }
+
+        static string GetAttrOrNull(XmlNode node, string attr) => node.Attributes?[attr]?.Value;
+
+        static float GetFloatAttr(XmlNode node, string attr, float fallback)
+        {
+            var a = node.Attributes?[attr];
+            if (a == null || string.IsNullOrWhiteSpace(a.Value))
+                return fallback;
+
+            if (float.TryParse(a.Value, NumberStyles.Float, CultureInfo.InvariantCulture, out float v))
+                return v;
+
+            if (float.TryParse(a.Value.Replace(',', '.'), NumberStyles.Float, CultureInfo.InvariantCulture, out v))
+                return v;
+
+            return fallback;
+        }
+
+        // ================= MODEL RENDER (Capsules) ================= //
+
+        void CreateModelRenderObjectsIfNeeded()
+        {
+            if (!renderModel || modelRootGO != null || model == null)
+                return;
+
+            modelRootGO = new GameObject("MoveVisualizerModel")
+            {
+                hideFlags = HideFlags.DontSave
+            };
+
+            modelRootGO.transform.SetPositionAndRotation(Vector3.zero, Quaternion.identity);
+            modelRootGO.transform.localScale = Vector3.one;
+
+            capsuleRuntimes.Clear();
+
+            foreach (var c in model.Capsules)
+            {
+                var capRoot = new GameObject(c.Name) { hideFlags = HideFlags.DontSave };
+                capRoot.transform.SetParent(modelRootGO.transform, false);
+
+                GameObject cyl = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+                CacheDefaultMatIfNeeded(cyl);
+
+                cyl.name = "Cylinder";
+                cyl.hideFlags = HideFlags.DontSave;
+                cyl.transform.SetParent(capRoot.transform, false);
+                DestroyImmediate(cyl.GetComponent<Collider>());
+
+                GameObject sA = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                sA.name = "Sphere_A";
+                sA.hideFlags = HideFlags.DontSave;
+                sA.transform.SetParent(capRoot.transform, false);
+                DestroyImmediate(sA.GetComponent<Collider>());
+
+                GameObject sB = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                sB.name = "Sphere_B";
+                sB.hideFlags = HideFlags.DontSave;
+                sB.transform.SetParent(capRoot.transform, false);
+                DestroyImmediate(sB.GetComponent<Collider>());
+
+                capsuleRuntimes.Add(new CapsuleRuntime
+                {
+                    Def = c,
+                    Root = capRoot,
+                    Cylinder = cyl.transform,
+                    SphereA = sA.transform,
+                    SphereB = sB.transform
+                });
+            }
+
+            ApplyCapsuleRenderSettings();
+
+            if (state.AnimationNodes != null && state.AnimationNodes.Length > 0)
+                UpdateCapsules(state.AnimationNodes);
+        }
+
+        void CacheDefaultMatIfNeeded(GameObject primitive)
+        {
+            if (defaultMat != null || primitive == null)
+                return;
+
+            var r = primitive.GetComponent<Renderer>();
+            if (r != null)
+                defaultMat = r.sharedMaterial;
+        }
+
+        void DestroyModelRootImmediate()
+        {
+            capsuleRuntimes.Clear();
+
+            if (modelRootGO != null)
+            {
+                DestroyImmediate(modelRootGO);
+                modelRootGO = null;
+            }
+        }
+
+        void UpdateCapsules(Vector3[] nodeWorld)
+        {
+            if (!renderModel || model == null)
+                return;
+
+            if (modelRootGO == null)
+                CreateModelRenderObjectsIfNeeded();
+
+            if (modelRootGO == null)
+                return;
+
+            for (int i = 0; i < capsuleRuntimes.Count; i++)
+            {
+                var rt = capsuleRuntimes[i];
+                var d = rt.Def;
+
+                if ((uint)d.A >= (uint)nodeWorld.Length || (uint)d.B >= (uint)nodeWorld.Length)
+                    continue;
+
+                Vector3 a = nodeWorld[d.A];
+                Vector3 b = nodeWorld[d.B];
+
+                float t0 = Mathf.Clamp01(d.Margin1);
+                float t1 = Mathf.Clamp01(1f - d.Margin2);
+                if (t1 < t0) (t0, t1) = (t1, t0);
+
+                Vector3 p0 = Vector3.Lerp(a, b, t0);
+                Vector3 p1 = Vector3.Lerp(a, b, t1);
+
+                Vector3 dir = (p1 - p0);
+                float len = dir.magnitude;
+
+                if (len < 1e-4f)
+                {
+                    SetCapsuleActive(rt, false);
+                    capsuleRuntimes[i] = rt;
+                    continue;
+                }
+
+                SetCapsuleActive(rt, true);
+
+                Vector3 dirN = dir / len;
+                Quaternion rot = Quaternion.FromToRotation(Vector3.up, dirN);
+
+                float rCyl = Mathf.Max(0.0001f, (d.Radius1 + d.Radius2) * 0.5f);
+                float rA = Mathf.Max(0.0001f, d.Radius1);
+                float rB = Mathf.Max(0.0001f, d.Radius2);
+
+                rt.SphereA.position = p0;
+                rt.SphereA.rotation = Quaternion.identity;
+                rt.SphereA.localScale = Vector3.one * (rA * 2f);
+
+                rt.SphereB.position = p1;
+                rt.SphereB.rotation = Quaternion.identity;
+                rt.SphereB.localScale = Vector3.one * (rB * 2f);
+
+                float cylHeight = Mathf.Max(0.0001f, len);
+                rt.Cylinder.position = (p0 + p1) * 0.5f;
+                rt.Cylinder.rotation = rot;
+                rt.Cylinder.localScale = new Vector3(rCyl * 2f, cylHeight * 0.5f, rCyl * 2f);
+
+                capsuleRuntimes[i] = rt;
+            }
+        }
+
+        static void SetCapsuleActive(CapsuleRuntime rt, bool active)
+        {
+            if (rt.Cylinder != null) rt.Cylinder.gameObject.SetActive(active);
+            if (rt.SphereA != null) rt.SphereA.gameObject.SetActive(active);
+            if (rt.SphereB != null) rt.SphereB.gameObject.SetActive(active);
+        }
+
+        void ApplyCapsuleRenderSettings()
+        {
+            Material targetMat = null;
+
+            if (renderBlack)
+                targetMat = GetBlackMaterial();
+
+            if (targetMat == null)
+                targetMat = defaultMat;
+
+            for (int i = 0; i < capsuleRuntimes.Count; i++)
+            {
+                var rt = capsuleRuntimes[i];
+                ApplyRendererSettings(rt.Cylinder, targetMat);
+                ApplyRendererSettings(rt.SphereA, targetMat);
+                ApplyRendererSettings(rt.SphereB, targetMat);
+            }
+        }
+
+        static void ApplyRendererSettings(Transform t, Material mat)
+        {
+            if (t == null)
+                return;
+
+            var r = t.GetComponent<Renderer>();
+            if (r == null)
+                return;
+
+            if (mat != null)
+                r.sharedMaterial = mat;
         }
 
         // ================= DRAWING ================= //
 
-        void DrawNodes()
+        void DrawPreview()
         {
-            if (isPreviewActive)
-            {
-                Handles.color = new Color(1f, 0f, 0f, 0.4f);
-                foreach (var position in previewNodes.Values)
-                    Handles.DotHandleCap(0, position, Quaternion.identity, 3f, EventType.Repaint);
-            }
+            if (!state.IsPreviewActive || state.PreviewNodes == null)
+                return;
+
+            Handles.color = new Color(1f, 0f, 0f, 0.4f);
+            for (int i = 0; i < state.PreviewNodes.Length; i++)
+                Handles.DotHandleCap(0, state.PreviewNodes[i], Quaternion.identity, 3f, EventType.Repaint);
+        }
+
+        void DrawAnimation()
+        {
+            if (state.AnimationNodes == null)
+                return;
 
             Handles.color = Color.red;
-            foreach (var position in animationNodes.Values)
-                Handles.DotHandleCap(0, position, Quaternion.identity, 3f, EventType.Repaint);
+            for (int i = 0; i < state.AnimationNodes.Length; i++)
+                Handles.DotHandleCap(0, state.AnimationNodes[i], Quaternion.identity, 3f, EventType.Repaint);
         }
 
         void DrawCenterOfMassPath()
         {
-            if (centerOfMassPath.Count < 2)
+            if (state.CenterOfMassPath.Count < 2)
                 return;
 
             Handles.color = Color.red;
-            Handles.DrawAAPolyLine(3f, centerOfMassPath.ToArray());
+            Handles.DrawAAPolyLine(3f, state.CenterOfMassPath.ToArray());
         }
 
         void DrawConnections()
         {
-            if (isPreviewActive)
+            if (state.AnimationNodes == null || model == null)
+                return;
+
+            if (state.IsPreviewActive && state.PreviewNodes != null)
             {
                 Handles.color = new Color(0f, 1f, 0f, 0.35f);
-                DrawConnectionSet(previewNodes);
+                DrawConnectionSet(state.PreviewNodes);
             }
 
             Handles.color = Color.green;
-            DrawConnectionSet(animationNodes);
+            DrawConnectionSet(state.AnimationNodes);
         }
 
-        void DrawConnectionSet(Dictionary<string, Vector3> nodeSet)
+        void DrawConnectionSet(Vector3[] nodeSet)
         {
-            foreach (var (first, second) in CONNECTIONS)
-                if (nodeSet.ContainsKey(first) && nodeSet.ContainsKey(second))
-                    Handles.DrawLine(nodeSet[first], nodeSet[second]);
-        }
+            for (int i = 0; i < model.Connections.Count; i++)
+            {
+                var e = model.Connections[i];
+                if ((uint)e.A >= (uint)nodeSet.Length || (uint)e.B >= (uint)nodeSet.Length)
+                    continue;
 
-        // ================= PREVIEW POSE ================= //
-
-        void InitializePreviewPose()
-        {
-            previewPose.Clear();
-            void Set(string name, float x, float y, float z)
-                => previewPose[name] = ConvertAxis(new Vector3(x, -y, -z));
-
-            Set("NHip_1", -19.577221f, -8.585417f, 84.134026f);
-            Set("NHip_2", -14.560858f, 8.122724f, 82.953896f);
-            Set("NStomach", -9.392555f, -1.314231f, 99.322510f);
-            Set("NChest", -0.985765f, -2.248583f, 114.576309f);
-            Set("NNeck", 8.144234f, 0.799165f, 129.391342f);
-            Set("NShoulder_1", 12.551178f, -15.790263f, 128.772690f);
-            Set("NShoulder_2", 6.237663f, 17.609047f, 134.210663f);
-            Set("NKnee_1", -50.975418f, -5.785246f, 45.456955f);
-            Set("NKnee_2", 25.844582f, 9.903176f, 58.044540f);
-            Set("NAnkle_1", -88.699814f, -3.378675f, 25.798462f);
-            Set("NAnkle_2", -13.250669f, 6.528876f, 50.287231f);
-            Set("NToe_1", -92.157410f, -0.610153f, 8.867973f);
-            Set("NHeel_1", -98.535316f, -3.505732f, 27.600554f);
-            Set("NToeTip_1", -87.669655f, 0.365667f, 2.316364f);
-            Set("NToeS_1", -92.283051f, -8.508365f, 7.602760f);
-            Set("NHeel_2", -22.572092f, 4.031524f, 52.909119f);
-            Set("NToe_2", -18.491583f, 7.329743f, 33.609646f);
-            Set("NToeTip_2", -16.405792f, 8.739633f, 26.016127f);
-            Set("NToeS_2", -20.299704f, 15.065866f, 34.549374f);
-            Set("NElbow_1", 23.573296f, -29.794552f, 106.561279f);
-            Set("NElbow_2", -22.879360f, 22.530788f, 132.434006f);
-            Set("NWrist_1", 47.289154f, -12.875849f, 114.187531f);
-            Set("NWrist_2", -24.266720f, 36.565292f, 107.673439f);
-            Set("NKnuckles_1", 56.037056f, -9.906665f, 115.244850f);
-            Set("NFingertips_1", 55.178741f, -1.261982f, 119.921249f);
-            Set("NKnucklesS_1", 50.209671f, -10.927604f, 120.081985f);
-            Set("NKnuckles_2", -27.603422f, 39.348595f, 98.328270f);
-            Set("NFingertips_2", -29.340508f, 31.007551f, 102.793465f);
-            Set("NKnucklesS_2", -21.749163f, 35.052471f, 98.640076f);
-            Set("NHead", 17.986877f, 0.118644f, 143.801025f);
-            Set("NTop", 22.405685f, -0.554002f, 160.715347f);
-            Set("NChestS_1", -0.897280f, -8.979884f, 116.031631f);
-            Set("NChestS_2", -2.560478f, 8.153231f, 115.891487f);
-            Set("NStomachS_1", -9.784924f, -9.954099f, 99.871407f);
-            Set("NStomachS_2", -9.076771f, 7.395645f, 99.385635f);
-            Set("NChestF", 4.352207f, 0.990542f, 110.784447f);
-            Set("NStomachF", -2.270447f, -1.816215f, 95.587852f);
-            Set("NPelvisF", -9.550920f, -2.755259f, 79.839340f);
-            Set("NHeadS_1", 17.150383f, -8.589858f, 143.676453f);
-            Set("NHeadS_2", 18.824371f, 8.826989f, 143.926865f);
-            Set("NHeadF", 26.410934f, -0.664772f, 141.568832f);
-            Set("NPivot", -17.069702f, -0.231332f, 83.542564f);
-            Set("DetectorH", -12f, 0f, 0f);
-            Set("DetectorV", 56f, 0f, 100f);
-            Set("COM", -8.691902f, 0.692974f, 91.093567f);
-            Set("Camera", 150.255203f, -9.272315f, 85f);
+                Handles.DrawLine(nodeSet[e.A], nodeSet[e.B]);
+            }
         }
 
         // ================= TRICKS ================= //
@@ -540,7 +1069,11 @@ namespace Vectorier.EditorScript.Tools
             foreach (string filePath in Directory.GetFiles(folderPath, "*.bin"))
             {
                 string fileName = Path.GetFileName(filePath);
-                string identifier = fileName.Equals("360_wall_hop.bin", StringComparison.OrdinalIgnoreCase) ? nameof(TrickType.Wall_Hop_360) : Path.GetFileNameWithoutExtension(fileName);
+
+                string identifier =
+                    fileName.Equals("360_wall_hop.bin", StringComparison.OrdinalIgnoreCase)
+                        ? nameof(TrickType.Wall_Hop_360)
+                        : Path.GetFileNameWithoutExtension(fileName);
 
                 discoveredTrickBins[identifier] = fileName;
             }
@@ -551,7 +1084,6 @@ namespace Vectorier.EditorScript.Tools
 
     class TrickSelectionWindow : EditorWindow
     {
-        private string selectedTrickIdentifier;
         Action<string> onSelected;
         Dictionary<string, string> availableTricks;
 
@@ -562,7 +1094,6 @@ namespace Vectorier.EditorScript.Tools
         {
             var window = CreateInstance<TrickSelectionWindow>();
             window.availableTricks = tricks;
-            window.selectedTrickIdentifier = current;
             window.onSelected = onSelected;
             window.titleContent = new GUIContent("Select Trick");
             window.minSize = WINDOW_SIZE;
@@ -583,8 +1114,7 @@ namespace Vectorier.EditorScript.Tools
                 string displayName = FormatTrickName(binFile);
 
                 string imageName = "TRACK_TRICK_" + Path.GetFileNameWithoutExtension(binFile).Replace("_", string.Empty).ToUpperInvariant();
-
-                string imagePath = Path.Combine(MoveVisualizer.IMAGE_BASE_PATH, imageName + ".png");
+                string imagePath = Path.Combine("Assets/Editor/Tools/MoveVisualizer/Image", imageName + ".png");
                 Texture2D previewTexture = AssetDatabase.LoadAssetAtPath<Texture2D>(imagePath);
 
                 using (new GUILayout.HorizontalScope(GUILayout.Height(64)))
@@ -596,7 +1126,6 @@ namespace Vectorier.EditorScript.Tools
 
                     if (GUILayout.Button(displayName, GUILayout.Height(64), GUILayout.MinWidth(200)))
                     {
-                        selectedTrickIdentifier = identifier;
                         onSelected?.Invoke(identifier);
                         Close();
                     }
