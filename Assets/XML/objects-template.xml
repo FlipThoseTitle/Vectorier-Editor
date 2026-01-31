@@ -1,10 +1,1 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Root>
-  <Objects>
-    <Object Name="BackgroundImage">
-      <Content>
-        <Image X="0" Y="0" ClassName="v_bg" Width="2121" Height="1116"/>
-      </Content>
-    </Object>
-  </Objects>
-</Root>
+﻿

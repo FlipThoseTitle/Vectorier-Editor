@@ -1,5 +1,8 @@
 using UnityEngine;
 using UnityEditor;
+using NUnit.Framework;
+using System.Collections.Generic;
+using static UnityEditor.EditorGUILayout;
 
 namespace Vectorier.Core.Preferences
 {
@@ -19,7 +22,6 @@ namespace Vectorier.Core.Preferences
         private bool showTriggerText;
         private bool showAreaText;
 
-
         // ================= MAIN ================= //
 
         [MenuItem("Vectorier/Preferences...", false, 31)]
@@ -34,7 +36,6 @@ namespace Vectorier.Core.Preferences
         {
             LoadPrefs();
         }
-
         private void OnGUI()
         {
             var subHeaderStyle = new GUIStyle(EditorStyles.label)
@@ -43,16 +44,16 @@ namespace Vectorier.Core.Preferences
                 fontStyle = FontStyle.Bold
             };
 
-            EditorGUILayout.LabelField("Scene", subHeaderStyle);
-            EditorGUILayout.Space(3);
+            LabelField("Scene", subHeaderStyle);
+            Space(3);
 
-            EditorGUILayout.LabelField("Trigger & Area", EditorStyles.boldLabel);
+            LabelField("Trigger & Area", EditorStyles.boldLabel);
 
             EditorGUI.BeginChangeCheck();
-            showOutline = EditorGUILayout.Toggle("Show Outline", showOutline);
-            showPlatformOutline = EditorGUILayout.Toggle("Show Platform Outline", showPlatformOutline);
-            showTriggerText = EditorGUILayout.Toggle("Show Trigger Text", showTriggerText);
-            showAreaText = EditorGUILayout.Toggle("Show Area Text", showAreaText);
+            showOutline = Toggle("Show Outline", showOutline);
+            showPlatformOutline = Toggle("Show Platform Outline", showPlatformOutline);
+            showTriggerText = Toggle("Show Trigger Text", showTriggerText);
+            showAreaText = Toggle("Show Area Text", showAreaText);
 
             if (EditorGUI.EndChangeCheck())
             {

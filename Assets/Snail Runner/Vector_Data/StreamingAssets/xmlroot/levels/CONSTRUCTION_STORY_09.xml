@@ -211,6 +211,13 @@
         <Object X="0" Y="0">
           <Content>
             <Object Name="FinalRoof_4" X="30750" Y="1500" DeltaX="550" DeltaY="60"/>
+            <Object Name="TriggerVictory" X="32196" Y="1201" >
+            	<Properties>
+            		<Static>
+            			<Selection Choice="AITriggers" Variant="CommonMode"/>
+            		</Static>
+            	</Properties>
+            </Object>/>
             <Object Name="Respawn_3sec" X="30790" Y="1515"/>
             <Object X="0" Y="0">
               <Content>

@@ -20,8 +20,8 @@ namespace Vectorier.Dynamic
         [Serializable]
         public class MoveData
         {
-            public float duration;     // seconds
-            public float delay;        // seconds
+            public int frames;         // frame
+            public float delay;        // frame
 
             public Vector2 move;      // ordered pair
             public Vector2 support;   // ordered pair
@@ -31,7 +31,7 @@ namespace Vectorier.Dynamic
         [Serializable]
         public class SizeData
         {
-            public int duration;
+            public int frames;
             public float finalWidth;
             public float finalHeight;
         }
@@ -41,7 +41,7 @@ namespace Vectorier.Dynamic
         {
             public float angle;
             public Vector2 anchor;
-            public int duration;
+            public int frames;
         }
 
         [Serializable]
@@ -49,7 +49,7 @@ namespace Vectorier.Dynamic
         {
             public Color colorStart = Color.white;
             public Color colorFinish = Color.white;
-            public int duration;
+            public int frames;
         }
 
         // ================= XML Writer ================= //
@@ -70,12 +70,10 @@ namespace Vectorier.Dynamic
             {
                 var interval = moves[i];
 
-                int frames = Mathf.RoundToInt(interval.duration * 60f);
-
                 XmlElement intervalElem = xmlUtility.AddElement(moveElement, "MoveInterval");
                 xmlUtility.SetAttribute(intervalElem, "Number", i + 1);
-                xmlUtility.SetAttribute(intervalElem, "FramesToMove", frames);
-                xmlUtility.SetAttribute(intervalElem, "Delay", interval.delay.ToString("F1", CultureInfo.InvariantCulture));
+                xmlUtility.SetAttribute(intervalElem, "FramesToMove", interval.frames);
+                xmlUtility.SetAttribute(intervalElem, "Delay", interval.delay);
 
                 // Start (always 0,0)
                 XmlElement startElem = xmlUtility.AddElement(intervalElem, "Point");
@@ -88,20 +86,20 @@ namespace Vectorier.Dynamic
                 xmlUtility.SetAttribute(supportElem, "Name", "Support");
                 xmlUtility.SetAttribute(supportElem, "Number", 1);
                 xmlUtility.SetAttribute(supportElem, "X", interval.support.x.ToString(CultureInfo.InvariantCulture));
-                xmlUtility.SetAttribute(supportElem, "Y", interval.support.y.ToString(CultureInfo.InvariantCulture));
+                xmlUtility.SetAttribute(supportElem, "Y", (-interval.support.y).ToString(CultureInfo.InvariantCulture));
 
                 // Finish
                 XmlElement finishElem = xmlUtility.AddElement(intervalElem, "Point");
                 xmlUtility.SetAttribute(finishElem, "Name", "Finish");
                 xmlUtility.SetAttribute(finishElem, "X", interval.move.x.ToString(CultureInfo.InvariantCulture));
-                xmlUtility.SetAttribute(finishElem, "Y", interval.move.y.ToString(CultureInfo.InvariantCulture));
+                xmlUtility.SetAttribute(finishElem, "Y", (-interval.move.y).ToString(CultureInfo.InvariantCulture));
             }
 
             // -------- SIZE --------
             foreach (var size in sizes)
             {
                 XmlElement sizeElem = xmlUtility.AddElement(transformElement, "Size");
-                xmlUtility.SetAttribute(sizeElem, "Frames", size.duration * 60f);
+                xmlUtility.SetAttribute(sizeElem, "Frames", size.frames);
                 xmlUtility.SetAttribute(sizeElem, "FinalWidth", size.finalWidth.ToString(CultureInfo.InvariantCulture));
                 xmlUtility.SetAttribute(sizeElem, "FinalHeight", size.finalHeight.ToString(CultureInfo.InvariantCulture));
             }
@@ -110,9 +108,9 @@ namespace Vectorier.Dynamic
             foreach (var rotation in rotations)
             {
                 XmlElement rotElem = xmlUtility.AddElement(transformElement, "Rotation");
-                xmlUtility.SetAttribute(rotElem, "Angle", rotation.angle.ToString(CultureInfo.InvariantCulture));
+                xmlUtility.SetAttribute(rotElem, "Angle", (-rotation.angle).ToString(CultureInfo.InvariantCulture));
                 xmlUtility.SetAttribute(rotElem, "Anchor", $"{rotation.anchor.x.ToString(CultureInfo.InvariantCulture)}|{rotation.anchor.y.ToString(CultureInfo.InvariantCulture)}");
-                xmlUtility.SetAttribute(rotElem, "Frames", rotation.duration * 60f);
+                xmlUtility.SetAttribute(rotElem, "Frames", rotation.frames);
             }
 
             // -------- COLOR --------
@@ -121,7 +119,7 @@ namespace Vectorier.Dynamic
                 XmlElement colorElem = xmlUtility.AddElement(transformElement, "Color");
                 xmlUtility.SetAttribute(colorElem, "ColorStart", "#" + ColorUtility.ToHtmlStringRGBA(color.colorStart));
                 xmlUtility.SetAttribute(colorElem, "ColorFinish", "#" + ColorUtility.ToHtmlStringRGBA(color.colorFinish));
-                xmlUtility.SetAttribute(colorElem, "Frames", color.duration * 60f);
+                xmlUtility.SetAttribute(colorElem, "Frames", color.frames);
             }
 
             return dynamicElement;
@@ -150,9 +148,9 @@ namespace Vectorier.Dynamic
                     MoveData move = new MoveData();
 
                     int frames = int.Parse(intervalElement.GetAttribute("FramesToMove"));
-                    move.duration = frames / 60f;
+                    move.frames = frames;
 
-                    move.delay = float.Parse(intervalElement.GetAttribute("Delay"), CultureInfo.InvariantCulture);
+                    move.delay = float.Parse(intervalElement.GetAttribute("Delay"));
 
                     foreach (XmlElement point in intervalElement.GetElementsByTagName("Point"))
                     {
@@ -162,9 +160,9 @@ namespace Vectorier.Dynamic
                         float y = float.Parse(point.GetAttribute("Y"), CultureInfo.InvariantCulture);
 
                         if (name == "Support")
-                            move.support = new Vector2(x, y);
+                            move.support = new Vector2(x, -y);
                         else if (name == "Finish")
-                            move.move = new Vector2(x, y);
+                            move.move = new Vector2(x, -y);
                     }
 
                     dynamic.moves.Add(move);
@@ -176,7 +174,7 @@ namespace Vectorier.Dynamic
             {
                 SizeData size = new SizeData();
 
-                size.duration = Mathf.RoundToInt(float.Parse(sizeElement.GetAttribute("Frames")) / 60f);
+                size.frames = int.Parse(sizeElement.GetAttribute("Frames"));
                 size.finalWidth = float.Parse(sizeElement.GetAttribute("FinalWidth"), CultureInfo.InvariantCulture);
                 size.finalHeight = float.Parse(sizeElement.GetAttribute("FinalHeight"), CultureInfo.InvariantCulture);
 
@@ -188,10 +186,10 @@ namespace Vectorier.Dynamic
             {
                 RotateData rotation = new RotateData();
 
-                rotation.angle = float.Parse(rotationElement.GetAttribute("Angle"), CultureInfo.InvariantCulture);
+                rotation.angle = -float.Parse(rotationElement.GetAttribute("Angle"), CultureInfo.InvariantCulture);
                 string[] anchor = rotationElement.GetAttribute("Anchor").Split('|');
                 rotation.anchor = new Vector2(float.Parse(anchor[0], CultureInfo.InvariantCulture), float.Parse(anchor[1], CultureInfo.InvariantCulture));
-                rotation.duration = Mathf.RoundToInt(float.Parse(rotationElement.GetAttribute("Frames")) / 60f);
+                rotation.frames = int.Parse(rotationElement.GetAttribute("Frames"));
 
                 dynamic.rotations.Add(rotation);
             }
@@ -204,7 +202,7 @@ namespace Vectorier.Dynamic
                 ColorUtility.TryParseHtmlString(colorElement.GetAttribute("ColorStart"), out color.colorStart);
                 ColorUtility.TryParseHtmlString(colorElement.GetAttribute("ColorFinish"), out color.colorFinish);
 
-                color.duration = Mathf.RoundToInt(float.Parse(colorElement.GetAttribute("Frames")) / 60f);
+                color.frames = int.Parse(colorElement.GetAttribute("Frames"));
 
                 dynamic.colors.Add(color);
             }

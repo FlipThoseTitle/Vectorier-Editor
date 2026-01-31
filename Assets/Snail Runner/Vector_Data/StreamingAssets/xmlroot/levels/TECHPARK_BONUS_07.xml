@@ -7,7 +7,7 @@
   <Music Name="music_dinamic" Volume="0.3"/>
   <Models Choice="AITriggers" Variant="CommonMode">
     <Model Name="Player" Type="1" Color="0" BirthSpawn="DefaultSpawn" AI="0" Time="0" Respawns="Hunter" ForceBlasts="Hunter" Trick="1" Item="1" Victory="1" Lose="1"/>
-    <Model Name="Hunter" Type="0" Color="0" BirthSpawn="HPSpawn" AI="1" Time="0" AllowedSpawns="RespawnBot" Skins="Hunter" Murders="Player" Arrests="Player" />
+    <Model Name="Hunter" Type="0" Color="0" BirthSpawn="HPSpawn" AI="1" Time="0" AllowedSpawns="RespawnBot" Skins="Hunter" Murders="Player" Arrests="Player" Icon=""/>
     <Model Name="Hunter2" Type="0" Color="0" BirthSpawn="HPSpawn" AI="1" Time="2" AllowedSpawns="RespawnBot2" Skins="Hunter" Murders="Player" Arrests="Player" Icon="1"/>
   </Models>
   <Models Choice="AITriggers" Variant="HunterMode">
