@@ -17,13 +17,46 @@ namespace Vectorier.Dynamic
     {
 #if UNITY_EDITOR
         void Reset() => hideFlags = HideFlags.HideInInspector;
-        void OnValidate() => hideFlags = HideFlags.HideInInspector;
+        private void OnValidate()
+        {
+            hideFlags = HideFlags.HideInInspector;
+            if (keys == null) keys = new List<KF>();
+            for (int i = 0; i < keys.Count; i++)
+            {
+                var k = keys[i];
+                k.EnsureDefaults();
+                keys[i] = k;
+            }
+        }
 #endif
         public string transformationName = "Transform";
         public int fps = 60, totalFrames = 300;
         public List<KF> keys = new();
 
-        [Serializable] public struct KF { public int f; public Vector3 lp, ls; public float z; public Color c; public Vector2 support; public EasePreset ease; }
+        [Serializable]
+        public struct KF
+        {
+            public int f;
+            public Vector3 lp, ls;
+            public float z;
+            public Color c;
+            public Vector2 support;
+            public EasePreset ease;
+
+            [SerializeField] private bool _init;
+
+            public void EnsureDefaults()
+            {
+                if (_init) return;
+
+                if (c == default) c = Color.white;
+                if (ease == default) ease = EasePreset.Linear;
+                if (support == default) support = EasePresetUtil.ToSupport(EasePreset.Linear);
+
+                _init = true;
+            }
+        }
+
         public void Sort() { keys = keys.OrderBy(k => k.f).ToList(); }
         public bool Has(int f, out int idx) { for (int i = 0; i < keys.Count; i++) if (keys[i].f == f) { idx = i; return true; } idx = -1; return false; }
 
@@ -32,7 +65,6 @@ namespace Vectorier.Dynamic
             const float E = 0.0005f;
             bool in01 = support.x >= -E && support.x <= 1f + E && support.y >= -E && support.y <= 1f + E;
             EasePreset ease = EasePreset.Custom;
-
             if (in01)
             {
                 bool eq = Mathf.Abs(support.x - support.y) <= 0.001f;
@@ -42,9 +74,11 @@ namespace Vectorier.Dynamic
                 else ease = EasePreset.Custom;
                 if (ease != EasePreset.Custom) support = EasePresetUtil.ToSupport(ease);
             }
-
-            if (Has(f, out var i)) { if (replace) keys[i] = new KF { f = f, lp = lp, ls = ls, z = z, c = c, support = support, ease = ease }; return; }
-            keys.Add(new KF { f = f, lp = lp, ls = ls, z = z, c = c, support = support, ease = ease }); Sort();
+            KF kf = new KF { f = f, lp = lp, ls = ls, z = z, c = (c == default ? Color.white : c), support = support, ease = ease };
+            kf.EnsureDefaults();
+            if (Has(f, out var i)) { if (replace) keys[i] = kf; return; }
+            keys.Add(kf);
+            Sort();
         }
 
         public void DeleteAt(int f) { for (int i = 0; i < keys.Count; i++) if (keys[i].f == f) { keys.RemoveAt(i); return; } }
@@ -65,58 +99,175 @@ namespace Vectorier.Dynamic
             if (!dt) return null;
             dt.transformationName = transformationName;
             Sort();
-            if (clear) { dt.moves.Clear(); dt.sizes.Clear(); dt.rotations.Clear(); dt.colors.Clear(); }
+
+            if (clear)
+            {
+                dt.moves.Clear();
+                dt.sizes.Clear();
+                dt.rotations.Clear();
+                dt.colors.Clear();
+            }
+
             if (keys.Count < 2) return dt;
 
             var go = dt.gameObject;
             var sr = go.GetComponent<SpriteRenderer>();
 
             const float EPS = 0.000001f;
+            const float EPS2 = 0.0000001f;
+
+            bool V2Eq(Vector2 a, Vector2 b) => (a - b).sqrMagnitude <= EPS2;
+            bool V3Eq(Vector3 a, Vector3 b) => (a - b).sqrMagnitude <= EPS2;
+            bool FEq(float a, float b) => Mathf.Abs(a - b) <= 0.0005f;
+            bool CEq(Color a, Color b) =>
+                Mathf.Abs(a.r - b.r) <= 0.0005f &&
+                Mathf.Abs(a.g - b.g) <= 0.0005f &&
+                Mathf.Abs(a.b - b.b) <= 0.0005f &&
+                Mathf.Abs(a.a - b.a) <= 0.0005f;
+
             bool IsZeroMove(Vector2 v) => Mathf.Abs(v.x) <= EPS && Mathf.Abs(v.y) <= EPS;
 
+            // ---------- decide which tracks are "actually animated" vs original state ----------
+            var k0 = keys[0];
+
+            bool anyMove = false, anySize = false, anyRot = false, anyColor = false;
+
+            for (int i = 1; i < keys.Count; i++)
+            {
+                var k = keys[i];
+
+                if (!anyMove)
+                {
+                    var md = new Vector2(k.lp.x - k0.lp.x, k.lp.y - k0.lp.y);
+                    if (!IsZeroMove(md)) anyMove = true;
+                }
+
+                if (!anySize && !V3Eq(k.ls, k0.ls)) anySize = true;
+
+                if (!anyRot && !FEq(Mathf.DeltaAngle(k0.z, k.z), 0f)) anyRot = true;
+
+                if (!anyColor && !CEq(k.c, k0.c)) anyColor = true;
+
+                if (anyMove && anySize && anyRot && anyColor) break;
+            }
+
+            // ---------- MOVE (interval-like; uses delay accumulation) ----------
             int pendingDelayFrames = 0;
 
+            // ---------- Standalone tracks: we compress consecutive identical segments ----------
             for (int i = 0; i < keys.Count - 1; i++)
             {
                 var a = keys[i];
                 var b = keys[i + 1];
+
                 int df = Mathf.Max(0, b.f - a.f);
+                if (df <= 0) continue;
 
-                Vector2 moveDelta = new(b.lp.x - a.lp.x, b.lp.y - a.lp.y);
+                // ---- MOVE ----
+                if (anyMove)
+                {
+                    Vector2 moveDelta = new(b.lp.x - a.lp.x, b.lp.y - a.lp.y);
 
-                if (IsZeroMove(moveDelta))
-                {
-                    pendingDelayFrames += df;
-                }
-                else
-                {
-                    Vector2 sup;
-                    if (useCustomEase || b.ease == EasePreset.Custom) sup = new Vector2(b.support.x, b.support.y); // absolute support
+                    if (IsZeroMove(moveDelta))
+                    {
+                        pendingDelayFrames += df;
+                    }
                     else
                     {
-                        var s = EasePresetUtil.ToSupport(b.ease);
-                        sup = new Vector2(moveDelta.x * s.x, moveDelta.y * s.y);
+                        Vector2 sup;
+                        if (useCustomEase || b.ease == EasePreset.Custom)
+                        {
+                            // absolute support (already in move space)
+                            sup = new Vector2(b.support.x, b.support.y);
+                        }
+                        else
+                        {
+                            // preset support scaled by move delta
+                            var s = EasePresetUtil.ToSupport(b.ease);
+                            sup = new Vector2(moveDelta.x * s.x, moveDelta.y * s.y);
+                        }
+
+                        dt.moves.Add(new DynamicTransform.MoveData
+                        {
+                            frames = df,
+                            delay = pendingDelayFrames, // stored in frames
+                            move = moveDelta,
+                            support = sup
+                        });
+
+                        pendingDelayFrames = 0;
                     }
-
-                    dt.moves.Add(new DynamicTransform.MoveData
-                    {
-                        frames = df,
-                        delay = pendingDelayFrames,   // delay is stored in frames
-                        move = moveDelta,
-                        support = sup
-                    });
-
-                    pendingDelayFrames = 0;
                 }
 
-                // ---------- SIZE / ROT / COLOR ----------
-                Vector2 wh = sr ? SpriteWH(sr, b.ls) : BoundsWH(go, b.lp, b.ls, b.z);
-                dt.sizes.Add(new DynamicTransform.SizeData { frames = df, finalWidth = wh.x, finalHeight = wh.y });
+                // ---- SIZE ----
+                if (anySize)
+                {
+                    Vector2 wh = sr ? SpriteWH(sr, b.ls) : BoundsWH(go, b.lp, b.ls, b.z);
 
-                float rotDelta = Mathf.DeltaAngle(a.z, b.z);
-                dt.rotations.Add(new DynamicTransform.RotateData { angle = rotDelta, anchor = Vector2.zero, frames = df });
+                    int last = dt.sizes.Count - 1;
+                    if (last >= 0 && FEq(dt.sizes[last].finalWidth, wh.x) && FEq(dt.sizes[last].finalHeight, wh.y))
+                    {
+                        var s = dt.sizes[last];
+                        s.frames += df;
+                        dt.sizes[last] = s;
+                    }
+                    else
+                    {
+                        dt.sizes.Add(new DynamicTransform.SizeData
+                        {
+                            frames = df,
+                            finalWidth = wh.x,
+                            finalHeight = wh.y
+                        });
+                    }
+                }
 
-                dt.colors.Add(new DynamicTransform.ColorData { colorStart = a.c, colorFinish = b.c, frames = df });
+                // ---- ROTATION ----
+                if (anyRot)
+                {
+                    float rotDelta = Mathf.DeltaAngle(a.z, b.z);
+
+                    int last = dt.rotations.Count - 1;
+                    if (last >= 0 && FEq(dt.rotations[last].angle, rotDelta) && V2Eq(dt.rotations[last].anchor, Vector2.zero))
+                    {
+                        var r = dt.rotations[last];
+                        r.frames += df;
+                        dt.rotations[last] = r;
+                    }
+                    else
+                    {
+                        dt.rotations.Add(new DynamicTransform.RotateData
+                        {
+                            angle = rotDelta,
+                            anchor = Vector2.zero,
+                            frames = df
+                        });
+                    }
+                }
+
+                // ---- COLOR ----
+                if (anyColor)
+                {
+                    var cs = a.c;
+                    var cf = b.c;
+
+                    int last = dt.colors.Count - 1;
+                    if (last >= 0 && CEq(dt.colors[last].colorStart, cs) && CEq(dt.colors[last].colorFinish, cf))
+                    {
+                        var c = dt.colors[last];
+                        c.frames += df;
+                        dt.colors[last] = c;
+                    }
+                    else
+                    {
+                        dt.colors.Add(new DynamicTransform.ColorData
+                        {
+                            colorStart = cs,
+                            colorFinish = cf,
+                            frames = df
+                        });
+                    }
+                }
             }
 
             return dt;
@@ -262,9 +413,11 @@ namespace Vectorier.Dynamic
 
         public KF Snapshot(int f)
         {
-            var sr = GetComponent<SpriteRenderer>(); var col = sr ? sr.color : Color.white;
-            var ease = EasePreset.Linear; var support = EasePresetUtil.ToSupport(ease);
-            return new KF { f = f, lp = transform.localPosition, ls = transform.localScale, z = transform.localEulerAngles.z, c = col, support = support, ease = ease };
+            var sr = GetComponent<SpriteRenderer>();
+            var col = sr ? sr.color : Color.white;
+            var k = new KF { f = f, lp = transform.localPosition, ls = transform.localScale, z = transform.localEulerAngles.z, c = col, support = EasePresetUtil.ToSupport(EasePreset.Linear), ease = EasePreset.Linear };
+            k.EnsureDefaults();
+            return k;
         }
 
         static Vector2 SpriteWH(SpriteRenderer sr, Vector3 ls)

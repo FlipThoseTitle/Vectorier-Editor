@@ -45,11 +45,30 @@ namespace Vectorier.Dynamic
         }
 
         [Serializable]
-        public class ColorData
+        public class ColorData : ISerializationCallbackReceiver
         {
+            private bool _init;
             public Color colorStart = Color.white;
             public Color colorFinish = Color.white;
             public int frames;
+            public void EnsureDefaults()
+            {
+                if (_init) return;
+                colorStart = Color.white;
+                colorFinish = Color.white;
+                _init = true;
+            }
+            public void OnAfterDeserialize() => EnsureDefaults();
+            public void OnBeforeSerialize() { }
+        }
+
+        private void OnValidate()
+        {
+            for (int i = 0; i < colors.Count; i++)
+            {
+                if (colors[i] == null) colors[i] = new ColorData();
+                colors[i].EnsureDefaults();
+            }
         }
 
         // ================= XML Writer ================= //
@@ -150,7 +169,7 @@ namespace Vectorier.Dynamic
                     int frames = int.Parse(intervalElement.GetAttribute("FramesToMove"));
                     move.frames = frames;
 
-                    move.delay = float.Parse(intervalElement.GetAttribute("Delay"));
+                    move.delay = float.Parse(intervalElement.GetAttribute("Delay"), CultureInfo.InvariantCulture);
 
                     foreach (XmlElement point in intervalElement.GetElementsByTagName("Point"))
                     {
