@@ -126,8 +126,6 @@ namespace Vectorier.Dynamic
                 Mathf.Abs(a.a - b.a) <= 0.0005f;
 
             bool IsZeroMove(Vector2 v) => Mathf.Abs(v.x) <= EPS && Mathf.Abs(v.y) <= EPS;
-
-            // ---------- decide which tracks are "actually animated" vs original state ----------
             var k0 = keys[0];
 
             bool anyMove = false, anySize = false, anyRot = false, anyColor = false;
@@ -151,10 +149,8 @@ namespace Vectorier.Dynamic
                 if (anyMove && anySize && anyRot && anyColor) break;
             }
 
-            // ---------- MOVE (interval-like; uses delay accumulation) ----------
             int pendingDelayFrames = 0;
 
-            // ---------- Standalone tracks: we compress consecutive identical segments ----------
             for (int i = 0; i < keys.Count - 1; i++)
             {
                 var a = keys[i];
@@ -177,7 +173,7 @@ namespace Vectorier.Dynamic
                         Vector2 sup;
                         if (useCustomEase || b.ease == EasePreset.Custom)
                         {
-                            // absolute support (already in move space)
+                            // absolute support
                             sup = new Vector2(b.support.x, b.support.y);
                         }
                         else
@@ -190,7 +186,7 @@ namespace Vectorier.Dynamic
                         dt.moves.Add(new DynamicTransform.MoveData
                         {
                             frames = df,
-                            delay = pendingDelayFrames, // stored in frames
+                            delay = pendingDelayFrames, // frames
                             move = moveDelta,
                             support = sup
                         });

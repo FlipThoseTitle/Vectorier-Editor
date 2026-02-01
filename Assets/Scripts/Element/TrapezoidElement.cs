@@ -85,7 +85,6 @@ namespace Vectorier.Element
 
             // Properties
             XmlElement propertiesElement = element.SelectSingleNode("Properties") as XmlElement;
-            XmlElement staticElement = propertiesElement?.SelectSingleNode("Static") as XmlElement;
 
             float xmlWidth = float.Parse(element.GetAttribute("Width"), CultureInfo.InvariantCulture);
             float xmlHeight = float.Parse(element.GetAttribute("Height"), CultureInfo.InvariantCulture);
