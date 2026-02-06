@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEngine;
@@ -32,6 +33,12 @@ namespace Vectorier.EditorScript
         // -------- OUTLINE BUFFER --------
         private static readonly Vector3[] OutlinePoints = new Vector3[5];
 
+        // ================= CHECK ================= //
+        private const string TriggerAreaSpritePath = "Assets/Resources/Images/Editor/Trigger/trigger.png";
+        private const string PlatformSpritePath = "Assets/Resources/Images/Editor/Collision/platform.png";
+        private static readonly Color TriggerAreaColor = new Color(1f, 0f, 0f, 1f); // red
+
+
         // ================= INIT ================= //
 
         static TextSceneDrawer()
@@ -55,17 +62,35 @@ namespace Vectorier.EditorScript
 
             CachedObjects.Clear();
 
-            foreach (var trigger in Object.FindObjectsByType<TriggerComponent>(FindObjectsSortMode.None))
-                CacheSceneObject(trigger.gameObject);
+            // Prevent duplicates
+            var seen = new HashSet<int>();
+
+            void CacheUnique(GameObject go)
+            {
+                if (go == null) return;
+                int id = go.GetInstanceID();
+                if (!seen.Add(id)) return;
+                CacheSceneObject(go);
+            }
+
+            foreach (var trigger in UnityEngine.Object.FindObjectsByType<TriggerComponent>(FindObjectsSortMode.None))
+                CacheUnique(trigger.gameObject);
 
             foreach (var area in GameObject.FindGameObjectsWithTag("Area"))
-                CacheSceneObject(area);
+                CacheUnique(area);
 
             foreach (var platform in GameObject.FindGameObjectsWithTag("Platform"))
-                CacheSceneObject(platform);
+                CacheUnique(platform);
 
             foreach (var comment in GameObject.FindGameObjectsWithTag("Comment"))
-                CacheSceneObject(comment);
+                CacheUnique(comment);
+
+            foreach (var sr in UnityEngine.Object.FindObjectsByType<SpriteRenderer>(FindObjectsSortMode.None))
+            {
+                if (sr == null) continue;
+                if (IsTriggerSpriteRedArea(sr) || IsPlatformBySprite(sr))
+                    CacheUnique(sr.gameObject);
+            }
 
             NeedsCacheRefresh = false;
         }
@@ -86,6 +111,32 @@ namespace Vectorier.EditorScript
         {
             name = name.Replace("(Clone)", "");
             return Regex.Replace(name, @" \(\d+\)$", "");
+        }
+
+        // ================= HELPERS ================= //
+        private static bool HasSpriteAtPath(SpriteRenderer sr, string assetPath)
+        {
+            if (sr == null || sr.sprite == null) return false;
+            string path = AssetDatabase.GetAssetPath(sr.sprite);
+            return string.Equals(path, assetPath, StringComparison.Ordinal);
+        }
+
+        private static bool ColorEquals(Color a, Color b, float eps = 0.0001f)
+        {
+            return Mathf.Abs(a.r - b.r) < eps &&
+                   Mathf.Abs(a.g - b.g) < eps &&
+                   Mathf.Abs(a.b - b.b) < eps &&
+                   Mathf.Abs(a.a - b.a) < eps;
+        }
+
+        private static bool IsTriggerSpriteRedArea(SpriteRenderer sr)
+        {
+            return HasSpriteAtPath(sr, TriggerAreaSpritePath) && ColorEquals(sr.color, TriggerAreaColor);
+        }
+
+        private static bool IsPlatformBySprite(SpriteRenderer sr)
+        {
+            return HasSpriteAtPath(sr, PlatformSpritePath);
         }
 
         // ================= FADE ================= //
@@ -143,7 +194,7 @@ namespace Vectorier.EditorScript
                 float fade = ComputeFade(sceneView, worldPos);
                 if (fade < 0.01f) continue;
 
-                bool isPlatform = entry.GameObject.CompareTag("Platform");
+                bool isPlatform = entry.GameObject.CompareTag("Platform") || IsPlatformBySprite(entry.SpriteRenderer);
                 bool isTrigger = entry.GameObject.GetComponent<TriggerComponent>() != null;
 
                 if (showOutline && entry.SpriteRenderer != null)
@@ -161,8 +212,8 @@ namespace Vectorier.EditorScript
             SharedTextStyle.normal.textColor = new Color(0, 0, 0, fade);
 
             bool isTrigger = entry.GameObject.GetComponent<TriggerComponent>() != null;
-            bool isArea = entry.GameObject.CompareTag("Area");
-            bool isPlatform = entry.GameObject.CompareTag("Platform");
+            bool isArea = entry.GameObject.CompareTag("Area") || (entry.SpriteRenderer != null && IsTriggerSpriteRedArea(entry.SpriteRenderer));
+            bool isPlatform = entry.GameObject.CompareTag("Platform") || IsPlatformBySprite(entry.SpriteRenderer);
 
             if ((isTrigger && !showTriggerText) || (isArea && !showAreaText) || isPlatform)
             {
@@ -222,10 +273,9 @@ namespace Vectorier.EditorScript
 
             Color outlineColor;
 
-            if (isTrigger && sr.color == new Color(1f, 1f, 0f, 1f))
-                outlineColor = TriggerOutlineColor;
-            else
-                outlineColor = isPlatform ? PlatformOutlineColor : sr.color;
+            if (isPlatform) outlineColor = PlatformOutlineColor;
+            else if (isTrigger && sr.color == new Color(1f, 1f, 0f, 1f)) outlineColor = TriggerOutlineColor;
+            else outlineColor = sr.color;
 
             outlineColor.a = fade;
 

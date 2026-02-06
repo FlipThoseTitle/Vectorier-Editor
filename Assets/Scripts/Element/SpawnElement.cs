@@ -25,12 +25,28 @@ namespace Vectorier.Element
             Element.WriteName(gameObject, xmlUtility, spawnElement);
 
             // Spawn Component
-            gameObject.TryGetComponent<SpawnComponent>(out var spawnComponent);
-            string animationString = spawnComponent.Animation;
-            if (spawnComponent == null || string.IsNullOrWhiteSpace(spawnComponent.Animation))
+            if (!gameObject.TryGetComponent<SpawnComponent>(out var spawnComponent))
+            {
+                Debug.LogWarning(
+                    $"[SpawnElement] GameObject '{gameObject.name}' has no SpawnComponent. Using default animation.",
+                    gameObject
+                );
+
                 xmlUtility.SetAttribute(spawnElement, "Animation", "JumpOff|18");
+            }
+            else if (string.IsNullOrWhiteSpace(spawnComponent.Animation))
+            {
+                Debug.LogWarning(
+                    $"[SpawnElement] GameObject '{gameObject.name}' has a SpawnComponent but no Animation set. Using default animation.",
+                    gameObject
+                );
+
+                xmlUtility.SetAttribute(spawnElement, "Animation", "JumpOff|18");
+            }
             else
-                xmlUtility.SetAttribute(spawnElement, "Animation", animationString);
+            {
+                xmlUtility.SetAttribute(spawnElement, "Animation", spawnComponent.Animation);
+            }
 
             // Selection Component
             Element.WriteSelectionComponent(xmlUtility, staticElement, gameObject);

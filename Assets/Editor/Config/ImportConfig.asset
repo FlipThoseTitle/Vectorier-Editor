@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8168d00812ad81b4c81b68d8e9dafa2c, type: 3}
   m_Name: ImportConfig
   m_EditorClassIdentifier: 
-  filePathDirectory: C:/Program Files (x86)/Steam/steamapps/common/Vectorier/Vectorier-Editor/Assets/XML/level_xml
-  xmlName: CONSTRUCTION_BONUS_03
+  filePathDirectory: Assets/XML/level_xml
+  xmlName: 
   selectedObject: 
   ignoreTags: 
   untagChildren: 1

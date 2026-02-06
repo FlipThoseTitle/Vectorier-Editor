@@ -28,6 +28,12 @@ namespace Vectorier.Parallax
         private Vector3 _cameraStartPosition;
         private float _currentZoom = 1f;
 
+        private Renderer[] _selfRenderers;
+        private bool[] _selfRenderersEnabled;
+
+        private Vector3 _lastSceneCamPos;
+        private Quaternion _lastSceneCamRot;
+
         private bool IsUnderTaggedParent(Transform transform, string tag)
         {
             Transform current = transform.parent;
@@ -39,6 +45,8 @@ namespace Vectorier.Parallax
             }
             return false;
         }
+
+        private static bool Approximately1(float v) => Mathf.Abs(v - 1f) <= 0.0001f;
 
         private class ParallaxTarget
         {
@@ -75,6 +83,30 @@ namespace Vectorier.Parallax
                 StopParallax();
         }
 
+        private void OnSceneGUI(SceneView sceneView)
+        {
+            if (!_isActive || !AttachSceneCamera) return;
+
+            if (Event.current.type != EventType.Repaint) return;
+
+            var sceneCam = sceneView.camera;
+            var cam = GetComponent<Camera>();
+            if (!sceneCam || !cam) return;
+            var pos = sceneCam.transform.position;
+            var rot = sceneCam.transform.rotation;
+
+            if (pos == _lastSceneCamPos && rot == _lastSceneCamRot)
+                return;
+
+            _lastSceneCamPos = pos;
+            _lastSceneCamRot = rot;
+
+            pos.z = cam.transform.position.z;
+            cam.transform.SetPositionAndRotation(pos, cam.transform.rotation);
+
+            UpdateParallax();
+        }
+
         //---------------------------------------------------------
 
         [MenuItem("Vectorier/Tools/Toggle Parallax", false, 35)]
@@ -92,6 +124,8 @@ namespace Vectorier.Parallax
                 return;
             }
 
+            Parallax targetParallax = null;
+
             // Multiple cameras found
             if (candidates.Count > 1)
             {
@@ -103,13 +137,21 @@ namespace Vectorier.Parallax
                     return;
                 }
 
-                selected.ToggleParallax();
-                EditorUtility.SetDirty(selected);
-                return;
+                targetParallax = selected;
+            }
+            else
+            {
+                targetParallax = candidates[0];
             }
 
-            candidates[0].ToggleParallax();
-            EditorUtility.SetDirty(candidates[0]);
+            targetParallax.ToggleParallax();
+            EditorUtility.SetDirty(targetParallax);
+            EditorApplication.DirtyHierarchyWindowSorting();
+            EditorApplication.RepaintHierarchyWindow();
+            EditorApplication.RepaintProjectWindow();
+            SceneView.RepaintAll();
+            UnityEditorInternal.InternalEditorUtility.RepaintAllViews();
+            EditorApplication.QueuePlayerLoopUpdate();
         }
 
         public void ToggleParallax()
@@ -126,6 +168,7 @@ namespace Vectorier.Parallax
             if (camera == null) return;
 
             _isActive = true;
+            HideSelf();
             _cameraStartPosition = camera.transform.position;
             _currentZoom = zoomValue;
 
@@ -161,13 +204,15 @@ namespace Vectorier.Parallax
                 });
             }
 
-            UpdateParallax();
+            SceneView.duringSceneGui += OnSceneGUI;
             EditorApplication.update += EditorUpdate;
         }
 
         private void StopParallax()
         {
             _isActive = false;
+            UnhideSelf();
+            SceneView.duringSceneGui -= OnSceneGUI;
             EditorApplication.update -= EditorUpdate;
 
             foreach (var target in _targets)
@@ -195,7 +240,11 @@ namespace Vectorier.Parallax
                 var sceneCamera = SceneView.lastActiveSceneView.camera;
                 var camera = GetComponent<Camera>();
                 if (sceneCamera && camera)
-                    camera.transform.position = sceneCamera.transform.position;
+                {
+                    Vector3 pos = sceneCamera.transform.position;
+                    pos.z = camera.transform.position.z;
+                    camera.transform.position = pos;
+                }
             }
 
             UpdateParallax();
@@ -212,8 +261,11 @@ namespace Vectorier.Parallax
             var camera = GetComponent<Camera>();
             if (camera == null || !_isActive) return;
 
+            UpdateTargetsCaptureForFactor1AtZoom1();
+
             float effectiveZoom = baseZoom * _currentZoom;
             Vector3 cameraPosition = camera.transform.position;
+            cameraPosition.z = 0f;
 
             foreach (var groupPair in _groups)
             {
@@ -232,17 +284,78 @@ namespace Vectorier.Parallax
                 scale = (float)Math.Round(scale, 1, MidpointRounding.AwayFromZero);
                 parallaxGroup.frameScale = (float)Math.Round(scale * frameScaleMultiplier, 1);
                 parallaxGroup.factor = factor;
-                parallaxGroup.offset = cameraPosition + -(cameraPosition * factor * parallaxGroup.frameScale);
+                parallaxGroup.offset = cameraPosition - (cameraPosition * factor * parallaxGroup.frameScale);
             }
+
+            bool skipFactor1 = Approximately1(_currentZoom);
 
             foreach (var target in _targets)
             {
                 if (target.transform == null) continue;
+
+                if (skipFactor1 && Approximately1(target.factor))
+                    continue;
+
                 if (!_groups.TryGetValue(target.factor, out var group)) continue;
 
                 target.transform.localScale = target.originalScale * group.frameScale;
-                target.transform.position = group.offset + target.originalPosition * group.frameScale;
+                Vector3 newPos = group.offset + target.originalPosition * group.frameScale;
+                newPos.z = target.originalPosition.z;
+                target.transform.position = newPos;
             }
+        }
+
+        private void UpdateTargetsCaptureForFactor1AtZoom1()
+        {
+            if (!Approximately1(_currentZoom)) return;
+
+            for (int i = 0; i < _targets.Count; i++)
+            {
+                var t = _targets[i];
+                if (t.transform == null) continue;
+
+                if (Approximately1(t.factor))
+                {
+                    t.originalPosition = t.transform.position;
+                    t.originalScale = t.transform.localScale;
+                }
+            }
+        }
+
+        // hide
+        private void HideSelf()
+        {
+            var go = gameObject;
+
+            _selfRenderers = go.GetComponentsInChildren<Renderer>(true);
+            _selfRenderersEnabled = new bool[_selfRenderers.Length];
+
+            for (int i = 0; i < _selfRenderers.Length; i++)
+            {
+                _selfRenderersEnabled[i] = _selfRenderers[i].enabled;
+                _selfRenderers[i].enabled = false;
+            }
+
+            SceneVisibilityManager.instance.Hide(go, true);
+        }
+
+        private void UnhideSelf()
+        {
+            var go = gameObject;
+
+            if (_selfRenderers != null && _selfRenderersEnabled != null)
+            {
+                for (int i = 0; i < _selfRenderers.Length; i++)
+                {
+                    if (_selfRenderers[i] == null) continue;
+                    _selfRenderers[i].enabled = _selfRenderersEnabled[i];
+                }
+            }
+
+            _selfRenderers = null;
+            _selfRenderersEnabled = null;
+
+            SceneVisibilityManager.instance.Show(go, true);
         }
 
         // cleanup
