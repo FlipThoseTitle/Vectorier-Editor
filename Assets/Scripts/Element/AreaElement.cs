@@ -138,6 +138,33 @@ namespace Vectorier.Element
             return areaObject;
         }
 
+        public static GameObject Create(Transform parent = null)
+        {
+            GameObject areaObject = new GameObject("Area");
+
+            // Parent
+            if (parent != null)
+            {
+                areaObject.transform.SetParent(parent, false);
+                areaObject.transform.localPosition = Vector3.zero;
+            }
+
+            // Component
+            AreaComponent areaComponent = areaObject.AddComponent<AreaComponent>();
+
+            // Sprite
+            SpriteRenderer spriteRenderer = areaObject.AddComponent<SpriteRenderer>();
+            spriteRenderer.sprite = Resources.Load<Sprite>("Images/Editor/Trigger/trigger");
+            spriteRenderer.color = new Color(1f, 0f, 0f, 1f);
+
+            // Tag + sorting
+            areaObject.tag = "Area";
+            spriteRenderer.sortingLayerName = "OnTop";
+            spriteRenderer.sortingOrder = 1;
+
+            return areaObject;
+        }
+
         private static void CreateTrickVisuals(GameObject areaObject, SpriteRenderer areaSpriteRenderer, string itemName)
         {
             if (areaObject == null || areaSpriteRenderer == null)

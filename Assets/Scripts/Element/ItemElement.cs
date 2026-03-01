@@ -102,5 +102,43 @@ namespace Vectorier.Element
 
             return itemObject;
         }
+
+        public static GameObject Create(ItemComponent.ItemType type, Transform parent = null)
+        {
+            GameObject itemObject = new GameObject("Item");
+
+            // Parent
+            if (parent != null)
+            {
+                itemObject.transform.SetParent(parent, false);
+                itemObject.transform.localPosition = Vector3.zero;
+            }
+
+            // Component
+            ItemComponent itemComponent = itemObject.AddComponent<ItemComponent>();
+            itemComponent.Type = type;
+
+            // Sprite
+            SpriteRenderer renderer = itemObject.AddComponent<SpriteRenderer>();
+            switch (type)
+            {
+                case ItemComponent.ItemType.Bonus:
+                    renderer.sprite = Resources.Load<Sprite>("Images/Editor/Item/pill");
+                    itemObject.name = "Bonus";
+                    break;
+
+                case ItemComponent.ItemType.Coin:
+                    renderer.sprite = Resources.Load<Sprite>("Images/Editor/Item/coin");
+                    itemObject.name = "Coin";
+                    break;
+            }
+
+            // Tag + sorting
+            itemObject.tag = "Item";
+            renderer.sortingOrder = 4;
+            renderer.sortingLayerName = "OnTop";
+
+            return itemObject;
+        }
     }
 }

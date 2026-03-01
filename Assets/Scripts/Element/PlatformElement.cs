@@ -61,5 +61,28 @@ namespace Vectorier.Element
 
             return platformObject;
         }
+
+        public static GameObject Create(Transform parent = null)
+        {
+            GameObject platformObject = new GameObject("Platform");
+
+            // Parent
+            if (parent != null)
+            {
+                platformObject.transform.SetParent(parent, false);
+                platformObject.transform.localPosition = Vector3.zero;
+            }
+
+            // Sprite
+            SpriteRenderer spriteRenderer = platformObject.AddComponent<SpriteRenderer>();
+            spriteRenderer.sprite = Resources.Load<Sprite>("Images/Editor/Collision/platform");
+
+            // Tag + sorting
+            platformObject.tag = "Platform";
+            spriteRenderer.sortingLayerName = "OnTop";
+            spriteRenderer.sortingOrder = 0;
+
+            return platformObject;
+        }
     }
 }

@@ -144,6 +144,45 @@ namespace Vectorier.Element
 
             return trapezoidObject;
         }
+
+        public static GameObject Create(TrapezoidComponent.TrapezoidType type, Transform parent = null)
+        {
+            GameObject trapezoidObject = new GameObject("Trapezoid");
+
+            // Parent
+            if (parent != null)
+            {
+                trapezoidObject.transform.SetParent(parent, false);
+                trapezoidObject.transform.localPosition = Vector3.zero;
+            }
+
+            // Component
+            TrapezoidComponent trapezoidComponent = trapezoidObject.AddComponent<TrapezoidComponent>();
+            trapezoidComponent.Type = type;
+            trapezoidObject.name = "Trapezoid_" + type.ToString();
+
+            // Sprite
+            SpriteRenderer renderer = trapezoidObject.AddComponent<SpriteRenderer>();
+            switch (type)
+            {
+                case TrapezoidComponent.TrapezoidType.Type1:
+                    renderer.sprite = Resources.Load<Sprite>("Images/Editor/Collision/trapezoid_type1");
+                    trapezoidObject.name = "Trapezoid_Type1";
+                    break;
+
+                case TrapezoidComponent.TrapezoidType.Type2:
+                    renderer.sprite = Resources.Load<Sprite>("Images/Editor/Collision/trapezoid_type2");
+                    trapezoidObject.name = "Trapezoid_Type2";
+                    break;
+            }
+
+            // Tag + sorting
+            trapezoidObject.tag = "Trapezoid";
+            renderer.sortingLayerName = "OnTop";
+            renderer.sortingOrder = 0;
+            
+            return trapezoidObject;
+        }
     }
 }
 

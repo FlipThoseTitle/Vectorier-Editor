@@ -43,7 +43,7 @@ namespace Vectorier.Element
             Element.ApplySelectionComponent(staticElement, cameraObject);
 
             // Correction
-            cameraObject.transform.localPosition += new Vector3(0f, 0f, -1f);
+            cameraObject.transform.localPosition += new Vector3(0f, 0f, -500f);
 
             // Add and configure Camera component
             Camera cameraComponent = cameraObject.AddComponent<Camera>();
@@ -54,6 +54,30 @@ namespace Vectorier.Element
             cameraObject.AddComponent<Parallax.Parallax>();
 
             // Set Tag
+            cameraObject.tag = "Camera";
+
+            return cameraObject;
+        }
+
+        public static GameObject Create(Transform parent = null)
+        {
+            GameObject cameraObject = new GameObject("Camera");
+
+            // Parent
+            if (parent != null)
+            {
+                cameraObject.transform.SetParent(parent, false);
+                cameraObject.transform.localPosition = Vector3.zero;
+            }
+
+            cameraObject.transform.localPosition += new Vector3(0f, 0f, -500f);
+
+            // Add and configure Camera component
+            Camera cameraComponent = cameraObject.AddComponent<Camera>();
+            cameraComponent.orthographic = true;
+            cameraComponent.orthographicSize = 400f;
+            cameraComponent.farClipPlane = 100000f;
+            cameraObject.AddComponent<Parallax.Parallax>();
             cameraObject.tag = "Camera";
 
             return cameraObject;

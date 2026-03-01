@@ -84,6 +84,33 @@ namespace Vectorier.Element
             return triggerObject;
         }
 
+        public static GameObject Create(Transform parent = null)
+        {
+            GameObject triggerObject = new GameObject("Trigger");
+
+            // Parent
+            if (parent != null)
+            {
+                triggerObject.transform.SetParent(parent, false);
+                triggerObject.transform.localPosition = Vector3.zero;
+            }
+
+            // Component
+            TriggerComponent triggerComponent = triggerObject.AddComponent<TriggerComponent>();
+
+            // Sprite
+            SpriteRenderer spriteRenderer = triggerObject.AddComponent<SpriteRenderer>();
+            spriteRenderer.sprite = Resources.Load<Sprite>("Images/Editor/Trigger/trigger");
+            spriteRenderer.color = new Color(1f, 1f, 0f, 1f);
+
+            // Tag + sorting
+            triggerObject.tag = "Trigger";
+            spriteRenderer.sortingLayerName = "OnTop";
+            spriteRenderer.sortingOrder = 2;
+
+            return triggerObject;
+        }
+
         private static string FormatInnerXml(string rawXml)
         {
             if (string.IsNullOrWhiteSpace(rawXml))

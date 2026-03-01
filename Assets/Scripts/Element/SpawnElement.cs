@@ -90,5 +90,33 @@ namespace Vectorier.Element
 
             return spawnObject;
         }
+
+        public static GameObject Create(Transform parent = null)
+        {
+            GameObject spawnObject = new GameObject("DefaultSpawn");
+
+            // Parent
+            if (parent != null)
+            {
+                spawnObject.transform.SetParent(parent, false);
+                spawnObject.transform.localPosition = Vector3.zero;
+            }
+
+            // Component
+            SpawnComponent spawnComponent = spawnObject.AddComponent<SpawnComponent>();
+            spawnComponent.Animation = "JumpOff|18";
+
+            // Sprite
+            SpriteRenderer spriteRenderer = spawnObject.AddComponent<SpriteRenderer>();
+            spriteRenderer.sprite = Resources.Load<Sprite>("Images/Editor/Misc/mark");
+            spriteRenderer.color = Color.red;
+
+            // Tag + sorting
+            spawnObject.tag = "Spawn";
+            spriteRenderer.sortingOrder = 0;
+            spriteRenderer.sortingLayerName = "OnTop";
+
+            return spawnObject;
+        }
     }
 }
