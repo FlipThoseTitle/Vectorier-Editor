@@ -378,8 +378,8 @@ namespace Vectorier.EditorScript.Tools
                 reader.ReadByte(); // marker
 
                 int nodeCount = reader.ReadInt32();
-                if (nodeCount != expectedNodeCount)
-                    throw new Exception($"Node count mismatch. Bin={nodeCount}, XML Nodes={expectedNodeCount}. Your bin must match XML <Nodes> order/count.");
+                //if (nodeCount != expectedNodeCount)
+                    //throw new Exception($"Node count mismatch. Bin={nodeCount}, XML Nodes={expectedNodeCount}. Your bin must match XML <Nodes> order/count.");
 
                 var frame = new Vector3[nodeCount];
 

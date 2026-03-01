@@ -67,7 +67,7 @@
             </Trigger>
             <Spawn X="4625" Y="-1490" Name="DefaultSpawn" Animation="JumpOff|18|1"/>
             <Camera X="4155" Y="-585" Name="" Zoom="0"/>
-            <Spawn X="4820" Y="125" Name="SpawnStart" Animation="JumpOff|18|1"/>
+            <Spawn X="4800" Y="125" Name="SpawnStart" Animation="JumpOff|18|1"/>
             <Trigger Name="TriggerStart" X="4540" Y="75" Width="200" Height="400">
               <Content>
                 <Init>
@@ -169,7 +169,7 @@
                 </Dynamic>
               </Properties>
               <Content>
-                <Object Name="TriggerRollToStraightLegsFlip" X="2465" Y="2240"/>
+                <!--Object Name="TriggerRollToStraightLegsFlip" X="2465" Y="2240"/ -->
                 <Trigger Name="" X="695" Y="39.9" Width="100" Height="400">
                   <Content>
                     <Init>

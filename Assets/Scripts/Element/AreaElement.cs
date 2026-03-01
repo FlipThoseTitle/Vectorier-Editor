@@ -124,12 +124,99 @@ namespace Vectorier.Element
                 }
             }
 
+            // Trick visuals
+            if (typeEnum == AreaComponent.AreaType.Trick)
+            {
+                CreateTrickVisuals(areaObject, spriteRenderer, element.GetAttribute("ItemName"));
+            }
+
             // Tag
             areaObject.tag = "Area";
             spriteRenderer.sortingLayerName = "OnTop";
             spriteRenderer.sortingOrder = 1;
 
             return areaObject;
+        }
+
+        private static void CreateTrickVisuals(GameObject areaObject, SpriteRenderer areaSpriteRenderer, string itemName)
+        {
+            if (areaObject == null || areaSpriteRenderer == null)
+                return;
+
+            Vector3 centerWorld = areaSpriteRenderer.bounds.center;
+            Vector3 parentLossy = areaObject.transform.lossyScale;
+            Vector3 centerLocal = areaObject.transform.InverseTransformPoint(centerWorld);
+
+            GameObject idleObj = new GameObject("trick_idle_up");
+            idleObj.tag = "EditorOnly";
+            idleObj.transform.SetParent(areaObject.transform, false);
+            idleObj.transform.localPosition = centerLocal;
+            idleObj.transform.localRotation = Quaternion.identity;
+
+            const float desiredIdleWorldScaleX = 1f;
+            const float desiredIdleWorldScaleY = 1f;
+
+            float idleLocalScaleX = parentLossy.x != 0f ? (desiredIdleWorldScaleX / parentLossy.x) : desiredIdleWorldScaleX;
+            float idleLocalScaleY = parentLossy.y != 0f ? (desiredIdleWorldScaleY / parentLossy.y) : desiredIdleWorldScaleY;
+
+            idleObj.transform.localScale = new Vector3(idleLocalScaleX, idleLocalScaleY, 1f);
+
+            SpriteRenderer idleSR = idleObj.AddComponent<SpriteRenderer>();
+            idleSR.sprite = Resources.Load<Sprite>("Images/Editor/Tricks/trick_idle_up");
+            idleSR.sortingLayerName = "OnTop";
+            idleSR.sortingOrder = 5;
+
+            if (idleSR.sprite == null)
+                Debug.LogWarning("[AreaElement] Missing trick_idle_up sprite at Resources path 'Images/Editor/Tricks/trick_idle_up'.");
+
+            // ----- track sprite lookup -----
+            if (string.IsNullOrEmpty(itemName))
+            {
+                Debug.LogWarning("[AreaElement] Trick Area has empty ItemName; skipping trick image.");
+                return;
+            }
+
+            string expectedSpriteName = "TRACK_" + itemName;
+
+            Sprite match = null;
+            Sprite[] sprites = Resources.LoadAll<Sprite>("Images/Editor/Tricks");
+            for (int i = 0; i < sprites.Length; i++)
+            {
+                if (sprites[i] != null && string.Equals(sprites[i].name, expectedSpriteName, StringComparison.Ordinal))
+                {
+                    match = sprites[i];
+                    break;
+                }
+            }
+
+            if (match == null)
+            {
+                Debug.LogWarning($"[AreaElement] No matching trick sprite found for ItemName='{itemName}'. " + $"Expected sprite name '{expectedSpriteName}' in Resources/Images/Editor/Tricks. " + "Skipping trick image; keeping only trick_idle_up.");
+                return;
+            }
+
+            GameObject trickGO = new GameObject(expectedSpriteName);
+            trickGO.tag = "EditorOnly";
+            trickGO.transform.SetParent(areaObject.transform, false);
+            trickGO.transform.localRotation = Quaternion.identity;
+
+            SpriteRenderer trickSR = trickGO.AddComponent<SpriteRenderer>();
+            trickSR.sprite = match;
+            trickSR.sortingLayerName = "OnTop";
+            trickSR.sortingOrder = 5;
+
+            const float desiredWorldYOffset = -23.5259f;
+            Vector3 trackWorld = centerWorld + new Vector3(0f, desiredWorldYOffset, 0f);
+            Vector3 trackLocal = areaObject.transform.InverseTransformPoint(trackWorld);
+            trickGO.transform.localPosition = trackLocal;
+
+            const float desiredWorldScaleX = 0.9059364f;
+            const float desiredWorldScaleY = 0.9138624f;
+
+            float localScaleX = parentLossy.x != 0f ? (desiredWorldScaleX / parentLossy.x) : desiredWorldScaleX;
+            float localScaleY = parentLossy.y != 0f ? (desiredWorldScaleY / parentLossy.y) : desiredWorldScaleY;
+
+            trickGO.transform.localScale = new Vector3(localScaleX, localScaleY, 1f);
         }
     }
 }

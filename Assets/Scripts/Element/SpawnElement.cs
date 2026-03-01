@@ -74,6 +74,7 @@ namespace Vectorier.Element
             // SpriteRenderer
             SpriteRenderer spriteRenderer = spawnObject.AddComponent<SpriteRenderer>();
             spriteRenderer.sprite = Resources.Load<Sprite>("Images/Editor/Misc/mark");
+            spriteRenderer.color = Color.red;
 
             // Add and configure Spawn component
             SpawnComponent spawn = spawnObject.AddComponent<SpawnComponent>();
@@ -84,6 +85,8 @@ namespace Vectorier.Element
 
             // Set Tag
             spawnObject.tag = "Spawn";
+            spriteRenderer.sortingLayerName = "OnTop";
+            spriteRenderer.sortingOrder = 0;
 
             return spawnObject;
         }

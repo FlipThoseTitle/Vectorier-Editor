@@ -1,1 +1,150 @@
-﻿
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Root>
+	<Sets>
+    <City FileName="objects-template.xml" />
+  </Sets>
+  <Objects>
+    <Object Name="Background" InX="0" InY="0" OutX="2121" OutY="0">
+      <Content>
+        <Object Name="BackgroundImage" X="0" Y="0"/>
+      </Content>
+    </Object>
+		<Object Name="DOWNTOWN_STORY_03_1" InX="0" InY="0" OutX="4710" OutY="0" BoxX="0" BoxY="-591" BoxWidth="4710" BoxHeight="1291">
+      <Content>
+        <Image X="2348" Y="-125" ClassName="v_muorny_tank_2_1" Width="198" Height="125" NativeX="198" NativeY="125">
+          <Properties>
+            <Static>
+              <Matrix A="198" B="0" C="0" D="125" Tx="0" Ty="0"/>
+            </Static>
+          </Properties>
+        </Image>
+        <Image X="3445" Y="-88" ClassName="v_antenna" Width="95" Height="90" NativeX="95" NativeY="90">
+          <Properties>
+            <Static>
+              <Matrix A="95" B="0" C="0" D="90" Tx="0" Ty="0"/>
+            </Static>
+          </Properties>
+        </Image>
+        <Image X="2773" Y="-88" ClassName="v_antenna" Width="95" Height="90" NativeX="95" NativeY="90">
+          <Properties>
+            <Static>
+              <Matrix A="95" B="0" C="0" D="90" Tx="0" Ty="0"/>
+            </Static>
+          </Properties>
+        </Image>
+        <Image X="3696" Y="0" ClassName="v_fence" Width="225" Height="100" NativeX="225" NativeY="100">
+          <Properties>
+            <Static>
+              <Matrix A="225" B="0" C="0" D="100" Tx="0" Ty="0"/>
+            </Static>
+          </Properties>
+        </Image>
+        <Image X="3471" Y="0" ClassName="v_fence" Width="225" Height="100" NativeX="225" NativeY="100">
+          <Properties>
+            <Static>
+              <Matrix A="225" B="0" C="0" D="100" Tx="0" Ty="0"/>
+            </Static>
+          </Properties>
+        </Image>
+        <Image X="3246" Y="0" ClassName="v_fence" Width="225" Height="100" NativeX="225" NativeY="100">
+          <Properties>
+            <Static>
+              <Matrix A="225" B="0" C="0" D="100" Tx="0" Ty="0"/>
+            </Static>
+          </Properties>
+        </Image>
+        <Image X="3024" Y="0" ClassName="v_fence" Width="225" Height="100" NativeX="225" NativeY="100">
+          <Properties>
+            <Static>
+              <Matrix A="225" B="0" C="0" D="100" Tx="0" Ty="0"/>
+            </Static>
+          </Properties>
+        </Image>
+        <Image X="2799" Y="0" ClassName="v_fence" Width="225" Height="100" NativeX="225" NativeY="100">
+          <Properties>
+            <Static>
+              <Matrix A="225" B="0" C="0" D="100" Tx="0" Ty="0"/>
+            </Static>
+          </Properties>
+        </Image>
+        <Image X="2574" Y="-1" ClassName="v_fence" Width="225" Height="100" NativeX="225" NativeY="100">
+          <Properties>
+            <Static>
+              <Matrix A="225" B="0" C="0" D="100" Tx="0" Ty="0"/>
+            </Static>
+          </Properties>
+        </Image>
+        <Image X="693" Y="-88" ClassName="v_barrel_1_1" Width="74" Height="90" NativeX="74" NativeY="90">
+          <Properties>
+            <Static>
+              <Matrix A="74" B="0" C="0" D="90" Tx="0" Ty="0"/>
+            </Static>
+          </Properties>
+        </Image>
+        <Image X="860" Y="-88" ClassName="v_barrel_1_1" Width="74" Height="90" NativeX="74" NativeY="90">
+          <Properties>
+            <Static>
+              <Matrix A="74" B="0" C="0" D="90" Tx="0" Ty="0"/>
+            </Static>
+          </Properties>
+        </Image>
+        <Image X="780" Y="-88" ClassName="v_barrel_1_1" Width="74" Height="90" NativeX="74" NativeY="90">
+          <Properties>
+            <Static>
+              <Matrix A="74" B="0" C="0" D="90" Tx="0" Ty="0"/>
+            </Static>
+          </Properties>
+        </Image>
+        <Image X="821" Y="-177" ClassName="v_barrel_1_1" Width="74" Height="90" NativeX="74" NativeY="90">
+          <Properties>
+            <Static>
+              <Matrix A="74" B="0" C="0" D="90" Tx="0" Ty="0"/>
+            </Static>
+          </Properties>
+        </Image>
+        <Image X="4092" Y="-94" ClassName="construct_holder" Width="250" Height="380" NativeX="250" NativeY="380">
+          <Properties>
+            <Static>
+              <Matrix A="250" B="0" C="0" D="380" Tx="0" Ty="0"/>
+            </Static>
+          </Properties>
+        </Image>
+        <Image X="4331" Y="-94" ClassName="construct_holder" Width="250" Height="380" NativeX="250" NativeY="380">
+          <Properties>
+            <Static>
+              <Matrix A="250" B="0" C="0" D="380" Tx="0" Ty="0"/>
+            </Static>
+          </Properties>
+        </Image>
+        <Image X="4028" Y="-145" ClassName="v_bar_binocular" Width="66" Height="150" NativeX="66" NativeY="150">
+          <Properties>
+            <Static>
+              <Matrix A="66" B="0" C="0" D="150" Tx="0" Ty="0"/>
+            </Static>
+          </Properties>
+        </Image>
+        <Image X="4579" Y="-145" ClassName="v_bar_binocular" Width="66" Height="150" NativeX="66" NativeY="150">
+          <Properties>
+            <Static>
+              <Matrix A="66" B="0" C="0" D="150" Tx="0" Ty="0"/>
+            </Static>
+          </Properties>
+        </Image>
+        <Image X="1346" Y="-378" ClassName="v_boothAngle_1_1" Width="612" Height="385" NativeX="612" NativeY="385">
+          <Properties>
+            <Static>
+              <Matrix A="612" B="0" C="0" D="385" Tx="0" Ty="0"/>
+            </Static>
+          </Properties>
+        </Image>
+        <Image X="1724" Y="-256" ClassName="vent_bar" Width="20" Height="320" NativeX="20" NativeY="320">
+          <Properties>
+            <Static>
+              <Matrix A="20" B="0" C="0" D="320" Tx="0" Ty="0"/>
+            </Static>
+          </Properties>
+        </Image>
+      </Content>
+    </Object>
+  </Objects>
+</Root>

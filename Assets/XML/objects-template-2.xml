@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Root>
+  <Objects>
+    <Object Name="Object">
+      <Content>
+        <Image X="993" Y="-122" ClassName="cons_beton" Width="465" Height="195" NativeX="465" NativeY="195" />
+      </Content>
+    </Object>
+  </Objects>
+</Root>
