@@ -21,5 +21,14 @@ A Discord server is open for the project : https://discord.com/invite/pVRuFBVwC2
 - Extract the zip file
 - Open the project in Unity Hub
 
+# Contributions
+This project was made possible through the collaboration and support of the following contributors. Each person has invested their time, knowledge, and effort to improve, refine, and expand this project. From identifying bugs and implementing new features, their involvement has been invaluable. The project stands as a result of shared effort and collective dedication.
+- DoritoTheChips
+- Supergoldapfel (sol)
+- kubinka0505
+- sonamenil (Vision)
+- mirrorsedgegamer
+- FloofIsFalaful (Floof)
+
 # Disclaimer
 This project is an independent, fan-made level editor for the game Vector developed and published by Nekki. This project is not affiliated with, endorsed by, sponsored by, or approved by Nekki. Vector and all related assets, trademarks, and intellectual property belong to their respective owners. This software is provided for educational and personal use only. This source code is released as is and will continue to be maintained by non-paid contributors in their free time. This project is built using Unity. Unity is a trademark of Unity Technologies. Use of this project is subject to Unity’s own terms and licensing. This repository does not grant any rights to the Unity engine. For full license terms, see the [LICENSE](https://github.com/FlipThoseTitle/Vectorier-Editor/blob/main/LICENSE) file.
