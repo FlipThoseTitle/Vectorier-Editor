@@ -1,25 +1,25 @@
 {
   "V": 1,
   "MainData": {
-    "Coins": 3520,
+    "Coins": 0,
     "Unlock": true
   },
   "Stats": {
-    "TotalRunningDistance": 20506.8125,
-    "JumpsCount": 1014,
-    "SlidesCount": 161,
-    "BonusCollected": 211,
-    "CoinsCollected": 80,
-    "TricksPerformed": 77,
-    "Death": 33,
-    "DeathByHunter": 10,
+    "TotalRunningDistance": 0,
+    "JumpsCount": 0,
+    "SlidesCount": 0,
+    "BonusCollected": 0,
+    "CoinsCollected": 0,
+    "TricksPerformed": 0,
+    "Death": 0,
+    "DeathByHunter": 0,
     "HuntersKilled": 0,
-    "GlassBroken": 12
+    "GlassBroken": 0
   },
   "Options": {
-    "SoundLevel": 0.16630654,
-    "MusicLevel": 0.0,
-    "LastUsedSetSoundValue": 0.16630654,
+    "SoundLevel": 0.5,
+    "MusicLevel": 0.5,
+    "LastUsedSetSoundValue": 0.0,
     "LastUsedSetMusicValue": 0.0,
     "Sound": true,
     "Music": true,
@@ -31,7 +31,7 @@
   },
   "GameStats": {},
   "ShopData": {
-    "Items": "[{\"id\":\"TRICK_JUMPTUMBLE\",\"count\":205,\"isEquip\":true},{\"id\":\"TRICK_SPINNINGVAULT\",\"count\":205,\"isEquip\":true}]"
+    "Items": "[{\"id\":\"TRICK_JUMPTUMBLE\",\"count\":1,\"isEquip\":true},{\"id\":\"TRICK_SPINNINGVAULT\",\"count\":1,\"isEquip\":true}]"
   },
   "OldData": {}
 }

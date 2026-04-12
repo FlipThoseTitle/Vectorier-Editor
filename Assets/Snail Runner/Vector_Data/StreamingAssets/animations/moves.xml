@@ -359,7 +359,8 @@
 						<VelosityX Min="12.6" Max="19.6" Type="H" Corner="0"/>
 					</LandingRoll>
 					<!--Vx=10-->
-					<LandingStop FirstFrame="23" Priority="15" NodesWI="DetectorV" SafeH="1" Sides="0" TriggerName="TriggerLandingStop"/>
+					<LandingStop FirstFrame="23" Priority="15" NodesWI="DetectorV" SafeH="1" Sides="0" TriggerName="TriggerLandingStop">
+					</LandingStop>
 					<LandingMiddle FirstFrame="23" Priority="5" NodesWI="DetectorV" SafeH="1" Sides="0">
 						<VelosityY Max="8.1" Type="H" Corner="0"/>
 						<VelosityX Min="1.6" Max="12.6" Type="H" Corner="0"/>

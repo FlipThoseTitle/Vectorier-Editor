@@ -1,3700 +1,1038 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <Templates>
-	<!-- Повсеместно используемые элементы -->
-	<Template Name="CommonLib" Library="1">
-		<Loop Name="Sound">
-			<Using>
-				<Variable Name="Sound" DefaultValue="None" ComplexName="1" Type="Sound"/>
-			</Using>
-			<Actions>
-				<Sound Name="_Sound"/>
-			</Actions>
-		</Loop>
-		<Loop Name="Delay">
-			<Using>
-				<Variable Name="Delay" DefaultValue="0" ComplexName="1" Type="UInt"/>
-			</Using>
-			<Actions>
-				<Wait Frames="_Delay"/>
-			</Actions>
-		</Loop>
-		<Loop Name="RequiredAnimation">
-			<Using>
-				<Variable Name="ReqAnim" DefaultValue="?getModel[_$Model].animationName" ComplexName="1" Type="Animation"/>
-			</Using>
-			<Events>
-				<ValueChange Value="?getModel[Player].animationName"/>
-				<ValueChange Value="?getModel[Hunter].animationName"/>
-			</Events>
-			<Conditions>
-				<Equal Value1="_ReqAnim" Value2="?getModel[_$Model].animationName"/>
-			</Conditions>
-		</Loop>
-		<Loop Name="ActiveDeath">
-			<Events>
-				<Collision/>
-			</Events>
-		</Loop>
-	</Template>
-	<!--Сокращения для часто используемых конструкций-->
-	<Template Name="FreqUsed" Library="1">
-		<Loop Name="OnShow">
-			<Events>
-				<OnShow/>
-			</Events>
-		</Loop>
-		<Loop Name="OnHide">
-			<Events>
-				<OnHide/>
-			</Events>
-		</Loop>
-		<Loop Name="PlayerPressedKey">
-			<Using>
-				<Variable Name="Key" DefaultValue="Up" Type="Key"/>
-			</Using>
-			<Events>
-				<KeyPressed/>
-			</Events>
-			<Conditions>
-				<Equal Value1="_$Key" Value2="_Key"/>
-				<Equal Value1="?getModel[_$Model].AI" Value2="0"/>
-			</Conditions>
-		</Loop>
-		<Loop Name="KeyPressed">
-			<Events>
-				<KeyPressed/>
-			</Events>
-		</Loop>
-		<Loop Name="OnCollision">
-			<Events>
-				<Collision/>
-			</Events>
-		</Loop>
-		<Loop Name="Enter">
-			<Events>
-				<Enter/>
-			</Events>
-		</Loop>
-		<Loop Name="Exit">
-			<Events>
-				<Exit/>
-			</Events>
-		</Loop>
-		<Loop Name="EnterOrExit">
-			<Events>
-				<Exit/>
-				<Enter/>
-			</Events>
-		</Loop>
-		<Loop Name="Timeout">
-			<Events>
-				<Timeout/>
-			</Events>
-		</Loop>
-		<Loop Name="Activate">
-			<Events>
-				<Activate/>
-			</Events>
-		</Loop>
-		<Loop Name="IsSetForPlayer">
-			<Conditions>
-				<Equal Value1="_$AI" Value2="0"/>
-			</Conditions>
-		</Loop>
-		<Loop Name="IsSetForHunter">
-			<Conditions>
-				<Equal Value1="_$AI" Value2="1"/>
-			</Conditions>
-		</Loop>
-		<Loop Name="IsSetForHelper">
-			<Conditions>
-				<Equal Value1="_$AI" Value2="2"/>
-			</Conditions>
-		</Loop>
-		<Loop Name="TriggeredByPlayer">
-			<Conditions>
-				<Equal Value1="?getModel[_$Model].AI" Value2="0"/>
-			</Conditions>
-		</Loop>
-		<Loop Name="TriggeredByHunter">
-			<Conditions>
-				<Equal Value1="?getModel[_$Model].AI" Value2="1"/>
-			</Conditions>
-		</Loop>
-		<Loop Name="TriggeredByHelper">
-			<Conditions>
-				<Equal Value1="?getModel[_$Model].AI" Value2="2"/>
-			</Conditions>
-		</Loop>
-		<Loop Name="TriggeredByAnyBot">
-			<Conditions>
-				<Equal Value1="?getModel[_$Model].AI" Value2="0" Not="1"/>
-			</Conditions>
-		</Loop>
-		<Loop Name="DispatchEvent">
-			<Using>
-				<Variable Name="Activator" DefaultValue="" ComplexName="1" Type="String"/>
-			</Using>
-			<Actions>
-				<Activate ActionID="_Activator"/>
-			</Actions>
-		</Loop>
-		<Loop Name="SwitchOn">
-			<Actions>
-				<SetVariable Name="$Active" Value="1"/>
-			</Actions>
-		</Loop>
-		<Loop Name="SwitchOff">
-			<Actions>
-				<SetVariable Name="$Active" Value="0"/>
-			</Actions>
-		</Loop>
-		<Loop Name="IfStanding">
-			<Conditions>
-				<Equal Value1="?getModel[_$Model].animationName" Value2="Stand"/>
-				<Equal Value1="?getModel[_$Model].animationName" Value2="StandFail"/>
-			</Conditions>
-		</Loop>
-	</Template>
-	<!--==========================-->
-	<!--==========================-->
-	<!--==========================-->
-	<!--==========================-->
-	<!-- Триггеры Type=None -->
-	<Template Name="NoneType">
-		<Init>
-			<SetVariable Name="$AI" Value="-1"/>
-			<SetVariable Name="$Active" Value="1"/>
-			<SetVariable Name="$Node" Value="COM"/>
-			<SetVariable Name="Flag1" Value="0"/>
-		</Init>
-		<Loop Name="Only">
-			<Events Template="FreqUsed.OnCollision"/>
-			<Actions>
-				<SetVariable Name="$Active" Value="0"/>
-				<Execute/>
-			</Actions>
-		</Loop>
-	</Template>
-	<!--==========================-->
-	<!--==========================-->
-	<!--==========================-->
-	<!--==========================-->
-	<!-- Триггеры Type=1 с параметром follow и без него-->
-	<Template Name="AI_noFollow">
-		<Init>
-			<SetVariable Name="$AI" Value="1"/>
-			<SetVariable Name="$Active" Value="1"/>
-			<SetVariable Name="$Node" Value="COM"/>
-			<SetVariable Name="Flag1" Value="0"/>
-		</Init>
-		<Loop Name="Only">
-			<Using>
-				<Variable Name="Key" DefaultValue="Up" Type="Key"/>
-			</Using>
-			<Events Template="FreqUsed.Enter"/>
-			<Actions>
-				<Press Key="_Key" Model="_$Model"/>
-			</Actions>
-		</Loop>
-	</Template>
-	<Template Name="AI_Follow">
-		<Init>
-			<SetVariable Name="$AI" Value="0"/>
-			<SetVariable Name="$Active" Value="1"/>
-			<SetVariable Name="$Node" Value="COM"/>
-			<SetVariable Name="Flag1" Value="0"/>
-		</Init>
-		<Loop Name="SetLineVert">
-			<Using>
-				<Variable Name="FixedLine" DefaultValue="0" Type="Bool"/>
-				<Variable Name="LineType" DefaultValue="Vertical" Type="Orientation"/>
-				<Variable Name="LineValue" DefaultValue="0" Type="Int"/>
-			</Using>
-			<Events Template="FreqUsed.KeyPressed"/>
-			<Conditions>
-				<ConditionBlock Template="FreqUsed.PlayerPressedKey"/>
-				<Equal Value1="_FixedLine" Value2="0"/>
-				<Equal Value1="_LineType" Value2="Vertical"/>
-			</Conditions>
-			<Actions>
-				<SetVariable Name="LineValue" Value="?getModel[Player].getNode[_$Node].localPositionX"/>
-				<SetVariable Name="$AI" Value="_FollowAI"/>
-			</Actions>
-		</Loop>
-		<Loop Name="SetLineHor">
-			<Using>
-				<Variable Name="LineValue" DefaultValue="0" Type="Int"/>
-				<Variable Name="FixedLine" DefaultValue="0" Type="Bool"/>
-				<Variable Name="LineType" DefaultValue="Vertical" Type="Orientation"/>
-			</Using>
-			<Events Template="FreqUsed.KeyPressed"/>
-			<Conditions>
-				<ConditionBlock Template="FreqUsed.PlayerPressedKey"/>
-				<Equal Value1="_FixedLine" Value2="0"/>
-				<Equal Value1="_LineType" Value2="Horizontal"/>
-			</Conditions>
-			<Actions>
-				<SetVariable Name="LineValue" Value="?getModel[Player].getNode[_$Node].localPositionY"/>
-				<SetVariable Name="$AI" Value="_FollowAI"/>
-			</Actions>
-		</Loop>
-		<Loop Name="SetLineFixed">
-			<Using>
-				<Variable Name="FollowAI" DefaultValue="1" Type="AI"/>
-			</Using>
-			<Events Template="FreqUsed.KeyPressed"/>
-			<Conditions>
-				<ConditionBlock Template="FreqUsed.PlayerPressedKey"/>
-				<Equal Value1="_FixedLine" Value2="1"/>
-			</Conditions>
-			<Actions>
-				<SetVariable Name="$AI" Value="_FollowAI"/>
-			</Actions>
-		</Loop>
-		<Loop Name="FollowLineTrigger">
-			<Using>
-				<Variable Name="Key" DefaultValue="Up" Type="Key"/>
-				<Variable Name="FollowAI" DefaultValue="1" Type="AI"/>
-			</Using>
-			<Events>
-				<Line Type="_LineType" Position="_LineValue"/>
-			</Events>
-			<Conditions>
-				<Equal Value1="_$AI" Value2="_FollowAI"/>
-			</Conditions>
-			<Actions>
-				<Press Key="_Key" Model="_$Model"/>
-				<SetVariable Name="$AI" Value="0"/>
-			</Actions>
-		</Loop>
-		<Loop Name="SetNoLine">
-			<Using>
-				<Variable Name="Key" DefaultValue="Up" Type="Key"/>
-			</Using>
-			<Events Template="FreqUsed.KeyPressed"/>
-			<Conditions>
-				<ConditionBlock Template="FreqUsed.PlayerPressedKey"/>
-				<Equal Value1="_LineType" Value2="NoLine"/>
-			</Conditions>
-			<Actions>
-				<SetVariable Name="$AI" Value="_FollowAI"/>
-			</Actions>
-		</Loop>
-		<Loop Name="FollowNoLineTrigger">
-			<Using>
-				<Variable Name="Key" DefaultValue="Up" Type="Key"/>
-				<Variable Name="LineType" DefaultValue="Vertical" Type="Orientation"/>
-				<Variable Name="FollowAI" DefaultValue="1" Type="AI"/>
-			</Using>
-			<Events Template="FreqUsed.Enter"/>
-			<Conditions>
-				<Equal Value1="_$AI" Value2="_FollowAI"/>
-				<Equal Value1="_LineType" Value2="NoLine"/>
-			</Conditions>
-			<Actions>
-				<Press Key="_Key" Model="_$Model"/>
-				<SetVariable Name="$AI" Value="0"/>
-			</Actions>
-		</Loop>
-	</Template>
-	<!--==========================-->
-	<!--==========================-->
-	<!--==========================-->
-	<!--==========================-->
-	<!--Триггеры Type=2 КАМЕРА-->
-	<Template Name="CameraZoom">
-		<Init>
-			<SetVariable Name="$AI" Value="0"/>
-			<SetVariable Name="$Active" Value="1"/>
-			<SetVariable Name="$Node" Value="COM"/>
-			<SetVariable Name="Flag1" Value="0"/>
-		</Init>
-		<Loop Name="Only">
-			<Using>
-				<Variable Name="Zoom" DefaultValue="1" Type="Zoom"/>
-			</Using>
-			<Events Template="FreqUsed.Enter"/>
-			<Actions>
-				<Camera Zoom="_Zoom"/>
-			</Actions>
-		</Loop>
-	</Template>
-	<Template Name="LossWrongWay">
-		<Init>
-			<SetVariable Name="$AI" Value="0"/>
-			<SetVariable Name="$Active" Value="1"/>
-			<SetVariable Name="$Node" Value="COM"/>
-			<SetVariable Name="Flag1" Value="0"/>
-		</Init>
-		<Loop Name="Only">
-			<Using>
-			</Using>
-			<Events Template="FreqUsed.OnCollision"/>
-			<Conditions Template="FreqUsed.IsSetForPlayer"/>
-			<Actions>
-				<Control Switch="Off" Model="Player"/>
-				<MessageOnScreen Text="track_wrong_way_txt" Color="#570701FF" Frames="120" AppearStyle="Fade" DisappearStyle="Fade"/>
-				<EndGame Result="Loss" Model="_$Model" Frames="120"/>
-			</Actions>
-		</Loop>
-	</Template>
-	<Template Name="TriggerText">
-		<Init>
-			<SetVariable Name="$AI" Value="0"/>
-			<SetVariable Name="$Active" Value="1"/>
-			<SetVariable Name="$Node" Value="COM"/>
-			<SetVariable Name="Flag1" Value="0"/>
-		</Init>
-		<Loop Name="Only">
-			<Using>
-				<Variable Name="Time" DefaultValue="120" Type="UInt"/>
-				<Variable Name="Color" DefaultValue="#FFFFFFFF" Type="String"/>
-				<Variable Name="Text" DefaultValue="placeholder" Type="String"/>
-			</Using>
-			<Events Template="FreqUsed.OnCollision"/>
-			<Actions>
-				<MessageOnScreen Text="_Text" Color="_Color" Frames="_Time" AppearStyle="Fade" DisappearStyle="Fade"/>
-				<!--Reset-->
-				<SetVariable Name="Color" Value="#FFFFFFFF"/>
-			</Actions>
-		</Loop>
-	</Template>
-	<Template Name="CameraSmoothness">
-		<Init>
-			<SetVariable Name="$AI" Value="0"/>
-			<SetVariable Name="$Active" Value="1"/>
-			<SetVariable Name="$Node" Value="COM"/>
-			<SetVariable Name="Flag1" Value="0"/>
-		</Init>
-		<Loop Name="Enter">
-			<Using>
-				<Variable Name="Smoothness" DefaultValue="100" Type="Int"/>
-			</Using>
-			<Events Template="FreqUsed.Enter"/>
-			<Actions>
-				<Camera Smoothness="_Smoothness"/>
-			</Actions>
-		</Loop>
-		<Loop Name="Exit">
-			<Events Template="FreqUsed.Exit"/>
-			<Actions>
-				<Camera Smoothness="2"/>
-			</Actions>
-		</Loop>
-	</Template>
-	<Template Name="CameraFollow">
-		<Init>
-			<SetVariable Name="$AI" Value="0"/>
-			<SetVariable Name="$Active" Value="1"/>
-			<SetVariable Name="$Node" Value="COM"/>
-			<SetVariable Name="Flag1" Value="0"/>
-		</Init>
-		<Loop Name="Only">
-			<Using>
-				<Variable Name="Follow" DefaultValue="_$Model" Type="Model"/>
-			</Using>
-			<Events Template="FreqUsed.Enter"/>
-			<Actions>
-				<Camera Follow="_Follow" Frames="1000000"/>
-			</Actions>
-		</Loop>
-	</Template>
-	<!--==========================-->
-	<!--==========================-->
-	<!--==========================-->
-	<!--====Type=13===============-->
-	<Template Name="ForcedAnimation">
-		<Init>
-			<SetVariable Name="$AI" Value="-1"/>
-			<SetVariable Name="$Active" Value="1"/>
-			<SetVariable Name="$Node" Value="COM"/>
-			<SetVariable Name="Flag1" Value="0"/>
-		</Init>
-		<Loop Name="Only">
-			<Using>
-				<Variable Name="ReqAnim" DefaultValue="?getModel[_$Model].animationName" ComplexName="1" Type="Animation"/>
-				<Variable Name="AnimName" DefaultValue="RunForward" Type="Animation"/>
-				<Variable Name="AnimFrame" DefaultValue="10" Type="UInt"/>
-				<Variable Name="Reversed" DefaultValue="0" Type="UInt"/>
-			</Using>
-			<Events Template="FreqUsed.Enter"/>
-			<Actions>
-				<ForceAnimation Name="_AnimName" Model="_$Model" Frame="_AnimFrame" Reversed="_Reversed"/>
-			</Actions>
-		</Loop>
-	</Template>
-	<!-- Floof's Stuff -->
-	<Template Name="Template">
-		<Init>
-			<SetVariable Name="$AI" Value="-1"/>
-			<SetVariable Name="$Active" Value="1"/>
-			<SetVariable Name="$Node" Value="COM"/>
-			<SetVariable Name="Flag1" Value="0"/>
-		</Init>
-		<Loop Name="Only">
-			<Using>
-			</Using>
-			<Events Template="FreqUsed.Enter"/>
-			<Conditions>
-			</Conditions>
-			<Actions>
-			</Actions>
-		</Loop>
-	</Template>
-	<Template Name="Test1">
-		<Loop Name="IfItemExists">
-			<Events>
-				<Enter/>
-			</Events>
-			<Conditions>
-				<Select Object="?getItem[GADGET_FORCEBLASTER].Quantity" From="Equipped">
-					<Equal Value1="?getItem[GADGET_FORCEBLASTER].Quantity" Value2="0"/>
-				</Select>
-			</Conditions>
-			<Actions>
-				<MessageOnScreen Text="True" Color="#FFFFFFFF" Frames="30" AppearStyle="Fade" DisappearStyle="Fade"/>
-			</Actions>
-		</Loop>
-	</Template>
-	<Template Name="MovementCoordinates">
-		<Init>
-			<SetVariable Name="$AI" Value="-1"/>
-			<SetVariable Name="$Active" Value="1"/>
-			<SetVariable Name="$Node" Value="COM"/>
-			<SetVariable Name="Flag1" Value="0"/>
-			<!-- Limits, Boolean (1 or 0)-->
-			<SetVariable Name="DisableXAxis" Value="0"/>
-			<SetVariable Name="DisableYAxis" Value="0"/>
-			<!-- Keys -->
-			<SetVariable Name="Key1" Value="Left"/>
-			<SetVariable Name="Key2" Value="Right"/>
-			<SetVariable Name="Key3" Value="Up"/>
-			<SetVariable Name="Key4" Value="Down"/>
-			<!-- Key Transformations -->
-			<SetVariable Name="TransformKey1" Value=""/>
-			<SetVariable Name="TransformKey2" Value=""/>
-			<SetVariable Name="TransformKey3" Value=""/>
-			<SetVariable Name="TransformKey4" Value=""/>
-			<!-- Boundaries -->
-			<SetVariable Name="MinXPosition" Value=""/>
-			<SetVariable Name="MaxXPosition" Value=""/>
-			<SetVariable Name="MinYPosition" Value=""/>
-			<SetVariable Name="MaxYPosition" Value=""/>
-			<!-- Initial Position -->
-			<SetVariable Name="CurrentYPosition" Value="0"/>
-			<SetVariable Name="CurrentXPosition" Value="0"/>
-			<!-- Don't Touch, This one does nothing for now -->
-			<SetVariable Name="Cooldown" Value="0"/>
-		</Init>
-		<Loop Name="SetMeUp">
-			<Using>
-			</Using>
-			<Events Template="FreqUsed.Enter"/>
-			<Conditions>
-			</Conditions>
-			<Actions>
-			</Actions>
-		</Loop>
-		<Loop Name="MoveTheObjectX-1">
-			<Using>
-				<Variable Name="DisableXAxis" DefaultValue="0" Type="Bool"/>
-				<Variable Name="TransformKey1" DefaultValue="0" Type="String"/>
-				<Variable Name="CurrentXPosition" DefaultValue="0" Type="Int"/>
-				<Variable Name="MaxXPosition" DefaultValue="0" Type="Int"/>
-				<Variable Name="MinXPosition" DefaultValue="0" Type="Int"/>
-				<Variable Name="Cooldown" DefaultValue="0" Type="UInt"/>
-				<Variable Name="Key1" DefaultValue="0" Type="Key"/>
-			</Using>
-			<Events>
-				<KeyPressed/>
-			</Events>
-			<Conditions>
-				<Operator Type="And">
-					<Equal Value1="_$Key" Value2="_Key1"/>
-					<Equal Value1="_MinXPosition" Value2="_CurrentXPosition" Not="1"/>
-					<Equal Value1="_Cooldown" Value2="0"/>
-					<Equal Value1="_DisableXAxis" Value2="0"/>
-				</Operator>
-			</Conditions>
-			<Actions>
-				<Choose Order="Sync">
-					<Transform Name="_TransformKey1"/>
-					<AppendValue Name="CurrentXPosition" Value="-1"/>
-				</Choose>
-			</Actions>
-		</Loop>
-		<Loop Name="MoveTheObjectX+1">
-			<Using>
-				<Variable Name="DisableXAxis" DefaultValue="0" Type="Bool"/>
-				<Variable Name="TransformKey2" DefaultValue="0" Type="String"/>
-				<Variable Name="CurrentXPosition" DefaultValue="0" Type="Int"/>
-				<Variable Name="MaxXPosition" DefaultValue="0" Type="Int"/>
-				<Variable Name="MinXPosition" DefaultValue="0" Type="Int"/>
-				<Variable Name="Cooldown" DefaultValue="0" Type="UInt"/>
-				<Variable Name="Key2" DefaultValue="0" Type="Key"/>
-			</Using>
-			<Events>
-				<KeyPressed/>
-			</Events>
-			<Conditions>
-				<Operator Type="And">
-					<Equal Value1="_$Key" Value2="_Key2"/>
-					<Equal Value1="_MaxXPosition" Value2="_CurrentXPosition" Not="1"/>
-					<Equal Value1="_Cooldown" Value2="0"/>
-					<Equal Value1="_DisableXAxis" Value2="0"/>
-				</Operator>
-			</Conditions>
-			<Actions>
-				<Choose Order="Sync">
-					<Transform Name="_TransformKey2"/>
-					<AppendValue Name="CurrentXPosition" Value="1"/>
-				</Choose>
-			</Actions>
-		</Loop>
-		<Loop Name="MoveTheObjectY+1">
-			<Using>
-				<Variable Name="DisableYAxis" DefaultValue="0" Type="Bool"/>
-				<Variable Name="TransformKey3" DefaultValue="0" Type="String"/>
-				<Variable Name="CurrentYPosition" DefaultValue="0" Type="Int"/>
-				<Variable Name="MaxYPosition" DefaultValue="0" Type="Int"/>
-				<Variable Name="MinYPosition" DefaultValue="0" Type="Int"/>
-				<Variable Name="Cooldown" DefaultValue="0" Type="UInt"/>
-				<Variable Name="Key3" DefaultValue="0" Type="Key"/>
-			</Using>
-			<Events>
-				<KeyPressed/>
-			</Events>
-			<Conditions>
-				<Operator Type="And">
-					<Equal Value1="_$Key" Value2="_Key3"/>
-					<Equal Value1="_MaxYPosition" Value2="_CurrentYPosition" Not="1"/>
-					<Equal Value1="_Cooldown" Value2="0"/>
-					<Equal Value1="_DisableYAxis" Value2="0"/>
-				</Operator>
-			</Conditions>
-			<Actions>
-				<Choose Order="Sync">
-					<Transform Name="_TransformKey3"/>
-					<AppendValue Name="CurrentYPosition" Value="1"/>
-				</Choose>
-			</Actions>
-		</Loop>
-		<Loop Name="MoveTheObjectY-1">
-			<Using>
-				<Variable Name="DisableYAxis" DefaultValue="0" Type="Bool"/>
-				<Variable Name="TransformKey4" DefaultValue="0" Type="String"/>
-				<Variable Name="CurrentYPosition" DefaultValue="0" Type="Int"/>
-				<Variable Name="MaxYPosition" DefaultValue="0" Type="Int"/>
-				<Variable Name="MinYPosition" DefaultValue="0" Type="Int"/>
-				<Variable Name="Cooldown" DefaultValue="0" Type="UInt"/>
-				<Variable Name="Key4" DefaultValue="0" Type="Key"/>
-			</Using>
-			<Events>
-				<KeyPressed/>
-			</Events>
-			<Conditions>
-				<Operator Type="And">
-					<Equal Value1="_$Key" Value2="_Key4"/>
-					<Equal Value1="_MinYPosition" Value2="_CurrentYPosition" Not="1"/>
-					<Equal Value1="_Cooldown" Value2="0"/>
-					<Equal Value1="_DisableYAxis" Value2="0"/>
-				</Operator>
-			</Conditions>
-			<Actions>
-				<Choose Order="Sync">
-					<Transform Name="_TransformKey4"/>
-					<AppendValue Name="CurrentYPosition" Value="-1"/>
-				</Choose>
-			</Actions>
-		</Loop>
-	</Template>
-	<Template Name="SoundLooper">
-		<Init>
-			<SetVariable Name="$AI" Value="-1"/>
-			<SetVariable Name="$Active" Value="1"/>
-			<SetVariable Name="$Node" Value="COM"/>
-			<SetVariable Name="ActionID" Value="Me"/>
-		</Init>
-		<Loop Name="Start">
-			<Using>
-				<Variable Name="ActivatorToStart" DefaultValue="0" Type="String"/>
-			</Using>
-			<Events>
-				<Enter/>
-			</Events>
-			<Conditions/>
-			<Actions>
-				<SetVariable Name="Flag1" Value="1"/>
-				<Activate ActionID="_ActivatorToStart"/>
-			</Actions>
-		</Loop>
-		<Loop Name="LoopMe">
-			<Using>
-				<Variable Name="ActivatorToStart" DefaultValue="0" Type="String"/>
-				<Variable Name="ActivatorToLoop" DefaultValue="0" Type="String"/>
-			</Using>
-			<Events>
-				<Activate/>
-			</Events>
-			<Conditions>
-				<Operator Type="And">
-					<Equal Value1="_$ActionID" Value2="_ActivatorToLoop"/>
-					<Equal Value1="_Flag1" Value2="1"/>
-				</Operator>
-			</Conditions>
-			<Actions>
-				<Activate ActionID="_ActivatorToStart"/>
-			</Actions>
-		</Loop>
-		<Loop Name="LoopMeAgain">
-			<Using>
-				<Variable Name="Sound" DefaultValue="0" ComplexName="1" Type="Sound"/>
-				<Variable Name="ActivatorToLoop" DefaultValue="0" Type="String"/>
-				<Variable Name="ActivatorToStart" DefaultValue="0" Type="String"/>
-			</Using>
-			<Events>
-				<Activate/>
-			</Events>
-			<Conditions>
-				<Operator Type="And">
-					<Equal Value1="_$ActionID" Value2="_ActivatorToStart"/>
-					<Equal Value1="_Flag1" Value2="1"/>
-				</Operator>
-			</Conditions>
-			<Actions>
-				<Choose Order="Straight">
-					<Sound Name="_Sound"/>
-					<Wait Frames="_Frames"/>
-					<Activate ActionID="_ActivatorToLoop"/>
-				</Choose>
-			</Actions>
-		</Loop>
-		<Loop Name="ToggleOn">
-			<Using>
-				<Variable Name="ActivatorToToggle" DefaultValue="0" Type="String"/>
-			</Using>
-			<Events>
-				<Activate/>
-			</Events>
-			<Conditions>
-				<Operator Type="And">
-					<Equal Value1="_$ActionID" Value2="_ActivatorToToggle"/>
-					<Equal Value1="_Flag1" Value2="0"/>
-				</Operator>
-			</Conditions>
-			<Actions>
-				<SetVariable Name="Flag1" Value="1"/>
-				<Activate ActionID="_ActivatorToLoop"/>
-			</Actions>
-		</Loop>
-		<Loop Name="ToggleOff">
-			<Using>
-				<Variable Name="ActivatorToToggle" DefaultValue="0" Type="String"/>
-			</Using>
-			<Events>
-				<Activate/>
-			</Events>
-			<Conditions>
-				<Operator Type="And">
-					<Equal Value1="_$ActionID" Value2="_ActivatorToToggle"/>
-					<Equal Value1="_Flag1" Value2="1"/>
-				</Operator>
-			</Conditions>
-			<Actions>
-				<SetVariable Name="Flag1" Value="0"/>
-			</Actions>
-		</Loop>
-	</Template>
-	<Template Name="DynamicFollowX">
-		<Init>
-			<SetVariable Name="$AI" Value="0"/>
-			<SetVariable Name="$Active" Value="1"/>
-			<SetVariable Name="$Node" Value="COM"/>
-			<SetVariable Name="Flag1" Value="0"/>
-			<SetVariable Name="ActivatorToStart" Value="Start"/>
-			<SetVariable Name="ActivatorToLoop" Value="LoopMe"/>
-			<SetVariable Name="ActivatorToToggle" Value="None"/>
-			<SetVariable Name="ActivatorToCheck" Value="Checkit"/>
-			<SetVariable Name="UpdateEveryFrame" Value="2"/>
-			<SetVariable Name="MovementUnits" Value="25"/>
-			<SetVariable Name="NegativeMovementUnits" Value="-25"/>
-			<SetVariable Name="FollowNode" Value="Camera"/>
-			<SetVariable Name="InitialXPos" Value="0"/>
-			<SetVariable Name="TransformForward" Value="Pain"/>
-			<SetVariable Name="TransformBack" Value="Pain2"/>
-			<SetVariable Name="Offset" Value="0"/>
-		</Init>
-		<Loop Name="Start">
-			<Events>
-				<Enter/>
-			</Events>
-			<Conditions>
-			</Conditions>
-			<Actions>
-				<SetVariable Name="Flag1" Value="1"/>
-				<Activate ActionID="_ActivatorToStart"/>
-			</Actions>
-		</Loop>
-		<Loop Name="UpdateInitialXPos">
-			<Events>
-				<Activate/>
-			</Events>
-			<Conditions>
-				<Operator Type="And">
-					<Equal Value1="_$ActionID" Value2="_ActivatorToLoop"/>
-					<Equal Value1="_Flag1" Value2="1"/>
-				</Operator>
-			</Conditions>
-			<Actions>
-				<Activate ActionID="_ActivatorToStart"/>
-			</Actions>
-		</Loop>
-		<Loop Name="CheckIfInitialIsHigher">
-			<Events>
-				<Activate/>
-			</Events>
-			<Conditions>
-				<Operator Type="And">
-					<Equal Value1="_$ActionID" Value2="_ActivatorToStart"/>
-					<Equal Value1="_Flag1" Value2="1"/>
-				</Operator>
-			</Conditions>
-			<Actions>
-				<Choose Order="Straight">
-					<Wait Frames="_UpdateEveryFrame"/>
-					<Activate ActionID="_ActivatorToCheck"/>
-					<Activate ActionID="_ActivatorToLoop"/>
-				</Choose>
-			</Actions>
-		</Loop>
-		<Loop Name="CheckPositive">
-			<Events>
-				<Activate/>
-			</Events>
-			<Conditions>
-				<Operator Type="And">
-					<Greater Value="?getModel[Player].getNode[_FollowNode].worldPositionX" Than="_InitialXPos"/>
-					<Equal Value1="_$ActionID" Value2="_ActivatorToCheck"/>
-				</Operator>
-			</Conditions>
-			<Actions>
-				<Choose Order="Sync">
-					<AppendValue Name="InitialXPos" Value="_MovementUnits"/>
-					<Transform Name="_TransformForward"/>
-				</Choose>
-			</Actions>
-		</Loop>
-		<Loop Name="CheckNegative">
-			<Events>
-				<Activate/>
-			</Events>
-			<Conditions>
-				<Operator Type="And">
-					<Less Value="?getModel[Player].getNode[_FollowNode].worldPositionX" Than="_InitialXPos"/>
-					<Equal Value1="_$ActionID" Value2="_ActivatorToCheck"/>
-				</Operator>
-			</Conditions>
-			<Actions>
-				<Choose Order="Sync">
-					<AppendValue Name="InitialXPos" Value="_NegativeMovementUnits"/>
-					<Transform Name="_TransformBack"/>
-				</Choose>
-			</Actions>
-		</Loop>
-		<Loop Name="ToggleOn">
-			<Using>
-				<Variable Name="ActivatorToToggle" DefaultValue="0" Type="String"/>
-			</Using>
-			<Events>
-				<Activate/>
-			</Events>
-			<Conditions>
-				<Operator Type="And">
-					<Equal Value1="_$ActionID" Value2="_ActivatorToToggle"/>
-					<Equal Value1="_Flag1" Value2="0"/>
-				</Operator>
-			</Conditions>
-			<Actions>
-				<SetVariable Name="Flag1" Value="1"/>
-				<Activate ActionID="_ActivatorToLoop"/>
-			</Actions>
-		</Loop>
-		<Loop Name="ToggleOff">
-			<Using>
-				<Variable Name="ActivatorToToggle" DefaultValue="0" Type="String"/>
-			</Using>
-			<Events>
-				<Activate/>
-			</Events>
-			<Conditions>
-				<Operator Type="And">
-					<Equal Value1="_$ActionID" Value2="_ActivatorToToggle"/>
-					<Equal Value1="_Flag1" Value2="1"/>
-				</Operator>
-			</Conditions>
-			<Actions>
-				<SetVariable Name="Flag1" Value="0"/>
-			</Actions>
-		</Loop>
-	</Template>
-	<Template Name="DynamicFollowY">
-		<Init>
-			<SetVariable Name="$AI" Value="0"/>
-			<SetVariable Name="$Active" Value="1"/>
-			<SetVariable Name="$Node" Value="COM"/>
-			<SetVariable Name="Flag1" Value="0"/>
-			<SetVariable Name="ActivatorToStart" Value="Start1"/>
-			<SetVariable Name="ActivatorToLoop" Value="LoopMe1"/>
-			<SetVariable Name="ActivatorToToggle" Value="N1"/>
-			<SetVariable Name="ActivatorToCheck" Value="Checkit1"/>
-			<SetVariable Name="UpdateEveryFrame" Value="2"/>
-			<SetVariable Name="MovementUnits" Value="-25"/>
-			<SetVariable Name="NegativeMovementUnits" Value="25"/>
-			<SetVariable Name="FollowNode" Value="Camera"/>
-			<SetVariable Name="InitialYPos" Value="-50"/>
-			<SetVariable Name="TransformUp" Value="Up"/>
-			<SetVariable Name="TransformDown" Value="Down"/>
-			<SetVariable Name="Offset" Value="0"/>
-		</Init>
-		<Loop Name="Start">
-			<Events>
-				<Enter/>
-			</Events>
-			<Conditions>
-			</Conditions>
-			<Actions>
-				<SetVariable Name="Flag1" Value="1"/>
-				<Activate ActionID="_ActivatorToStart"/>
-			</Actions>
-		</Loop>
-		<Loop Name="UpdateInitialYPos">
-			<Events>
-				<Activate/>
-			</Events>
-			<Conditions>
-				<Operator Type="And">
-					<Equal Value1="_$ActionID" Value2="_ActivatorToLoop"/>
-					<Equal Value1="_Flag1" Value2="1"/>
-				</Operator>
-			</Conditions>
-			<Actions>
-				<Activate ActionID="_ActivatorToStart"/>
-			</Actions>
-		</Loop>
-		<Loop Name="CheckIfInitialIsHigher">
-			<Events>
-				<Activate/>
-			</Events>
-			<Conditions>
-				<Operator Type="And">
-					<Equal Value1="_$ActionID" Value2="_ActivatorToStart"/>
-					<Equal Value1="_Flag1" Value2="1"/>
-				</Operator>
-			</Conditions>
-			<Actions>
-				<Choose Order="Straight">
-					<Wait Frames="_UpdateEveryFrame"/>
-					<Activate ActionID="_ActivatorToCheck"/>
-					<Activate ActionID="_ActivatorToLoop"/>
-				</Choose>
-			</Actions>
-		</Loop>
-		<Loop Name="CheckPositive">
-			<Events>
-				<Activate/>
-			</Events>
-			<Conditions>
-				<Operator Type="And">
-					<Greater Value="?getModel[Player].getNode[_FollowNode].worldPositionY" Than="_InitialYPos"/>
-					<Equal Value1="_$ActionID" Value2="_ActivatorToCheck"/>
-				</Operator>
-			</Conditions>
-			<Actions>
-				<Choose Order="Sync">
-					<AppendValue Name="InitialYPos" Value="_MovementUnits"/>
-					<Transform Name="_TransformDown"/>
-				</Choose>
-			</Actions>
-		</Loop>
-		<Loop Name="CheckNegative">
-			<Events>
-				<Activate/>
-			</Events>
-			<Conditions>
-				<Operator Type="And">
-					<Less Value="?getModel[Player].getNode[_FollowNode].worldPositionY" Than="_InitialYPos"/>
-					<Equal Value1="_$ActionID" Value2="_ActivatorToCheck"/>
-				</Operator>
-			</Conditions>
-			<Actions>
-				<Choose Order="Sync">
-					<AppendValue Name="InitialYPos" Value="_NegativeMovementUnits"/>
-					<Transform Name="_TransformUp"/>
-				</Choose>
-			</Actions>
-		</Loop>
-		<Loop Name="ToggleOn">
-			<Using>
-				<Variable Name="ActivatorToToggle" DefaultValue="0" Type="String"/>
-			</Using>
-			<Events>
-				<Activate/>
-			</Events>
-			<Conditions>
-				<Operator Type="And">
-					<Equal Value1="_$ActionID" Value2="_ActivatorToToggle"/>
-					<Equal Value1="_Flag1" Value2="0"/>
-				</Operator>
-			</Conditions>
-			<Actions>
-				<SetVariable Name="Flag1" Value="1"/>
-				<Activate ActionID="_ActivatorToLoop"/>
-			</Actions>
-		</Loop>
-		<Loop Name="ToggleOff">
-			<Using>
-				<Variable Name="ActivatorToToggle" DefaultValue="0" Type="String"/>
-			</Using>
-			<Events>
-				<Activate/>
-			</Events>
-			<Conditions>
-				<Operator Type="And">
-					<Equal Value1="_$ActionID" Value2="_ActivatorToToggle"/>
-					<Equal Value1="_Flag1" Value2="1"/>
-				</Operator>
-			</Conditions>
-			<Actions>
-				<SetVariable Name="Flag1" Value="0"/>
-			</Actions>
-		</Loop>
-	</Template>
-	<Template Name="SpawnLooper">
-		<Init>
-			<SetVariable Name="$AI" Value="-1"/>
-			<SetVariable Name="$Active" Value="1"/>
-			<SetVariable Name="$Node" Value="COM"/>
-			<SetVariable Name="ActionID" Value="Me"/>
-			<SetVariable Name="Spawn" Value="SpawnPoint"/>
-			<SetVariable Name="Model" Value="Player"/>
-			<SetVariable Name="Frames" Value="1"/>
-			<SetVariable Name="ActivatorToStart" Value="Start2"/>
-			<SetVariable Name="ActivatorToLoop" Value="LoopMe2"/>
-			<SetVariable Name="ActivatorToToggle" Value="None2"/>
-		</Init>
-		<Loop Name="Start">
-			<Using>
-				<Variable Name="ActivatorToStart" DefaultValue="0" Type="String"/>
-			</Using>
-			<Events>
-				<Enter/>
-			</Events>
-			<Conditions/>
-			<Actions>
-				<SetVariable Name="Flag1" Value="1"/>
-				<Activate ActionID="_ActivatorToStart"/>
-			</Actions>
-		</Loop>
-		<Loop Name="LoopMe">
-			<Using>
-				<Variable Name="ActivatorToStart" DefaultValue="0" Type="String"/>
-				<Variable Name="ActivatorToLoop" DefaultValue="0" Type="String"/>
-			</Using>
-			<Events>
-				<Activate/>
-			</Events>
-			<Conditions>
-				<Operator Type="And">
-					<Equal Value1="_$ActionID" Value2="_ActivatorToLoop"/>
-					<Equal Value1="_Flag1" Value2="1"/>
-				</Operator>
-			</Conditions>
-			<Actions>
-				<Activate ActionID="_ActivatorToStart"/>
-			</Actions>
-		</Loop>
-		<Loop Name="LoopMeAgain">
-			<Using>
-				<Variable Name="Sound" DefaultValue="0" ComplexName="1" Type="Sound"/>
-				<Variable Name="ActivatorToLoop" DefaultValue="0" Type="String"/>
-				<Variable Name="ActivatorToStart" DefaultValue="0" Type="String"/>
-			</Using>
-			<Events>
-				<Activate/>
-			</Events>
-			<Conditions>
-				<Operator Type="And">
-					<Equal Value1="_$ActionID" Value2="_ActivatorToStart"/>
-					<Equal Value1="_Flag1" Value2="1"/>
-				</Operator>
-			</Conditions>
-			<Actions>
-				<Choose Order="Straight">
-					<Spawn Model="_Model" Spawn="_Spawn"/>
-					<Camera Follow="_Model"/>
-					<Kill Model="_Model"/>
-					<Wait Frames="_Frames"/>
-					<Activate ActionID="_ActivatorToLoop"/>
-				</Choose>
-			</Actions>
-		</Loop>
-		<Loop Name="ToggleOn">
-			<Using>
-				<Variable Name="ActivatorToToggle" DefaultValue="0" Type="String"/>
-			</Using>
-			<Events>
-				<Activate/>
-			</Events>
-			<Conditions>
-				<Operator Type="And">
-					<Equal Value1="_$ActionID" Value2="_ActivatorToToggle"/>
-					<Equal Value1="_Flag1" Value2="0"/>
-				</Operator>
-			</Conditions>
-			<Actions>
-				<SetVariable Name="Flag1" Value="1"/>
-				<Activate ActionID="_ActivatorToLoop"/>
-			</Actions>
-		</Loop>
-		<Loop Name="ToggleOff">
-			<Using>
-				<Variable Name="ActivatorToToggle" DefaultValue="0" Type="String"/>
-			</Using>
-			<Events>
-				<Activate/>
-			</Events>
-			<Conditions>
-				<Operator Type="And">
-					<Equal Value1="_$ActionID" Value2="_ActivatorToToggle"/>
-					<Equal Value1="_Flag1" Value2="1"/>
-				</Operator>
-			</Conditions>
-			<Actions>
-				<SetVariable Name="Flag1" Value="0"/>
-			</Actions>
-		</Loop>
-	</Template>
-	<Template Name="UniqueIDTest">
-		<Init>
-			<SetVariable Name="$AI" Value="-1"/>
-			<SetVariable Name="$Active" Value="1"/>
-			<SetVariable Name="$Node" Value="COM"/>
-			<SetVariable Name="UniqueID" Value="Me"/>
-		</Init>
-		<Loop Name="Enter">
-			<Using>
-				<Variable Name="ActivatorToStart" DefaultValue="0" Type="String"/>
-				<Variable Name="UniqueID" DefaultValue="0" Type="String"/>
-			</Using>
-			<Events>
-				<Enter/>
-			</Events>
-			<Conditions/>
-			<Actions>
-				<Choose Order="Straight">
-					<SetVariable Name="ActivatorToStart" Value="uidstart- + _UniqueID"/>
-					<SetVariable Name="ActivatorToLoop" Value="uidloop- + _UniqueID"/>
-					<Activate ActionID="_ActivatorToStart"/>
-				</Choose>
-			</Actions>
-		</Loop>
-		<Loop Name="LoopMe">
-			<Using>
-				<Variable Name="ActivatorToStart" DefaultValue="0" Type="String"/>
-				<Variable Name="ActivatorToLoop" DefaultValue="0" Type="String"/>
-			</Using>
-			<Events>
-				<Activate/>
-			</Events>
-			<Conditions>
-				<Equal Value1="_$ActionID" Value2="_ActivatorToLoop"/>
-			</Conditions>
-			<Actions>
-				<Activate ActionID="_ActivatorToStart"/>
-			</Actions>
-		</Loop>
-		<Loop Name="LoopMeAgain">
-			<Using>
-				<Variable Name="Sound" DefaultValue="0" ComplexName="1" Type="Sound"/>
-				<Variable Name="ActivatorToLoop" DefaultValue="0" Type="String"/>
-				<Variable Name="ActivatorToStart" DefaultValue="0" Type="String"/>
-			</Using>
-			<Events>
-				<Activate/>
-			</Events>
-			<Conditions>
-				<Equal Value1="_$ActionID" Value2="_ActivatorToStart"/>
-			</Conditions>
-			<Actions>
-				<Choose Order="Straight">
-					<Sound Name="_Sound"/>
-					<Wait Frames="_Frames"/>
-					<Activate ActionID="_ActivatorToLoop"/>
-				</Choose>
-			</Actions>
-		</Loop>
-	</Template>
-	<Template Name="RandomSoundWithIntervals">
-		<Init>
-			<SetVariable Name="$AI" Value="-1"/>
-			<SetVariable Name="$Active" Value="1"/>
-			<SetVariable Name="$Node" Value="COM"/>
-			<SetVariable Name="Flag1" Value="0"/>
-		</Init>
-		<Loop Name="Enter">
-			<Using>
-				<Variable Name="ActivatorToStart" DefaultValue="0" Type="String"/>
-			</Using>
-			<Events>
-				<Enter/>
-			</Events>
-			<Conditions/>
-			<Actions>
-				<Activate ActionID="_ActivatorToStart"/>
-			</Actions>
-		</Loop>
-		<Loop Name="LoopMe">
-			<Using>
-				<Variable Name="ActivatorToStart" DefaultValue="0" Type="String"/>
-				<Variable Name="ActivatorToLoop" DefaultValue="0" Type="String"/>
-			</Using>
-			<Events>
-				<Activate/>
-			</Events>
-			<Conditions>
-				<Equal Value1="_$ActionID" Value2="_ActivatorToLoop"/>
-			</Conditions>
-			<Actions>
-				<Activate ActionID="_ActivatorToStart"/>
-			</Actions>
-		</Loop>
-		<Loop Name="LoopMeAgain">
-			<Using>
-				<Variable Name="Sound" DefaultValue="0" ComplexName="1" Type="Sound"/>
-				<Variable Name="ActivatorToLoop" DefaultValue="0" Type="String"/>
-				<Variable Name="ActivatorToStart" DefaultValue="0" Type="String"/>
-			</Using>
-			<Events>
-				<Activate/>
-			</Events>
-			<Conditions>
-				<Equal Value1="_$ActionID" Value2="_ActivatorToStart"/>
-			</Conditions>
-			<Actions>
-				<Choose Order="Straight">
-					<Sound Name="_Sound"/>
-					<Wait Frames="_Frames"/>
-					<Activate ActionID="_ActivatorToLoop"/>
-				</Choose>
-			</Actions>
-		</Loop>
-	</Template>
-	<Template Name="RedLightGreenLight">
-		<Init>
-			<SetVariable Name="$AI" Value="-1"/>
-			<SetVariable Name="$Active" Value="1"/>
-			<SetVariable Name="$Node" Value="COM"/>
-			<SetVariable Name="Flag1" Value="0"/>
-		</Init>
-		<Loop Name="ChangeTheLightToRed">
-			<Using>
-				<Variable Name="CurrentLight" DefaultValue="Red" Type="String"/>
-			</Using>
-			<Events Template="FreqUsed.Activate"/>
-			<Conditions>
-				<Equal Value1="_$ActionID" Value2="ChangeItToRed"/>
-			</Conditions>
-			<Actions>
-				<Wait Frames="20"/>
-				<SetVariable Name="CurrentLight" Value="Red"/>
-			</Actions>
-		</Loop>
-		<Loop Name="ChangeTheLightToGreen">
-			<Using>
-				<Variable Name="CurrentLight" DefaultValue="Red" Type="String"/>
-			</Using>
-			<Events Template="FreqUsed.Activate"/>
-			<Conditions>
-				<Equal Value1="_$ActionID" Value2="ChangeItToGreen"/>
-			</Conditions>
-			<Actions>
-				<SetVariable Name="CurrentLight" Value="Green"/>
-			</Actions>
-		</Loop>
-		<Loop Name="MoveOrDie">
-			<Using>
-				<Variable Name="CurrentLight" DefaultValue="Red" Type="String"/>
-			</Using>
-			<Events Template="FreqUsed.Enter"/>
-			<Conditions>
-				<Equal Value1="_CurrentLight" Value2="Red"/>
-				<Equal Value1="RunForward" Value2="?getModel[_$Model].animationName" Not="_Not"/>
-			</Conditions>
-			<Actions>
-				<Kill Model="_$Model"/>
-			</Actions>
-		</Loop>
-	</Template>
-	<Template Name="NoCollisions">
-		<Init>
-			<SetVariable Name="$AI" Value="-1"/>
-			<SetVariable Name="$Active" Value="1"/>
-			<SetVariable Name="$Node" Value="COM"/>
-			<SetVariable Name="Flag1" Value="0"/>
-		</Init>
-		<Loop Name="Only">
-			<Using/>
-			<Events>
-				<ValueChange Value="?getModel[Player].animationName"/>
-			</Events>
-			<Conditions>
-				<Operator Type="Or">
-					<Equal Value1="WallCollisionFromRun" Value2="?getModel[_$Model].animationName"/>
-					<Equal Value1="WallCollisionFromSlide" Value2="?getModel[_$Model].animationName"/>
-					<Equal Value1="TableCollision" Value2="?getModel[_$Model].animationName"/>
-					<Equal Value1="LongTableCollision" Value2="?getModel[_$Model].animationName"/>
-					<Equal Value1="TableCollisionCling" Value2="?getModel[_$Model].animationName"/>
-					<Equal Value1="LongTableCollisionCling" Value2="?getModel[_$Model].animationName"/>
-					<Equal Value1="CollisionToFly" Value2="?getModel[_$Model].animationName"/>
-					<Equal Value1="Stumble" Value2="?getModel[_$Model].animationName"/>
-					<Equal Value1="FlyObjectCollision" Value2="?getModel[_$Model].animationName"/>
-					<Equal Value1="FlyCollisionFly" Value2="?getModel[_$Model].animationName"/>
-				</Operator>
-			</Conditions>
-			<Actions>
-				<Camera Stop="1" Smoothness="4"/>
-				<Kill Model="Player"/>
-				<EndGame Result="Loss" Model="_$Model" Frames="120"/>
-			</Actions>
-		</Loop>
-	</Template>
-	<!-- Broken, Work on this later-->
-	<Template Name="InvertedControls">
-		<Init>
-			<SetVariable Name="$AI" Value="-1"/>
-			<SetVariable Name="$Active" Value="1"/>
-			<SetVariable Name="$Node" Value="COM"/>
-			<SetVariable Name="Flag1" Value="0"/>
-		</Init>
-		<Loop Name="LeftInvert">
-			<Using/>
-			<Events>
-				<KeyPressed/>
-			</Events>
-			<Conditions>
-				<Equal Value1="_$Key" Value2="Left"/>
-			</Conditions>
-			<Actions>
-				<ForceAnimation Name="RunForward" Model="Player" Frame="4" Reversed="0"/>
-				<Press Key="Right" Model="Player"/>
-			</Actions>
-		</Loop>
-		<Loop Name="RightInvert">
-			<Using/>
-			<Events>
-				<KeyPressed/>
-			</Events>
-			<Conditions>
-				<Equal Value1="_$Key" Value2="Right"/>
-			</Conditions>
-			<Actions>
-				<ForceAnimation Name="RunForward" Model="Player" Frame="4" Reversed="0"/>
-				<Press Key="Left" Model="Player"/>
-			</Actions>
-		</Loop>
-		<Loop Name="UpInvert">
-			<Using/>
-			<Events>
-				<KeyPressed/>
-			</Events>
-			<Conditions>
-				<Equal Value1="_$Key" Value2="Up"/>
-			</Conditions>
-			<Actions>
-				<ForceAnimation Name="RunForward" Model="Player" Frame="4" Reversed="0"/>
-				<Press Key="Down" Model="Player"/>
-			</Actions>
-		</Loop>
-		<Loop Name="DownInvert">
-			<Using/>
-			<Events>
-				<KeyPressed/>
-			</Events>
-			<Conditions>
-				<Equal Value1="_$Key" Value2="Down"/>
-			</Conditions>
-			<Actions>
-				<ForceAnimation Name="RunForward" Model="Player" Frame="4" Reversed="0"/>
-				<Press Key="Up" Model="Player"/>
-			</Actions>
-		</Loop>
-	</Template>
-	<Template Name="LimitedKeypresses">
-		<Init>
-			<SetVariable Name="$AI" Value="-1"/>
-			<SetVariable Name="$Active" Value="1"/>
-			<SetVariable Name="$Node" Value="COM"/>
-			<SetVariable Name="Flag1" Value="0"/>
-		</Init>
-		<Loop Name="DecreaseCounter">
-			<Using>
-				<Variable Name="KeyPressesLeft" DefaultValue="0" Type="Int"/>
-			</Using>
-			<Events>
-				<KeyPressed/>
-			</Events>
-			<Conditions>
-				<Equal Value1="_KeyPressesLeft" Value2="0" Not="1"/>
-			</Conditions>
-			<Actions>
-				<Wait Frames="5"/>
-				<AppendValue Name="KeyPressesLeft" Value="-1"/>
-			</Actions>
-		</Loop>
-		<Loop Name="Lose">
-			<Using>
-				<Variable Name="KeyPressesLeft" DefaultValue="0" Type="Int"/>
-			</Using>
-			<Events>
-				<KeyPressed/>
-				<Exit/>
-			</Events>
-			<Conditions>
-				<Equal Value1="_KeyPressesLeft" Value2="0"/>
-			</Conditions>
-			<Actions>
-				<EndGame Result="Loss" Model="_$Model" Frames="120"/>
-			</Actions>
-		</Loop>
-		<Loop Name="ReminderOne">
-			<Using>
-				<Variable Name="KeyPressesLeft" DefaultValue="0" Type="Int"/>
-			</Using>
-			<Events>
-				<KeyPressed/>
-			</Events>
-			<Conditions>
-				<Equal Value1="_KeyPressesLeft" Value2="4"/>
-			</Conditions>
-			<Actions>
-				<MessageOnScreen Text="5 Left" Color="#FFFFFFFF" Frames="30" AppearStyle="Fade" DisappearStyle="Fade"/>
-			</Actions>
-		</Loop>
-		<Loop Name="ReminderTwo">
-			<Using>
-				<Variable Name="KeyPressesLeft" DefaultValue="0" Type="Int"/>
-			</Using>
-			<Events>
-				<KeyPressed/>
-			</Events>
-			<Conditions>
-				<Equal Value1="_KeyPressesLeft" Value2="9"/>
-			</Conditions>
-			<Actions>
-				<MessageOnScreen Text="10 Left" Color="#FFFFFFFF" Frames="30" AppearStyle="Fade" DisappearStyle="Fade"/>
-			</Actions>
-		</Loop>
-	</Template>
-	<Template Name="FollowPlayer">
-		<Init>
-			<SetVariable Name="$AI" Value="-1"/>
-			<SetVariable Name="$Active" Value="1"/>
-			<SetVariable Name="$Node" Value="COM"/>
-			<SetVariable Name="Flag1" Value="0"/>
-		</Init>
-		<Loop Name="FollowKey">
-			<Using>
-			</Using>
-			<Events>
-				<KeyPressed/>
-			</Events>
-			<Conditions>
-			</Conditions>
-			<Actions>
-			</Actions>
-		</Loop>
-	</Template>
-	<Template Name="TransformationAnimationCondition">
-		<Init>
-			<SetVariable Name="$AI" Value="-1"/>
-			<SetVariable Name="$Active" Value="1"/>
-			<SetVariable Name="$Node" Value="COM"/>
-			<SetVariable Name="Flag1" Value="0"/>
-		</Init>
-		<Loop>
-			<Using>
-				<Variable Name="ReqAnim" DefaultValue="0" Type="String" ComplexName="1"/>
-				<Variable Name="TransformationName" DefaultValue="0" Type="String"/>
-				<Variable Name="Not" DefaultValue="0" Type="Int"/>
-			</Using>
-			<Events>
-				<EventBlock Template="FreqUsed.Enter"/>
-			</Events>
-			<Conditions>
-				<Equal Value1="_ReqAnim" Value2="?getModel[_$Model].animationName" Not="_Not"/>
-			</Conditions>
-			<Actions>
-				<ActionBlock Template="FreqUsed.SwitchOff"/>
-				<Transform Name="_TransformationName"/>
-			</Actions>
-		</Loop>
-	</Template>
-	<Template Name="DynamicLoop">
-		<Init>
-			<SetVariable Name="$AI" Value="-1"/>
-			<SetVariable Name="$Active" Value="1"/>
-			<SetVariable Name="$Node" Value="COM"/>
-			<SetVariable Name="Flag1" Value="0"/>
-		</Init>
-		<Loop Name="Enter">
-			<Using>
-				<Variable Name="UniqueID" DefaultValue="0" Type="String"/>
-			</Using>
-			<Events>
-				<EventBlock Template="FreqUsed.Enter"/>
-			</Events>
-			<Actions>
-				<Activate ActionID="_UniqueID"/>
-			</Actions>
-		</Loop>
-		<Loop Name="Loop">
-			<Using>
-				<Variable Name="UniqueID" DefaultValue="0" Type="String"/>
-				<Variable Name="Transformation" DefaultValue="0" Type="String"/>
-				<Variable Name="Delay" DefaultValue="0" Type="String"/>
-			</Using>
-			<Events>
-				<EventBlock Template="FreqUsed.Activate"/>
-			</Events>
-			<Conditions>
-				<Equal Value1="_$ActionID" Value2="_UniqueID"/>
-			</Conditions>
-			<Actions>
-				<ActionBlock Template="FreqUsed.SwitchOff"/>
-				<Transform Name="_Transformation"/>
-				<Wait Frames="_Delay"/>
-			</Actions>
-		</Loop>
-	</Template>
-	<Template Name="TransformKeyChoice">
-		<Init>
-			<SetVariable Name="$AI" Value="-1"/>
-			<SetVariable Name="$Active" Value="1"/>
-			<SetVariable Name="$Node" Value="COM"/>
-			<SetVariable Name="Flag1" Value="0"/>
-		</Init>
-		<Loop Name="One">
-			<Using>
-				<Variable Name="KeyOne" DefaultValue="0" Type="Key"/>
-				<Variable Name="TransformationOne" DefaultValue="0" Type="String"/>
-			</Using>
-			<Events>
-				<EventBlock Template="FreqUsed.KeyPressed"/>
-			</Events>
-			<Conditions>
-				<Operator Type="And">
-					<Equal Value1="_$Key" Value2="_KeyOne"/>
-					<Equal Value1="?getModel[_$Model].animationName" Value2="StandAfterInhibition"/>
-				</Operator>
-			</Conditions>
-			<Actions>
-				<ActionBlock Template="FreqUsed.SwitchOff"/>
-				<Transform Name="_TransformationOne"/>
-			</Actions>
-		</Loop>
-		<Loop Name="Two">
-			<Using>
-				<Variable Name="KeyTwo" DefaultValue="0" Type="Key"/>
-				<Variable Name="TransformationTwo" DefaultValue="0" Type="String"/>
-			</Using>
-			<Events>
-				<EventBlock Template="FreqUsed.KeyPressed"/>
-			</Events>
-			<Conditions>
-				<Operator Type="And">
-					<Equal Value1="_$Key" Value2="_KeyTwo"/>
-					<Equal Value1="?getModel[_$Model].animationName" Value2="StandAfterInhibition"/>
-				</Operator>
-			</Conditions>
-			<Actions>
-				<ActionBlock Template="FreqUsed.SwitchOff"/>
-				<Transform Name="_TransformationTwo"/>
-			</Actions>
-		</Loop>
-	</Template>
-	<Template Name="TransformKey">
-		<Init>
-			<SetVariable Name="$AI" Value="-1"/>
-			<SetVariable Name="$Active" Value="1"/>
-			<SetVariable Name="$Node" Value="COM"/>
-			<SetVariable Name="Flag1" Value="0"/>
-		</Init>
-		<Loop Name="Only">
-			<Using>
-				<Variable Name="Key" DefaultValue="0" Type="Key"/>
-				<Variable Name="Transformation" DefaultValue="0" Type="String"/>
-			</Using>
-			<Events>
-				<EventBlock Template="FreqUsed.KeyPressed"/>
-			</Events>
-			<Conditions>
-				<Equal Value1="_$Key" Value2="_Key"/>
-			</Conditions>
-			<Actions>
-				<ActionBlock Template="FreqUsed.SwitchOff"/>
-				<Transform Name="_Transformation"/>
-			</Actions>
-		</Loop>
-	</Template>
-	<Template Name="TransformKeyChoiceMultiple">
-		<Init>
-			<SetVariable Name="$AI" Value="-1"/>
-			<SetVariable Name="$Active" Value="1"/>
-			<SetVariable Name="$Node" Value="COM"/>
-			<SetVariable Name="Flag1" Value="0"/>
-		</Init>
-		<Loop Name="One">
-			<Using>
-				<Variable Name="KeyOne" DefaultValue="0" Type="Key"/>
-				<Variable Name="TransformationOne" DefaultValue="0" Type="String"/>
-			</Using>
-			<Events>
-				<EventBlock Template="FreqUsed.KeyPressed"/>
-			</Events>
-			<Conditions>
-				<Operator Type="And">
-					<Equal Value1="_$Key" Value2="_KeyOne"/>
-					<Equal Value1="?getModel[_$Model].animationName" Value2="StandAfterInhibition"/>
-				</Operator>
-			</Conditions>
-			<Actions>
-				<ActionBlock Template="FreqUsed.SwitchOff"/>
-				<Transform Name="_TransformationOne"/>
-				<Wait Frames="30"/>
-				<ActionBlock Template="FreqUsed.SwitchOn"/>
-			</Actions>
-		</Loop>
-		<Loop Name="Two">
-			<Using>
-				<Variable Name="KeyTwo" DefaultValue="0" Type="Key"/>
-				<Variable Name="TransformationTwo" DefaultValue="0" Type="String"/>
-			</Using>
-			<Events>
-				<EventBlock Template="FreqUsed.KeyPressed"/>
-			</Events>
-			<Conditions>
-				<Operator Type="And">
-					<Equal Value1="_$Key" Value2="_KeyTwo"/>
-					<Equal Value1="?getModel[_$Model].animationName" Value2="StandAfterInhibition"/>
-				</Operator>
-			</Conditions>
-			<Actions>
-				<ActionBlock Template="FreqUsed.SwitchOff"/>
-				<Transform Name="_TransformationTwo"/>
-				<Wait Frames="30"/>
-				<ActionBlock Template="FreqUsed.SwitchOn"/>
-			</Actions>
-		</Loop>
-	</Template>
-	<Template Name="DynamicElevator">
-		<Init>
-			<SetVariable Name="$AI" Value="-1"/>
-			<SetVariable Name="$Active" Value="1"/>
-			<SetVariable Name="$Node" Value="COM"/>
-			<SetVariable Name="Flag1" Value="0"/>
-		</Init>
-		<Loop Name="One">
-			<Using>
-				<Variable Name="KeyOne" DefaultValue="0" Type="Key"/>
-				<Variable Name="TransformationOne" DefaultValue="0" Type="String"/>
-				<Variable Name="MaxFloor" DefaultValue="0" Type="Int"/>
-				<Variable Name="CurrentFloor" DefaultValue="-1" Type="Int"/>
-			</Using>
-			<Events>
-				<EventBlock Template="FreqUsed.KeyPressed"/>
-			</Events>
-			<Conditions>
-				<Operator Type="And">
-					<Equal Value1="_$Key" Value2="_KeyOne"/>
-					<Equal Value1="?getModel[_$Model].animationName" Value2="StandAfterInhibition"/>
-					<Equal Value1="_MaxFloor" Value2="_CurrentFloor" Not="1"/>
-				</Operator>
-			</Conditions>
-			<Actions>
-				<ActionBlock Template="FreqUsed.SwitchOff"/>
-				<Transform Name="_TransformationOne"/>
-				<Wait Frames="30"/>
-				<ActionBlock Template="FreqUsed.SwitchOn"/>
-				<AppendValue Name="CurrentFloor" Value="1"/>
-			</Actions>
-		</Loop>
-		<Loop Name="Two">
-			<Using>
-				<Variable Name="KeyTwo" DefaultValue="0" Type="Key"/>
-				<Variable Name="TransformationTwo" DefaultValue="0" Type="String"/>
-				<Variable Name="CurrentFloor" DefaultValue="-1" Type="Int"/>
-			</Using>
-			<Events>
-				<EventBlock Template="FreqUsed.KeyPressed"/>
-			</Events>
-			<Conditions>
-				<Operator Type="And">
-					<Equal Value1="_$Key" Value2="_KeyTwo"/>
-					<Equal Value1="?getModel[_$Model].animationName" Value2="StandAfterInhibition"/>
-					<Equal Value1="0" Value2="_CurrentFloor" Not="1"/>
-				</Operator>
-			</Conditions>
-			<Actions>
-				<ActionBlock Template="FreqUsed.SwitchOff"/>
-				<Transform Name="_TransformationTwo"/>
-				<Wait Frames="30"/>
-				<ActionBlock Template="FreqUsed.SwitchOn"/>
-				<AppendValue Name="CurrentFloor" Value="-1"/>
-			</Actions>
-		</Loop>
-	</Template>
-	<Template Name="DynamicElevatorWithCalling">
-		<Init>
-			<SetVariable Name="$AI" Value="-1"/>
-			<SetVariable Name="$Active" Value="1"/>
-			<SetVariable Name="$Node" Value="COM"/>
-			<SetVariable Name="Flag1" Value="0"/>
-		</Init>
-		<Loop Name="One">
-			<Using>
-				<Variable Name="KeyOne" DefaultValue="0" Type="Key"/>
-				<Variable Name="TransformationOne" DefaultValue="0" Type="String"/>
-				<Variable Name="MaxFloor" DefaultValue="0" Type="Int"/>
-				<Variable Name="CurrentFloor" DefaultValue="-1" Type="Int"/>
-			</Using>
-			<Events>
-				<EventBlock Template="FreqUsed.KeyPressed"/>
-			</Events>
-			<Conditions>
-				<Operator Type="And">
-					<Equal Value1="_$Key" Value2="_KeyOne"/>
-					<Equal Value1="?getModel[_$Model].animationName" Value2="StandAfterInhibition"/>
-					<Equal Value1="_MaxFloor" Value2="_CurrentFloor" Not="1"/>
-				</Operator>
-			</Conditions>
-			<Actions>
-				<ActionBlock Template="FreqUsed.SwitchOff"/>
-				<Transform Name="_TransformationOne"/>
-				<Wait Frames="30"/>
-				<ActionBlock Template="FreqUsed.SwitchOn"/>
-				<AppendValue Name="CurrentFloor" Value="1"/>
-			</Actions>
-		</Loop>
-		<Loop Name="Two">
-			<Using>
-				<Variable Name="KeyTwo" DefaultValue="0" Type="Key"/>
-				<Variable Name="TransformationTwo" DefaultValue="0" Type="String"/>
-				<Variable Name="CurrentFloor" DefaultValue="-1" Type="Int"/>
-			</Using>
-			<Events>
-				<EventBlock Template="FreqUsed.KeyPressed"/>
-			</Events>
-			<Conditions>
-				<Operator Type="And">
-					<Equal Value1="_$Key" Value2="_KeyTwo"/>
-					<Equal Value1="?getModel[_$Model].animationName" Value2="StandAfterInhibition"/>
-					<Equal Value1="0" Value2="_CurrentFloor" Not="1"/>
-				</Operator>
-			</Conditions>
-			<Actions>
-				<ActionBlock Template="FreqUsed.SwitchOff"/>
-				<Transform Name="_TransformationTwo"/>
-				<Wait Frames="30"/>
-				<ActionBlock Template="FreqUsed.SwitchOn"/>
-				<AppendValue Name="CurrentFloor" Value="-1"/>
-			</Actions>
-		</Loop>
-		<Loop Name="RecieveTheCallGoUp">
-			<Using>
-				<Variable Name="ActivatorToGoUp" DefaultValue="None" Type="String"/>
-				<Variable Name="CurrentFloor" DefaultValue="-1" Type="Int"/>
-			</Using>
-			<Events>
-				<EventBlock Template="FreqUsed.Activate"/>
-			</Events>
-			<Conditions>
-				<Operator Type="And">
-					<Equal Value1="0" Value2="_CurrentFloor" Not="1"/>
-					<Equal Value1="_$ActionID" Value2="_ActivatorToGoUp"/>
-				</Operator>
-			</Conditions>
-			<Actions>
-				<ActionBlock Template="FreqUsed.SwitchOff"/>
-				<Transform Name="_TransformationOne"/>
-				<Wait Frames="30"/>
-				<ActionBlock Template="FreqUsed.SwitchOn"/>
-				<AppendValue Name="CurrentFloor" Value="1"/>
-			</Actions>
-		</Loop>
-		<Loop Name="RecieveTheCallGoDown">
-			<Using>
-				<Variable Name="ActivatorToGoDown" DefaultValue="None" Type="String"/>
-				<Variable Name="CurrentFloor" DefaultValue="-1" Type="Int"/>
-				<Variable Name="MaxFloor" DefaultValue="0" Type="Int"/>
-			</Using>
-			<Events>
-				<EventBlock Template="FreqUsed.Activate"/>
-			</Events>
-			<Conditions>
-				<Operator Type="And">
-					<Equal Value1="_MaxFloor" Value2="_CurrentFloor" Not="1"/>
-					<Equal Value1="_$ActionID" Value2="_ActivatorToGoDown"/>
-				</Operator>
-			</Conditions>
-			<Actions>
-				<ActionBlock Template="FreqUsed.SwitchOff"/>
-				<Transform Name="_TransformationTwo"/>
-				<Wait Frames="30"/>
-				<ActionBlock Template="FreqUsed.SwitchOn"/>
-				<AppendValue Name="CurrentFloor" Value="-1"/>
-			</Actions>
-		</Loop>
-	</Template>
-	<Template Name="DynamicElevatorCaller">
-		<Init>
-			<SetVariable Name="$AI" Value="-1"/>
-			<SetVariable Name="$Active" Value="1"/>
-			<SetVariable Name="$Node" Value="COM"/>
-			<SetVariable Name="Flag1" Value="0"/>
-		</Init>
-		<Loop Name="UpdateUp">
-			<Using>
-				<Variable Name="ActivatorToGoUp" DefaultValue="None" Type="String"/>
-			</Using>
-			<Events>
-				<EventBlock Template="FreqUsed.Enter"/>
-			</Events>
-			<Actions>
-				<Activate ActionID="_ActivatorToGoUp"/>
-			</Actions>
-		</Loop>
-		<Loop Name="UpdateUp">
-			<Using>
-				<Variable Name="ActivatorToGoDown" DefaultValue="None" Type="String"/>
-			</Using>
-			<Events>
-				<EventBlock Template="FreqUsed.Enter"/>
-			</Events>
-			<Actions>
-				<Activate ActionID="_ActivatorToGoDown"/>
-			</Actions>
-		</Loop>
-	</Template>
-	<Template Name="DynamicElevatorWithCallingAdv">
-		<Init>
-			<SetVariable Name="$AI" Value="-1"/>
-			<SetVariable Name="$Active" Value="1"/>
-			<SetVariable Name="$Node" Value="COM"/>
-			<SetVariable Name="Flag1" Value="0"/>
-		</Init>
-		<Loop Name="One">
-			<Using>
-				<Variable Name="KeyOne" DefaultValue="0" Type="Key"/>
-				<Variable Name="TransformationOne" DefaultValue="0" Type="String"/>
-				<Variable Name="MaxFloor" DefaultValue="0" Type="Int"/>
-				<Variable Name="CurrentFloor" DefaultValue="-1" Type="Int"/>
-				<Variable Name="CurrentPlayerFloor" DefaultValue="-1" Type="Int"/>
-				<Variable Name="ActivatorToSyncUp" DefaultValue="None" Type="String"/>
-			</Using>
-			<Events>
-				<EventBlock Template="FreqUsed.KeyPressed"/>
-			</Events>
-			<Conditions>
-				<Operator Type="And">
-					<Equal Value1="_$Key" Value2="_KeyOne"/>
-					<Equal Value1="?getModel[_$Model].animationName" Value2="StandAfterInhibition"/>
-					<Equal Value1="_MaxFloor" Value2="_CurrentFloor" Not="1"/>
-				</Operator>
-			</Conditions>
-			<Actions>
-				<Choose Order="Sync">
-					<ActionBlock Template="FreqUsed.SwitchOn"/>
-					<MessageOnScreen Text="SentUp" Color="#FFFFFFFF" Frames="10" AppearStyle="Fade" DisappearStyle="Fade"/>
-					<!--Update the elevator position on both the Remote and Elevator-->
-					<AppendValue Name="CurrentFloor" Value="1"/>
-					<AppendValue Name="CurrentPlayerFloor" Value="1"/>
-					<Activate ActionID="_ActivatorToSyncUp"/>
-					<Transform Name="_TransformationOne"/>
-				</Choose>
-			</Actions>
-		</Loop>
-		<Loop Name="Two">
-			<Using>
-				<Variable Name="KeyTwo" DefaultValue="0" Type="Key"/>
-				<Variable Name="TransformationTwo" DefaultValue="0" Type="String"/>
-				<Variable Name="CurrentFloor" DefaultValue="-1" Type="Int"/>
-				<Variable Name="CurrentPlayerFloor" DefaultValue="-1" Type="Int"/>
-				<Variable Name="ActivatorToSyncDown" DefaultValue="None" Type="String"/>
-			</Using>
-			<Events>
-				<EventBlock Template="FreqUsed.KeyPressed"/>
-			</Events>
-			<Conditions>
-				<Operator Type="And">
-					<Equal Value1="_$Key" Value2="_KeyTwo"/>
-					<Equal Value1="?getModel[_$Model].animationName" Value2="StandAfterInhibition"/>
-					<Equal Value1="0" Value2="_CurrentFloor" Not="1"/>
-				</Operator>
-			</Conditions>
-			<Actions>
-				<Choose Order="Sync">
-					<MessageOnScreen Text="SentDown" Color="#FFFFFFFF" Frames="10" AppearStyle="Fade" DisappearStyle="Fade"/>
-					<!--Update the elevator position on both the Remote and Elevator-->
-					<AppendValue Name="CurrentFloor" Value="-1"/>
-					<AppendValue Name="CurrentPlayerFloor" Value="-1"/>
-					<Activate ActionID="_ActivatorToSyncDown"/>
-					<Transform Name="_TransformationTwo"/>
-				</Choose>
-			</Actions>
-		</Loop>
-		<Loop Name="RecieveTheCallGoUp">
-			<Using>
-				<Variable Name="CurrentPlayerFloor" DefaultValue="-1" Type="Int"/>
-				<Variable Name="ActivatorToGoUp" DefaultValue="None" Type="String"/>
-				<Variable Name="CurrentFloor" DefaultValue="-1" Type="Int"/>
-				<Variable Name="ActivatorToSyncUp" DefaultValue="None" Type="String"/>
-			</Using>
-			<Events>
-				<EventBlock Template="FreqUsed.Activate"/>
-			</Events>
-			<Conditions>
-				<Operator Type="And">
-					<Equal Value1="_$ActionID" Value2="_ActivatorToGoUp"/>
-					<Equal Value1="_MaxFloor" Value2="_CurrentFloor" Not="1"/>
-				</Operator>
-			</Conditions>
-			<Actions>
-				<!--Execute Transformation-->
-				<ActionBlock Template="FreqUsed.SwitchOff"/>
-				<Transform Name="_TransformationOne"/>
-				<Wait Frames="30"/>
-				<ActionBlock Template="FreqUsed.SwitchOn"/>
-				<!--Update the elevator position on both the Remote and Elevator-->
-				<AppendValue Name="CurrentFloor" Value="1"/>
-				<Activate ActionID="_ActivatorToSyncUp"/>
-			</Actions>
-		</Loop>
-		<Loop Name="RecieveTheCallGoDown">
-			<Using>
-				<Variable Name="CurrentPlayerFloor" DefaultValue="-1" Type="Int"/>
-				<Variable Name="ActivatorToGoDown" DefaultValue="None" Type="String"/>
-				<Variable Name="CurrentFloor" DefaultValue="-1" Type="Int"/>
-				<Variable Name="ActivatorToSyncDown" DefaultValue="None" Type="String"/>
-			</Using>
-			<Events>
-				<EventBlock Template="FreqUsed.Activate"/>
-			</Events>
-			<Conditions>
-				<Operator Type="And">
-					<Equal Value1="_$ActionID" Value2="_ActivatorToGoDown"/>
-					<Equal Value1="_MaxFloor" Value2="_CurrentFloor" Not="1"/>
-				</Operator>
-			</Conditions>
-			<Actions>
-				<!--Execute Transformation-->
-				<ActionBlock Template="FreqUsed.SwitchOff"/>
-				<Transform Name="_TransformationOne"/>
-				<Wait Frames="30"/>
-				<ActionBlock Template="FreqUsed.SwitchOn"/>
-				<!--Update the elevator position on both the Remote and Elevator-->
-				<AppendValue Name="CurrentFloor" Value="-1"/>
-				<Activate ActionID="_ActivatorToSyncDown"/>
-			</Actions>
-		</Loop>
-	</Template>
-	<Template Name="DynamicElevatorCallerAdv">
-		<Init>
-			<SetVariable Name="$AI" Value="-1"/>
-			<SetVariable Name="$Active" Value="1"/>
-			<SetVariable Name="$Node" Value="COM"/>
-			<SetVariable Name="Flag1" Value="0"/>
-		</Init>
-		<!-- When the player enters check for elevator location and the current player's floor, ignore transformations if equal-->
-		<Loop Name="CheckElevatorFloorAndGoUp">
-			<Using>
-				<Variable Name="CurrentPlayerFloor" DefaultValue="-1" Type="Int"/>
-				<Variable Name="ActivatorToGoUp" DefaultValue="None" Type="String"/>
-				<Variable Name="CurrentFloor" DefaultValue="-1" Type="Int"/>
-			</Using>
-			<Events>
-				<EventBlock Template="FreqUsed.Enter"/>
-			</Events>
-			<Conditions>
-				<Operator Type="And">
-					<Equal Value1="_CurrentPlayerFloor" Value2="_CurrentFloor" Not="1"/>
-					<Greater Value="_CurrentPlayerFloor" Than="_CurrentFloor"/>
-				</Operator>
-			</Conditions>
-			<Actions>
-				<Activate ActionID="_ActivatorToGoUp"/>
-			</Actions>
-		</Loop>
-		<Loop Name="CheckElevatorFloorAndGoDown">
-			<Using>
-				<Variable Name="CurrentPlayerFloor" DefaultValue="-1" Type="Int"/>
-				<Variable Name="ActivatorToGoDown" DefaultValue="None" Type="String"/>
-				<Variable Name="CurrentFloor" DefaultValue="-1" Type="Int"/>
-			</Using>
-			<Events>
-				<EventBlock Template="FreqUsed.Enter"/>
-			</Events>
-			<Conditions>
-				<Operator Type="And">
-					<Equal Value1="_CurrentPlayerFloor" Value2="_CurrentFloor" Not="1"/>
-					<Less Value="_CurrentPlayerFloor" Than="_CurrentFloor"/>
-				</Operator>
-			</Conditions>
-			<Actions>
-				<Activate ActionID="_ActivatorToGoDown"/>
-			</Actions>
-		</Loop>
-		<Loop Name="UpdateUp">
-			<Using>
-				<Variable Name="CurrentPlayerFloor" DefaultValue="-1" Type="Int"/>
-				<Variable Name="ActivatorToSyncUp" DefaultValue="None" Type="String"/>
-				<Variable Name="CurrentFloor" DefaultValue="-1" Type="Int"/>
-			</Using>
-			<Events>
-				<EventBlock Template="FreqUsed.Activate"/>
-			</Events>
-			<Conditions>
-				<Equal Value1="_$ActionID" Value2="_ActivatorToSyncUp"/>
-			</Conditions>
-			<Actions>
-				<MessageOnScreen Text="Update Up" Color="#FFFFFFFF" Frames="30" AppearStyle="Fade" DisappearStyle="Fade"/>
-				<AppendValue Name="CurrentFloor" Value="1"/>
-			</Actions>
-		</Loop>
-		<Loop Name="UpdateDown">
-			<Using>
-				<Variable Name="CurrentPlayerFloor" DefaultValue="-1" Type="Int"/>
-				<Variable Name="ActivatorToSyncDown" DefaultValue="None" Type="String"/>
-				<Variable Name="CurrentFloor" DefaultValue="-1" Type="Int"/>
-			</Using>
-			<Events>
-				<EventBlock Template="FreqUsed.Activate"/>
-			</Events>
-			<Conditions>
-				<Equal Value1="_$ActionID" Value2="_ActivatorToSyncDown"/>
-			</Conditions>
-			<Actions>
-				<MessageOnScreen Text="Update Down" Color="#FFFFFFFF" Frames="30" AppearStyle="Fade" DisappearStyle="Fade"/>
-				<AppendValue Name="CurrentFloor" Value="-1"/>
-			</Actions>
-		</Loop>
-	</Template>
-	<Template Name="DirectionalTransformationWithUpdatesOnShow">
-		<Init>
-			<SetVariable Name="$AI" Value="0"/>
-			<SetVariable Name="$Active" Value="1"/>
-			<SetVariable Name="$Node" Value="COM"/>
-			<SetVariable Name="Flag1" Value="0"/>
-			<SetVariable Name="State" Value="0"/>
-			<SetVariable Name="TransformFacingRight" Value=""/>
-			<SetVariable Name="TransformFacingLeft" Value=""/>
-		</Init>
-		<Loop Name="FacingRightTransfomration">
-			<Using>
-				<Variable Name="State" DefaultValue="0" Type="Int"/>
-				<Variable Name="TransformFacingRight" DefaultValue="0" Type="String"/>
-			</Using>
-			<Events>
-				<OnShow/>
-				<Exit/>
-			</Events>
-			<Conditions>
-				<Operator Type="And">
-					<Equal Value1="?getModel[Player].direction" Value2="1"/>
-					<Equal Value1="_State" Value2="0"/>
-				</Operator>
-			</Conditions>
-			<Actions>
-				<Wait Frames="5"/>
-				<ActionBlock Template="FreqUsed.SwitchOff"/>
-				<Choose Order="Sync">
-					<MessageOnScreen Text="Update Right" Color="#FFFFFFFF" Frames="30" AppearStyle="Fade" DisappearStyle="Fade"/>
-					<SetVariable Name="State" Value="1"/>
-					<Transform Name="_TransformFacingRight"/>
-				</Choose>
-				<ActionBlock Template="FreqUsed.SwitchOn"/>
-			</Actions>
-		</Loop>
-		<Loop Name="FacingLeftTransfomration">
-			<Using>
-				<Variable Name="State" DefaultValue="0" Type="Int"/>
-				<Variable Name="TransformFacingLeft" DefaultValue="0" Type="String"/>
-			</Using>
-			<Events>
-				<OnShow/>
-				<Exit/>
-			</Events>
-			<Conditions>
-				<Operator Type="And">
-					<Equal Value1="?getModel[Player].direction" Value2="-1"/>
-					<Equal Value1="_State" Value2="1"/>
-				</Operator>
-			</Conditions>
-			<Actions>
-				<Wait Frames="5"/>
-				<ActionBlock Template="FreqUsed.SwitchOff"/>
-				<Choose Order="Sync">
-					<MessageOnScreen Text="Update Left" Color="#FFFFFFFF" Frames="30" AppearStyle="Fade" DisappearStyle="Fade"/>
-					<SetVariable Name="State" Value="0"/>
-					<Transform Name="_TransformFacingLeft"/>
-				</Choose>
-				<ActionBlock Template="FreqUsed.SwitchOn"/>
-			</Actions>
-		</Loop>
-	</Template>
-	<Template Name="TransformDirection">
-		<Init>
-			<SetVariable Name="$AI" Value="-1"/>
-			<SetVariable Name="$Active" Value="1"/>
-			<SetVariable Name="$Node" Value="COM"/>
-			<SetVariable Name="Flag1" Value="0"/>
-			<SetVariable Name="Transform" Value="COM"/>
-			<SetVariable Name="Direction" Value="0"/>
-		</Init>
-		<Loop Name="Only">
-			<Using>
-				<Variable Name="Transform" DefaultValue="0" Type="String"/>
-				<Variable Name="Direction" DefaultValue="0" Type="Int"/>
-			</Using>
-			<Events>
-				<Enter/>
-			</Events>
-			<Conditions>
-				<Equal Value1="?getModel[Player].direction" Value2="_Direction"/>
-			</Conditions>
-			<Actions>
-				<SetVariable Name="$Active" Value="0"/>
-				<Choose Order="Sync">
-					<Transform Name="_Transform"/>
-					<SetVariable Name="$Active" Value="1"/>
-				</Choose>
-			</Actions>
-		</Loop>
-	</Template>
-	<Template Name="CurrencyCheckerTemplate">
-		<Init>
-			<SetVariable Name="$AI" Value="-1"/>
-			<SetVariable Name="$Active" Value="1"/>
-			<SetVariable Name="$Node" Value="COM"/>
-			<SetVariable Name="Flag1" Value="0"/>
-		</Init>
-		<Loop Name="IfCurrencyIsPresent">
-			<Using>
-				<Variable Name="Currency" DefaultValue="0" Type="Int"/>
-			</Using>
-			<Events Template="FreqUsed.Enter"/>
-			<Conditions>
-				<Equal Value1="_Currency" Value2="1"/>
-			</Conditions>
-			<Actions>
-				<AppendValue Name="Currency" Value="-1"/>
-			</Actions>
-		</Loop>
-		<Loop Name="IfCurrencyIsNotPresent">
-			<Using>
-				<Variable Name="Currency" DefaultValue="0" Type="Int"/>
-			</Using>
-			<Events Template="FreqUsed.Enter"/>
-			<Conditions>
-				<Equal Value1="_Currency" Value2="0"/>
-			</Conditions>
-			<Actions>
-				<MessageOnScreen Text="Key Is Not Present" Color="#FFFFFFFF" Frames="30" AppearStyle="Fade" DisappearStyle="Fade"/>
-			</Actions>
-		</Loop>
-		<Loop Name="AddCurrency">
-			<Using>
-				<Variable Name="Currency" DefaultValue="0" Type="Int"/>
-			</Using>
-			<Events Template="FreqUsed.Activate"/>
-			<Conditions>
-				<Equal Value1="_$ActionID" Value2="AddCurrency"/>
-			</Conditions>
-			<Actions>
-				<MessageOnScreen Text="Key Obtained" Color="#FFFFFFFF" Frames="30" AppearStyle="Fade" DisappearStyle="Fade"/>
-				<AppendValue Name="Currency" Value="1"/>
-			</Actions>
-		</Loop>
-	</Template>
-	<Template Name="CurrencyCheckerDynamic">
-		<Init>
-			<SetVariable Name="$AI" Value="-1"/>
-			<SetVariable Name="$Active" Value="1"/>
-			<SetVariable Name="$Node" Value="COM"/>
-			<SetVariable Name="Flag1" Value="0"/>
-		</Init>
-		<Loop Name="IfCurrencyIsPresent">
-			<Using>
-				<Variable Name="Currency" DefaultValue="0" Type="Int"/>
-				<Variable Name="Transformation" DefaultValue="0" Type="String"/>
-			</Using>
-			<Events Template="FreqUsed.Enter"/>
-			<Conditions>
-				<Equal Value1="_Currency" Value2="1"/>
-			</Conditions>
-			<Actions>
-				<MessageOnScreen Text="Opening" Color="#FF00FF00" Frames="10" AppearStyle="Fade" DisappearStyle="Fade"/>
-				<Transform Name="_Transformation"/>
-				<AppendValue Name="Currency" Value="-1"/>
-			</Actions>
-		</Loop>
-		<Loop Name="IfCurrencyIsNotPresent">
-			<Using>
-				<Variable Name="Currency" DefaultValue="0" Type="Int"/>
-			</Using>
-			<Events Template="FreqUsed.Enter"/>
-			<Conditions>
-				<Equal Value1="_Currency" Value2="0"/>
-			</Conditions>
-			<Actions>
-				<MessageOnScreen Text="Key Is Not Present" Color="#FFFFFFFF" Frames="30" AppearStyle="Fade" DisappearStyle="Fade"/>
-			</Actions>
-		</Loop>
-		<Loop Name="AddCurrency">
-			<Using>
-				<Variable Name="Currency" DefaultValue="0" Type="Int"/>
-			</Using>
-			<Events Template="FreqUsed.Activate"/>
-			<Conditions>
-				<Equal Value1="_$ActionID" Value2="AddCurrency"/>
-			</Conditions>
-			<Actions>
-				<MessageOnScreen Text="Key Obtained" Color="#FFFFFFFF" Frames="30" AppearStyle="Fade" DisappearStyle="Fade"/>
-				<AppendValue Name="Currency" Value="1"/>
-			</Actions>
-		</Loop>
-	</Template>
-	<Template Name="ValueCheck">
-		<Init>
-			<SetVariable Name="$AI" Value="-1"/>
-			<SetVariable Name="$Active" Value="1"/>
-			<SetVariable Name="$Node" Value="COM"/>
-			<SetVariable Name="Flag1" Value="0"/>
-		</Init>
-		<Loop Name="Zero">
-			<Using>
-				<Variable Name="Var" DefaultValue="0" Type="Int"/>
-			</Using>
-			<Events Template="FreqUsed.Enter"/>
-			<Conditions>
-				<Equal Value1="_Var" Value2="0"/>
-			</Conditions>
-			<Actions>
-				<MessageOnScreen Text="Zero" Color="#FFFFFFFF" Frames="30" AppearStyle="Fade" DisappearStyle="Fade"/>
-			</Actions>
-		</Loop>
-		<Loop Name="One">
-			<Using>
-				<Variable Name="Var" DefaultValue="0" Type="Int"/>
-			</Using>
-			<Events Template="FreqUsed.Enter"/>
-			<Conditions>
-				<Equal Value1="_Var" Value2="1"/>
-			</Conditions>
-			<Actions>
-				<MessageOnScreen Text="One" Color="#FFFFFFFF" Frames="30" AppearStyle="Fade" DisappearStyle="Fade"/>
-			</Actions>
-		</Loop>
-		<Loop Name="Two">
-			<Using>
-				<Variable Name="Var" DefaultValue="0" Type="Int"/>
-			</Using>
-			<Events Template="FreqUsed.Enter"/>
-			<Conditions>
-				<Equal Value1="_Var" Value2="2"/>
-			</Conditions>
-			<Actions>
-				<MessageOnScreen Text="Two" Color="#FFFFFFFF" Frames="30" AppearStyle="Fade" DisappearStyle="Fade"/>
-			</Actions>
-		</Loop>
-	</Template>
-	<!-- For Static Camera-->
-	<Template Name="CameraRoom">
-		<Init>
-			<SetVariable Name="$AI" Value="-1"/>
-			<SetVariable Name="$Active" Value="1"/>
-			<SetVariable Name="$Node" Value="COM"/>
-			<SetVariable Name="Flag1" Value="0"/>
-		</Init>
-		<Loop Name="Enter">
-			<Using>
-				<Variable Name="Camera" DefaultValue="Camera" Type="Model"/>
-				<Variable Name="Spawn" DefaultValue="None"/>
-			</Using>
-			<Events Template="FreqUsed.Enter"/>
-			<Conditions>
-			</Conditions>
-			<Actions>
-				<Spawn Model="_Camera" Spawn="_Spawn"/>
-				<Camera Smoothness="10"/>
-				<Camera Follow="_Camera"/>
-				<Camera Stop="1"/>
-				<Kill Model="_Camera"/>
-			</Actions>
-		</Loop>
-		<Loop Name="Exit">
-			<Using>
-				<Variable Name="Model" DefaultValue="Player" Type="Model"/>
-				<Variable Name="Camera" DefaultValue="Camera" Type="Model"/>
-			</Using>
-			<Events Template="FreqUsed.Exit"/>
-			<Conditions>
-			</Conditions>
-			<Actions>
-				<Camera Follow="_Model"/>
-				<Camera Smoothness="2"/>
-			</Actions>
-		</Loop>
-	</Template>
-	<!-- Spawning Camera, But animation has to be manually set, either by SpawnObject or CameraMove template-->
-	<Template Name="CameraSpawn">
-		<Init>
-			<SetVariable Name="$AI" Value="-1"/>
-			<SetVariable Name="$Active" Value="1"/>
-			<SetVariable Name="$Node" Value="COM"/>
-			<SetVariable Name="Flag1" Value="0"/>
-		</Init>
-		<Loop Name="TurnNormal">
-			<Using>
-				<Variable Name="Camera" DefaultValue="Camera" Type="Model"/>
-				<Variable Name="Spawn" DefaultValue="None"/>
-				<Variable Name="Mode" DefaultValue="None" Type="String"/>
-			</Using>
-			<Events Template="FreqUsed.Enter"/>
-			<Conditions>
-				<Equal Value1="_Mode" Value2="Normal"/>
-			</Conditions>
-			<Actions>
-				<Spawn Model="_Camera" Spawn="_Spawn"/>
-				<Camera Smoothness="2"/>
-				<Camera Follow="_Camera"/>
-			</Actions>
-		</Loop>
-		<Loop Name="TurnRunFast">
-			<Using>
-				<Variable Name="Camera" DefaultValue="Camera" Type="Model"/>
-				<Variable Name="Spawn" DefaultValue="None"/>
-				<Variable Name="Mode" DefaultValue="None" Type="String"/>
-			</Using>
-			<Events Template="FreqUsed.EnterOrExit"/>
-			<Conditions>
-				<Operator Type="And">
-					<Equal Value1="_Mode" Value2="RunFast"/>
-					<Equal Value1="?getModel[_$Model].animationName" Value2="RunFast"/>
-				</Operator>
-			</Conditions>
-			<Actions>
-				<Spawn Model="_Camera" Spawn="_Spawn"/>
-				<Camera Smoothness="1"/>
-				<Camera Follow="_Camera"/>
-			</Actions>
-		</Loop>
-	</Template>
-	<!-- Basic Movement-->
-	<Template Name="CameraMove">
-		<Init>
-			<SetVariable Name="$AI" Value="-1"/>
-			<SetVariable Name="$Active" Value="1"/>
-			<SetVariable Name="$Node" Value="COM"/>
-			<SetVariable Name="Flag1" Value="0"/>
-		</Init>
-		<Loop Name="SetRunFastGravity">
-			<Using>
-				<Variable Name="Camera" DefaultValue="Camera" Type="Model"/>
-				<Variable Name="Mode" DefaultValue="None" Type="String"/>
-			</Using>
-			<Events Template="FreqUsed.Enter"/>
-			<Conditions>
-				<Equal Value1="_Mode" Value2="RunFastGravity"/>
-			</Conditions>
-			<Actions>
-				<ForceAnimation Name="CMFRG" Model="_Camera" Frame="2" Reversed="0"/>
-			</Actions>
-		</Loop>
-		<Loop Name="SetDown15V">
-			<Using>
-				<Variable Name="Camera" DefaultValue="Camera" Type="Model"/>
-				<Variable Name="Mode" DefaultValue="None" Type="String"/>
-			</Using>
-			<Events Template="FreqUsed.Enter"/>
-			<Conditions>
-				<Equal Value1="_Mode" Value2="Down15V"/>
-			</Conditions>
-			<Actions>
-				<ForceAnimation Name="CMD15V" Model="_Camera" Frame="2" Reversed="0"/>
-			</Actions>
-		</Loop>
-		<Loop Name="SetForward30V">
-			<Using>
-				<Variable Name="Camera" DefaultValue="Camera" Type="Model"/>
-				<Variable Name="Mode" DefaultValue="None" Type="String"/>
-			</Using>
-			<Events Template="FreqUsed.Enter"/>
-			<Conditions>
-				<Equal Value1="_Mode" Value2="Forward30V"/>
-			</Conditions>
-			<Actions>
-				<ForceAnimation Name="CMF30V" Model="_Camera" Frame="2" Reversed="0"/>
-			</Actions>
-		</Loop>
-		<Loop Name="SetBackward30V">
-			<Using>
-				<Variable Name="Camera" DefaultValue="Camera" Type="Model"/>
-				<Variable Name="Mode" DefaultValue="None" Type="String"/>
-			</Using>
-			<Events Template="FreqUsed.Enter"/>
-			<Conditions>
-				<Equal Value1="_Mode" Value2="Backward30V"/>
-			</Conditions>
-			<Actions>
-				<ForceAnimation Name="CMF30V" Model="_Camera" Frame="2" Reversed="1"/>
-			</Actions>
-		</Loop>
-	</Template>
-	<Template Name="CameraLockXWallJump">
-		<Init>
-			<SetVariable Name="$AI" Value="-1"/>
-			<SetVariable Name="$Active" Value="1"/>
-			<SetVariable Name="$Node" Value="COM"/>
-			<SetVariable Name="Flag1" Value="0"/>
-		</Init>
-		<Loop Name="InputDetectorAndMove">
-			<Using>
-				<Variable Name="Camera" DefaultValue="Camera" Type="Model"/>
-				<Variable Name="Buffer" DefaultValue="0" Type="UInt"/>
-			</Using>
-			<Events>
-				<KeyPressed/>
-			</Events>
-			<Conditions>
-				<Operator Type="And">
-					<Operator Type="Or">
-						<Equal Value1="_$Key" Value2="Left"/>
-						<Equal Value1="_$Key" Value2="Right"/>
-					</Operator>
-					<Operator Type="Or">
-						<Equal Value1="?getModel[Player].animationName" Value2="WallJumpLanding"/>
-						<Equal Value1="?getModel[Player].animationName" Value2="WallRunMiddle"/>
-						<Equal Value1="?getModel[Player].animationName" Value2="WallRun"/>
-					</Operator>
-					<Equal Value1="_Buffer" Value2="0"/>
-				</Operator>
-			</Conditions>
-			<Actions>
-				<ForceAnimation Name="CMFWJ" Model="_Camera" Frame="29" Reversed="1"/>
-			</Actions>
-		</Loop>
-		<Loop Name="InputBufferDetector">
-			<Using>
-				<Variable Name="Camera" DefaultValue="Camera" Type="Model"/>
-				<Variable Name="Buffer" DefaultValue="0" Type="UInt"/>
-			</Using>
-			<Events>
-				<KeyPressed/>
-			</Events>
-			<Conditions>
-				<Operator Type="And">
-					<Operator Type="Or">
-						<Equal Value1="_$Key" Value2="Left"/>
-						<Equal Value1="_$Key" Value2="Right"/>
-					</Operator>
-					<Operator Type="Or">
-						<Equal Value1="getModel[Player].animationName" Value2="WallJumpFly"/>
-						<Equal Value1="getModel[Player].animationName" Value2="WallJumpFlyAfter42"/>
-					</Operator>
-				</Operator>
-			</Conditions>
-			<Actions>
-				<MessageOnScreen Text="1" Color="#FFFFFFFF" Frames="4" AppearStyle="None" DisappearStyle="None"/>
-				<SetVariable Name="Buffer" Value="1"/>
-				<Wait Frames="5"/>
-				<SetVariable Name="Buffer" Value="0"/>
-				<MessageOnScreen Text="0" Color="#FFFFFFFF" Frames="4" AppearStyle="None" DisappearStyle="None"/>
-			</Actions>
-		</Loop>
-		<Loop Name="BufferDetectorAndMove">
-			<Using>
-				<Variable Name="Camera" DefaultValue="Camera" Type="Model"/>
-				<Variable Name="Buffer" DefaultValue="0" Type="UInt"/>
-			</Using>
-			<Events>
-				<ValueChange Value="?getModel[Player].animationName"/>
-			</Events>
-			<Conditions>
-				<Operator Type="And">
-					<Operator Type="Or">
-						<Equal Value1="?getModel[Player].animationName" Value2="WallJumpLanding"/>
-						<Equal Value1="?getModel[Player].animationName" Value2="WallJump"/>
-					</Operator>
-					<Equal Value1="_Buffer" Value2="1"/>
-				</Operator>
-			</Conditions>
-			<Actions>
-				<ForceAnimation Name="CMFWJ" Model="_Camera" Frame="29" Reversed="1"/>
-			</Actions>
-		</Loop>
-		<Loop Name="Enter">
-			<Using>
-				<Variable Name="Camera" DefaultValue="Camera" Type="Model"/>
-				<Variable Name="Spawn" DefaultValue="None"/>
-			</Using>
-			<Events Template="FreqUsed.Enter"/>
-			<Conditions>
-			</Conditions>
-			<Actions>
-				<Spawn Model="_Camera" Spawn="_Spawn"/>
-				<Camera Smoothness="1"/>
-				<Camera Follow="_Camera"/>
-			</Actions>
-		</Loop>
-		<Loop Name="Exit">
-			<Using>
-				<Variable Name="Model" DefaultValue="Player" Type="Model"/>
-				<Variable Name="Camera" DefaultValue="Camera" Type="Model"/>
-			</Using>
-			<Events Template="FreqUsed.Exit"/>
-			<Conditions>
-			</Conditions>
-			<Actions>
-				<Camera Follow="_Model"/>
-				<Camera Smoothness="2"/>
-				<Kill Model="_Camera"/>
-			</Actions>
-		</Loop>
-	</Template>
-	<!-- It is in the name, Modes are for when it should kill camera-->
-	<Template Name="KillCamera">
-		<Init>
-			<SetVariable Name="$AI" Value="-1"/>
-			<SetVariable Name="$Active" Value="1"/>
-			<SetVariable Name="$Node" Value="COM"/>
-			<SetVariable Name="Flag1" Value="0"/>
-		</Init>
-		<Loop Name="Normal">
-			<Using>
-				<Variable Name="Camera" DefaultValue="Camera" Type="Model"/>
-				<Variable Name="Model" DefaultValue="Player" Type="Model"/>
-				<Variable Name="Mode" DefaultValue="None" Type="String"/>
-			</Using>
-			<Events Template="FreqUsed.Enter"/>
-			<Conditions>
-				<Equal Value1="_Mode" Value2="Normal"/>
-			</Conditions>
-			<Actions>
-				<Kill Model="_Camera"/>
-				<Camera Smoothness="2"/>
-				<Camera Follow="_Model"/>
-			</Actions>
-		</Loop>
-		<Loop Name="OnKeyPress">
-			<Using>
-				<Variable Name="Camera" DefaultValue="Camera" Type="Model"/>
-				<Variable Name="Model" DefaultValue="Player" Type="Model"/>
-				<Variable Name="Mode" DefaultValue="None" Type="String"/>
-				<Variable Name="Key" DefaultValue="Up" Type="Key"/>
-			</Using>
-			<Events Template="FreqUsed.PlayerPressedKey"/>
-			<Conditions>
-				<Operator Type="And">
-					<Equal Value1="_Mode" Value2="OnKeyPress"/>
-					<Equal Value1="_$Key" Value2="_Key"/>
-				</Operator>
-			</Conditions>
-			<Actions>
-				<Kill Model="_Camera"/>
-				<Camera Smoothness="2"/>
-				<Camera Follow="_Model"/>
-			</Actions>
-		</Loop>
-	</Template>
-	<!-- Separate Kill Trigger for simplicity-->
-	<Template Name="KillCameraStop">
-		<Init>
-			<SetVariable Name="$AI" Value="-1"/>
-			<SetVariable Name="$Active" Value="1"/>
-			<SetVariable Name="$Node" Value="COM"/>
-			<SetVariable Name="Flag1" Value="0"/>
-		</Init>
-		<Loop Name="Only">
-			<Using>
-				<Variable Name="Camera" DefaultValue="Camera" Type="Model"/>
-			</Using>
-			<Events Template="FreqUsed.Enter"/>
-			<Actions>
-				<Kill Model="_Camera"/>
-				<Camera Smoothness="2"/>
-				<Camera Stop="1"/>
-			</Actions>
-		</Loop>
-	</Template>
-	<!--WIP-->
-	<Template Name="AIControlArea">
-		<Init>
-			<SetVariable Name="$AI" Value="-1"/>
-			<SetVariable Name="$Active" Value="1"/>
-			<SetVariable Name="$Node" Value="COM"/>
-			<SetVariable Name="Flag1" Value="0"/>
-		</Init>
-		<Loop Name="Up">
-			<Using>
-				<Variable Name="Model" DefaultValue="Player" Type="Model"/>
-			</Using>
-			<Events>
-				<KeyPressed/>
-			</Events>
-			<Conditions>
-				<Equal Value1="_$Key" Value2="Up"/>
-			</Conditions>
-			<Actions>
-				<Press Key="Up" Model="_Model"/>
-			</Actions>
-		</Loop>
-		<Loop Name="Down">
-			<Using>
-				<Variable Name="Model" DefaultValue="Player" Type="Model"/>
-			</Using>
-			<Events>
-				<KeyPressed/>
-			</Events>
-			<Conditions>
-				<Equal Value1="_$Key" Value2="Down"/>
-			</Conditions>
-			<Actions>
-				<Press Key="Down" Model="_Model"/>
-			</Actions>
-		</Loop>
-		<Loop Name="Left">
-			<Using>
-				<Variable Name="Model" DefaultValue="Player" Type="Model"/>
-			</Using>
-			<Events>
-				<KeyPressed/>
-			</Events>
-			<Conditions>
-				<Equal Value1="_$Key" Value2="Left"/>
-			</Conditions>
-			<Actions>
-				<Press Key="Left" Model="_Model"/>
-			</Actions>
-		</Loop>
-		<Loop Name="Right">
-			<Using>
-				<Variable Name="Model" DefaultValue="Player" Type="Model"/>
-			</Using>
-			<Events>
-				<KeyPressed/>
-			</Events>
-			<Conditions>
-				<Equal Value1="_$Key" Value2="Right"/>
-			</Conditions>
-			<Actions>
-				<Press Key="Right" Model="_Model"/>
-			</Actions>
-		</Loop>
-	</Template>
-	<!-- WIP-->
-	<Template Name="MinigameRaceStart">
-		<Init>
-			<SetVariable Name="$AI" Value="-1"/>
-			<SetVariable Name="$Active" Value="1"/>
-			<SetVariable Name="$Node" Value="COM"/>
-			<SetVariable Name="Flag1" Value="0"/>
-		</Init>
-		<Loop Name="Countdown">
-			<Using>
-				<Variable Name="Player1" DefaultValue="Player" Type="Model"/>
-				<Variable Name="Player2" DefaultValue="Player2" Type="Model"/>
-			</Using>
-			<Events>
-				<Enter/>
-			</Events>
-			<Conditions>
-				<Equal Value1="_$Model" Value2="_Player1"/>
-			</Conditions>
-			<Actions>
-				<ForceAnimation Name="RunInhibition" Model="_Player1" Frame="40" Reversed="0"/>
-				<ForceAnimation Name="RunInhibition" Model="_Player2" Frame="40" Reversed="0"/>
-				<Wait Frames="30"/>
-				<MessageOnScreen Text="Three" Color="#FFFFFFFF" Frames="30" AppearStyle="Fade" DisappearStyle="Fade"/>
-				<Wait Frames="60"/>
-				<MessageOnScreen Text="Two" Color="#FFFFFFFF" Frames="30" AppearStyle="Fade" DisappearStyle="Fade"/>
-				<Wait Frames="60"/>
-				<MessageOnScreen Text="One" Color="#FFFFFFFF" Frames="30" AppearStyle="Fade" DisappearStyle="Fade"/>
-				<Wait Frames="60"/>
-				<MessageOnScreen Text="GO" Color="#FFFFFFFF" Frames="50" AppearStyle="Fade" DisappearStyle="Fade"/>
-				<ForceAnimation Name="RunFromInhibition" Model="_Player1" Frame="69" Reversed="0"/>
-				<ForceAnimation Name="RunFromInhibition" Model="_Player2" Frame="69" Reversed="0"/>
-			</Actions>
-		</Loop>
-		<Loop Name="SkipCountdown">
-			<Using>
-				<Variable Name="Player1" DefaultValue="Player" Type="Model"/>
-				<Variable Name="Player2" DefaultValue="Player2" Type="Model"/>
-			</Using>
-			<Events>
-				<KeyPressed/>
-			</Events>
-			<Conditions>
-				<Equal Value1="_$Key" Value2="Right"/>
-				<Equal Value1="_$Model" Value2="_Player1"/>
-			</Conditions>
-			<Actions>
-				<ForceAnimation Name="RunFromInhibition" Model="_Player1" Frame="69" Reversed="0"/>
-				<ForceAnimation Name="RunFromInhibition" Model="_Player2" Frame="69" Reversed="0"/>
-				<MessageOnScreen Text="Countdown Skipped" Color="#FFFFFFFF" Frames="60" AppearStyle="Fade" DisappearStyle="Fade"/>
-				<SetVariable Name="$Active" Value="0"/>
-			</Actions>
-		</Loop>
-	</Template>
-	<Template Name="MinigameRaceFinish">
-		<Init>
-			<SetVariable Name="$AI" Value="-1"/>
-			<SetVariable Name="$Active" Value="1"/>
-			<SetVariable Name="$Node" Value="COM"/>
-			<SetVariable Name="Flag1" Value="0"/>
-		</Init>
-		<Loop Name="Player1Win">
-			<Using>
-				<Variable Name="Player1" DefaultValue="Player" Type="Model"/>
-				<Variable Name="Player2" DefaultValue="Player2" Type="Model"/>
-				<Variable Name="Loss" DefaultValue="0" Type="UInt"/>
-				<Variable Name="LossPlayer2" DefaultValue="0" Type="UInt"/>
-			</Using>
-			<Events>
-				<Enter/>
-			</Events>
-			<Conditions>
-				<Operator Type="And">
-					<Equal Value1="_$Model" Value2="_Player1"/>
-					<Equal Value1="_Loss" Value2="0"/>
-				</Operator>
-			</Conditions>
-			<Actions>
-				<Camera Stop="1"/>
-				<EndGame Result="Win" Model="_$Model" Frames="240"/>
-				<SetVariable Name="LossPlayer2" Value="1"/>
-				<MessageOnScreen Text="You Win." Color="#FFFFFFFF" Frames="180" AppearStyle="Fade" DisappearStyle="Fade"/>
-			</Actions>
-		</Loop>
-		<Loop Name="Player2Loss">
-			<Using>
-				<Variable Name="Player1" DefaultValue="Player" Type="Model"/>
-				<Variable Name="Player2" DefaultValue="Player2" Type="Model"/>
-				<Variable Name="LossPlayer2" DefaultValue="0" Type="UInt"/>
-			</Using>
-			<Events>
-				<Enter/>
-			</Events>
-			<Conditions>
-				<Operator Type="And">
-					<Equal Value1="_$Model" Value2="_Player2"/>
-					<Equal Value1="_LossPlayer2" Value2="1"/>
-				</Operator>
-			</Conditions>
-			<Actions>
-				<ForceAnimation Name="Loose" Model="_Player2" Frame="20" Reversed="0"/>
-			</Actions>
-		</Loop>
-		<Loop Name="Player2Win">
-			<Using>
-				<Variable Name="Player1" DefaultValue="Player" Type="Model"/>
-				<Variable Name="Player2" DefaultValue="Player2" Type="Model"/>
-				<Variable Name="Loss" DefaultValue="0" Type="UInt"/>
-			</Using>
-			<Events>
-				<Enter/>
-			</Events>
-			<Conditions>
-				<Operator Type="And">
-					<Equal Value1="_$Model" Value2="_Player2"/>
-					<Equal Value1="_Loss" Value2="0"/>
-				</Operator>
-			</Conditions>
-			<Actions>
-				<SetVariable Name="Loss" Value="1"/>
-			</Actions>
-		</Loop>
-		<Loop Name="Player1Loss">
-			<Using>
-				<Variable Name="Player1" DefaultValue="Player" Type="Model"/>
-				<Variable Name="Loss" DefaultValue="Player2" Type="UInt"/>
-			</Using>
-			<Events>
-				<Enter/>
-			</Events>
-			<Conditions>
-				<Operator Type="And">
-					<Equal Value1="_$Model" Value2="_Player1"/>
-					<Equal Value1="_Loss" Value2="1"/>
-				</Operator>
-			</Conditions>
-			<Actions>
-				<Camera Stop="1"/>
-				<ForceAnimation Name="Loose" Model="_Player1" Frame="20" Reversed="0"/>
-				<EndGame Result="Loss" Model="_Player1" Frames="240"/>
-				<MessageOnScreen Text="You Lost." Color="#FFFFFFFF" Frames="180" AppearStyle="Fade" DisappearStyle="Fade"/>
-			</Actions>
-		</Loop>
-	</Template>
-	<Template Name="CustomLevelMinigameTrigger">
-		<Init>
-			<SetVariable Name="$AI" Value="-1"/>
-			<SetVariable Name="$Active" Value="1"/>
-			<SetVariable Name="$Node" Value="COM"/>
-			<SetVariable Name="Flag1" Value="0"/>
-		</Init>
-		<Loop Name="FollowPlayer">
-			<Using>
-				<Variable Name="Model" DefaultValue="Player" Type="Model"/>
-				<Variable Name="Model1" DefaultValue="Player2" Type="Model"/>
-			</Using>
-			<Events>
-				<KeyPressed/>
-			</Events>
-			<Conditions>
-				<Operator Type="Or">
-					<Operator Type="And">
-						<Equal Value1="?getModel[Player].direction" Value2="1"/>
-						<Greater Value="?getModel[Player].getNode[COM].localPositionX" Than="?getModel[Player2].getNode[COM].localPositionX"/>
-					</Operator>
-					<Operator Type="And">
-						<Equal Value1="?getModel[Player].direction" Value2="-1"/>
-						<Greater Value="?getModel[Player].getNode[COM].worldPositionX" Than="?getModel[Player2].getNode[COM].worldPositionX" Not="1"/>
-					</Operator>
-				</Operator>
-			</Conditions>
-			<Actions>
-				<Camera Follow="Player"/>
-			</Actions>
-		</Loop>
-		<Loop Name="FollowPlayer2">
-			<Using>
-				<Variable Name="Model" DefaultValue="Player" Type="Model"/>
-				<Variable Name="Model1" DefaultValue="Player2" Type="Model"/>
-			</Using>
-			<Events>
-				<KeyPressed/>
-			</Events>
-			<Conditions>
-				<Operator Type="Or">
-					<Operator Type="And">
-						<Equal Value1="?getModel[Player2].direction" Value2="1"/>
-						<Greater Value="?getModel[Player2].getNode[COM].localPositionX" Than="?getModel[Player].getNode[COM].localPositionX"/>
-					</Operator>
-					<Operator Type="And">
-						<Equal Value1="?getModel[Player2].direction" Value2="-1"/>
-						<Greater Value="?getModel[Player2].getNode[COM].worldPositionX" Than="?getModel[Player].getNode[COM].worldPositionX" Not="1"/>
-					</Operator>
-				</Operator>
-			</Conditions>
-			<Actions>
-				<Camera Follow="Player2"/>
-			</Actions>
-		</Loop>
-		<Loop Name="UpModel">
-			<Using>
-				<Variable Name="Model" DefaultValue="Player" Type="Model"/>
-				<Variable Name="Model1" DefaultValue="Player2" Type="Model"/>
-				<Variable Name="Delay" DefaultValue="0" Type="Int"/>
-			</Using>
-			<Events>
-				<KeyPressed/>
-			</Events>
-			<Conditions>
-				<Equal Value1="_$Key" Value2="Up"/>
-			</Conditions>
-			<Actions>
-				<Wait Frames="_Delay"/>
-				<Press Key="Up" Model="_Model"/>
-			</Actions>
-		</Loop>
-		<Loop Name="DownModel">
-			<Using>
-				<Variable Name="Model" DefaultValue="Player" Type="Model"/>
-				<Variable Name="Delay" DefaultValue="0" Type="Int"/>
-			</Using>
-			<Events>
-				<KeyPressed/>
-			</Events>
-			<Conditions>
-				<Equal Value1="_$Key" Value2="Down"/>
-			</Conditions>
-			<Actions>
-				<Wait Frames="_Delay"/>
-				<Press Key="Down" Model="_Model"/>
-			</Actions>
-		</Loop>
-		<Loop Name="LeftModel">
-			<Using>
-				<Variable Name="Model" DefaultValue="Player" Type="Model"/>
-				<Variable Name="Delay" DefaultValue="0" Type="Int"/>
-			</Using>
-			<Events>
-				<KeyPressed/>
-			</Events>
-			<Conditions>
-				<Equal Value1="_$Key" Value2="Left"/>
-			</Conditions>
-			<Actions>
-				<Wait Frames="_Delay"/>
-				<Press Key="Left" Model="_Model"/>
-			</Actions>
-		</Loop>
-		<Loop Name="RightModel">
-			<Using>
-				<Variable Name="Model" DefaultValue="Player" Type="Model"/>
-				<Variable Name="Delay" DefaultValue="0" Type="Int"/>
-			</Using>
-			<Events>
-				<KeyPressed/>
-			</Events>
-			<Conditions>
-				<Equal Value1="_$Key" Value2="Right"/>
-			</Conditions>
-			<Actions>
-				<Wait Frames="_Delay"/>
-				<Press Key="Right" Model="_Model"/>
-			</Actions>
-		</Loop>
-	</Template>
-	<Template Name="ForcedConditionAnimation">
-		<Init>
-			<SetVariable Name="$AI" Value="-1"/>
-			<SetVariable Name="$Active" Value="1"/>
-			<SetVariable Name="$Node" Value="COM"/>
-			<SetVariable Name="Flag1" Value="0"/>
-		</Init>
-		<Loop Name="Only">
-			<Using>
-				<Variable Name="ReqAnim" DefaultValue="None" Type="Animation"/>
-				<Variable Name="AnimName" DefaultValue="RunForward" Type="Animation"/>
-				<Variable Name="AnimFrame" DefaultValue="10" Type="UInt"/>
-				<Variable Name="Reversed" DefaultValue="0" Type="UInt"/>
-			</Using>
-			<Events Template="FreqUsed.Enter"/>
-			<Conditions>
-				<Equal Value1="_ReqAnim" Value2="?getModel[_$Model].animationName"/>
-			</Conditions>
-			<Actions>
-				<ForceAnimation Name="_AnimName" Model="_$Model" Frame="_AnimFrame" Reversed="_Reversed"/>
-			</Actions>
-		</Loop>
-	</Template>
-	<Template Name="ForcedAnimationWithDelayToAnother">
-		<Init>
-			<SetVariable Name="$AI" Value="-1"/>
-			<SetVariable Name="$Active" Value="1"/>
-			<SetVariable Name="$Node" Value="COM"/>
-			<SetVariable Name="Flag1" Value="0"/>
-		</Init>
-		<Loop Name="First">
-			<Using>
-				<Variable Name="AnimName" DefaultValue="RunForward" Type="Animation"/>
-				<Variable Name="AnimFrame" DefaultValue="10" Type="UInt"/>
-				<Variable Name="Reversed" DefaultValue="0" Type="UInt"/>
-				<Variable Name="Delay" DefaultValue="0" Type="UInt"/>
-				<Variable Name="Activator" DefaultValue="RunForward" Type="String"/>
-			</Using>
-			<Events Template="FreqUsed.Enter"/>
-			<Conditions>
-			</Conditions>
-			<Actions>
-				<ForceAnimation Name="_AnimName" Model="_$Model" Frame="_AnimFrame" Reversed="_Reversed"/>
-				<Wait Frames="_Delay"/>
-				<Activate ActionID="_Activator"/>
-			</Actions>
-		</Loop>
-		<Loop Name="Second">
-			<Using>
-				<Variable Name="SecondAnimName" DefaultValue="RunForward" Type="Animation"/>
-				<Variable Name="SecondAnimFrame" DefaultValue="10" Type="UInt"/>
-				<Variable Name="SecondReversed" DefaultValue="0" Type="UInt"/>
-				<Variable Name="Activator" DefaultValue="RunForward" Type="String"/>
-			</Using>
-			<Events Template="FreqUsed.Activate"/>
-			<Conditions>
-				<Equal Value1="_$ActionID" Value2="_Activator"/>
-			</Conditions>
-			<Actions>
-				<ForceAnimation Name="_SecondAnimName" Model="_$Model" Frame="_SecondAnimFrame" Reversed="_SecondReversed"/>
-			</Actions>
-		</Loop>
-	</Template>
-	<!--
-	<Init>
-<SetVariable Name="$Active" Value="1"/>
-<SetVariable Name="$AI" Value="1"/>
-<SetVariable Name="$Node" Value="COM"/>
-<SetVariable Name="AnimName" Value="CornerClingLow"/>
-<SetVariable Name="AnimFrame" Value="3"/>
-<SetVariable Name="Reversed" Value="0"/>
-<SetVariable Name="Delay" Value="?"/>
-<SetVariable Name="SecondAnimName" Value="WallRunFail"/>
-<SetVariable Name="SecondAnimFrame" Value="38"/>
-<SetVariable Name="SecondReversed" Value="0"/>
-<SetVariable Name="Activator" Value="Putwhateveryouwanthere"/>
-<SetVariable Name="Flag1" Value="0"/>
-</Init>
-<Template Name="ForcedAnimationWithDelayToAnother"/>-->
-	<Template Name="ForcedConditionAnimationWithFrames">
-		<Init>
-			<SetVariable Name="$AI" Value="-1"/>
-			<SetVariable Name="$Active" Value="1"/>
-			<SetVariable Name="$Node" Value="COM"/>
-			<SetVariable Name="Flag1" Value="0"/>
-		</Init>
-		<Loop Name="Only">
-			<Using>
-				<Variable Name="ReqAnim" DefaultValue="None" Type="Animation"/>
-				<Variable Name="ReqFrame" DefaultValue="None" Type="Frame"/>
-				<Variable Name="AnimName" DefaultValue="RunForward" Type="Animation"/>
-				<Variable Name="AnimFrame" DefaultValue="10" Type="UInt"/>
-				<Variable Name="Reversed" DefaultValue="0" Type="UInt"/>
-			</Using>
-			<Events Template="FreqUsed.Enter"/>
-			<Conditions>
-				<Equal Value1="_ReqAnim" Value2="?getModel[_$Model].animationName"/>
-				<Equal Value1="_ReqFrame" Value2="?getModel[_$Model].animationFrame"/>
-			</Conditions>
-			<Actions>
-				<ForceAnimation Name="_AnimName" Model="_$Model" Frame="_AnimFrame" Reversed="_Reversed"/>
-			</Actions>
-		</Loop>
-	</Template>
-	<Template Name="ForcedAnimationOnCollision">
-		<Init>
-			<SetVariable Name="$AI" Value="-1"/>
-			<SetVariable Name="$Active" Value="1"/>
-			<SetVariable Name="$Node" Value="COM"/>
-			<SetVariable Name="Flag1" Value="0"/>
-		</Init>
-		<Loop Name="Only">
-			<Using>
-				<Variable Name="AnimName" DefaultValue="RunForward" Type="Animation"/>
-				<Variable Name="AnimFrame" DefaultValue="10" Type="UInt"/>
-				<Variable Name="Reversed" DefaultValue="0" Type="UInt"/>
-			</Using>
-			<Events Template="FreqUsed.OnCollision"/>
-			<Conditions>
-				<Operator Type="And">
-					<Equal Value1="_AnimName" Value2="?getModel[_$Model].animationName" Not="1"/>
-					<Equal Value1="SlideSimple" Value2="?getModel[_$Model].animationName" Not="1"/>
-					<Equal Value1="Fly" Value2="?getModel[_$Model].animationName" Not="1"/>
-				</Operator>
-			</Conditions>
-			<Actions>
-				<ForceAnimation Name="_AnimName" Model="_$Model" Frame="_AnimFrame" Reversed="_Reversed"/>
-			</Actions>
-		</Loop>
-	</Template>
-	<Template Name="ForcedAnimationActivate">
-		<Init>
-			<SetVariable Name="$AI" Value="-1"/>
-			<SetVariable Name="$Active" Value="1"/>
-			<SetVariable Name="$Node" Value="COM"/>
-			<SetVariable Name="Flag1" Value="0"/>
-		</Init>
-		<Loop Name="Only">
-			<Using>
-			</Using>
-			<Events Template="FreqUsed.Activate"/>
-			<Conditions>
-			</Conditions>
-			<Actions>
-				<ForceAnimation Name="Swallow" Model="_$Model" Frame="7" Reversed="0"/>
-			</Actions>
-		</Loop>
-	</Template>
-	<Template Name="MineTemplate">
-		<Init>
-			<SetVariable Name="$AI" Value="-1"/>
-			<SetVariable Name="$Active" Value="1"/>
-			<SetVariable Name="$Node" Value="COM"/>
-			<SetVariable Name="Flag1" Value="0"/>
-		</Init>
-		<Loop Name="Only">
-			<Using>
-			</Using>
-			<Events Template="FreqUsed.OnCollision"/>
-			<Actions>
-				<Camera Stop="1"/>
-				<Kill Model="_$Model"/>
-				<Spawn Model="_$Model" Spawn="MineSpawn"/>
-				<EndGame Result="Death" Model="_$Model" Frames="120"/>
-			</Actions>
-		</Loop>
-	</Template>
-	<Template Name="TriggerCheck">
-		<Init>
-			<SetVariable Name="$AI" Value="0"/>
-			<SetVariable Name="$Active" Value="1"/>
-			<SetVariable Name="$Node" Value="COM"/>
-			<SetVariable Name="Flag1" Value="0"/>
-			<SetVariable Name="ReqAnim" Value="RunFast"/>
-			<SetVariable Name="KeyCheck" Value="Up"/>
-		</Init>
-		<Loop Name="Only">
-			<Using>
-				<Variable Name="ReqAnim" DefaultValue="RunForward" Type="Animation"/>
-				<Variable Name="KeyCheck" DefaultValue="Up" Type="Key"/>
-			</Using>
-			<Events Template="FreqUsed.KeyPressed"/>
-			<Conditions>
-				<Operator Type="Or">
-					<Equal Value1="_ReqAnim" Value2="?getModel[_$Model].animationName" Not="1"/>
-				</Operator>
-				<Equal Value1="_$Key" Value2="_KeyCheck"/>
-			</Conditions>
-			<Actions>
-				<MessageOnScreen Text="You Must Be Running" Color="#FFFFFFFF" Frames="60" AppearStyle="Fade" DisappearStyle="Scale"/>
-			</Actions>
-		</Loop>
-	</Template>
-	<!-- Floof's Stuff End-->
-	<Template Name="Death">
-		<Init>
-			<SetVariable Name="$AI" Value="-1"/>
-			<SetVariable Name="$Active" Value="1"/>
-			<SetVariable Name="$Node" Value="COM"/>
-			<SetVariable Name="Flag1" Value="0"/>
-		</Init>
-		<Loop Name="KillBot">
-			<Events Template="FreqUsed.Enter"/>
-			<Conditions Template="FreqUsed.TriggeredByAnyBot"/>
-			<Actions>
-				<Kill Model="_$Model"/>
-			</Actions>
-		</Loop>
-		<Loop Name="KillPlayer">
-			<Events Template="FreqUsed.Enter"/>
-			<Conditions Template="FreqUsed.TriggeredByPlayer"/>
-			<Actions>
-				<EndGame Result="Death" Model="_$Model" Frames="120"/>
-			</Actions>
-		</Loop>
-	</Template>
-	<Template Name="DeathOnCollision">
-		<Init>
-			<SetVariable Name="$AI" Value="-1"/>
-			<SetVariable Name="$Active" Value="1"/>
-			<SetVariable Name="$Node" Value="COM"/>
-			<SetVariable Name="Flag1" Value="0"/>
-		</Init>
-		<Loop Name="KillBot">
-			<Events Template="FreqUsed.OnCollision"/>
-			<Conditions Template="FreqUsed.TriggeredByAnyBot"/>
-			<Actions>
-				<Kill Model="_$Model"/>
-			</Actions>
-		</Loop>
-		<Loop Name="KillPlayer">
-			<Events Template="FreqUsed.OnCollision"/>
-			<Conditions Template="FreqUsed.TriggeredByPlayer"/>
-			<Actions>
-				<EndGame Result="Death" Model="_$Model" Frames="120"/>
-			</Actions>
-		</Loop>
-	</Template>
-	<Template Name="ForcedVariableAnimation">
-		<Init>
-			<SetVariable Name="$AI" Value="-1"/>
-			<SetVariable Name="$Active" Value="1"/>
-			<SetVariable Name="$Node" Value="COM"/>
-			<SetVariable Name="Flag1" Value="0"/>
-		</Init>
-		<Loop Name="TurnDelayed">
-			<Using>
-				<Variable Name="Mode" DefaultValue="0" Type="Bool"/>
-				<Variable Name="ActivatorToCheck" DefaultValue="None" Type="String"/>
-				<Variable Name="NewModel" DefaultValue="None" Type="String"/>
-			</Using>
-			<Events Template="FreqUsed.Activate"/>
-			<Conditions>
-				<Equal Value1="_ActivatorToCheck" Value2="_$ActionID"/>
-				<Equal Value1="_Mode" Value2="0"/>
-				<Equal Value1="_NewModel" Value2="None"/>
-			</Conditions>
-			<Actions>
-				<SetVariable Name="Mode" Value="1"/>
-			</Actions>
-		</Loop>
-		<Loop Name="TurnRegular">
-			<Using>
-				<Variable Name="Mode" DefaultValue="0" Type="Bool"/>
-				<Variable Name="ActivatorToCheck" DefaultValue="None" Type="String"/>
-				<Variable Name="NewModel" DefaultValue="None" Type="String"/>
-			</Using>
-			<Events Template="FreqUsed.Activate"/>
-			<Conditions>
-				<Equal Value1="_ActivatorToCheck" Value2="_$ActionID"/>
-				<Equal Value1="_Mode" Value2="1"/>
-			</Conditions>
-			<Actions>
-				<SetVariable Name="Mode" Value="0"/>
-			</Actions>
-		</Loop>
-		<Loop Name="Regular">
-			<Using>
-				<Variable Name="AnimName" DefaultValue="RunForward"/>
-				<Variable Name="AnimFrame" DefaultValue="10"/>
-				<Variable Name="Reversed" DefaultValue="0"/>
-				<Variable Name="Mode" DefaultValue="0"/>
-				<Variable Name="NewModel" DefaultValue="None"/>
-			</Using>
-			<Events Template="FreqUsed.Enter"/>
-			<Conditions>
-				<Equal Value1="_Mode" Value2="0" Type="Bool"/>
-			</Conditions>
-			<Actions>
-				<ForceAnimation Name="_AnimName" Model="_$Model" Frame="_AnimFrame" Reversed="_Reversed"/>
-				<SetVariable Name="NewModel" Value="_$Model"/>
-			</Actions>
-		</Loop>
-		<Loop Name="Delayed">
-			<Using>
-				<Variable Name="DelayedAnimName" DefaultValue="RunForward" Type="Animation"/>
-				<Variable Name="DelayedAnimFrame" DefaultValue="10" Type="UInt"/>
-				<Variable Name="DelayedReversed" DefaultValue="0" Type="Bool"/>
-				<Variable Name="Mode" DefaultValue="0" Type="Bool"/>
-			</Using>
-			<Events Template="FreqUsed.Enter"/>
-			<Conditions>
-				<Equal Value1="_Mode" Value2="1"/>
-			</Conditions>
-			<Actions>
-				<ForceAnimation Name="_DelayedAnimName" Model="_$Model" Frame="_DelayedAnimFrame" Reversed="_DelayedReversed"/>
-			</Actions>
-		</Loop>
-		<Loop Name="TurnDelayedWithModel">
-			<Using>
-				<Variable Name="DelayedAnimName" DefaultValue="RunForward" Type="Animation"/>
-				<Variable Name="DelayedAnimFrame" DefaultValue="10" Type="UInt"/>
-				<Variable Name="DelayedReversed" DefaultValue="0" Type="Bool"/>
-				<Variable Name="Mode" DefaultValue="0" Type="Bool"/>
-				<Variable Name="ActivatorToCheck" DefaultValue="None" Type="String"/>
-			</Using>
-			<Events Template="FreqUsed.Activate"/>
-			<Conditions>
-				<Equal Value1="_ActivatorToCheck" Value2="_$ActionID"/>
-				<Equal Value1="_Mode" Value2="0"/>
-				<Equal Value1="_NewModel" Value2="None" Not="1"/>
-			</Conditions>
-			<Actions>
-				<ForceAnimation Name="_DelayedAnimName" Model="_NewModel" Frame="_DelayedAnimFrame" Reversed="_DelayedReversed"/>
-				<SetVariable Name="Mode" Value="1"/>
-			</Actions>
-		</Loop>
-	</Template>
-	<Template Name="VariableDeath">
-		<Init>
-			<SetVariable Name="$AI" Value="-1"/>
-			<SetVariable Name="$Active" Value="1"/>
-			<SetVariable Name="$Node" Value="COM"/>
-			<SetVariable Name="Flag1" Value="0"/>
-		</Init>
-		<Loop Name="TurnDelayed">
-			<Using>
-				<Variable Name="Mode" DefaultValue="0" Type="Bool"/>
-				<Variable Name="ActivatorToCheck" DefaultValue="None" Type="String"/>
-				<Variable Name="NewModel" DefaultValue="None" Type="String"/>
-			</Using>
-			<Events Template="FreqUsed.Activate"/>
-			<Conditions>
-				<Equal Value1="_ActivatorToCheck" Value2="_$ActionID"/>
-				<Equal Value1="_Mode" Value2="0"/>
-				<Equal Value1="_NewModel" Value2="None"/>
-			</Conditions>
-			<Actions>
-				<SetVariable Name="Mode" Value="1"/>
-			</Actions>
-		</Loop>
-		<Loop Name="TurnRegular">
-			<Using>
-				<Variable Name="Mode" DefaultValue="0" Type="Bool"/>
-				<Variable Name="ActivatorToCheck" DefaultValue="None" Type="String"/>
-				<Variable Name="NewModel" DefaultValue="None" Type="String"/>
-			</Using>
-			<Events Template="FreqUsed.Activate"/>
-			<Conditions>
-				<Equal Value1="_ActivatorToCheck" Value2="_$ActionID"/>
-				<Equal Value1="_Mode" Value2="1"/>
-			</Conditions>
-			<Actions>
-				<SetVariable Name="Mode" Value="0"/>
-			</Actions>
-		</Loop>
-		<Loop Name="Regular">
-			<Using>
-				<Variable Name="AnimName" DefaultValue="RunForward"/>
-				<Variable Name="AnimFrame" DefaultValue="10"/>
-				<Variable Name="Reversed" DefaultValue="0"/>
-				<Variable Name="Mode" DefaultValue="0"/>
-				<Variable Name="NewModel" DefaultValue="None"/>
-			</Using>
-			<Events Template="FreqUsed.Enter"/>
-			<Conditions>
-				<Equal Value1="_Mode" Value2="0" Type="Bool"/>
-			</Conditions>
-			<Actions>
-				<ForceAnimation Name="_AnimName" Model="_$Model" Frame="_AnimFrame" Reversed="_Reversed"/>
-				<SetVariable Name="NewModel" Value="_$Model"/>
-			</Actions>
-		</Loop>
-		<Loop Name="Delayed">
-			<Using>
-				<Variable Name="DelayedAnimName" DefaultValue="RunForward" Type="Animation"/>
-				<Variable Name="DelayedAnimFrame" DefaultValue="10" Type="UInt"/>
-				<Variable Name="DelayedReversed" DefaultValue="0" Type="Bool"/>
-				<Variable Name="Mode" DefaultValue="0" Type="Bool"/>
-			</Using>
-			<Events Template="FreqUsed.Enter"/>
-			<Conditions>
-				<Equal Value1="_Mode" Value2="1"/>
-			</Conditions>
-			<Actions>
-				<Kill Model="_$Model"/>
-			</Actions>
-		</Loop>
-		<Loop Name="TurnDelayedWithModel">
-			<Using>
-				<Variable Name="DelayedAnimName" DefaultValue="RunForward" Type="Animation"/>
-				<Variable Name="DelayedAnimFrame" DefaultValue="10" Type="UInt"/>
-				<Variable Name="DelayedReversed" DefaultValue="0" Type="Bool"/>
-				<Variable Name="Mode" DefaultValue="0" Type="Bool"/>
-				<Variable Name="ActivatorToCheck" DefaultValue="None" Type="String"/>
-			</Using>
-			<Events Template="FreqUsed.Activate"/>
-			<Conditions>
-				<Equal Value1="_ActivatorToCheck" Value2="_$ActionID"/>
-				<Equal Value1="_Mode" Value2="0"/>
-				<Equal Value1="_NewModel" Value2="None" Not="1"/>
-			</Conditions>
-			<Actions>
-				<Kill Model="_NewModel"/>
-				<SetVariable Name="Mode" Value="1"/>
-			</Actions>
-		</Loop>
-	</Template>
-	<!--==========================-->
-	<!--==========================-->
-	<!--==========================-->
-	<!--==========================-->
-	<Template Name="Control">
-		<Init>
-			<SetVariable Name="$AI" Value="0"/>
-			<SetVariable Name="$Active" Value="1"/>
-			<SetVariable Name="$Node" Value="COM"/>
-			<SetVariable Name="Flag1" Value="0"/>
-		</Init>
-		<Loop Name="TurnOn">
-			<Events Template="FreqUsed.Enter"/>
-			<Conditions>
-				<Equal Value1="?getModel[_$Model].isControlled" Value2="0"/>
-			</Conditions>
-			<Actions>
-				<Control Switch="On" Model="_$Model"/>
-			</Actions>
-		</Loop>
-		<Loop Name="TurnOff">
-			<Events Template="FreqUsed.Enter"/>
-			<Conditions>
-				<Equal Value1="?getModel[_$Model].isControlled" Value2="1"/>
-			</Conditions>
-			<Actions>
-				<Control Switch="Off" Model="_$Model"/>
-			</Actions>
-		</Loop>
-	</Template>
-	<!--==========================-->
-	<!--==========================-->
-	<!--==========================-->
-	<!--==========================-->
-	<!--Триггеры type=5-->
-	<Template Name="TriggerLoss">
-		<Init>
-			<SetVariable Name="$AI" Value="-1"/>
-			<SetVariable Name="$Active" Value="1"/>
-			<SetVariable Name="$Node" Value="COM"/>
-			<SetVariable Name="Flag1" Value="0"/>
-		</Init>
-		<Loop Name="PlayerPass">
-			<Using>
-				<Variable Name="Time" DefaultValue="0" Type="UInt"/>
-				<Variable Name="Start" DefaultValue="" Type="Animation"/>
-				<Variable Name="ReversedStart" DefaultValue="0" Type="Bool"/>
-				<Variable Name="StartFrame" DefaultValue="" Type="UInt"/>
-			</Using>
-			<Events Template="FreqUsed.Enter"/>
-			<Conditions Template="FreqUsed.TriggeredByPlayer"/>
-			<Actions>
-				<EndGame Result="Loss" Model="_$Model" Frames="_Time"/>
-				<ForceAnimation Name="_Start" Model="_$Model" Frame="_StartFrame" Reversed="_ReversedStart"/>
-			</Actions>
-		</Loop>
-		<Loop Name="HunterPass">
-			<Using>
-				<Variable Name="End" DefaultValue="" Type="Animation"/>
-				<Variable Name="ReversedEnd" DefaultValue="0" Type="Bool"/>
-				<Variable Name="EndFrame" DefaultValue="" Type="UInt"/>
-			</Using>
-			<Events Template="FreqUsed.Enter"/>
-			<Conditions>
-				<Equal Value1="?getModel[_$Model].AI" Value2="0" Not="1"/>
-			</Conditions>
-			<Actions>
-				<ForceAnimation Name="_End" Model="_$Model" Frame="_EndFrame" Reversed="_ReversedEnd"/>
-			</Actions>
-		</Loop>
-	</Template>
-	<Template Name="TriggerVictory">
-		<Init>
-			<SetVariable Name="$AI" Value="-1"/>
-			<SetVariable Name="$Active" Value="1"/>
-			<SetVariable Name="$Node" Value="COM"/>
-			<SetVariable Name="Flag1" Value="0"/>
-		</Init>
-		<Loop Name="PlayerPass">
-			<Using>
-				<Variable Name="Time" DefaultValue="0" Type="UInt"/>
-				<Variable Name="Start" DefaultValue="" Type="Animation"/>
-				<Variable Name="ReversedStart" DefaultValue="0" Type="Bool"/>
-				<Variable Name="StartFrame" DefaultValue="" Type="UInt"/>
-			</Using>
-			<Events Template="FreqUsed.Enter"/>
-			<Conditions Template="FreqUsed.TriggeredByPlayer"/>
-			<Actions>
-				<Control Switch="Off" Model="Player"/>
-				<Camera Stop="1"/>
-				<EndGame Result="Win" Model="_$Model" Frames="_Time"/>
-				<ForceAnimation Name="_Start" Model="Hunter" Frame="_StartFrame" Reversed="_ReversedStart"/>
-				<SetVariable Name="$AI" Value="1"/>
-			</Actions>
-		</Loop>
-		<Loop Template="TriggerLoss.HunterPass" Name="HunterPass"/>
-	</Template>
-	<!--==========================-->
-	<!--==========================-->
-	<!--==========================-->
-	<!--==========================-->
-	<!-- Триггеры Type=10-->
-	<Template Name="ModelAnimation">
-		<Init>
-			<SetVariable Name="$AI" Value="0"/>
-			<SetVariable Name="$Active" Value="1"/>
-			<SetVariable Name="$Node" Value="COM"/>
-			<SetVariable Name="Flag1" Value="0"/>
-		</Init>
-		<Loop Name="Only">
-			<Using>
-				<Variable Name="AnimName" DefaultValue="" Type="String"/>
-				<Variable Name="AnimFrame" DefaultValue="" Type="String"/>
-			</Using>
-			<Events Template="FreqUsed.OnCollision"/>
-			<Actions>
-				<SetVariable Name="$Active" Value="0"/>
-				<ModelExecute AnimName="_AnimName" AnimFrame="_AnimFrame"/>
-			</Actions>
-		</Loop>
-	</Template>
-	<!--==========================-->
-	<!--==========================-->
-	<!--==========================-->
-	<!--==========================-->
-	<!-- Триггеры Type=11-->
-	<Template Name="Respawn">
-		<Init>
-			<SetVariable Name="$AI" Value="0"/>
-			<SetVariable Name="$Active" Value="1"/>
-			<SetVariable Name="$Node" Value="COM"/>
-			<SetVariable Name="Flag1" Value="0"/>
-		</Init>
-		<Loop Name="Player">
-			<Using>
-				<Variable Name="Frames" DefaultValue="0" Type="UInt"/>
-			</Using>
-			<Events Template="FreqUsed.Enter"/>
-			<Conditions Template="FreqUsed.IsSetForPlayer"/>
-			<Actions>
-				<SetVariable Name="$AI" Value="1"/>
-				<SetTimer Frames="_Frames"/>
-			</Actions>
-		</Loop>
-		<Loop Name="Timeout">
-			<Events Template="FreqUsed.Timeout"/>
-			<Conditions Template="FreqUsed.IsSetForHunter"/>
-			<Actions>
-				<AppendValue Name="Flag1" Value="1"/>
+  <!-- Повсеместно используемые элементы -->
+  <Template Name="CommonLib" Library="1">
+    <Loop Name = "Sound">
+      <Using>
+        <Variable Name="Sound" DefaultValue="None" ComplexName="1" Type="Sound" />
+      </Using>
+      <Actions>
+        <Sound Name="_Sound" />
+      </Actions>
+    </Loop>
+    <Loop Name = "Delay">
+      <Using>
+        <Variable Name="Delay" DefaultValue="0" ComplexName="1" Type="UInt"/>
+      </Using>    
+      <Actions>
+        <Wait Frames="_Delay" />
+      </Actions>    
+    </Loop>
+    <Loop Name = "RequiredAnimation">
+      <Using>
+        <Variable Name="ReqAnim" DefaultValue="?getModel[_$Model].animationName" ComplexName="1" Type="Animation"/>
+      </Using>        
+      <Events>
+        <ValueChange Value="?getModel[Player].animationName"/>
+        <ValueChange Value="?getModel[Hunter].animationName"/>
+      </Events>   
+      <Conditions>
+        <Equal Value1="_ReqAnim" Value2="?getModel[_$Model].animationName" />
+      </Conditions>   
+    </Loop>
+    <Loop Name = "ActiveDeath">
+      <Events>
+        <Collision />
+      </Events>
+    </Loop>
+  </Template>
+
+  <!--Сокращения для часто используемых конструкций-->
+  <Template Name="FreqUsed" Library="1">
+    <Loop Name="OnShow">
+      <Events>
+        <OnShow />
+      </Events>
+    </Loop>
+    <Loop Name="OnHide">
+      <Events>
+        <OnHide />
+      </Events>
+    </Loop>
+    <Loop Name="PlayerPressedKey">
+      <Using>
+        <Variable Name="Key" DefaultValue="Up" Type="Key" />
+      </Using>
+      <Events>
+        <KeyPressed />
+      </Events>
+      <Conditions>
+        <Equal Value1="_$Key" Value2="_Key" />
+        <Equal Value1="?getModel[_$Model].AI" Value2="0" />
+      </Conditions>
+    </Loop>
+    <Loop Name="KeyPressed">
+      <Events>
+        <KeyPressed />
+      </Events>
+    </Loop>
+    <Loop Name="OnCollision">
+      <Events>
+        <Collision />
+      </Events>
+    </Loop>
+    <Loop Name="Enter">
+      <Events>
+        <Enter />
+      </Events>
+    </Loop>
+    <Loop Name="Exit">
+      <Events>
+        <Exit />
+      </Events>
+    </Loop>
+    <Loop Name="EnterOrExit">
+      <Events>
+        <Exit />
+        <Enter />
+      </Events>
+    </Loop>
+    <Loop Name="Timeout">
+      <Events>
+        <Timeout />
+      </Events>
+    </Loop>
+    <Loop Name="Activate">
+      <Events>
+        <Activate />
+      </Events>
+    </Loop>
+    <Loop Name="IsSetForPlayer">
+      <Conditions>
+        <Equal Value1="_$AI" Value2="0" />
+      </Conditions>
+    </Loop>
+    <Loop Name="IsSetForHunter">
+      <Conditions>
+        <Equal Value1="_$AI" Value2="1" />
+      </Conditions>
+    </Loop>
+    <Loop Name="IsSetForHelper">
+      <Conditions>
+        <Equal Value1="_$AI" Value2="2" />
+      </Conditions>
+    </Loop>
+    <Loop Name="TriggeredByPlayer">
+      <Conditions>
+        <Equal Value1="?getModel[_$Model].AI" Value2="0" />
+      </Conditions>
+    </Loop>
+    <Loop Name="TriggeredByHunter">
+      <Conditions>
+        <Equal Value1="?getModel[_$Model].AI" Value2="1" />
+      </Conditions>
+    </Loop>
+    <Loop Name="TriggeredByHelper">
+      <Conditions>
+        <Equal Value1="?getModel[_$Model].AI" Value2="2" />
+      </Conditions>
+    </Loop>
+    <Loop Name="TriggeredByAnyBot">
+      <Conditions>
+        <Equal Value1="?getModel[_$Model].AI" Value2="0" Not="1" />
+      </Conditions>
+    </Loop>
+    <Loop Name="DispatchEvent">
+      <Using>
+        <Variable Name="Activator" DefaultValue="" ComplexName="1" Type="String"/>
+      </Using>
+      <Actions>
+        <Activate ActionID = "_Activator" />
+      </Actions>
+    </Loop>
+    <Loop Name="SwitchOn">
+      <Actions>
+        <SetVariable Name="$Active" Value="1"/>
+      </Actions>
+    </Loop>
+    <Loop Name="SwitchOff">
+      <Actions>
+        <SetVariable Name="$Active" Value="0"/>
+      </Actions>
+    </Loop>
+  </Template>
+
+  <!--==========================-->
+  <!--==========================-->
+  <!--==========================-->
+  <!--==========================-->
+
+  <!-- Триггеры Type=None -->
+
+  <Template Name="NoneType">
+    <Init>
+      <SetVariable Name="$AI" Value="-1"/>
+      <SetVariable Name="$Active" Value="1"/>
+      <SetVariable Name="$Node" Value="COM"/>    
+    	<SetVariable Name="Flag1" Value="0"/>    
+    </Init>
+    <Loop Name="Only">
+      <Events Template="FreqUsed.OnCollision"/>
+      <Actions>
+        <SetVariable Name="$Active" Value="0" />
+        <Execute/>
+      </Actions>
+    </Loop>
+  </Template>
+
+  <!--==========================-->
+  <!--==========================-->
+  <!--==========================-->
+  <!--==========================-->
+
+  <!-- Триггеры Type=1 с параметром follow и без него-->
+
+  <Template Name="AI_noFollow">
+    <Init>
+      <SetVariable Name="$AI" Value="1" />
+      <SetVariable Name="$Active" Value="1" />
+      <SetVariable Name="$Node" Value="COM" />
+    	<SetVariable Name="Flag1" Value="0"/>
+    </Init>
+    <Loop Name="Only">
+      <Using>
+        <Variable Name="Key" DefaultValue="Up" Type="Key"/>
+      </Using>
+      <Events Template="FreqUsed.Enter" />
+      <Actions>
+        <Press Key="_Key" Model="_$Model" />
+      </Actions>
+    </Loop>
+  </Template>
+
+  <Template Name="AI_Follow">
+    <Init>
+      <SetVariable Name="$AI" Value="0" />
+      <SetVariable Name="$Active" Value="1" />
+      <SetVariable Name="$Node" Value="COM" />
+    	<SetVariable Name="Flag1" Value="0"/>
+    </Init>
+    <Loop Name="SetLineVert">
+      <Using>
+        <Variable Name="FixedLine" DefaultValue="0" Type="Bool" />
+        <Variable Name="LineType" DefaultValue="Vertical" Type="Orientation" />
+        <Variable Name="LineValue" DefaultValue="0" Type="Int" />
+      </Using>
+      <Events Template="FreqUsed.KeyPressed" />
+      <Conditions>
+        <ConditionBlock Template="FreqUsed.PlayerPressedKey" />
+        <Equal Value1="_FixedLine" Value2="0" />
+        <Equal Value1="_LineType" Value2="Vertical" />
+      </Conditions>
+      <Actions>
+        <SetVariable Name="LineValue" Value="?getModel[Player].getNode[_$Node].localPositionX" />
+        <SetVariable Name="$AI" Value="_FollowAI" />
+      </Actions>
+    </Loop>
+    <Loop Name="SetLineHor">
+      <Using>
+        <Variable Name="LineValue" DefaultValue="0" Type="Int" />
+        <Variable Name="FixedLine" DefaultValue="0" Type="Bool" />
+        <Variable Name="LineType" DefaultValue="Vertical" Type="Orientation" />
+      </Using>
+      <Events Template="FreqUsed.KeyPressed" />
+      <Conditions>
+        <ConditionBlock Template="FreqUsed.PlayerPressedKey" />
+        <Equal Value1="_FixedLine" Value2="0" />
+        <Equal Value1="_LineType" Value2="Horizontal" />
+      </Conditions>
+      <Actions>
+        <SetVariable Name="LineValue" Value="?getModel[Player].getNode[_$Node].localPositionY" />
+        <SetVariable Name="$AI" Value="_FollowAI" />
+      </Actions>
+    </Loop>
+    <Loop Name="SetLineFixed">
+      <Using>
+        <Variable Name="FollowAI" DefaultValue="1" Type="AI"/>
+      </Using>
+      <Events Template="FreqUsed.KeyPressed" />
+      <Conditions>
+        <ConditionBlock Template="FreqUsed.PlayerPressedKey" />
+        <Equal Value1="_FixedLine" Value2="1" />
+      </Conditions>
+      <Actions>
+        <SetVariable Name="$AI" Value="_FollowAI" />
+      </Actions>
+    </Loop>
+    <Loop Name="FollowLineTrigger">
+      <Using>
+        <Variable Name="Key" DefaultValue="Up" Type="Key" />
+        <Variable Name="FollowAI" DefaultValue="1" Type="AI" />
+      </Using>
+      <Events>
+        <Line Type="_LineType" Position="_LineValue" />
+      </Events>
+      <Conditions>
+        <Equal Value1="_$AI" Value2="_FollowAI" />
+      </Conditions>
+      <Actions>
+        <Press Key="_Key" Model="_$Model" />
+        <SetVariable Name="$AI" Value="0" />
+      </Actions>
+    </Loop>
+    <Loop Name="SetNoLine">
+      <Using>
+        <Variable Name="Key" DefaultValue="Up" Type="Key" />
+      </Using>
+      <Events Template="FreqUsed.KeyPressed" />
+      <Conditions>
+        <ConditionBlock Template="FreqUsed.PlayerPressedKey" />
+        <Equal Value1="_LineType" Value2="NoLine" />
+      </Conditions>
+      <Actions>
+        <SetVariable Name="$AI" Value="_FollowAI" />
+      </Actions>
+    </Loop>
+    <Loop Name="FollowNoLineTrigger">
+      <Using>
+        <Variable Name="Key" DefaultValue="Up" Type="Key" />
+        <Variable Name="LineType" DefaultValue="Vertical" Type="Orientation" />
+        <Variable Name="FollowAI" DefaultValue="1" Type="AI" />
+      </Using>
+      <Events Template="FreqUsed.Enter" />
+      <Conditions>
+        <Equal Value1="_$AI" Value2="_FollowAI" />
+        <Equal Value1="_LineType" Value2="NoLine" />
+      </Conditions>
+      <Actions>
+        <Press Key="_Key" Model="_$Model"/>
+        <SetVariable Name="$AI" Value="0" />
+      </Actions>
+    </Loop>
+  </Template>
+
+
+  <!--==========================-->
+  <!--==========================-->
+  <!--==========================-->
+  <!--==========================-->
+
+  <!--Триггеры Type=2 КАМЕРА-->
+
+
+  <Template Name="CameraZoom">
+    <Init>
+      <SetVariable Name="$AI" Value="0" />
+      <SetVariable Name="$Active" Value="1" />
+      <SetVariable Name="$Node" Value="COM" />
+    	<SetVariable Name="Flag1" Value="0"/>
+    </Init>
+    <Loop Name="Only">
+      <Using>
+        <Variable Name="Zoom" DefaultValue="1" Type="Zoom" />
+      </Using>
+      <Events Template="FreqUsed.Enter" />
+      <Actions>
+        <Camera Zoom="_Zoom" />
+      </Actions>
+    </Loop>
+  </Template>
+
+
+  <Template Name="CameraSmoothness">
+    <Init>
+      <SetVariable Name="$AI" Value="0" />
+      <SetVariable Name="$Active" Value="1" />
+      <SetVariable Name="$Node" Value="COM" />
+    	<SetVariable Name="Flag1" Value="0"/>
+    </Init>
+    <Loop Name="Enter">
+      <Using>
+        <Variable Name="Smoothness" DefaultValue="100" Type="Int" />
+      </Using>
+      <Events Template="FreqUsed.Enter" />
+      <Actions>
+        <Camera Smoothness="_Smoothness" />
+      </Actions>
+    </Loop>
+    <Loop Name="Exit">
+      <Events Template="FreqUsed.Exit" />
+      <Actions>
+        <Camera Smoothness="2" />
+      </Actions>
+    </Loop>
+  </Template>
+
+
+  <Template Name="CameraFollow">
+    <Init>
+      <SetVariable Name="$AI" Value="0" />
+      <SetVariable Name="$Active" Value="1" />
+      <SetVariable Name="$Node" Value="COM" />
+    	<SetVariable Name="Flag1" Value="0"/>
+    </Init>
+    <Loop Name="Only">
+      <Using>
+        <Variable Name="Follow" DefaultValue="_$Model" Type="Model" />
+      </Using>
+      <Events Template="FreqUsed.Enter" />
+      <Actions>
+        <Camera Follow="_Follow" />
+      </Actions>
+    </Loop>
+  </Template>
+
+
+  <!--==========================-->
+  <!--==========================-->
+  <!--==========================-->
+  <!--====Type=13===============-->
+
+
+  <Template Name="ForcedAnimation">
+    <Init>
+      <SetVariable Name="$AI" Value="-1" />
+      <SetVariable Name="$Active" Value="1" />
+      <SetVariable Name="$Node" Value="COM" />    
+    	<SetVariable Name="Flag1" Value="0"/>    
+    </Init>
+    <Loop Name="Only">
+      <Using>
+        <Variable Name="AnimName" DefaultValue="RunForward" Type="Animation" />
+        <Variable Name="AnimFrame" DefaultValue="10"  Type="UInt" />
+        <Variable Name="Reversed" DefaultValue="0" Type="UInt" />
+      </Using>
+      <Events Template="FreqUsed.Enter" />
+      <Actions>
+        <ForceAnimation Name="_AnimName" Model="_$Model" Frame="_AnimFrame" Reversed="_Reversed" />
+      </Actions>
+    </Loop>
+  </Template>
+
+  <Template Name="Death">
+    <Init>
+      <SetVariable Name="$AI" Value="-1" />
+      <SetVariable Name="$Active" Value="1" />
+      <SetVariable Name="$Node" Value="COM" />    
+    	<SetVariable Name="Flag1" Value="0"/>    
+    </Init>
+    <Loop Name="KillBot">
+      <Events Template="FreqUsed.Enter" />
+      <Conditions Template="FreqUsed.TriggeredByAnyBot" />
+      <Actions>
+        <Kill Model="_$Model" />
+      </Actions>
+    </Loop>
+    <Loop Name="KillPlayer">
+      <Events Template="FreqUsed.Enter" />
+      <Conditions Template="FreqUsed.TriggeredByPlayer" />
+      <Actions>
+        <EndGame Result="Death" Model="_$Model" Frames="120" />
+      </Actions>
+    </Loop>
+  </Template>
+
+  <Template Name="ForcedVariableAnimation">
+    <Init>
+      <SetVariable Name="$AI" Value="-1" />
+      <SetVariable Name="$Active" Value="1" />
+      <SetVariable Name="$Node" Value="COM" />    
+    	<SetVariable Name="Flag1" Value="0"/>    
+    </Init>
+    <Loop Name="TurnDelayed">
+      <Using>
+        <Variable Name="Mode" DefaultValue="0" Type="Bool" />
+        <Variable Name="ActivatorToCheck" DefaultValue="None" Type="String" />
+        <Variable Name="NewModel" DefaultValue="None" Type="String" />
+      </Using>
+      <Events Template="FreqUsed.Activate" />
+      <Conditions>
+        <Equal Value1="_ActivatorToCheck" Value2="_$ActionID" />
+        <Equal Value1="_Mode" Value2="0" />
+        <Equal Value1="_NewModel" Value2="None" />
+      </Conditions>
+      <Actions>
+        <SetVariable Name="Mode" Value="1" />
+      </Actions>
+    </Loop>
+    <Loop Name="TurnRegular">
+      <Using>
+        <Variable Name="Mode" DefaultValue="0" Type="Bool" />
+        <Variable Name="ActivatorToCheck" DefaultValue="None" Type="String" />
+        <Variable Name="NewModel" DefaultValue="None" Type="String" />
+      </Using>
+      <Events Template="FreqUsed.Activate" />
+      <Conditions>
+        <Equal Value1="_ActivatorToCheck" Value2="_$ActionID" />
+        <Equal Value1="_Mode" Value2="1" />
+      </Conditions>
+      <Actions>
+        <SetVariable Name="Mode" Value="0" />
+      </Actions>
+    </Loop>
+    <Loop Name="Regular">
+      <Using>
+        <Variable Name="AnimName" DefaultValue="RunForward" />
+        <Variable Name="AnimFrame" DefaultValue="10" />
+        <Variable Name="Reversed" DefaultValue="0" />
+        <Variable Name="Mode" DefaultValue="0" />
+        <Variable Name="NewModel" DefaultValue="None"/>
+      </Using>
+      <Events Template="FreqUsed.Enter" />
+      <Conditions>
+        <Equal Value1="_Mode" Value2="0" Type="Bool" />
+      </Conditions>
+      <Actions>
+        <ForceAnimation Name="_AnimName" Model="_$Model" Frame="_AnimFrame" Reversed="_Reversed" />
+        <SetVariable Name="NewModel" Value="_$Model"/>
+      </Actions>
+    </Loop>
+    <Loop Name="Delayed">
+      <Using>
+        <Variable Name="DelayedAnimName" DefaultValue="RunForward" Type="Animation" />
+        <Variable Name="DelayedAnimFrame" DefaultValue="10" Type="UInt" />
+        <Variable Name="DelayedReversed" DefaultValue="0" Type="Bool" />
+        <Variable Name="Mode" DefaultValue="0" Type="Bool" />
+      </Using>
+      <Events Template="FreqUsed.Enter" />
+      <Conditions>
+        <Equal Value1="_Mode" Value2="1"  />
+      </Conditions>
+      <Actions>
+        <ForceAnimation Name="_DelayedAnimName" Model="_$Model" Frame="_DelayedAnimFrame" Reversed="_DelayedReversed" />
+      </Actions>
+    </Loop>
+    <Loop Name="TurnDelayedWithModel">
+      <Using>
+        <Variable Name="DelayedAnimName" DefaultValue="RunForward" Type="Animation" />
+        <Variable Name="DelayedAnimFrame" DefaultValue="10" Type="UInt" />
+        <Variable Name="DelayedReversed" DefaultValue="0" Type="Bool" />
+        <Variable Name="Mode" DefaultValue="0" Type="Bool" />
+        <Variable Name="ActivatorToCheck" DefaultValue="None" Type="String" />
+      </Using>
+      <Events Template="FreqUsed.Activate"/>
+      <Conditions>
+        <Equal Value1="_ActivatorToCheck" Value2="_$ActionID" />
+        <Equal Value1="_Mode" Value2="0"/>
+        <Equal Value1="_NewModel" Value2="None" Not="1"/>
+      </Conditions>
+      <Actions>
+        <ForceAnimation Name="_DelayedAnimName" Model="_NewModel" Frame="_DelayedAnimFrame" Reversed="_DelayedReversed"/>
+        <SetVariable Name="Mode" Value="1"/>
+      </Actions>
+    </Loop>
+  </Template>
+
+  <Template Name="VariableDeath">
+    <Init>
+      <SetVariable Name="$AI" Value="-1" />
+      <SetVariable Name="$Active" Value="1" />
+      <SetVariable Name="$Node" Value="COM" />    
+    	<SetVariable Name="Flag1" Value="0"/>    
+    </Init>
+    <Loop Name="TurnDelayed">
+      <Using>
+        <Variable Name="Mode" DefaultValue="0" Type="Bool" />
+        <Variable Name="ActivatorToCheck" DefaultValue="None" Type="String" />
+        <Variable Name="NewModel" DefaultValue="None" Type="String" />
+      </Using>
+      <Events Template="FreqUsed.Activate" />
+      <Conditions>
+        <Equal Value1="_ActivatorToCheck" Value2="_$ActionID" />
+        <Equal Value1="_Mode" Value2="0" />
+        <Equal Value1="_NewModel" Value2="None" />
+      </Conditions>
+      <Actions>
+        <SetVariable Name="Mode" Value="1" />
+      </Actions>
+    </Loop>
+    <Loop Name="TurnRegular">
+      <Using>
+        <Variable Name="Mode" DefaultValue="0" Type="Bool" />
+        <Variable Name="ActivatorToCheck" DefaultValue="None" Type="String" />
+        <Variable Name="NewModel" DefaultValue="None" Type="String" />
+      </Using>
+      <Events Template="FreqUsed.Activate" />
+      <Conditions>
+        <Equal Value1="_ActivatorToCheck" Value2="_$ActionID" />
+        <Equal Value1="_Mode" Value2="1" />
+      </Conditions>
+      <Actions>
+        <SetVariable Name="Mode" Value="0" />
+      </Actions>
+    </Loop>
+    <Loop Name="Regular">
+      <Using>
+        <Variable Name="AnimName" DefaultValue="RunForward" />
+        <Variable Name="AnimFrame" DefaultValue="10" />
+        <Variable Name="Reversed" DefaultValue="0" />
+        <Variable Name="Mode" DefaultValue="0" />
+        <Variable Name="NewModel" DefaultValue="None"/>
+      </Using>
+      <Events Template="FreqUsed.Enter" />
+      <Conditions>
+        <Equal Value1="_Mode" Value2="0" Type="Bool" />
+      </Conditions>
+      <Actions>
+        <ForceAnimation Name="_AnimName" Model="_$Model" Frame="_AnimFrame" Reversed="_Reversed" />
+        <SetVariable Name="NewModel" Value="_$Model"/>
+      </Actions>
+    </Loop>
+    <Loop Name="Delayed">
+      <Using>
+        <Variable Name="DelayedAnimName" DefaultValue="RunForward" Type="Animation" />
+        <Variable Name="DelayedAnimFrame" DefaultValue="10" Type="UInt" />
+        <Variable Name="DelayedReversed" DefaultValue="0" Type="Bool" />
+        <Variable Name="Mode" DefaultValue="0" Type="Bool" />
+      </Using>
+      <Events Template="FreqUsed.Enter" />
+      <Conditions>
+        <Equal Value1="_Mode" Value2="1"  />
+      </Conditions>
+      <Actions>
+        <Kill Model="_$Model" />
+      </Actions>
+    </Loop>
+    <Loop Name="TurnDelayedWithModel">
+      <Using>
+        <Variable Name="DelayedAnimName" DefaultValue="RunForward" Type="Animation" />
+        <Variable Name="DelayedAnimFrame" DefaultValue="10" Type="UInt" />
+        <Variable Name="DelayedReversed" DefaultValue="0" Type="Bool" />
+        <Variable Name="Mode" DefaultValue="0" Type="Bool" />
+        <Variable Name="ActivatorToCheck" DefaultValue="None" Type="String" />
+      </Using>
+      <Events Template="FreqUsed.Activate"/>
+      <Conditions>
+        <Equal Value1="_ActivatorToCheck" Value2="_$ActionID" />
+        <Equal Value1="_Mode" Value2="0"/>
+        <Equal Value1="_NewModel" Value2="None" Not="1"/>
+      </Conditions>
+      <Actions>
+        <Kill Model="_NewModel" />
+        <SetVariable Name="Mode" Value="1"/>
+      </Actions>
+    </Loop>
+  </Template>
+
+
+
+  <!--==========================-->
+  <!--==========================-->
+  <!--==========================-->
+  <!--==========================-->
+
+  <Template Name="Control">
+    <Init>
+      <SetVariable Name="$AI" Value="0" />
+      <SetVariable Name="$Active" Value="1" />
+      <SetVariable Name="$Node" Value="COM" />
+    	<SetVariable Name="Flag1" Value="0"/>
+    </Init>
+    <Loop Name="TurnOn">
+      <Events Template="FreqUsed.Enter" />
+      <Conditions>
+        <Equal Value1="?getModel[_$Model].isControlled" Value2="0" />
+      </Conditions>
+      <Actions>
+        <Control Switch="On" Model="_$Model" />
+      </Actions>
+    </Loop>
+    <Loop Name="TurnOff">
+      <Events Template="FreqUsed.Enter" />
+      <Conditions>
+        <Equal Value1="?getModel[_$Model].isControlled" Value2="1" />
+      </Conditions>
+      <Actions>
+        <Control Switch="Off" Model="_$Model" />
+      </Actions>
+    </Loop>
+  </Template>
+
+  <!--==========================-->
+  <!--==========================-->
+  <!--==========================-->
+  <!--==========================-->
+  <!--Триггеры type=5-->
+
+
+  <Template Name="TriggerLoss">
+    <Init>
+      <SetVariable Name="$AI" Value="-1" />
+      <SetVariable Name="$Active" Value="1" />
+      <SetVariable Name="$Node" Value="COM" />
+    	<SetVariable Name="Flag1" Value="0"/>
+    </Init>
+    <Loop Name="PlayerPass">
+      <Using>
+        <Variable Name="Time" DefaultValue="0" Type="UInt" />
+        <Variable Name="Start" DefaultValue="" Type="Animation" />
+        <Variable Name="ReversedStart" DefaultValue="0" Type="Bool" />
+        <Variable Name="StartFrame" DefaultValue="" Type="UInt" />
+      </Using>
+      <Events Template="FreqUsed.Enter" />
+      <Conditions Template="FreqUsed.TriggeredByPlayer" />
+      <Actions>
+        <EndGame Result="Loss" Model="_$Model" Frames="_Time" />
+        <ForceAnimation Name="_Start" Model="_$Model" Frame="_StartFrame" Reversed="_ReversedStart" />
+      </Actions>
+    </Loop>  
+    <Loop Name="HunterPass">
+      <Using>
+        <Variable Name="End" DefaultValue="" Type="Animation" />
+        <Variable Name="ReversedEnd" DefaultValue="0" Type="Bool" />
+        <Variable Name="EndFrame" DefaultValue="" Type="UInt" />
+      </Using>
+      <Events Template="FreqUsed.Enter" />
+      <Conditions>
+        <Equal Value1="?getModel[_$Model].AI" Value2="0" Not="1"/>
+      </Conditions>
+      <Actions>
+        <ForceAnimation Name="_End" Model="_$Model" Frame="_EndFrame" Reversed="_ReversedEnd" />
+      </Actions>
+    </Loop>
+  </Template>
+
+  <Template Name="TriggerVictory">
+    <Init>
+      <SetVariable Name="$AI" Value="-1" />
+      <SetVariable Name="$Active" Value="1" />
+      <SetVariable Name="$Node" Value="COM" />
+    	<SetVariable Name="Flag1" Value="0"/>
+    </Init>
+    <Loop Name="PlayerPass">
+      <Using>
+        <Variable Name="Time" DefaultValue="0" Type="UInt" />
+        <Variable Name="Start" DefaultValue="" Type="Animation" />
+        <Variable Name="ReversedStart" DefaultValue="0" Type="Bool" />
+        <Variable Name="StartFrame" DefaultValue="" Type="UInt" />
+      </Using>
+      <Events Template="FreqUsed.Enter" />
+      <Conditions Template="FreqUsed.TriggeredByPlayer" />
+      <Actions>
+        <Control Switch="Off" Model="Player" />
+        <Camera Stop="1" />
+        <EndGame Result="Win" Model="_$Model" Frames="_Time" />
+        <ForceAnimation Name="_Start" Model="Hunter" Frame="_StartFrame" Reversed="_ReversedStart" />
+        <SetVariable Name="$AI" Value="1" />
+      </Actions>
+    </Loop>  
+    <Loop Template="TriggerLoss.HunterPass" Name="HunterPass" />
+  </Template>
+
+  <!--==========================-->
+  <!--==========================-->
+  <!--==========================-->
+  <!--==========================-->
+
+  <!-- Триггеры Type=10-->
+
+  <Template Name="ModelAnimation">
+    <Init>
+      <SetVariable Name="$AI" Value="0" />
+      <SetVariable Name="$Active" Value="1" />
+      <SetVariable Name="$Node" Value="COM" />    
+    	<SetVariable Name="Flag1" Value="0"/>    
+    </Init>
+    <Loop Name="Only">
+      <Using>
+        <Variable Name="AnimName" DefaultValue="" Type="String" />
+        <Variable Name="AnimFrame" DefaultValue="" Type="String" />
+      </Using>
+      <Events Template="FreqUsed.OnCollision" />
+      <Actions>
+        <SetVariable Name="$Active" Value="0" />
+        <ModelExecute AnimName="_AnimName" AnimFrame="_AnimFrame" />
+      </Actions>
+    </Loop>
+  </Template>
+  <!--==========================-->
+  <!--==========================-->
+  <!--==========================-->
+  <!--==========================-->
+
+  <!-- Триггеры Type=11-->
+
+  <Template Name="Respawn">
+    <Init>
+      <SetVariable Name="$AI" Value="0" />
+      <SetVariable Name="$Active" Value="1" />
+      <SetVariable Name="$Node" Value="COM" />    
+			<SetVariable Name="Flag1" Value="0" />    
+    </Init>
+    <Loop Name="Player">
+      <Using>
+        <Variable Name="Frames" DefaultValue="0" Type="UInt" />
+      </Using>
+      <Events Template="FreqUsed.Enter" />
+      <Conditions Template="FreqUsed.IsSetForPlayer" />
+      <Actions>
+        <SetVariable Name="$AI" Value="1" />
+        <SetTimer Frames="_Frames" />
+      </Actions>
+    </Loop>
+    <Loop Name="Timeout">
+      <Events Template="FreqUsed.Timeout" />
+      <Conditions Template="FreqUsed.IsSetForHunter" />
+      <Actions>
+        <AppendValue Name="Flag1" Value="1"/>
 				<Activate ActionID="SpawnHim"/>
-			</Actions>
-		</Loop>
+      </Actions>
+    </Loop>
 		<Loop Name="OnHide">
 			<Events>
 				<OnHide/>
 			</Events>
-			<Conditions Template="FreqUsed.IsSetForHunter"/>
+      <Conditions Template="FreqUsed.IsSetForHunter" />
 			<Actions>
-				<AppendValue Name="Flag1" Value="1"/>
+        <AppendValue Name="Flag1" Value="1"/>
 				<Activate ActionID="SpawnHim"/>
 			</Actions>
 		</Loop>
 		<Loop Name="Spawn">
-			<Using>
-				<Variable Name="Spawn" DefaultValue="Respawn"/>
-				<Variable Name="SpawnModel" DefaultValue="Hunter" Type="Model"/>
-			</Using>
+      <Using>
+        <Variable Name="Spawn" DefaultValue="Respawn" />
+        <Variable Name="SpawnModel" DefaultValue="Hunter" Type="Model" />
+      </Using>
 			<Events>
 				<Activate/>
 			</Events>
 			<Conditions>
 				<Equal Value1="_$ActionID" Value2="SpawnHim"/>
-				<Equal Value1="_$AI" Value2="1"/>
+				<Equal Value1="_$AI" Value2="1" />
 				<Equal Value1="_Flag1" Value2="2"/>
 			</Conditions>
-			<Actions>
-				<Spawn Model="_SpawnModel" Spawn="_Spawn"/>
-				<SetVariable Name="$AI" Value="0"/>
-			</Actions>
+      <Actions>
+        <Spawn Model="_SpawnModel" Spawn="_Spawn" />
+        <SetVariable Name="$AI" Value="0" />
+      </Actions>
 		</Loop>
-		<Loop Name="Bot">
-			<Events Template="FreqUsed.Enter"/>
-			<Conditions Template="FreqUsed.TriggeredByHunter"/>
-			<Actions>
-				<SetVariable Name="$AI" Value="0"/>
-				<SetVariable Name="Flag1" Value="0"/>
+    <Loop Name="Bot">
+      <Events Template="FreqUsed.Enter" />
+      <Conditions Template="FreqUsed.TriggeredByHunter" />
+      <Actions>
+        <SetVariable Name="$AI" Value="0" />
+				<SetVariable Name="Flag1" Value="0" />
 				<SetVariable Name="$Active" Value="0"/>
-			</Actions>
-		</Loop>
-	</Template>
-	<Template Name="Respawn_OnScreen">
-		<Init>
-			<SetVariable Name="$AI" Value="0"/>
-			<SetVariable Name="$Active" Value="1"/>
-			<SetVariable Name="$Node" Value="COM"/>
-			<SetVariable Name="Flag1" Value="0"/>
-		</Init>
-		<Loop Name="Player">
-			<Using>
-				<Variable Name="Frames" DefaultValue="0" Type="UInt"/>
-			</Using>
-			<Events Template="FreqUsed.Enter"/>
-			<Conditions Template="FreqUsed.IsSetForPlayer"/>
-			<Actions>
-				<SetVariable Name="$AI" Value="1"/>
-				<SetTimer Frames="_Frames"/>
-			</Actions>
-		</Loop>
-		<Loop Name="Timeout">
-			<Using>
-				<Variable Name="Spawn" DefaultValue="Respawn"/>
-				<Variable Name="SpawnModel" DefaultValue="Hunter" Type="Model"/>
-			</Using>
-			<Events Template="FreqUsed.Timeout"/>
-			<Conditions Template="FreqUsed.IsSetForHunter"/>
-			<Actions>
-				<Spawn Model="_SpawnModel" Spawn="_Spawn"/>
-				<SetVariable Name="$AI" Value="0"/>
-			</Actions>
-		</Loop>
-		<Loop Name="Bot">
-			<Events Template="FreqUsed.Enter"/>
-			<Conditions Template="FreqUsed.TriggeredByHunter"/>
-			<Actions>
-				<SetVariable Name="$AI" Value="0"/>
-				<SetVariable Name="Flag1" Value="0"/>
+      </Actions>
+    </Loop>
+  </Template>
+	
+  <Template Name="Respawn_OnScreen">
+    <Init>
+      <SetVariable Name="$AI" Value="0" />
+      <SetVariable Name="$Active" Value="1" />
+      <SetVariable Name="$Node" Value="COM" />    
+			<SetVariable Name="Flag1" Value="0" />    
+    </Init>
+    <Loop Name="Player">
+      <Using>
+        <Variable Name="Frames" DefaultValue="0" Type="UInt" />
+      </Using>
+      <Events Template="FreqUsed.Enter" />
+      <Conditions Template="FreqUsed.IsSetForPlayer" />
+      <Actions>
+        <SetVariable Name="$AI" Value="1" />
+        <SetTimer Frames="_Frames" />
+      </Actions>
+    </Loop>
+    <Loop Name="Timeout">
+      <Using>
+        <Variable Name="Spawn" DefaultValue="Respawn" />
+        <Variable Name="SpawnModel" DefaultValue="Hunter" Type="Model" />
+      </Using>
+      <Events Template="FreqUsed.Timeout" />
+      <Conditions Template="FreqUsed.IsSetForHunter" />
+      <Actions>
+        <Spawn Model="_SpawnModel" Spawn="_Spawn" />
+        <SetVariable Name="$AI" Value="0" />
+      </Actions>
+    </Loop>
+    <Loop Name="Bot">
+      <Events Template="FreqUsed.Enter" />
+      <Conditions Template="FreqUsed.TriggeredByHunter" />
+      <Actions>
+        <SetVariable Name="$AI" Value="0" />
+				<SetVariable Name="Flag1" Value="0" />
 				<SetVariable Name="$Active" Value="0"/>
-			</Actions>
-		</Loop>
-	</Template>
-	<!--==========================-->
-	<!--==========================-->
-	<!--==========================-->
-	<!-- Триггеры Type=11-->
-	<Template Name="RespawnHelper">
-		<Init>
-			<SetVariable Name="$AI" Value="-1"/>
-			<SetVariable Name="$Active" Value="1"/>
-			<SetVariable Name="$Node" Value="COM"/>
-			<SetVariable Name="Flag1" Value="0"/>
-		</Init>
-		<Loop Name="Helper">
-			<Using>
-				<Variable Name="Frames" DefaultValue="1" Type="UInt"/>
-			</Using>
-			<Events Template="FreqUsed.Enter"/>
-			<Conditions>
-				<Operator Type="Or">
-					<Equal Value1="?getModel[_$Model].AI" Value2="2"/>
-					<Equal Value1="?getModel[_$Model].AI" Value2="5"/>
-				</Operator>
+      </Actions>
+    </Loop>
+  </Template>
+  <!--==========================-->
+  <!--==========================-->
+  <!--==========================-->
+
+  <!-- Триггеры Type=11-->
+
+  <Template Name="RespawnHelper">
+    <Init>
+      <SetVariable Name="$AI" Value="-1" />
+      <SetVariable Name="$Active" Value="1" />
+      <SetVariable Name="$Node" Value="COM" />   
+    	<SetVariable Name="Flag1" Value="0"/>   
+    </Init>
+    <Loop Name="Helper">
+      <Using>
+        <Variable Name="Frames" DefaultValue="1" Type="UInt" />
+      </Using>
+      <Events Template="FreqUsed.Enter" />
+      <Conditions>
+        <Operator Type="Or">
+          <Equal Value1="?getModel[_$Model].AI" Value2="2" />
+          <Equal Value1="?getModel[_$Model].AI" Value2="5" />
+        </Operator>
 				<Equal Value1="Flag1" Value2="0"/>
-			</Conditions>
-			<Actions>
-				<SetVariable Name="$AI" Value="0"/>
-				<SetTimer Frames="_Frames"/>
-			</Actions>
-		</Loop>
-		<Loop Name="Timeout">
-			<Using>
-				<Variable Name="Time" DefaultValue="120" Type="UInt"/>
-			</Using>
-			<Events Template="FreqUsed.Timeout"/>
-			<Conditions Template="FreqUsed.IsSetForPlayer"/>
-			<Actions>
-				<EndGame Result="Loss" Model="Player" Frames="_Time"/>
+      </Conditions>
+      <Actions>
+        <SetVariable Name="$AI" Value="0" />
+        <SetTimer Frames="_Frames" />
+      </Actions>
+    </Loop>
+    <Loop Name="Timeout">
+      <Using>
+        <Variable Name="Time" DefaultValue="120" Type="UInt" />
+      </Using>
+      <Events Template="FreqUsed.Timeout" />
+      <Conditions Template="FreqUsed.IsSetForPlayer" />
+      <Actions>
+        <EndGame Result="Loss" Model="Player" Frames="_Time" />
 				<Control Switch="Off" Model="Player"/>
 				<MessageOnScreen Text="track_far_txt" Color="#FFFFFFFF" Frames="120" AppearStyle="Fade" DisappearStyle="Fade"/>
-			</Actions>
-		</Loop>
-		<Loop Name="Player">
-			<Events Template="FreqUsed.Enter"/>
-			<Conditions Template="FreqUsed.IsSetForPlayer"/>
-			<Actions>
-				<SetVariable Name="$AI" Value="-1"/>
-			</Actions>
-		</Loop>
-		<Loop Name="PlayerisFirst">
-			<Events Template="FreqUsed.Enter"/>
-			<Conditions>
+      </Actions>
+    </Loop>
+    <Loop Name="Player">
+      <Events Template="FreqUsed.Enter" />
+      <Conditions Template="FreqUsed.IsSetForPlayer" />
+      <Actions>
+        <SetVariable Name="$AI" Value="-1" />
+      </Actions>
+    </Loop>
+    <Loop Name="PlayerisFirst">
+      <Events Template="FreqUsed.Enter" />
+      <Conditions>
 				<Equal Value1="_$AI" Value2="-1"/>
 				<Equal Value1="?getModel[_$Model].AI" Value2="0"/>
 			</Conditions>
-			<Actions>
-				<SetVariable Name="Flag1" Value="1"/>
-			</Actions>
-		</Loop>
-	</Template>
-	<Template Name="RespawnHunterMode">
-		<Init>
-			<SetVariable Name="$AI" Value="-1"/>
-			<SetVariable Name="$Active" Value="1"/>
-			<SetVariable Name="$Node" Value="COM"/>
-			<SetVariable Name="Flag1" Value="0"/>
-		</Init>
-		<Loop Name="Helper">
-			<Using>
-				<Variable Name="Frames" DefaultValue="1" Type="UInt"/>
-			</Using>
-			<Events Template="FreqUsed.Enter"/>
-			<Conditions>
-				<Operator Type="Or">
-					<Equal Value1="?getModel[_$Model].AI" Value2="2"/>
-					<Equal Value1="?getModel[_$Model].AI" Value2="5"/>
-				</Operator>
-			</Conditions>
-			<Actions>
-				<SetVariable Name="$AI" Value="0"/>
-				<SetTimer Frames="_Frames"/>
-			</Actions>
-		</Loop>
-		<Loop Name="HunterIsFirst">
-			<Events Template="FreqUsed.Enter"/>
-			<Conditions>
-				<Equal Value1="_$AI" Value2="-1"/>
-				<Equal Value1="?getModel[_$Model].AI" Value2="0"/>
-			</Conditions>
-			<Actions>
-				<SetVariable Name="$Active" Value="0"/>
+      <Actions>
+				<SetVariable Name="Flag1" Value="1" />
+      </Actions>
+    </Loop>
+  </Template>
+
+  <Template Name="RespawnHunterMode">
+    <Init>
+      <SetVariable Name="$AI" Value="-1" />
+      <SetVariable Name="$Active" Value="1" />
+      <SetVariable Name="$Node" Value="COM" />   
+    	<SetVariable Name="Flag1" Value="0"/>   
+    </Init>
+    <Loop Name="Helper">
+      <Using>
+        <Variable Name="Frames" DefaultValue="1" Type="UInt" />
+      </Using>
+      <Events Template="FreqUsed.Enter" />
+      <Conditions>
+        <Operator Type="Or">
+          <Equal Value1="?getModel[_$Model].AI" Value2="2" />
+          <Equal Value1="?getModel[_$Model].AI" Value2="5" />
+        </Operator>
+      </Conditions>
+      <Actions>
+        <SetVariable Name="$AI" Value="0" />
+        <SetTimer Frames="_Frames" />
+      </Actions>
+    </Loop>
+    <Loop Name="HunterIsFirst">
+      <Events Template="FreqUsed.Enter" />
+      <Conditions>
+				<Equal Value1="_$AI" Value2="-1" />
+				<Equal Value1="?getModel[_$Model].AI" Value2="0" />
+      </Conditions>
+      <Actions>
+        <SetVariable Name="$Active" Value="0" />
 				<Control Switch="Off" Model="Hunter"/>
 				<Activate ActionID="Hunterwasfirst"/>
-			</Actions>
-		</Loop>
-		<Loop Name="HunterCanArrest">
-			<Events>
+      </Actions>
+    </Loop>
+    <Loop Name="HunterCanArrest">
+      <Events>
 				<Activate/>
 			</Events>
-			<Conditions>
-				<Equal Value1="_$ActionID" Value2="Hunterwasfirst"/>
+      <Conditions>
+				<Equal Value1="_$ActionID" Value2="Hunterwasfirst" />
 				<Operator Type="Or">
-					<Equal Value1="?getModel[Hunter].animationName" Value2="RunForward"/>
-					<Equal Value1="?getModel[Hunter].animationName" Value2="RunFast"/>
+					<Equal Value1="?getModel[Hunter].animationName" Value2="RunForward" />
+					<Equal Value1="?getModel[Hunter].animationName" Value2="RunFast" />
 				</Operator>
-			</Conditions>
-			<Actions>
+      </Conditions>
+      <Actions>
 				<ForceAnimation Name="Arrest" Frame="21" Model="Hunter"/>
 				<EndGame Result="Win" Model="Hunter" Frames="30"/>
-			</Actions>
-		</Loop>
-		<Loop Name="HunterCannotArrest">
-			<Events>
+      </Actions>
+    </Loop>
+    <Loop Name="HunterCannotArrest">
+      <Events>
 				<Activate/>
 			</Events>
-			<Conditions>
-				<Equal Value1="_$ActionID" Value2="Hunterwasfirst"/>
-				<Equal Value1="?getModel[Hunter].animationName" Value2="RunForward" Not="1"/>
-				<Equal Value1="?getModel[Hunter].animationName" Value2="RunFast" Not="1"/>
-			</Conditions>
-			<Actions>
+      <Conditions>
+				<Equal Value1="_$ActionID" Value2="Hunterwasfirst" />
+				<Equal Value1="?getModel[Hunter].animationName" Value2="RunForward" Not="1" />
+				<Equal Value1="?getModel[Hunter].animationName" Value2="RunFast" Not="1" />
+      </Conditions>
+      <Actions>
 				<Wait Frames="2"/>
 				<Activate ActionID="Hunterwasfirst"/>
-			</Actions>
-		</Loop>
-		<Loop Name="Timeout">
-			<Using>
-				<Variable Name="Time" DefaultValue="120" Type="UInt"/>
-			</Using>
-			<Events Template="FreqUsed.Timeout"/>
-			<Conditions Template="FreqUsed.IsSetForPlayer"/>
-			<Actions>
-				<EndGame Result="Loss" Model="Hunter" Frames="_Time"/>
+      </Actions>
+    </Loop>
+    <Loop Name="Timeout">
+      <Using>
+        <Variable Name="Time" DefaultValue="120" Type="UInt" />
+      </Using>
+      <Events Template="FreqUsed.Timeout" />
+      <Conditions Template="FreqUsed.IsSetForPlayer" />
+      <Actions>
+        <EndGame Result="Loss" Model="Hunter" Frames="_Time" />
 				<Control Switch="Off" Model="Hunter"/>
 				<MessageOnScreen Text="track_far_txt" Color="#FFFFFFFF" Frames="120" AppearStyle="Fade" DisappearStyle="Fade"/>
-			</Actions>
-		</Loop>
-		<Loop Name="Player">
-			<Events Template="FreqUsed.Enter"/>
-			<Conditions Template="FreqUsed.IsSetForPlayer"/>
-			<Actions>
-				<SetVariable Name="$AI" Value="-1"/>
-				<SetVariable Name="$Active" Value="0"/>
-			</Actions>
-		</Loop>
-	</Template>
-	<!--==========================-->
-	<!--==========================-->
-	<!--==========================-->
-	<!-- Триггеры Type=11-->
-	<Template Name="ItemUsage" Library="1">
-		<Loop Name="IfItemExists">
-			<Using>
-				<Variable Name="ItemResult" DefaultValue="" Type="String" ComplexName="1"/>
-				<Variable Name="TargetItem" DefaultValue="" Type="String" ComplexName="1"/>
-			</Using>
-			<Conditions>
-				<Select Object="_ItemResult" From="Equipped">
-					<Equal Value1="_ItemResult" Value2="_TargetItem"/>
-				</Select>
-			</Conditions>
-		</Loop>
-		<Loop Name="IfItemDoesntExist">
-			<Using>
-				<Variable Name="ItemResult" DefaultValue="" Type="String" ComplexName="1"/>
-				<Variable Name="TargetItem" DefaultValue="" Type="String" ComplexName="1"/>
-			</Using>
-			<Conditions>
-				<Select Object="_ItemResult" From="Equipped" Not="1">
-					<Equal Value1="_ItemResult" Value2="_TargetItem"/>
-				</Select>
-			</Conditions>
-		</Loop>
-		<Loop Name="UseItem">
-			<Using>
-				<Variable Name="TargetItem" DefaultValue="" Type="String" ComplexName="1"/>
-			</Using>
-			<Actions>
-				<Use Object="_TargetItem"/>
-			</Actions>
-		</Loop>
-	</Template>
+      </Actions>
+    </Loop>
+    <Loop Name="Player">
+      <Events Template="FreqUsed.Enter" />
+      <Conditions Template="FreqUsed.IsSetForPlayer" />
+      <Actions>
+        <SetVariable Name="$AI" Value="-1" />
+				<SetVariable Name="$Active" Value="0" />
+      </Actions>
+    </Loop>
+  </Template>
+  <!--==========================-->
+  <!--==========================-->
+  <!--==========================-->
+
+  <!-- Триггеры Type=11-->
+
+  <Template Name="ItemUsage" Library="1" >
+    <Loop Name="IfItemExists">
+      <Using>
+        <Variable Name="ItemResult" DefaultValue="" Type="String" ComplexName="1" />
+        <Variable Name="TargetItem" DefaultValue="" Type="String" ComplexName="1" />
+      </Using>
+      <Conditions>
+        <Select Object="_ItemResult" From="Equipped">
+          <Equal Value1="_ItemResult" Value2="_TargetItem" />
+        </Select>
+      </Conditions>
+    </Loop>
+    <Loop Name="IfItemDoesntExist">
+      <Using>
+        <Variable Name="ItemResult" DefaultValue="" Type="String" ComplexName="1" />
+        <Variable Name="TargetItem" DefaultValue="" Type="String" ComplexName="1" />
+      </Using>
+      <Conditions>
+        <Select Object="_ItemResult" From="Equipped" Not="1">
+          <Equal Value1="_ItemResult" Value2="_TargetItem" />
+        </Select>
+      </Conditions>
+    </Loop>
+    <Loop Name="UseItem">
+      <Using>
+        <Variable Name="TargetItem" DefaultValue="" Type="String" ComplexName="1" />
+      </Using>
+      <Actions>
+        <Use Object="_TargetItem"/>
+      </Actions>
+    </Loop>
+  </Template>
+	
 	<Template Name="ArrestHunterMode">
 		<Loop Name="HunterEntered">
 			<Events>
@@ -3705,16 +1043,16 @@
 				<Operator Type="Or">
 					<Operator Type="And">
 						<Equal Value1="?getModel[Hunter].direction" Value2="1"/>
-						<Greater Value="?getModel[Hunter].getNode[COM].localPositionX" Than="?getModel[Player].getNode[COM].localPositionX"/>
+						<Greater Value1="?getModel[Hunter].getNode[COM].localPositionX" Value2="?getModel[Player].getNode[COM].localPositionX"/>
 					</Operator>
 					<Operator Type="And">
 						<Equal Value1="?getModel[Hunter].direction" Value2="-1"/>
-						<Greater Value="?getModel[Hunter].getNode[COM].worldPositionX" Than="?getModel[Player].getNode[COM].worldPositionX" Not="1"/>
+						<Greater Value1="?getModel[Hunter].getNode[COM].worldPositionX" Value2="?getModel[Player].getNode[COM].worldPositionX" Not="1"/>
 					</Operator>
 				</Operator>
 			</Conditions>
 			<Actions>
-				<Control Switch="Off" Model="_$Model"/>
+				<Control Switch="Off" Model="_$Model" />
 				<Activate ActionID="youwin"/>
 			</Actions>
 		</Loop>
@@ -3722,19 +1060,18 @@
 			<Events>
 				<Enter/>
 			</Events>
-			<!--
-			<Operator Type="Or">
+				<Operator Type="Or">
 					<Operator Type="And">
 						<Equal Value1="?getModel[Hunter].direction" Value2="1"/>
-						<Greater Value="?getModel[Hunter].getNode[COM].localPositionX" Than="?getModel[Player].getNode[COM].localPositionX" Not="1"/>
+						<Greater Value1="?getModel[Hunter].getNode[COM].localPositionX" Value2="?getModel[Player].getNode[COM].localPositionX" Not="1"/>
 					</Operator>
 					<Operator Type="And">
 						<Equal Value1="?getModel[Hunter].direction" Value2="-1"/>
-						<Greater Value="?getModel[Hunter].getNode[COM].worldPositionX" Than="?getModel[Player].getNode[COM].worldPositionX"/>
+						<Greater Value1="?getModel[Hunter].getNode[COM].worldPositionX" Value2="?getModel[Player].getNode[COM].worldPositionX"/>
 					</Operator>
-				</Operator>-->
+				</Operator>
 			<Actions>
-				<Control Switch="Off" Model="_$Model"/>
+				<Control Switch="Off" Model="_$Model" />
 			</Actions>
 		</Loop>
 		<Loop Name="HunterWin">
@@ -3752,7 +1089,7 @@
 		</Loop>
 		<Loop Name="HunterWin2">
 			<Events>
-				<Activate/>
+				<Activate />
 			</Events>
 			<Conditions>
 				<Equal Value1="_$ActionID" Value2="youwin"/>
@@ -3764,522 +1101,5 @@
 			</Actions>
 		</Loop>
 	</Template>
-	<Template Name="VariableElevator">
-		<Init>
-			<SetVariable Name="$Active" Value="1"/>
-			<SetVariable Name="$Node" Value="COM"/>
-			<SetVariable Name="$AI" Value="-1"/>
-			<!-- Set a unique string for each moving object, used for calling different objects -->
-			<SetVariable Name="UniqueID" Value="E1"/>
-			<!-- Where the moving object currently is -->
-			<SetVariable Name="CurrentFloor" Value="2"/>
-			<!-- Designated Keys to control the moving object -->
-			<SetVariable Name="Key1" Value="Up"/>
-			<SetVariable Name="Key2" Value="Down"/>
-			<!-- Maximum and Minimum floor the object can travel -->
-			<SetVariable Name="MaxFloor" Value="3"/>
-			<SetVariable Name="MinFloor" Value="1"/>
-			<!-- Transformation Names -->
-			<SetVariable Name="RegularTransform1" Value="RegularUp"/>
-			<SetVariable Name="RegularTransform2" Value="RegularDown"/>
-			<!-- DO NOT EDIT, Used as memory for the trigger -->
-			<SetVariable Name="CurrentlyMoving" Value="0"/>
-			<SetVariable Name="CurrentPlayerFloor" Value="0"/>
-			<SetVariable Name="CacheModel" Value="Player"/>
-			<SetVariable Name="ActivatorToUpdateFloor" Value="EID1"/>
-			<SetVariable Name="ActivatorToMove" Value="EID2"/>
-			<SetVariable Name="ActivatorToMoveAgain" Value="EID3"/>
-			<SetVariable Name="ActivatorToChangeTransform1" Value="EID8"/>
-			<SetVariable Name="ActivatorToChangeTransform2" Value="EID9"/>
-			<SetVariable Name="Flag1" Value="0"/>
-			<!-- DO NOT EDIT -->
-		</Init>
-		<Loop Name="LoadCallerVariables">
-			<Events>
-				<OnStartGame/>
-			</Events>
-			<Actions>
-				<AppendValue Name="ActivatorToUpdateFloor" Value="_UniqueID"/>
-				<AppendValue Name="ActivatorToMove" Value="_UniqueID"/>
-				<AppendValue Name="ActivatorToMoveAgain" Value="_UniqueID"/>
-				<AppendValue Name="ActivatorToChangeTransform1" Value="_UniqueID"/>
-				<AppendValue Name="ActivatorToChangeTransform2" Value="_UniqueID"/>
-			</Actions>
-		</Loop>
-		<Loop Name="CacheModel">
-			<Events>
-				<Enter/>
-			</Events>
-			<Actions>
-				<SetVariable Name="CacheModel" Value="_$Model"/>
-			</Actions>
-		</Loop>
-		<!-- Keyboard Inputs -->
-		<Loop Name="QueryInput1">
-			<Events>
-				<KeyPressed/>
-			</Events>
-			<Conditions>
-				<Operator Type="And">
-					<Equal Value1="_$Key" Value2="_Key1"/>
-					<Less Value="_CurrentlyMoving" Than="1"/>
-					<Less Value="_CurrentFloor" Than="_MaxFloor"/>
-					<Operator Type="Or">
-						<Equal Value1="?getModel[_CacheModel].animationName" Value2="StandAfterInhibition"/>
-						<Equal Value1="?getModel[_CacheModel].animationName" Value2="Stand"/>
-					</Operator>
-				</Operator>
-			</Conditions>
-			<Actions>
-				<Choose Order="Straight">
-					<AppendValue Name="CurrentFloor" Value="1"/>
-					<SetVariable Name="CurrentlyMoving" Value="1"/>
-					<Transform Name="_RegularTransform1"/>
-					<SetVariable Name="CurrentlyMoving" Value="0"/>
-				</Choose>
-			</Actions>
-		</Loop>
-		<Loop Name="QueryInput2">
-			<Events>
-				<KeyPressed/>
-			</Events>
-			<Conditions>
-				<Operator Type="And">
-					<Equal Value1="_$Key" Value2="_Key2"/>
-					<Less Value="_CurrentlyMoving" Than="1"/>
-					<Greater Value="_CurrentFloor" Than="_MinFloor"/>
-					<Operator Type="Or">
-						<Equal Value1="?getModel[_CacheModel].animationName" Value2="StandAfterInhibition"/>
-						<Equal Value1="?getModel[_CacheModel].animationName" Value2="Stand"/>
-					</Operator>
-				</Operator>
-			</Conditions>
-			<Actions>
-				<Choose Order="Straight">
-					<AppendValue Name="CurrentFloor" Value="-1"/>
-					<SetVariable Name="CurrentlyMoving" Value="2"/>
-					<Transform Name="_RegularTransform2"/>
-					<SetVariable Name="CurrentlyMoving" Value="0"/>
-				</Choose>
-			</Actions>
-		</Loop>
-		<!-- Resetting for Calling -->
-		<Loop Name="ResetFloor">
-			<Events>
-				<Exit/>
-			</Events>
-			<Actions>
-				<SetVariable Name="CurrentPlayerFloor" Value="0"/>
-			</Actions>
-		</Loop>
-		<!-- Calling Shenanigans -->
-		<Loop Name="UpdatePlayersFloor">
-			<Events>
-				<Activate/>
-			</Events>
-			<Conditions>
-				<Equal Value1="_$ActionID" Value2="_ActivatorToUpdateFloor"/>
-			</Conditions>
-			<Actions>
-				<AppendValue Name="CurrentPlayerFloor" Value="1"/>
-			</Actions>
-		</Loop>
-		<Loop Name="MoveToFloor1">
-			<Events>
-				<Activate/>
-			</Events>
-			<Conditions>
-				<Operator Type="And">
-					<Equal Value1="_$ActionID" Value2="_ActivatorToMove"/>
-					<Greater Value="_CurrentPlayerFloor" Than="_CurrentFloor"/>
-				</Operator>
-			</Conditions>
-			<Actions>
-				<AppendValue Name="CurrentFloor" Value="1"/>
-				<Transform Name="_RegularTransform1"/>
-				<Activate ActionID="_ActivatorToMoveAgain"/>
-			</Actions>
-		</Loop>
-		<Loop Name="MoveToFloor2">
-			<Events>
-				<Activate/>
-			</Events>
-			<Conditions>
-				<Operator Type="And">
-					<Equal Value1="_$ActionID" Value2="_ActivatorToMove"/>
-					<Less Value="_CurrentPlayerFloor" Than="_CurrentFloor"/>
-				</Operator>
-			</Conditions>
-			<Actions>
-				<AppendValue Name="CurrentFloor" Value="-1"/>
-				<Transform Name="_RegularTransform2"/>
-				<Activate ActionID="_ActivatorToMoveAgain"/>
-			</Actions>
-		</Loop>
-		<Loop Name="MoveAgain">
-			<Events>
-				<Activate/>
-			</Events>
-			<Conditions>
-				<Operator Type="And">
-					<Equal Value1="_$ActionID" Value2="_ActivatorToMoveAgain"/>
-					<Equal Value1="_CurrentPlayerFloor" Value2="_CurrentFloor" Not="1"/>
-				</Operator>
-			</Conditions>
-			<Actions>
-				<Wait Frames="2"/>
-				<Activate ActionID="_ActivatorToMove"/>
-			</Actions>
-		</Loop>
-		<Loop Name="ResetTheCounter">
-			<Events>
-				<Activate/>
-			</Events>
-			<Conditions>
-				<Operator Type="And">
-					<Operator Type="Or">
-						<Equal Value1="_$ActionID" Value2="_ActivatorToMoveAgain"/>
-						<Equal Value1="_$ActionID" Value2="_ActivatorToMove"/>
-					</Operator>
-					<Equal Value1="_CurrentPlayerFloor" Value2="_CurrentFloor"/>
-				</Operator>
-			</Conditions>
-			<Actions>
-				<SetVariable Name="CurrentPlayerFloor" Value="0"/>
-			</Actions>
-		</Loop>
-	</Template>
 
-	<Template Name="VariableElevator_Target">
-		<Init>
-			<SetVariable Name="$Active" Value="1"/>
-			<SetVariable Name="$Node" Value="COM"/>
-			<SetVariable Name="$AI" Value="-1"/>
-			<!-- Set a unique string for each moving object, used for calling different objects -->
-			<SetVariable Name="UniqueID" Value="E3"/>
-			<!-- Where the moving object currently is -->
-			<SetVariable Name="CurrentFloor" Value="2"/>
-			<SetVariable Name="TargetFloor" Value="2"/>
-			<!-- Transformation Names -->
-			<SetVariable Name="RegularTransform1" Value="RegularUp"/>
-			<SetVariable Name="RegularTransform2" Value="RegularDown"/>
-			<!-- DO NOT EDIT, Used as memory for the trigger -->
-			<SetVariable Name="CurrentlyMoving" Value="0"/>
-			<SetVariable Name="CurrentPlayerFloor" Value="0"/>
-			<SetVariable Name="CacheModel" Value="Player"/>
-			<!-- Caller Numbers -->
-			<SetVariable Name="ActivatorToUpdateFloor" Value="EID1"/>
-			<SetVariable Name="ActivatorToMove" Value="EID2"/>
-			<SetVariable Name="ActivatorToMoveAgain" Value="EID3"/>
-			<!-- Target Numbers -->
-			<SetVariable Name="ActivatorToUpdateTarget" Value="EID6"/>
-			<SetVariable Name="ActivatorToUpdateFinalTarget" Value="EID7"/>
-			<SetVariable Name="ActivatorToChangeTransform1" Value="EID8"/>
-			<SetVariable Name="ActivatorToChangeTransform2" Value="EID9"/>
-			<SetVariable Name="TargetFloorChange" Value="0"/>
-			<!-- DO NOT EDIT -->
-		</Init>
-		<Loop Name="LoadCallerVariables">
-			<Events>
-				<OnStartGame/>
-			</Events>
-			<Actions>
-				<AppendValue Name="ActivatorToUpdateFloor" Value="_UniqueID"/>
-				<AppendValue Name="ActivatorToUpdateTarget" Value="_UniqueID"/>
-				<AppendValue Name="ActivatorToUpdateFinalTarget" Value="_UniqueID"/>
-				<AppendValue Name="ActivatorToMove" Value="_UniqueID"/>
-				<AppendValue Name="ActivatorToMoveAgain" Value="_UniqueID"/>
-				<AppendValue Name="ActivatorToChangeTransform1" Value="_UniqueID"/>
-				<AppendValue Name="ActivatorToChangeTransform2" Value="_UniqueID"/>
-			</Actions>
-		</Loop>
-		<Loop Name="CacheModel">
-			<Events>
-				<Enter/>
-			</Events>
-			<Actions>
-				<SetVariable Name="CacheModel" Value="_$Model"/>
-			</Actions>
-		</Loop>
-		<Loop Name="QueryMovement1">
-			<Events>
-				<Enter/>
-				<ValueChange Value="?getModel[Player].animationName"/>
-			</Events>
-			<Conditions>
-				<Operator Type="And">
-					<Less Value="_CurrentlyMoving" Than="1"/>
-					<!--<Less Value="_CurrentFloor" Than="_MaxFloor"/>-->
-					<Less Value="_CurrentFloor" Than="_TargetFloor"/>
-					<Operator Type="Or">
-						<Equal Value1="?getModel[_CacheModel].animationName" Value2="StandAfterInhibition"/>
-						<Equal Value1="?getModel[_CacheModel].animationName" Value2="Stand"/>
-						<Equal Value1="?getModel[_CacheModel].animationName" Value2="RunInhibition"/>
-					</Operator>
-				</Operator>
-			</Conditions>
-			<Actions>
-				<Choose Order="Straight">
-					<AppendValue Name="CurrentFloor" Value="1"/>
-					<SetVariable Name="CurrentlyMoving" Value="1"/>
-					<Transform Name="_RegularTransform1"/>
-					<!-- Retry Movement -->
-					<SetVariable Name="CurrentPlayerFloor" Value="_TargetFloor"/>
-					<Activate ActionID="_ActivatorToMoveAgain"/>
-					<SetVariable Name="CurrentlyMoving" Value="0"/>
-				</Choose>
-			</Actions>
-		</Loop>
-		<Loop Name="QueryMovement2">
-			<Events>
-				<Enter/>
-				<ValueChange Value="?getModel[Player].animationName"/>
-			</Events>
-			<Conditions>
-				<Operator Type="And">
-					<Less Value="_CurrentlyMoving" Than="1"/>
-					<!--<Greater Value="_CurrentFloor" Than="_MinFloor"/>-->
-					<Greater Value="_CurrentFloor" Than="_TargetFloor"/>
-					<Operator Type="Or">
-						<Equal Value1="?getModel[_CacheModel].animationName" Value2="StandAfterInhibition"/>
-						<Equal Value1="?getModel[_CacheModel].animationName" Value2="Stand"/>
-						<Equal Value1="?getModel[_CacheModel].animationName" Value2="RunInhibition"/>
-					</Operator>
-				</Operator>
-			</Conditions>
-			<Actions>
-				<Choose Order="Straight">
-					<AppendValue Name="CurrentFloor" Value="-1"/>
-					<SetVariable Name="CurrentlyMoving" Value="2"/>
-					<Transform Name="_RegularTransform2"/>
-					<!-- Retry Movement -->
-					<SetVariable Name="CurrentPlayerFloor" Value="_TargetFloor"/>
-					<Activate ActionID="_ActivatorToMoveAgain"/>
-					<SetVariable Name="CurrentlyMoving" Value="0"/>
-				</Choose>
-			</Actions>
-		</Loop>
-		<!-- Resetting for Calling -->
-		<Loop Name="ResetFloorAndTarget">
-			<Events>
-				<Exit/>
-			</Events>
-			<Actions>
-				<SetVariable Name="CurrentPlayerFloor" Value="0"/>
-				<SetVariable Name="TargetFloorChange" Value="0"/>
-			</Actions>
-		</Loop>
-		<!-- Calling Shenanigans -->
-		<Loop Name="UpdatePlayersFloor">
-			<Events>
-				<Activate/>
-			</Events>
-			<Conditions>
-				<Equal Value1="_$ActionID" Value2="_ActivatorToUpdateFloor"/>
-			</Conditions>
-			<Actions>
-				<AppendValue Name="CurrentPlayerFloor" Value="1"/>
-			</Actions>
-		</Loop>
-		<Loop Name="MoveToFloor_Call1">
-			<Events>
-				<Activate/>
-			</Events>
-			<Conditions>
-				<Operator Type="And">
-					<Equal Value1="_$ActionID" Value2="_ActivatorToMove"/>
-					<Greater Value="_CurrentPlayerFloor" Than="_CurrentFloor"/>
-				</Operator>
-			</Conditions>
-			<Actions>
-				<AppendValue Name="CurrentFloor" Value="1"/>
-				<Transform Name="_RegularTransform1"/>
-				<Activate ActionID="_ActivatorToMoveAgain"/>
-			</Actions>
-		</Loop>
-		<Loop Name="MoveToFloor_Call2">
-			<Events>
-				<Activate/>
-			</Events>
-			<Conditions>
-				<Operator Type="And">
-					<Equal Value1="_$ActionID" Value2="_ActivatorToMove"/>
-					<Less Value="_CurrentPlayerFloor" Than="_CurrentFloor"/>
-				</Operator>
-			</Conditions>
-			<Actions>
-				<AppendValue Name="CurrentFloor" Value="-1"/>
-				<Transform Name="_RegularTransform2"/>
-				<Activate ActionID="_ActivatorToMoveAgain"/>
-			</Actions>
-		</Loop>
-		<Loop Name="MoveAgain_Caller">
-			<Events>
-				<Activate/>
-			</Events>
-			<Conditions>
-				<Operator Type="And">
-					<Equal Value1="_$ActionID" Value2="_ActivatorToMoveAgain"/>
-					<Equal Value1="_CurrentPlayerFloor" Value2="_CurrentFloor" Not="1"/>
-				</Operator>
-			</Conditions>
-			<Actions>
-				<Wait Frames="2"/>
-				<Activate ActionID="_ActivatorToMove"/>
-			</Actions>
-		</Loop>
-		<Loop Name="ResetTheCounter">
-			<Events>
-				<Activate/>
-			</Events>
-			<Conditions>
-				<Operator Type="And">
-					<Operator Type="Or">
-						<Equal Value1="_$ActionID" Value2="_ActivatorToMoveAgain"/>
-						<Equal Value1="_$ActionID" Value2="_ActivatorToMove"/>
-					</Operator>
-					<Equal Value1="_CurrentPlayerFloor" Value2="_CurrentFloor"/>
-				</Operator>
-			</Conditions>
-			<Actions>
-				<SetVariable Name="CurrentPlayerFloor" Value="0"/>
-			</Actions>
-		</Loop>
-		<!-- Change The Target Floor -->
-		<Loop Name="UpdateTargetFloor">
-			<Events>
-				<Activate/>
-			</Events>
-			<Conditions>
-				<Equal Value1="_$ActionID" Value2="_ActivatorToUpdateTarget"/>
-			</Conditions>
-			<Actions>
-				<AppendValue Name="TargetFloorChange" Value="1"/>
-			</Actions>
-		</Loop>
-		<Loop Name="FinalizeTargetFloor">
-			<Events>
-				<Activate/>
-			</Events>
-			<Conditions>
-				<Equal Value1="_$ActionID" Value2="_ActivatorToUpdateFinalTarget"/>
-			</Conditions>
-			<Actions>
-				<SetVariable Name="TargetFloor" Value="_TargetFloorChange"/>
-				<SetVariable Name="TargetFloorChange" Value="0"/>
-			</Actions>
-		</Loop>
-	</Template>
-
-	<Template Name="ElevatorControl">
-		<Init>
-			<SetVariable Name="$Active" Value="1"/>
-			<SetVariable Name="$AI" Value="0"/>
-			<SetVariable Name="$Node" Value="COM"/>
-			<!-- Which ID to Use? -->
-			<SetVariable Name="ID" Value="E1"/>
-			<SetVariable Name="Mode" Value="ChangeTarget"/>
-			<SetVariable Name="Floor" Value="2"/>
-			<!-- DO NOT EDIT, Used as memory for the trigger -->
-			<SetVariable Name="Flag1" Value="0"/>
-			<SetVariable Name="TempCounter" Value="0"/>
-			<SetVariable Name="Enabled" Value="0"/>
-			<SetVariable Name="Placeholder1" Value="EID1"/>
-			<SetVariable Name="Placeholder2" Value="EID2"/>
-			<SetVariable Name="Placeholder4" Value="EID4"/>
-			<SetVariable Name="Placeholder5" Value="EID5"/>
-			<!-- DO NOT EDIT -->
-		</Init>
-		<Loop Name="LoadCallVariables">
-			<Events>
-				<OnStartGame/>
-			</Events>
-			<Conditions>
-				<Equal Value1="_Mode" Value2="Call"/>
-			</Conditions>
-			<Actions>
-				<SetVariable Name="Placeholder1" Value="EID1"/>
-				<SetVariable Name="Placeholder2" Value="EID2"/>
-				<AppendValue Name="Placeholder1" Value="_ID"/>
-				<AppendValue Name="Placeholder2" Value="_ID"/>
-				<AppendValue Name="Placeholder4" Value="_ID"/>
-				<AppendValue Name="Placeholder5" Value="_ID"/>
-			</Actions>
-		</Loop>
-		<Loop Name="LoadChangeTargetVariables">
-			<Events>
-				<OnStartGame/>
-			</Events>
-			<Conditions>
-				<Equal Value1="_Mode" Value2="ChangeTarget"/>
-			</Conditions>
-			<Actions>
-				<SetVariable Name="Placeholder1" Value="EID6"/>
-				<SetVariable Name="Placeholder2" Value="EID7"/>
-				<AppendValue Name="Placeholder1" Value="_ID"/>
-				<AppendValue Name="Placeholder2" Value="_ID"/>
-				<AppendValue Name="Placeholder4" Value="_ID"/>
-				<AppendValue Name="Placeholder5" Value="_ID"/>
-			</Actions>
-		</Loop>
-		<Loop Name="EnableLoopers">
-			<Events>
-				<Enter/>
-			</Events>
-			<Actions>
-				<Wait Frames="1"/>
-				<SetVariable Name="Enabled" Value="1"/>
-				<Activate ActionID="_Placeholder4"/>
-			</Actions>
-		</Loop>
-		<Loop Name="CounterUp">
-			<Events>
-				<Activate/>
-			</Events>
-			<Conditions>
-				<Operator Type="And">
-					<Equal Value1="_$ActionID" Value2="_Placeholder4"/>
-					<Less Value="_TempCounter" Than="_Floor"/>
-					<Equal Value1="_Enabled" Value2="1"/>
-				</Operator>
-			</Conditions>
-			<Actions>
-				<Wait Frames="1"/>
-				<Activate ActionID="_Placeholder1"/>
-				<AppendValue Name="TempCounter" Value="1"/>
-				<Activate ActionID="_Placeholder5"/>
-			</Actions>
-		</Loop>
-		<Loop Name="CountAgain">
-			<Events>
-				<Activate/>
-			</Events>
-			<Conditions>
-				<Operator Type="And">
-					<Equal Value1="_$ActionID" Value2="_Placeholder5"/>
-					<Equal Value1="_Enabled" Value2="1"/>
-				</Operator>
-			</Conditions>
-			<Actions>
-				<Activate ActionID="_Placeholder4"/>
-			</Actions>
-		</Loop>
-		<Loop Name="ExecuteTheAction">
-			<Events>
-				<Activate/>
-			</Events>
-			<Conditions>
-				<Operator Type="And">
-					<Equal Value1="_$ActionID" Value2="_Placeholder4"/>
-					<Equal Value1="_TempCounter" Value2="_Floor"/>
-					<Equal Value1="_Enabled" Value2="1"/>
-				</Operator>
-			</Conditions>
-			<Actions>
-				<SetVariable Name="Enabled" Value="0"/>
-				<Activate ActionID="_Placeholder2"/>
-				<SetVariable Name="TempCounter" Value="0"/>
-			</Actions>
-		</Loop>
-	</Template>
 </Templates>
