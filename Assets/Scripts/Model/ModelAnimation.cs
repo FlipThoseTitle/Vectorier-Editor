@@ -1,6 +1,7 @@
 using UnityEditor;
 using UnityEngine;
 using System;
+using System.Globalization;
 using System.IO;
 using System.Collections.Generic;
 
@@ -334,8 +335,7 @@ namespace Vectorier.Model
 
                 if (expectedNodeCount > 0 && nodeCount != expectedNodeCount)
                 {
-                    throw new Exception(
-                        $"Animation node count mismatch. Model expects {expectedNodeCount}, but frame {frameIndex} contains {nodeCount} nodes.");
+                    throw new Exception(string.Format(System.Globalization.CultureInfo.InvariantCulture, "Animation node count mismatch. Model expects {0}, but frame {1} contains {2} nodes.", expectedNodeCount, frameIndex, nodeCount));
                 }
 
                 var frame = new Vector3[nodeCount];

@@ -72,10 +72,19 @@ namespace Vectorier.XML
         // -------- Set an attribute on an element -------- //
         public void SetAttribute(XmlElement element, string attributeName, object value)
         {
-            if (value == null)
-                return;
+            if (value == null) return;
 
-            element.SetAttribute(attributeName, value.ToString());
+            string stringValue = value switch
+            {
+                float f => XmlConvert.ToString(f),
+                double d => XmlConvert.ToString(d),
+                decimal dec => XmlConvert.ToString(dec),
+                bool b => XmlConvert.ToString(b),
+                System.DateTime dt => XmlConvert.ToString(dt, XmlDateTimeSerializationMode.Utc),
+                _ => value.ToString()
+            };
+
+            element.SetAttribute(attributeName, string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0}", value));
         }
 
         // -------- Get Element if it exists, and create a new one if there isn't -------- //

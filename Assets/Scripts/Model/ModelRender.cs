@@ -208,7 +208,7 @@ namespace Vectorier.Model
                 hideFlags = HideFlags.DontSave
             };
 
-            rootObject.transform.SetParent(parentTransform, false);
+            rootObject.transform.SetParent(null);
             rootObject.transform.localPosition = Vector3.zero;
             rootObject.transform.localRotation = Quaternion.identity;
             rootObject.transform.localScale = Vector3.one;

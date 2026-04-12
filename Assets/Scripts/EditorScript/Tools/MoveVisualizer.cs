@@ -98,15 +98,12 @@ namespace Vectorier.EditorScript.Tools
 
         Transform GetPreviewParentTransform()
         {
-            return Selection.activeTransform;
+            return null;
         }
 
         Transform GetPlaybackParentTransform()
         {
-            if (modelRenderer != null && modelRenderer.RootObject != null)
-                return modelRenderer.RootObject.transform;
-
-            return placementHostTransform;
+            return null;
         }
 
         void SyncAnimationSpaceTransform()
@@ -384,13 +381,13 @@ namespace Vectorier.EditorScript.Tools
                 binFolderPath,
                 binFileName);
 
-            placementHostTransform = GetPreviewParentTransform();
+            placementHostTransform = null;
 
-            animation.PlaceAt(worldPosition, placementHostTransform, xmlPath, binPath, pivotNodeName, stayInPlace);
+            animation.PlaceAt(worldPosition, null, xmlPath, binPath, pivotNodeName, stayInPlace);
 
             if (renderModel && animation.Model != null)
             {
-                modelRenderer?.Create(animation.Model, animation.AnimationNodes, placementHostTransform, renderBlack);
+                modelRenderer?.Create(animation.Model, animation.AnimationNodes, null, renderBlack);
                 modelDebug?.AttachToModel(animation.Model, modelRenderer?.RootObject);
             }
             else
@@ -399,7 +396,7 @@ namespace Vectorier.EditorScript.Tools
             }
 
             SyncAnimationSpaceTransform();
-            modelDebug?.UpdateNodeWorldPositions(animation.AnimationNodes, GetPlaybackParentTransform());
+            modelDebug?.UpdateNodeWorldPositions(animation.AnimationNodes, null);
             modelDebug?.FollowSceneViewCameraToNodeXY(animation);
         }
 

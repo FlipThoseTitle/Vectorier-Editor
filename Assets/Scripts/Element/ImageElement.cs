@@ -72,9 +72,9 @@ namespace Vectorier.Element
             ImageComponent imageComponent = imageObject.AddComponent<ImageComponent>();
 
             // LAYERING SYSTEM
-
-            if (element.HasAttribute("Depth") && int.TryParse(element.GetAttribute("Depth"), out int depthValue))
+            if (element.HasAttribute("Depth"))
             {
+                int depthValue = Element.ParseInt(element.GetAttribute("Depth"));
                 imageComponent.depth =
                     depthValue == 0 ? ImageComponent.ImageDepth.Front :
                     depthValue == 1 ? ImageComponent.ImageDepth.Middle :
@@ -82,7 +82,8 @@ namespace Vectorier.Element
                     ImageComponent.ImageDepth.Middle;
             }
 
-            float factorValue = float.Parse(factor, CultureInfo.InvariantCulture);
+            // Factor Parsing
+            float factorValue = Element.ParseFloat(factor);
             int factorBand = Mathf.RoundToInt(factorValue * 10000);
 
             int sortOffset =
@@ -114,8 +115,12 @@ namespace Vectorier.Element
             }
 
             // Native Resolution
-            bool hasNativeX = int.TryParse(element.GetAttribute("NativeX"), NumberStyles.Any, CultureInfo.InvariantCulture, out int nativeX);
-            bool hasNativeY = int.TryParse(element.GetAttribute("NativeY"), NumberStyles.Any, CultureInfo.InvariantCulture, out int nativeY);
+            int nativeX = Element.ParseInt(element.GetAttribute("NativeX"));
+            int nativeY = Element.ParseInt(element.GetAttribute("NativeY"));
+
+            // Check if values were actually found
+            bool hasNativeX = nativeX > 0;
+            bool hasNativeY = nativeY > 0;
 
             // Fallback 1 - Use sprite texture resolution
             if ((!hasNativeX || !hasNativeY) && loadedSprite != null && loadedSprite.texture != null)
@@ -150,8 +155,9 @@ namespace Vectorier.Element
 
 
             // Image Type
-            if (element.HasAttribute("Type") && int.TryParse(element.GetAttribute("Type"), out int typeValue))
+            if (element.HasAttribute("Type"))
             {
+                int typeValue = Element.ParseInt(element.GetAttribute("Type"));
                 imageComponent.Type =
                     typeValue == 0 ? ImageComponent.ImageType.None :
                     typeValue == 1 ? ImageComponent.ImageType.Static :

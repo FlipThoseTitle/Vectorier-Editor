@@ -3,6 +3,7 @@ using System.Linq;
 using UnityEditor;
 using UnityEngine;
 using System;
+using System.Globalization;
 
 namespace Vectorier.Parallax
 {
@@ -189,7 +190,7 @@ namespace Vectorier.Parallax
                     continue;
 
                 string layerName = LayerMask.LayerToName(gameObject.layer);
-                if (!float.TryParse(layerName, out float factor))
+                if (!float.TryParse(layerName, NumberStyles.Float, CultureInfo.InvariantCulture, out float factor))
                     factor = 1f;
 
                 if (!_groups.ContainsKey(factor))

@@ -133,7 +133,7 @@ namespace Vectorier.Element
             else
             {
                 float x = customX.Value;
-                float y = customX.Value;
+                float y = customY.Value;
 
                 xml.SetAttribute(element, "X", x.ToString(CultureInfo.InvariantCulture));
                 xml.SetAttribute(element, "Y", y.ToString(CultureInfo.InvariantCulture));
