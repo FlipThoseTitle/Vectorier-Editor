@@ -30,7 +30,7 @@ namespace Vectorier.Core
             EditorGUILayout.LabelField("Snail Runner", EditorStyles.boldLabel);
             EditorGUILayout.Space();
 
-            levelName = EditorGUILayout.TextField("Level Name", levelName);
+            DrawXmlNameFieldWithBrowse("Level Name", ref levelName);
             noUI = EditorGUILayout.Toggle("Disable Debug UI", noUI);
             hunterMode = EditorGUILayout.Toggle("Hunter Mode", hunterMode);
             showPlatforms = EditorGUILayout.Toggle("Show Platforms", showPlatforms);
@@ -44,6 +44,27 @@ namespace Vectorier.Core
             {
                 TryRunLevel();
             }
+        }
+
+        private void DrawXmlNameFieldWithBrowse(string label, ref string xmlName)
+        {
+            EditorGUILayout.BeginHorizontal();
+
+            xmlName = EditorGUILayout.TextField(label, xmlName);
+
+            if (GUILayout.Button("...", GUILayout.Width(28)))
+            {
+                string startPath = Path.Combine(Application.dataPath, "Snail Runner/Vector_Data/StreamingAssets/xmlroot/levels");
+                if (!Directory.Exists(startPath))
+                    startPath = Application.dataPath;
+
+                string picked = EditorUtility.OpenFilePanel($"Select {label}", startPath, "xml");
+
+                if (!string.IsNullOrEmpty(picked))
+                    xmlName = Path.GetFileNameWithoutExtension(picked);
+            }
+
+            EditorGUILayout.EndHorizontal();
         }
 
         private void TryRunLevel()

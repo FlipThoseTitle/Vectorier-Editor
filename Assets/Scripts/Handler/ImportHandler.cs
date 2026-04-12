@@ -61,7 +61,7 @@ namespace Vectorier.Handler
             xml.Load(fullPath);
 
             if (applyConfig)
-                ApplyLevelConfig(xml);
+                ApplyLevelConfig(xml, untagChildren, applyConfig);
 
             // Load referenced <Sets>
             LoadSets(directoryPath, xml);
@@ -405,7 +405,7 @@ namespace Vectorier.Handler
             }
         }
 
-        private static void ApplyLevelConfig(XmlUtility xml)
+        private static void ApplyLevelConfig(XmlUtility xml, bool untagChildren, bool applyConfig)
         {
             GameObject configObj = GameObject.Find("[EDITORONLY]ExportConfigHolder");
             if (configObj == null)
@@ -418,28 +418,37 @@ namespace Vectorier.Handler
             XmlElement root = xml.RootElement;
 
             // -------- SETS -------- //
-            XmlElement sets = root.SelectSingleNode("Sets") as XmlElement;
-            if (sets != null)
+            if (!(applyConfig && !untagChildren))
+            {
+                XmlElement sets = root.SelectSingleNode("Sets") as XmlElement;
+                if (sets != null)
+                {
+                    config.citySets.Clear();
+                    config.groundSets.Clear();
+                    config.librarySets.Clear();
+
+                    foreach (XmlNode node in sets.ChildNodes)
+                    {
+                        XmlElement element = node as XmlElement;
+                        if (element == null) continue;
+
+                        string file = element.GetAttribute("FileName");
+                        if (string.IsNullOrEmpty(file)) continue;
+
+                        switch (element.Name)
+                        {
+                            case "City": config.citySets.Add(file); break;
+                            case "Ground": config.groundSets.Add(file); break;
+                            case "Library": config.librarySets.Add(file); break;
+                        }
+                    }
+                }
+            }
+            else
             {
                 config.citySets.Clear();
                 config.groundSets.Clear();
                 config.librarySets.Clear();
-
-                foreach (XmlNode node in sets.ChildNodes)
-                {
-                    XmlElement element = node as XmlElement;
-                    if (element == null) continue;
-
-                    string file = element.GetAttribute("FileName");
-                    if (string.IsNullOrEmpty(file)) continue;
-
-                    switch (element.Name)
-                    {
-                        case "City": config.citySets.Add(file); break;
-                        case "Ground": config.groundSets.Add(file); break;
-                        case "Library": config.librarySets.Add(file); break;
-                    }
-                }
             }
 
             // -------- MUSIC -------- //

@@ -7,6 +7,7 @@ using UnityEditor.SceneManagement;
 using UnityEngine;
 using Vectorier.XML;
 using Vectorier.Handler;
+using Vectorier.EditorScript;
 using UnityEngine.SceneManagement;
 
 namespace Vectorier.Core
@@ -166,11 +167,21 @@ namespace Vectorier.Core
             config.commonModeModels = EditorGUILayout.TextArea(config.commonModeModels, new GUIStyle(EditorStyles.textArea) { wordWrap = false }, GUILayout.ExpandHeight(true), GUILayout.ExpandWidth(true));
             EditorGUILayout.EndScrollView();
 
+            if (GUILayout.Button("Edit Common Mode Models", GUILayout.Height(24)))
+            {
+                ModelEditorWindow.Open(config, true);
+            }
+
             EditorGUILayout.Space();
             EditorGUILayout.LabelField("Hunter Mode");
             hunterModeScrollPosition = EditorGUILayout.BeginScrollView(hunterModeScrollPosition, true, true, GUILayout.Height(100));
             config.hunterModeModels = EditorGUILayout.TextArea(config.hunterModeModels, new GUIStyle(EditorStyles.textArea) { wordWrap = false }, GUILayout.ExpandHeight(true), GUILayout.ExpandWidth(true));
             EditorGUILayout.EndScrollView();
+
+            if (GUILayout.Button("Edit Hunter Mode Models", GUILayout.Height(24)))
+            {
+                ModelEditorWindow.Open(config, false);
+            }
 
             EditorGUILayout.Space();
             config.coinValue = EditorGUILayout.IntField("Coins Value", config.coinValue);
@@ -272,8 +283,10 @@ namespace Vectorier.Core
         private void DrawDirectoryFieldWithBrowse(string label, ref string directoryPath)
         {
             EditorGUILayout.BeginHorizontal();
+
             directoryPath = EditorGUILayout.TextField(label, directoryPath);
 
+            // Browse button
             if (GUILayout.Button("...", GUILayout.Width(28)))
             {
                 string startPath = string.IsNullOrEmpty(directoryPath) ? Application.dataPath : directoryPath;
@@ -281,6 +294,12 @@ namespace Vectorier.Core
 
                 if (!string.IsNullOrEmpty(picked))
                     directoryPath = picked;
+            }
+            
+            // Set to default
+            if (GUILayout.Button("R", GUILayout.Width(28)))
+            {
+                directoryPath = "Assets/Snail Runner/Vector_Data/StreamingAssets/xmlroot/levels";
             }
 
             EditorGUILayout.EndHorizontal();

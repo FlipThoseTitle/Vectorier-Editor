@@ -1,12 +1,10 @@
 ﻿using UnityEditor;
 using UnityEngine;
-
 using System;
 using System.IO;
 using System.Linq;
-using System.Xml;
-using System.Globalization;
 using System.Collections.Generic;
+using Vectorier.Model;
 
 namespace Vectorier.EditorScript.Tools
 {
@@ -45,11 +43,6 @@ namespace Vectorier.EditorScript.Tools
         const string DEFAULT_MODEL_XML_PATH = "Assets/Editor/Tools/MoveVisualizer/runner.xml";
         const string BLACK_MAT_PATH = "Assets/Editor/Material/Black.mat";
 
-        const float Z_OFFSET = -300f;
-        const float SOURCE_FPS = 20f;
-
-        static readonly Vector3 ANIM_Z_PUSH_VEC = new(0f, 0f, Z_OFFSET);
-
         static readonly Dictionary<MovementType, string> MovementBins = new()
         {
             { MovementType.Jump, "fly.bin" },
@@ -83,40 +76,53 @@ namespace Vectorier.EditorScript.Tools
         string customBinPath;
 
         bool placementEnabled;
-        bool isPlaying = true;
 
         string modelXmlPath = DEFAULT_MODEL_XML_PATH;
         bool renderModel = true;
         bool renderBlack = true;
-        bool renderEdges = false;
-        bool renderTrajectory = true;
-        bool followCamera = false;
-
-        // ================= CACHED ASSETS ================= //
-
-        Material blackMat;
-        Material defaultMat;
+        bool stayInPlace;
 
         // ================= RUNTIME DATA ================= //
 
         static Dictionary<string, string> discoveredTrickBins;
 
-        ModelData model;          // parsed XML (nodes/edges/capsules/previewPose)
-        PlaybackState state;      // animation frames, offsets, current nodes, etc.
-
-        // Model render objects
-        GameObject modelRootGO;
-        readonly List<CapsuleRuntime> capsuleRuntimes = new();
+        ModelAnimation animation;
+        ModelRenderer modelRenderer;
+        ModelDebug modelDebug;
+        Transform placementHostTransform;
 
         // ================= WINDOW ================= //
 
         [MenuItem("Vectorier/Tools/Move Visualizer", false, 34)]
         static void OpenWindow() => GetWindow<MoveVisualizer>("Move Visualizer");
 
+        Transform GetPreviewParentTransform()
+        {
+            return Selection.activeTransform;
+        }
+
+        Transform GetPlaybackParentTransform()
+        {
+            if (modelRenderer != null && modelRenderer.RootObject != null)
+                return modelRenderer.RootObject.transform;
+
+            return placementHostTransform;
+        }
+
+        void SyncAnimationSpaceTransform()
+        {
+            animation?.SetAnimationSpaceTransform(GetPlaybackParentTransform());
+        }
+
         void OnEnable()
         {
             SceneView.duringSceneGui += OnSceneGUI;
             EditorApplication.update += UpdatePlayback;
+
+            animation ??= new ModelAnimation();
+            modelRenderer ??= new ModelRenderer(BLACK_MAT_PATH);
+            modelDebug ??= new ModelDebug();
+
             ResetAll();
         }
 
@@ -124,8 +130,14 @@ namespace Vectorier.EditorScript.Tools
         {
             SceneView.duringSceneGui -= OnSceneGUI;
             EditorApplication.update -= UpdatePlayback;
+
             ResetAll();
-            DestroyModelRootImmediate();
+
+            modelDebug?.Dispose();
+            modelDebug = null;
+
+            modelRenderer?.Dispose();
+            modelRenderer = null;
         }
 
         void OnInspectorUpdate() => Repaint();
@@ -146,19 +158,29 @@ namespace Vectorier.EditorScript.Tools
                 EditorGUI.indentLevel--;
             }
 
-            if (modelRootGO != null)
-                ApplyCapsuleRenderSettings();
+            if (modelRenderer != null && modelRenderer.RootObject != null)
+                modelRenderer.ApplyRenderSettings(renderBlack);
 
-            renderEdges = EditorGUILayout.Toggle("Render Edges", renderEdges);
-            renderTrajectory = EditorGUILayout.Toggle("Render Trajectory", renderTrajectory);
-            followCamera = EditorGUILayout.Toggle("Follow Camera", followCamera);
+            modelDebug.RenderEdges = EditorGUILayout.Toggle("Render Edges", modelDebug.RenderEdges);
+            modelDebug.RenderTrajectory = EditorGUILayout.Toggle("Render Trajectory", modelDebug.RenderTrajectory);
+            modelDebug.FollowCamera = EditorGUILayout.Toggle("Follow Camera", modelDebug.FollowCamera);
 
+            modelDebug.RenderDetector = EditorGUILayout.Toggle("Render Detector", modelDebug.RenderDetector);
+
+            if (modelDebug.RenderDetector)
+            {
+                EditorGUI.indentLevel++;
+                modelDebug.DeltaDetectorH = EditorGUILayout.IntField("Detector H", modelDebug.DeltaDetectorH);
+                modelDebug.DeltaDetectorV = EditorGUILayout.IntField("Detector V", modelDebug.DeltaDetectorV);
+                EditorGUI.indentLevel--;
+            }
             GUILayout.Space(10);
             currentPlacementMode = (PlacementMode)EditorGUILayout.EnumPopup("Placement Mode", currentPlacementMode);
 
             DrawPlacementModeUI();
 
             pivotNodeName = EditorGUILayout.TextField("Pivot Node", pivotNodeName);
+            stayInPlace = EditorGUILayout.Toggle("Stay In Place", stayInPlace);
 
             GUILayout.Space(12);
 
@@ -168,42 +190,77 @@ namespace Vectorier.EditorScript.Tools
             if (GUILayout.Button("Clear", GUILayout.Height(40)))
             {
                 ResetAll();
-                DestroyModelRootImmediate();
+                modelDebug?.Destroy();
+                modelRenderer?.Destroy();
             }
 
             GUILayout.Space(10);
 
             using (new GUILayout.HorizontalScope())
             {
-                if (GUILayout.Button(isPlaying ? "Pause" : "Play", GUILayout.Height(30)))
-                    isPlaying = !isPlaying;
+                if (GUILayout.Button(animation.IsPlaying ? "Pause" : "Play", GUILayout.Height(30)))
+                    animation.IsPlaying = !animation.IsPlaying;
 
                 if (GUILayout.Button("Restart", GUILayout.Height(30)))
                 {
-                    state.CurrentFrameIndex = 0;
-                    ApplyFrame(0);
+                    animation.CurrentFrameIndex = animation.StartFrame;
+                    animation.ApplyFrame(animation.StartFrame);
+
+                    if (renderModel)
+                        modelRenderer?.UpdateCapsules(animation.AnimationNodes);
+
+                    SyncAnimationSpaceTransform();
+                    modelDebug?.UpdateNodeWorldPositions(animation.AnimationNodes, GetPlaybackParentTransform());
+                    modelDebug?.FollowSceneViewCameraToNodeXY(animation);
                 }
             }
 
-            GUI.enabled = state.AnimationFrames.Count > 0;
+            GUI.enabled = animation.AnimationFrames.Count > 0;
 
-            int maxFrame = Mathf.Max(0, state.AnimationFrames.Count - 1);
-            int newFrame = EditorGUILayout.IntSlider("Frame", state.CurrentFrameIndex, 0, maxFrame);
+            int maxFrame = Mathf.Max(0, animation.AnimationFrames.Count - 1);
 
-            if (newFrame != state.CurrentFrameIndex)
+            animation.StartFrame = Mathf.Clamp(animation.StartFrame, 0, maxFrame);
+            if (animation.EndFrame > maxFrame || animation.EndFrame == int.MaxValue)
+                animation.EndFrame = maxFrame;
+
+            if (animation.EndFrame < animation.StartFrame)
+                animation.EndFrame = animation.StartFrame;
+
+            int newFrame = EditorGUILayout.IntSlider(
+                "Frame",
+                animation.CurrentFrameIndex,
+                animation.StartFrame,
+                animation.EndFrame
+            );
+
+            EditorGUILayout.Space();
+
+            using (new EditorGUILayout.HorizontalScope())
             {
-                isPlaying = false;
-                state.CurrentFrameIndex = newFrame;
-                ApplyFrame(state.CurrentFrameIndex);
+                animation.StartFrame = EditorGUILayout.IntField("Start", animation.StartFrame);
+                animation.EndFrame = EditorGUILayout.IntField("End", animation.EndFrame);
+            }
+            if (newFrame != animation.CurrentFrameIndex)
+            {
+                animation.IsPlaying = false;
+                animation.CurrentFrameIndex = newFrame;
+                animation.ApplyFrame(animation.CurrentFrameIndex);
 
-                if (followCamera)
-                    FollowSceneViewCameraToNodeXY();
+                if (renderModel)
+                    modelRenderer?.UpdateCapsules(animation.AnimationNodes);
+
+                SyncAnimationSpaceTransform();
+                modelDebug?.UpdateNodeWorldPositions(animation.AnimationNodes, GetPlaybackParentTransform());
+                modelDebug?.FollowSceneViewCameraToNodeXY(animation);
             }
 
             GUI.enabled = true;
 
-            if (!renderModel && modelRootGO != null)
-                DestroyModelRootImmediate();
+            if (!renderModel && modelRenderer != null && modelRenderer.RootObject != null)
+            {
+                modelDebug?.Destroy();
+                modelRenderer.Destroy();
+            }
         }
 
         void DrawPlacementModeUI()
@@ -283,30 +340,22 @@ namespace Vectorier.EditorScript.Tools
             if (placementEnabled)
                 HandlePlacementInput();
 
-            DrawPreview();
-
-            if (renderEdges)
-            {
-                DrawAnimation();
-                DrawConnections();
-            }
-
-            if (renderTrajectory)
-                DrawCenterOfMassPath();
+            modelDebug?.DrawScene(animation, GetPlaybackParentTransform(), renderModel);
         }
 
         void HandlePlacementInput()
         {
-            EnsureModelLoadedForPreview();
+            animation.EnsureModelLoadedForPreview(ResolveXmlPath());
 
+            Transform parentTransform = GetPreviewParentTransform();
             Vector3 cursorWorldPosition = GetCursorWorldPositionOnZPlane();
-            UpdatePreview(cursorWorldPosition);
-            state.IsPreviewActive = true;
+
+            animation.UpdatePreview(cursorWorldPosition, parentTransform, pivotNodeName);
 
             if (Event.current.type == EventType.MouseDown && Event.current.button == 0)
             {
                 PlaceAt(cursorWorldPosition);
-                state.IsPreviewActive = false;
+                animation.ClearPreview();
                 Event.current.Use();
             }
 
@@ -325,736 +374,71 @@ namespace Vectorier.EditorScript.Tools
 
         void PlaceAt(Vector3 worldPosition)
         {
-            ResetRuntimeStateOnly();
-            DestroyModelRootImmediate();
+            modelDebug?.Destroy();
+            modelRenderer?.Destroy();
 
-            model = ModelData.LoadOrThrow(ResolveXmlPath());
-            state.AllocateNodeBuffers(model.NodeCount);
+            string xmlPath = ResolveXmlPath();
+            string binPath = ModelAnimation.ResolveBinFullPathOrThrow(
+                currentPlacementMode == PlacementMode.Custom,
+                customBinPath,
+                binFolderPath,
+                binFileName);
 
-            LoadBinaryAnimation(model.NodeCount);
+            placementHostTransform = GetPreviewParentTransform();
 
-            state.CenterOfMassNodeIndex = model.TryGetNodeIndex("COM", out int comIdx) ? comIdx : -1;
+            animation.PlaceAt(worldPosition, placementHostTransform, xmlPath, binPath, pivotNodeName, stayInPlace);
 
-            int pivotIndex = ResolvePivotNodeIndex(pivotNodeName, model);
-
-            Vector3 pivotFrameZero = state.AnimationFrames[0][pivotIndex];
-            state.StartOffset = worldPosition - pivotFrameZero;
-            state.IsOffsetInitialized = true;
-
-            PrecomputeCenterOfMassPath();
-
-            state.CurrentFrameIndex = 0;
-            isPlaying = true;
-            ApplyFrame(0);
-
-            if (renderModel)
-                CreateModelRenderObjectsIfNeeded();
-
-            state.LastPlaybackTime = EditorApplication.timeSinceStartup;
-        }
-
-        int ResolvePivotNodeIndex(string requestedPivot, ModelData m)
-        {
-            if (!string.IsNullOrWhiteSpace(requestedPivot) && m.TryGetNodeIndex(requestedPivot, out int idx))
-                return idx;
-
-            if (m.TryGetNodeIndex("NPivot", out int pivotIdx))
-                return pivotIdx;
-
-            throw new Exception("Pivot node not found. Requested pivot missing, and 'NPivot' not found in XML <Nodes>.");
-        }
-
-        void LoadBinaryAnimation(int expectedNodeCount)
-        {
-            state.AnimationFrames.Clear();
-
-            string fullPath = ResolveBinFullPathOrThrow();
-            using var reader = new BinaryReader(File.OpenRead(fullPath));
-
-            int frameCount = reader.ReadInt32();
-
-            for (int frameIndex = 0; frameIndex < frameCount; frameIndex++)
+            if (renderModel && animation.Model != null)
             {
-                reader.ReadByte(); // marker
-
-                int nodeCount = reader.ReadInt32();
-                //if (nodeCount != expectedNodeCount)
-                    //throw new Exception($"Node count mismatch. Bin={nodeCount}, XML Nodes={expectedNodeCount}. Your bin must match XML <Nodes> order/count.");
-
-                var frame = new Vector3[nodeCount];
-
-                for (int nodeIndex = 0; nodeIndex < nodeCount; nodeIndex++)
-                {
-                    float x = reader.ReadSingle();
-                    float y = reader.ReadSingle();
-                    float z = reader.ReadSingle();
-                    frame[nodeIndex] = new Vector3(x, y, -z);
-                }
-
-                state.AnimationFrames.Add(frame);
-            }
-        }
-
-        string ResolveBinFullPathOrThrow()
-        {
-            string fullPath;
-
-            if (currentPlacementMode == PlacementMode.Custom)
-            {
-                fullPath = customBinPath;
-                if (string.IsNullOrWhiteSpace(fullPath))
-                    throw new Exception("Custom Bin Path is empty.");
+                modelRenderer?.Create(animation.Model, animation.AnimationNodes, placementHostTransform, renderBlack);
+                modelDebug?.AttachToModel(animation.Model, modelRenderer?.RootObject);
             }
             else
             {
-                fullPath = Path.Combine(binFolderPath ?? string.Empty, binFileName ?? string.Empty);
+                modelDebug?.AttachToModel(animation.Model, null);
             }
 
-            if (!Path.IsPathRooted(fullPath))
-            {
-                string projectRoot = Directory.GetParent(Application.dataPath).FullName;
-                fullPath = Path.GetFullPath(Path.Combine(projectRoot, fullPath));
-            }
-
-            if (!File.Exists(fullPath))
-                throw new FileNotFoundException($"Bin file not found: {fullPath}");
-
-            return fullPath;
+            SyncAnimationSpaceTransform();
+            modelDebug?.UpdateNodeWorldPositions(animation.AnimationNodes, GetPlaybackParentTransform());
+            modelDebug?.FollowSceneViewCameraToNodeXY(animation);
         }
 
         void UpdatePlayback()
         {
-            if (!state.IsOffsetInitialized || state.AnimationFrames.Count == 0 || !isPlaying)
+            if (!animation.TryAdvancePlayback())
                 return;
-
-            double now = EditorApplication.timeSinceStartup;
-            double frameInterval = 1.0 / SOURCE_FPS;
-
-            if (now - state.LastPlaybackTime < frameInterval)
-                return;
-
-            state.LastPlaybackTime = now;
-
-            state.CurrentFrameIndex = (state.CurrentFrameIndex + 1) % state.AnimationFrames.Count;
-            ApplyFrame(state.CurrentFrameIndex);
-
-            if (followCamera)
-                FollowSceneViewCameraToNodeXY();
-
-            Repaint();
-            SceneView.RepaintAll();
-        }
-
-        void ApplyFrame(int frameIndex)
-        {
-            if (state.AnimationFrames.Count == 0 || state.AnimationNodes == null)
-                return;
-
-            Vector3[] frame = state.AnimationFrames[frameIndex];
-
-            for (int i = 0; i < frame.Length; i++)
-                state.AnimationNodes[i] = frame[i] + state.StartOffset + ANIM_Z_PUSH_VEC;
 
             if (renderModel)
-                UpdateCapsules(state.AnimationNodes);
+            {
+                if (modelRenderer != null && modelRenderer.RootObject == null && animation.Model != null)
+                {
+                    modelRenderer.Create(animation.Model, animation.AnimationNodes, placementHostTransform, renderBlack);
+                    modelDebug?.AttachToModel(animation.Model, modelRenderer.RootObject);
+                }
+                else
+                {
+                    modelRenderer?.UpdateCapsules(animation.AnimationNodes);
+                }
+            }
+
+            SyncAnimationSpaceTransform();
+            modelDebug?.UpdateNodeWorldPositions(animation.AnimationNodes, GetPlaybackParentTransform());
+            modelDebug?.FollowSceneViewCameraToNodeXY(animation);
 
             Repaint();
             SceneView.RepaintAll();
-        }
-
-        void UpdatePreview(Vector3 cursorWorldPosition)
-        {
-            if (model == null || state.PreviewPose == null || state.PreviewNodes == null)
-                return;
-
-            int pivotIndex = ResolvePivotNodeIndex(pivotNodeName, model);
-
-            Vector3 pivotLocal = state.PreviewPose[pivotIndex];
-            Vector3 offset = cursorWorldPosition - pivotLocal;
-
-            for (int i = 0; i < state.PreviewPose.Length; i++)
-                state.PreviewNodes[i] = state.PreviewPose[i] + offset + ANIM_Z_PUSH_VEC;
-        }
-
-        void PrecomputeCenterOfMassPath()
-        {
-            state.CenterOfMassPath.Clear();
-
-            if (state.CenterOfMassNodeIndex < 0)
-                return;
-
-            foreach (var frame in state.AnimationFrames)
-                state.CenterOfMassPath.Add(frame[state.CenterOfMassNodeIndex] + state.StartOffset + ANIM_Z_PUSH_VEC);
         }
 
         void ResetAll()
         {
-            model = null;
-            ResetRuntimeStateOnly();
-        }
-
-        void ResetRuntimeStateOnly()
-        {
-            state.Reset();
-        }
-
-        void EnsureModelLoadedForPreview()
-        {
-            string path = ResolveXmlPath();
-            if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
-                return;
-
-            if (model == null || !string.Equals(model.SourcePath, path, StringComparison.OrdinalIgnoreCase))
-            {
-                model = ModelData.LoadOrThrow(path);
-                state.AllocateNodeBuffers(model.NodeCount);
-                state.PreviewPose = model.PreviewPose; // share read-only pose array
-            }
-
-            if (state.PreviewPose == null || state.PreviewPose.Length == 0)
-                state.PreviewPose = model.PreviewPose;
-        }
-
-        void FollowSceneViewCameraToNodeXY()
-        {
-            if (state.AnimationNodes == null || state.AnimationNodes.Length == 0)
-                return;
-
-            if (!isPlaying)
-                return;
-
-            if (model == null || !model.TryGetNodeIndex("Camera", out int camIdx))
-                return;
-
-            if (camIdx < 0 || camIdx >= state.AnimationNodes.Length)
-                return;
-
-            Vector3 target = state.AnimationNodes[camIdx];
-
-            SceneView sv = SceneView.lastActiveSceneView;
-            if (sv == null)
-                return;
-
-            Vector3 pivot = sv.pivot;
-            pivot.x = target.x;
-            pivot.y = target.y;
-            sv.pivot = pivot;
-            sv.Repaint();
+            placementHostTransform = null;
+            animation?.ResetAll();
         }
 
         string ResolveXmlPath()
         {
             string p = string.IsNullOrWhiteSpace(modelXmlPath) ? DEFAULT_MODEL_XML_PATH : modelXmlPath;
-
-            if (Path.IsPathRooted(p))
-                return p;
-
-            string projectRoot = Directory.GetParent(Application.dataPath).FullName;
-            return Path.GetFullPath(Path.Combine(projectRoot, p));
-        }
-
-        Material GetBlackMaterial()
-        {
-            if (blackMat != null)
-                return blackMat;
-
-            blackMat = AssetDatabase.LoadAssetAtPath<Material>(BLACK_MAT_PATH);
-            if (blackMat == null)
-                Debug.LogWarning($"[MoveVisualizer] Black material not found at {BLACK_MAT_PATH}");
-
-            return blackMat;
-        }
-
-        // ================= XML MODEL DATA ================= //
-
-        sealed class ModelData
-        {
-            public string SourcePath { get; private set; }
-
-            public readonly List<string> NodeNamesOrdered = new();
-            public readonly Dictionary<string, int> NodeIndexByName = new(StringComparer.OrdinalIgnoreCase);
-            public readonly List<EdgeIndex> Connections = new();
-            public readonly List<CapsuleDef> Capsules = new();
-
-            public Vector3[] PreviewPose { get; private set; }
-            public int NodeCount => NodeNamesOrdered.Count;
-
-            public bool TryGetNodeIndex(string name, out int idx) => NodeIndexByName.TryGetValue(name, out idx);
-
-            public static ModelData LoadOrThrow(string path)
-            {
-                if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
-                    throw new FileNotFoundException($"Model XML not found. Resolved: '{path}'");
-
-                // Keep your existing encoding assumption
-                byte[] bytes = File.ReadAllBytes(path);
-                string xmlText = System.Text.Encoding.GetEncoding("Windows-1251").GetString(bytes);
-
-                var doc = new XmlDocument();
-                doc.LoadXml(xmlText);
-
-                XmlNode scene = doc.SelectSingleNode("/Scene") ?? throw new Exception("Invalid XML: missing <Scene> root.");
-                XmlNode nodesElem = scene.SelectSingleNode("Nodes") ?? throw new Exception("Invalid XML: missing <Nodes>.");
-
-                var m = new ModelData { SourcePath = path };
-
-                // Nodes
-                int idx = 0;
-                foreach (XmlNode n in nodesElem.ChildNodes)
-                {
-                    if (n.NodeType != XmlNodeType.Element)
-                        continue;
-
-                    string name = n.Name;
-                    m.NodeNamesOrdered.Add(name);
-                    m.NodeIndexByName[name] = idx++;
-                }
-
-                if (m.NodeCount <= 0)
-                    throw new Exception("XML <Nodes> is empty.");
-
-                // Build preview pose from nodes list
-                m.PreviewPose = new Vector3[m.NodeCount];
-                int i = 0;
-                foreach (XmlNode n in nodesElem.ChildNodes)
-                {
-                    if (n.NodeType != XmlNodeType.Element)
-                        continue;
-
-                    float x = GetFloatAttr(n, "X", 0f);
-                    float y = GetFloatAttr(n, "Y", 0f);
-                    float z = GetFloatAttr(n, "Z", 0f);
-
-                    m.PreviewPose[i++] = new Vector3(x, y, -z);
-                    if (i >= m.PreviewPose.Length)
-                        break;
-                }
-
-                // Edges
-                XmlNode edgesElem = scene.SelectSingleNode("Edges");
-                if (edgesElem != null)
-                {
-                    foreach (XmlNode e in edgesElem.ChildNodes)
-                    {
-                        if (e.NodeType != XmlNodeType.Element)
-                            continue;
-
-                        string edgeName = e.Name;
-                        string end1 = GetAttr(e, "End1");
-                        string end2 = GetAttr(e, "End2");
-
-                        if (!m.NodeIndexByName.TryGetValue(end1, out int a) || !m.NodeIndexByName.TryGetValue(end2, out int b))
-                            continue;
-
-                        m.Connections.Add(new EdgeIndex { Name = edgeName, A = a, B = b });
-                    }
-                }
-
-                // Capsules
-                XmlNode figsElem = scene.SelectSingleNode("Figures");
-                if (figsElem != null)
-                {
-                    foreach (XmlNode f in figsElem.ChildNodes)
-                    {
-                        if (f.NodeType != XmlNodeType.Element)
-                            continue;
-
-                        string type = GetAttrOrNull(f, "Type");
-                        if (!string.Equals(type, "Capsule", StringComparison.OrdinalIgnoreCase))
-                            continue;
-
-                        string capName = f.Name;
-                        string edgeName = GetAttr(f, "Edge");
-
-                        float r1 = GetFloatAttr(f, "Radius1", 1f);
-                        float r2 = GetFloatAttr(f, "Radius2", r1);
-                        float m1 = Mathf.Clamp01(GetFloatAttr(f, "Margin1", 0f));
-                        float m2 = Mathf.Clamp01(GetFloatAttr(f, "Margin2", 0f));
-
-                        // Find edge endpoints from connections
-                        int edgeIdx = m.Connections.FindIndex(x => string.Equals(x.Name, edgeName, StringComparison.OrdinalIgnoreCase));
-                        if (edgeIdx < 0)
-                            continue;
-
-                        var edge = m.Connections[edgeIdx];
-
-                        m.Capsules.Add(new CapsuleDef
-                        {
-                            Name = capName,
-                            EdgeName = edgeName,
-                            A = edge.A,
-                            B = edge.B,
-                            Radius1 = r1,
-                            Radius2 = r2,
-                            Margin1 = m1,
-                            Margin2 = m2
-                        });
-                    }
-                }
-
-                return m;
-            }
-        }
-
-        // ================= STATE ================= //
-
-        struct PlaybackState
-        {
-            public readonly List<Vector3[]> AnimationFrames;
-            public readonly List<Vector3> CenterOfMassPath;
-
-            public Vector3[] AnimationNodes;
-            public Vector3[] PreviewNodes;
-            public Vector3[] PreviewPose;
-
-            public int CurrentFrameIndex;
-            public int CenterOfMassNodeIndex;
-
-            public Vector3 StartOffset;
-            public bool IsOffsetInitialized;
-            public bool IsPreviewActive;
-
-            public double LastPlaybackTime;
-
-            public PlaybackState(bool init)
-            {
-                AnimationFrames = new List<Vector3[]>();
-                CenterOfMassPath = new List<Vector3>();
-
-                AnimationNodes = null;
-                PreviewNodes = null;
-                PreviewPose = null;
-
-                CurrentFrameIndex = 0;
-                CenterOfMassNodeIndex = -1;
-
-                StartOffset = default;
-                IsOffsetInitialized = false;
-                IsPreviewActive = false;
-
-                LastPlaybackTime = 0;
-            }
-
-            public void Reset()
-            {
-                AnimationFrames.Clear();
-                CenterOfMassPath.Clear();
-
-                CurrentFrameIndex = 0;
-                CenterOfMassNodeIndex = -1;
-
-                StartOffset = default;
-                IsOffsetInitialized = false;
-                IsPreviewActive = false;
-
-                AnimationNodes = null;
-                PreviewNodes = null;
-            }
-
-            public void AllocateNodeBuffers(int nodeCount)
-            {
-                if (nodeCount <= 0)
-                    return;
-
-                AnimationNodes = new Vector3[nodeCount];
-                PreviewNodes = new Vector3[nodeCount];
-            }
-        }
-
-        MoveVisualizer()
-        {
-            state = new PlaybackState(init: true);
-        }
-
-        // ================= XML HELPERS ================= //
-
-        struct EdgeIndex { public int A; public int B; public string Name; }
-
-        struct CapsuleDef
-        {
-            public string Name;
-            public string EdgeName;
-            public int A;
-            public int B;
-            public float Radius1;
-            public float Radius2;
-            public float Margin1; // [0..1] start trim
-            public float Margin2; // [0..1] end trim
-        }
-
-        struct CapsuleRuntime
-        {
-            public CapsuleDef Def;
-            public GameObject Root;
-            public Transform Cylinder;
-            public Transform SphereA;
-            public Transform SphereB;
-        }
-
-        static string GetAttr(XmlNode node, string attr)
-        {
-            var a = node.Attributes?[attr];
-            if (a == null || string.IsNullOrWhiteSpace(a.Value))
-                throw new Exception($"XML missing attribute '{attr}' on <{node.Name}>");
-            return a.Value;
-        }
-
-        static string GetAttrOrNull(XmlNode node, string attr) => node.Attributes?[attr]?.Value;
-
-        static float GetFloatAttr(XmlNode node, string attr, float fallback)
-        {
-            var a = node.Attributes?[attr];
-            if (a == null || string.IsNullOrWhiteSpace(a.Value))
-                return fallback;
-
-            if (float.TryParse(a.Value, NumberStyles.Float, CultureInfo.InvariantCulture, out float v))
-                return v;
-
-            if (float.TryParse(a.Value.Replace(',', '.'), NumberStyles.Float, CultureInfo.InvariantCulture, out v))
-                return v;
-
-            return fallback;
-        }
-
-        // ================= MODEL RENDER (Capsules) ================= //
-
-        void CreateModelRenderObjectsIfNeeded()
-        {
-            if (!renderModel || modelRootGO != null || model == null)
-                return;
-
-            modelRootGO = new GameObject("MoveVisualizerModel")
-            {
-                hideFlags = HideFlags.DontSave
-            };
-
-            modelRootGO.transform.SetPositionAndRotation(Vector3.zero, Quaternion.identity);
-            modelRootGO.transform.localScale = Vector3.one;
-
-            capsuleRuntimes.Clear();
-
-            foreach (var c in model.Capsules)
-            {
-                var capRoot = new GameObject(c.Name) { hideFlags = HideFlags.DontSave };
-                capRoot.transform.SetParent(modelRootGO.transform, false);
-
-                GameObject cyl = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-                CacheDefaultMatIfNeeded(cyl);
-
-                cyl.name = "Cylinder";
-                cyl.hideFlags = HideFlags.DontSave;
-                cyl.transform.SetParent(capRoot.transform, false);
-                DestroyImmediate(cyl.GetComponent<Collider>());
-
-                GameObject sA = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-                sA.name = "Sphere_A";
-                sA.hideFlags = HideFlags.DontSave;
-                sA.transform.SetParent(capRoot.transform, false);
-                DestroyImmediate(sA.GetComponent<Collider>());
-
-                GameObject sB = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-                sB.name = "Sphere_B";
-                sB.hideFlags = HideFlags.DontSave;
-                sB.transform.SetParent(capRoot.transform, false);
-                DestroyImmediate(sB.GetComponent<Collider>());
-
-                capsuleRuntimes.Add(new CapsuleRuntime
-                {
-                    Def = c,
-                    Root = capRoot,
-                    Cylinder = cyl.transform,
-                    SphereA = sA.transform,
-                    SphereB = sB.transform
-                });
-            }
-
-            ApplyCapsuleRenderSettings();
-
-            if (state.AnimationNodes != null && state.AnimationNodes.Length > 0)
-                UpdateCapsules(state.AnimationNodes);
-        }
-
-        void CacheDefaultMatIfNeeded(GameObject primitive)
-        {
-            if (defaultMat != null || primitive == null)
-                return;
-
-            var r = primitive.GetComponent<Renderer>();
-            if (r != null)
-                defaultMat = r.sharedMaterial;
-        }
-
-        void DestroyModelRootImmediate()
-        {
-            capsuleRuntimes.Clear();
-
-            if (modelRootGO != null)
-            {
-                DestroyImmediate(modelRootGO);
-                modelRootGO = null;
-            }
-        }
-
-        void UpdateCapsules(Vector3[] nodeWorld)
-        {
-            if (!renderModel || model == null)
-                return;
-
-            if (modelRootGO == null)
-                CreateModelRenderObjectsIfNeeded();
-
-            if (modelRootGO == null)
-                return;
-
-            for (int i = 0; i < capsuleRuntimes.Count; i++)
-            {
-                var rt = capsuleRuntimes[i];
-                var d = rt.Def;
-
-                if ((uint)d.A >= (uint)nodeWorld.Length || (uint)d.B >= (uint)nodeWorld.Length)
-                    continue;
-
-                Vector3 a = nodeWorld[d.A];
-                Vector3 b = nodeWorld[d.B];
-
-                float t0 = Mathf.Clamp01(d.Margin1);
-                float t1 = Mathf.Clamp01(1f - d.Margin2);
-                if (t1 < t0) (t0, t1) = (t1, t0);
-
-                Vector3 p0 = Vector3.Lerp(a, b, t0);
-                Vector3 p1 = Vector3.Lerp(a, b, t1);
-
-                Vector3 dir = (p1 - p0);
-                float len = dir.magnitude;
-
-                if (len < 1e-4f)
-                {
-                    SetCapsuleActive(rt, false);
-                    capsuleRuntimes[i] = rt;
-                    continue;
-                }
-
-                SetCapsuleActive(rt, true);
-
-                Vector3 dirN = dir / len;
-                Quaternion rot = Quaternion.FromToRotation(Vector3.up, dirN);
-
-                float rCyl = Mathf.Max(0.0001f, (d.Radius1 + d.Radius2) * 0.5f);
-                float rA = Mathf.Max(0.0001f, d.Radius1);
-                float rB = Mathf.Max(0.0001f, d.Radius2);
-
-                rt.SphereA.position = p0;
-                rt.SphereA.rotation = Quaternion.identity;
-                rt.SphereA.localScale = Vector3.one * (rA * 2f);
-
-                rt.SphereB.position = p1;
-                rt.SphereB.rotation = Quaternion.identity;
-                rt.SphereB.localScale = Vector3.one * (rB * 2f);
-
-                float cylHeight = Mathf.Max(0.0001f, len);
-                rt.Cylinder.position = (p0 + p1) * 0.5f;
-                rt.Cylinder.rotation = rot;
-                rt.Cylinder.localScale = new Vector3(rCyl * 2f, cylHeight * 0.5f, rCyl * 2f);
-
-                capsuleRuntimes[i] = rt;
-            }
-        }
-
-        static void SetCapsuleActive(CapsuleRuntime rt, bool active)
-        {
-            if (rt.Cylinder != null) rt.Cylinder.gameObject.SetActive(active);
-            if (rt.SphereA != null) rt.SphereA.gameObject.SetActive(active);
-            if (rt.SphereB != null) rt.SphereB.gameObject.SetActive(active);
-        }
-
-        void ApplyCapsuleRenderSettings()
-        {
-            Material targetMat = null;
-
-            if (renderBlack)
-                targetMat = GetBlackMaterial();
-
-            if (targetMat == null)
-                targetMat = defaultMat;
-
-            for (int i = 0; i < capsuleRuntimes.Count; i++)
-            {
-                var rt = capsuleRuntimes[i];
-                ApplyRendererSettings(rt.Cylinder, targetMat);
-                ApplyRendererSettings(rt.SphereA, targetMat);
-                ApplyRendererSettings(rt.SphereB, targetMat);
-            }
-        }
-
-        static void ApplyRendererSettings(Transform t, Material mat)
-        {
-            if (t == null)
-                return;
-
-            var r = t.GetComponent<Renderer>();
-            if (r == null)
-                return;
-
-            if (mat != null)
-                r.sharedMaterial = mat;
-        }
-
-        // ================= DRAWING ================= //
-
-        void DrawPreview()
-        {
-            if (!state.IsPreviewActive || state.PreviewNodes == null)
-                return;
-
-            Handles.color = new Color(1f, 0f, 0f, 0.4f);
-            for (int i = 0; i < state.PreviewNodes.Length; i++)
-                Handles.DotHandleCap(0, state.PreviewNodes[i], Quaternion.identity, 3f, EventType.Repaint);
-        }
-
-        void DrawAnimation()
-        {
-            if (state.AnimationNodes == null)
-                return;
-
-            Handles.color = Color.red;
-            for (int i = 0; i < state.AnimationNodes.Length; i++)
-                Handles.DotHandleCap(0, state.AnimationNodes[i], Quaternion.identity, 3f, EventType.Repaint);
-        }
-
-        void DrawCenterOfMassPath()
-        {
-            if (state.CenterOfMassPath.Count < 2)
-                return;
-
-            Handles.color = Color.red;
-            Handles.DrawAAPolyLine(3f, state.CenterOfMassPath.ToArray());
-        }
-
-        void DrawConnections()
-        {
-            if (state.AnimationNodes == null || model == null)
-                return;
-
-            if (state.IsPreviewActive && state.PreviewNodes != null)
-            {
-                Handles.color = new Color(0f, 1f, 0f, 0.35f);
-                DrawConnectionSet(state.PreviewNodes);
-            }
-
-            Handles.color = Color.green;
-            DrawConnectionSet(state.AnimationNodes);
-        }
-
-        void DrawConnectionSet(Vector3[] nodeSet)
-        {
-            for (int i = 0; i < model.Connections.Count; i++)
-            {
-                var e = model.Connections[i];
-                if ((uint)e.A >= (uint)nodeSet.Length || (uint)e.B >= (uint)nodeSet.Length)
-                    continue;
-
-                Handles.DrawLine(nodeSet[e.A], nodeSet[e.B]);
-            }
+            return ModelAnimation.ResolveFullPath(p);
         }
 
         // ================= TRICKS ================= //
