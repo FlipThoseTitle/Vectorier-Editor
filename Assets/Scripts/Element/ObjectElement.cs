@@ -366,12 +366,15 @@ namespace Vectorier.Element
 
         private static void WriteDynamic(GameObject sourceObject, XmlUtility xmlUtility, XmlElement parentXmlElement)
         {
-            DynamicTransform dynamicTransform = sourceObject.GetComponent<DynamicTransform>();
-            if (dynamicTransform == null)
+        DynamicTransform[] dynamicTransforms = sourceObject.GetComponents<DynamicTransform>();
+           if (dynamicTransforms.Length == 0)
                 return;
 
             XmlElement propertiesElement = xmlUtility.GetOrCreateElement(parentXmlElement, "Properties");
-            dynamicTransform.WriteToXML(xmlUtility, propertiesElement);
+            foreach (var dynamic in dynamicTransforms)
+            {
+                dynamic.WriteToXML(xmlUtility, propertiesElement);
+            }
         }
 
         private static void ApplyDynamic(GameObject sourceObject, XmlUtility xmlUtility, XmlElement parentXmlElement)

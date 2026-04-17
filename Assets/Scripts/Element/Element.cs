@@ -308,10 +308,15 @@ namespace Vectorier.Element
             if (xml == null || propertiesElement == null || gameObject == null)
                 return;
 
-            if (!gameObject.TryGetComponent<DynamicTransform>(out var dynamic))
+            DynamicTransform[] dynamics = gameObject.GetComponents<DynamicTransform>();
+
+            if (dynamics.Length == 0)
                 return;
 
-            dynamic.WriteToXML(xml, propertiesElement);
+            foreach (var dynamic in dynamics)
+            {
+                dynamic.WriteToXML(xml, propertiesElement);
+            }
         }
 
         public static void ApplySelectionComponent(XmlElement staticElement, GameObject gameObject)

@@ -209,7 +209,7 @@ namespace Vectorier.Model
             };
 
             rootObject.transform.SetParent(null);
-            rootObject.transform.localPosition = Vector3.zero;
+            rootObject.transform.localPosition = new Vector3(0, 0, -300);
             rootObject.transform.localRotation = Quaternion.identity;
             rootObject.transform.localScale = Vector3.one;
 
