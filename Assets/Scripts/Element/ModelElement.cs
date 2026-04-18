@@ -28,7 +28,7 @@ namespace Vectorier.Element
             Element.WritePosition(xmlUtility, modelElement, gameObject);
 
             // Write attributes
-            if (modelComponent == null)
+            if (modelComponent != null)
                 xmlUtility.SetAttribute(modelElement, "Type", ((int)modelComponent.Type).ToString(CultureInfo.InvariantCulture));
             else
                 xmlUtility.SetAttribute(modelElement, "Type", "1");
