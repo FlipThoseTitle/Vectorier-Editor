@@ -17,7 +17,7 @@ A Discord server is open for the project : https://discord.com/invite/pVRuFBVwC2
 <img width="1068" height="532" alt="image" src="https://github.com/user-attachments/assets/46f3d128-45fc-45a6-8771-30a6144842e3" />
 
 # Installation
-- Download Unity [6000.0.70f1](https://unity.com/releases/editor/whats-new/6000.0.70f1) at the [Official Unity Website](https://unity.com/releases/editor/archive)
+- Download Unity [6000.3.15f1](https://unity.com/releases/editor/whats-new/6000.3.15f1) at the [Official Unity Website](https://unity.com/releases/editor/archive)
 - Download the [Vectorier Editor Project](https://github.com/FlipThoseTitle/Vectorier-Editor/archive/refs/heads/main.zip)
 - Extract the zip file
 - Open the project in Unity Hub
