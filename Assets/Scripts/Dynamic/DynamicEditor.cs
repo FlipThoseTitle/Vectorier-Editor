@@ -105,7 +105,7 @@ namespace Vectorier.Dynamic
 
             foreach (var kv in mo)
             {
-                var g = EditorUtility.InstanceIDToObject(kv.Key) as GameObject;
+                var g = EditorUtility.EntityIdToObject(kv.Key) as GameObject;
                 if (!g) continue;
 
                 var o = kv.Value;
