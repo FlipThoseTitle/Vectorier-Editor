@@ -4,13 +4,13 @@
 # Introduction
 Vectorier is a community-developed level editor for the game Vector to build your own dystopian stages in Unity. This project includes the following features:
 - Export Level into an XML
-- Importing Level from the official game
+- Import existing levels directly from the base game
 - Built-in Game, allowing for quick playtest
 - Dynamic Timeline to easily create dynamic objects
 - Trigger Editor to quickly tweak the game's rule
 - Move Visualizer to easily preview animations
 - Parallax Preview directly in the Editor
-- Support for both Unity and Marmalade version
+- Compatible with both the Unity and Marmalade versions of the game
 
 A Discord server is open for the project : https://discord.com/invite/pVRuFBVwC2
 
