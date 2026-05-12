@@ -113,8 +113,7 @@ namespace Vectorier.XML
             {
                 if (node is XmlElement element)
                 {
-					//Skip trigger events, actions and conditions
-                    if (node.Name == "Events" || node.Name == "Actions" || node.Name == "Conditions")
+					if (node.Name == "Events" || node.Name == "Actions" || node.Name == "Conditions")
                         continue;
 					
                     RemoveEmptyElements(element); // recursive

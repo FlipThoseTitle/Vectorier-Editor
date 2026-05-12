@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -8,6 +9,7 @@ using UnityEngine;
 using Vectorier.XML;
 using Vectorier.Handler;
 using Vectorier.EditorScript;
+using Vectorier.Parallax;
 using UnityEngine.SceneManagement;
 
 namespace Vectorier.Core
@@ -63,6 +65,39 @@ namespace Vectorier.Core
             }
         }
 
+        // ================= Parallax ================= //
+
+        private void ExecuteWithParallaxDisabled(Action exportAction)
+        {
+            var parallaxes = FindObjectsByType<Parallax.Parallax>(FindObjectsSortMode.None);
+            var activeParallaxes = new List<Parallax.Parallax>();
+
+            // Find all active parallaxes and turn them off
+            foreach (var p in parallaxes)
+            {
+                if (p.IsActive)
+                {
+                    activeParallaxes.Add(p);
+                    p.ToggleParallax();
+                }
+            }
+
+            try
+            {
+                exportAction?.Invoke();
+            }
+            finally
+            {
+                foreach (var p in activeParallaxes)
+                {
+                    if (p != null && !p.IsActive)
+                    {
+                        p.ToggleParallax();
+                    }
+                }
+            }
+        }
+
         // ================= UI ================= //
 
         private void OnGUI()
@@ -104,16 +139,38 @@ namespace Vectorier.Core
             }
 
             EditorGUILayout.Space(10);
-            if (GUILayout.Button("Build and Export", GUILayout.Height(50)))
+            
+            if (GUILayout.Button("Export", GUILayout.Height(50)))
             {
                 EditorSceneManager.MarkSceneDirty(UnityEngine.SceneManagement.SceneManager.GetActiveScene());
 
-                if (config.exportType == ExportConfig.ExportType.Level)
-                    BuildLevel();
-                else if (config.exportType == ExportConfig.ExportType.Objects)
-                    BuildObjects();
-                else
-                    BuildBuildings();
+                ExecuteWithParallaxDisabled(() => 
+                {
+                    if (config.exportType == ExportConfig.ExportType.Level)
+                        BuildLevel();
+                    else if (config.exportType == ExportConfig.ExportType.Objects)
+                        BuildObjects();
+                    else
+                        BuildBuildings();
+                });
+            }
+
+            if (GUILayout.Button("Export and Play", GUILayout.Height(50)))
+            {
+                EditorSceneManager.MarkSceneDirty(UnityEngine.SceneManagement.SceneManager.GetActiveScene());
+
+                ExecuteWithParallaxDisabled(() => 
+                {
+                    if (config.exportType == ExportConfig.ExportType.Level)
+                        BuildLevel();
+                    else if (config.exportType == ExportConfig.ExportType.Objects)
+                        BuildObjects();
+                    else
+                        BuildBuildings();
+                });
+
+                SnailRunner runner = EditorWindow.GetWindow<SnailRunner>("Play Level");
+                runner.SetLevelAndPlay(config.fileName);
             }
 
             if ((config.exportType == ExportConfig.ExportType.Objects || config.exportType == ExportConfig.ExportType.Buildings) && config.exportAsXML)
@@ -123,18 +180,23 @@ namespace Vectorier.Core
                     if (string.IsNullOrEmpty(config.filePathDirectory) || string.IsNullOrEmpty(config.fileName))
                     {
                         UnityEngine.Debug.LogWarning("[Export] Path or filename missing.");
-                        return;
                     }
-
-                    string path = Path.Combine(config.filePathDirectory, $"{config.fileName}.xml");
-
-                    if (!File.Exists(path))
+                    else
                     {
-                        UnityEngine.Debug.LogError("[Export] Target XML does not exist.");
-                        return;
-                    }
+                        string path = Path.Combine(config.filePathDirectory, $"{config.fileName}.xml");
 
-                    ExportHandler.ExportToExisting(config.exportType == ExportConfig.ExportType.Objects ? ExportHandler.ExportMode.Objects : ExportHandler.ExportMode.Buildings, path);
+                        if (!File.Exists(path))
+                        {
+                            UnityEngine.Debug.LogError("[Export] Target XML does not exist.");
+                        }
+                        else
+                        {
+                            ExecuteWithParallaxDisabled(() => 
+                            {
+                                ExportHandler.ExportToExisting(config.exportType == ExportConfig.ExportType.Objects ? ExportHandler.ExportMode.Objects : ExportHandler.ExportMode.Buildings, path);
+                            });
+                        }
+                    }
                 }
             }
 

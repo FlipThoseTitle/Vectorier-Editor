@@ -25,8 +25,8 @@ MonoBehaviour:
   loops:
   - name: 
     loopTemplate: 
-    ev: 00000000
-    evTemplate: 
+    ev: 
+    evTemplate: FreqUsed.Enter
     op: 0
     condTemplate: 
     c: []

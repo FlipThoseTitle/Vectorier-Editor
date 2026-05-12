@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
@@ -23,6 +23,7 @@ namespace Vectorier.Dynamic
         string[] dtNames = new string[0];
         int dtPick = 0;
         string curDTName = "NewTransform";
+        GameObject[] boundGos;
 
         string[] GetDTNames(GameObject go)
         {
@@ -46,19 +47,35 @@ namespace Vectorier.Dynamic
 
         void OnEnable()
         {
-            Selection.selectionChanged += Rebind;
+            Selection.selectionChanged += OnSelectionChanged;
             EditorApplication.update += EditorTick;
             SceneView.duringSceneGui += OnSceneGUI;
-            Rebind();
+            Unbind();
         }
 
         void OnDisable()
         {
-            RestoreOriginalMulti();
-            RestoreOriginal();
-            Selection.selectionChanged -= Rebind;
+            Unbind();
+            Selection.selectionChanged -= OnSelectionChanged;
             EditorApplication.update -= EditorTick;
             SceneView.duringSceneGui -= OnSceneGUI;
+        }
+
+        void OnSelectionChanged()
+        {
+            Unbind();
+            Repaint();
+        }
+
+        void Unbind()
+        {
+            RestoreOriginalMulti();
+            RestoreOriginal();
+            boundGos = null;
+            d = null;
+            p = null;
+            selF.Clear();
+            moving = scrubbing = false;
         }
 
         void CacheOriginalMulti(GameObject[] gos)
@@ -166,12 +183,9 @@ namespace Vectorier.Dynamic
             boundGO = null;
         }
 
-        void Rebind()
+        void Bind(GameObject[] gos)
         {
-            RestoreOriginalMulti();
-            RestoreOriginal();
-
-            var gos = Selection.gameObjects;
+            boundGos = gos;
             bool multi = gos != null && gos.Length > 1;
 
             var go = Selection.activeGameObject;
@@ -280,10 +294,32 @@ namespace Vectorier.Dynamic
         void OnGUI()
         {
             var gos = Selection.gameObjects;
-            bool multi = gos != null && gos.Length > 1;
 
-            if (!Selection.activeGameObject) { EditorGUILayout.HelpBox("Select a GameObject.", MessageType.Info); return; }
-            if (!d) { EditorGUILayout.HelpBox("Select a GameObject.", MessageType.Info); return; }
+            if (gos == null || gos.Length == 0)
+            {
+                EditorGUILayout.HelpBox("Select a GameObject.", MessageType.Info);
+                return;
+            }
+
+            if (boundGos == null)
+            {
+                GUILayout.Space(10);
+                EditorGUILayout.HelpBox($"You have selected {gos.Length} GameObject(s).\nClick below to edit them in Dynamic Editor.", MessageType.Info);
+                GUILayout.Space(5);
+                if (GUILayout.Button("Edit Selected GameObject(s)", GUILayout.Height(30)))
+                {
+                    Bind(gos);
+                }
+                return;
+            }
+
+            if (!Selection.activeGameObject || !d)
+            {
+                EditorGUILayout.HelpBox("Select a GameObject.", MessageType.Info);
+                return;
+            }
+
+            bool multi = gos.Length > 1;
 
             HandleHotkeys();
 

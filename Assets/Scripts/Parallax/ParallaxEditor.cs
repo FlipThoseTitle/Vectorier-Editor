@@ -13,8 +13,7 @@ namespace Vectorier.Parallax
 
             GUI.enabled = !Application.isPlaying;
 
-            bool isActive = (bool)handler.GetType().GetField("_isActive", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).GetValue(handler);
-            string label = isActive ? "Stop Parallax" : "Start Parallax";
+            string label = handler.IsActive ? "Stop Parallax" : "Start Parallax";
 
             if (GUILayout.Button(label, GUILayout.Height(40)))
                 handler.ToggleParallax();

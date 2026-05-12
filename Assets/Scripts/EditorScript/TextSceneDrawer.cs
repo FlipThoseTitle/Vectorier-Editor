@@ -289,6 +289,8 @@ namespace Vectorier.EditorScript
             showPlatformOutline = EditorPrefs.GetBool("Vectorier_ShowPlatformOutline", false);
             showTriggerText = EditorPrefs.GetBool("Vectorier_ShowTriggerText", true);
             showAreaText = EditorPrefs.GetBool("Vectorier_ShowAreaText", false);
+            TextAnchor anchor = (TextAnchor)EditorPrefs.GetInt("Vectorier_TextAnchor", (int)TextAnchor.UpperLeft);
+            SharedTextStyle.alignment = anchor; 
         }
     }
 }

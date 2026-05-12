@@ -88,6 +88,12 @@ namespace Vectorier.Core
             RunVector(levelName);
         }
 
+        public void SetLevelAndPlay(string newLevelName)
+        {
+            levelName = newLevelName;
+            TryRunLevel();
+        }
+
         private void KillExistingVectorProcess()
         {
             Process[] processes = Process.GetProcessesByName("Vector");

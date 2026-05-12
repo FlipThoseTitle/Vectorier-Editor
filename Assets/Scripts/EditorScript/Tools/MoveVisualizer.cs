@@ -3,8 +3,10 @@ using UnityEngine;
 using System;
 using System.IO;
 using System.Linq;
+using System.Xml.Linq;
 using System.Collections.Generic;
 using Vectorier.Model;
+using Vectorier.Component;
 
 namespace Vectorier.EditorScript.Tools
 {
@@ -41,6 +43,8 @@ namespace Vectorier.EditorScript.Tools
         const string MOVEMENT_BASE_PATH = "Assets/Editor/Tools/MoveVisualizer/Movement";
         const string TRICKS_BASE_PATH = "Assets/Editor/Tools/MoveVisualizer/Tricks";
         const string DEFAULT_MODEL_XML_PATH = "Assets/Editor/Tools/MoveVisualizer/runner.xml";
+        const string DEFAULT_MOVES_XML_PATH = "Assets/Editor/Tools/MoveVisualizer/moves.xml";
+        const string DEFAULT_BINS_FOLDER_PATH = "Assets/Editor/Tools/MoveVisualizer/Tricks";
         const string BLACK_MAT_PATH = "Assets/Editor/Material/Black.mat";
 
         static readonly Dictionary<MovementType, string> MovementBins = new()
@@ -81,6 +85,13 @@ namespace Vectorier.EditorScript.Tools
         bool renderModel = true;
         bool renderBlack = true;
         bool stayInPlace;
+        bool reverse = false;
+        bool isPlaced = false;
+        Vector3 lastPlacedWorldPosition;
+
+        string movesXmlPath = DEFAULT_MOVES_XML_PATH;
+        string binsFolderPath = DEFAULT_BINS_FOLDER_PATH;
+        AreaComponent selectedAreaComponent;
 
         // ================= RUNTIME DATA ================= //
 
@@ -91,10 +102,196 @@ namespace Vectorier.EditorScript.Tools
         ModelDebug modelDebug;
         Transform placementHostTransform;
 
+        TrickMovePreviewData ResolveTrickMovePreviewData(AreaComponent areaComponent)
+        {
+            string resolvedMovesXmlPath = ResolveMovesXmlPath();
+
+            if (string.IsNullOrWhiteSpace(resolvedMovesXmlPath) || !File.Exists(resolvedMovesXmlPath))
+                throw new FileNotFoundException($"moves.xml not found: {resolvedMovesXmlPath}");
+
+            XDocument document = XDocument.Load(resolvedMovesXmlPath);
+            XElement root = document.Root ?? throw new Exception("moves.xml has no root element.");
+
+            XElement trickGroup = root
+                .Element("ReactionGroups")?
+                .Elements("ReactionGroup")
+                .FirstOrDefault(group =>
+                    string.Equals((string)group.Attribute("Name"), "TrickGroup", StringComparison.OrdinalIgnoreCase));
+
+            if (trickGroup == null)
+                throw new Exception("Could not find <ReactionGroup Name=\"TrickGroup\"> in moves.xml.");
+
+            string[] candidateAreaNames = GetAreaNameCandidates(areaComponent);
+
+            XElement trickReaction = trickGroup
+                .Elements()
+                .FirstOrDefault(element =>
+                    AttributeMatchesAnyCandidate(element, "TriggerName", candidateAreaNames) ||
+                    AttributeMatchesAnyCandidate(element, "AreaName", candidateAreaNames));
+
+            if (trickReaction == null)
+            {
+                throw new Exception(
+                    $"Could not find a TrickGroup entry with TriggerName or AreaName matching: {string.Join(", ", candidateAreaNames)}"
+                );
+            }
+
+            string moveName = trickReaction.Name.LocalName;
+
+            XElement moveElement = root
+                .Element("Moves")?
+                .Elements()
+                .FirstOrDefault(element =>
+                    string.Equals(element.Name.LocalName, moveName, StringComparison.OrdinalIgnoreCase));
+
+            if (moveElement == null)
+                throw new Exception($"Could not find <Moves><{moveName} ... /> in moves.xml.");
+
+            string fileName = (string)moveElement.Attribute("FileName");
+
+            if (string.IsNullOrWhiteSpace(fileName))
+                throw new Exception($"Move '{moveName}' does not have a FileName attribute.");
+
+            string pivotNode = (string)moveElement.Attribute("PivotNode");
+
+            if (string.IsNullOrWhiteSpace(pivotNode))
+                pivotNode = "NPivot";
+
+            int firstFrame = 0;
+            string firstFrameText = (string)trickReaction.Attribute("FirstFrame");
+
+            if (!string.IsNullOrWhiteSpace(firstFrameText))
+                int.TryParse(firstFrameText, out firstFrame);
+
+            string binFullPath = ModelAnimation.ResolveFullPath(
+                Path.Combine(ResolveBinsFolderPath(), fileName)
+            );
+
+            if (!File.Exists(binFullPath))
+                throw new FileNotFoundException($"Animation bin not found: {binFullPath}");
+
+            return new TrickMovePreviewData
+            {   
+                FirstFrame = firstFrame,
+                FileName = fileName,
+                PivotNode = pivotNode,
+                BinFullPath = binFullPath,
+                WorldPosition = GetAreaPreviewPosePlacementPosition(areaComponent, pivotNode)
+            };
+        }
+
+        static bool AttributeMatchesAnyCandidate(XElement element, string attributeName, string[] candidates)
+        {
+            string value = (string)element.Attribute(attributeName);
+
+            if (string.IsNullOrWhiteSpace(value))
+                return false;
+
+            return candidates.Any(candidate =>
+                string.Equals(value, candidate, StringComparison.OrdinalIgnoreCase));
+        }
+
+        static string[] GetAreaNameCandidates(AreaComponent areaComponent)
+        {
+            List<string> candidates = new();
+
+            if (areaComponent == null)
+                return candidates.ToArray();
+
+            if (areaComponent.gameObject != null)
+                candidates.Add(areaComponent.gameObject.name);
+
+            if (areaComponent.transform.parent != null)
+                candidates.Add(areaComponent.transform.parent.gameObject.name);
+
+            return candidates
+                .Where(candidate => !string.IsNullOrWhiteSpace(candidate))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToArray();
+        }
+
+        Vector3 GetAreaPreviewPosePlacementPosition(AreaComponent areaComponent, string pivotNode)
+        {
+            SpriteRenderer spriteRenderer = areaComponent.GetComponent<SpriteRenderer>();
+
+            if (spriteRenderer == null)
+                spriteRenderer = areaComponent.GetComponentInChildren<SpriteRenderer>();
+
+            if (spriteRenderer == null)
+                spriteRenderer = areaComponent.GetComponentInParent<SpriteRenderer>();
+
+            if (spriteRenderer == null)
+                throw new Exception($"No SpriteRenderer found for AreaComponent '{areaComponent.name}'.");
+
+            animation.EnsureModelLoadedForPreview(ResolveXmlPath());
+
+            if (animation.Model == null)
+                throw new Exception($"Could not load model XML: {ResolveXmlPath()}");
+
+            if (animation.State.PreviewPose == null || animation.State.PreviewPose.Length == 0)
+                throw new Exception("Model preview pose is empty.");
+
+            if (!animation.Model.TryGetNodeIndex(pivotNode, out int pivotIndex))
+                throw new Exception($"PivotNode '{pivotNode}' was not found in the model XML.");
+
+            if (!animation.Model.TryGetNodeIndex("COM", out int comIndex))
+                throw new Exception("Node 'COM' was not found in the model XML.");
+
+            Bounds bounds = spriteRenderer.bounds;
+
+            Vector3 pivotPosePosition = animation.State.PreviewPose[pivotIndex];
+            Vector3 comPosePosition = animation.State.PreviewPose[comIndex];
+
+            const float finalXOffset = 20f;
+
+            float comToPivotX = comPosePosition.x - pivotPosePosition.x;
+
+            float targetPivotX = reverse
+                ? bounds.min.x - finalXOffset - comToPivotX
+                : bounds.max.x + finalXOffset - comToPivotX;
+                
+            float targetPivotY = bounds.min.y;
+
+            return new Vector3(
+                targetPivotX,
+                targetPivotY,
+                bounds.center.z
+            );
+        }
+
+        string ResolveMovesXmlPath()
+        {
+            string path = string.IsNullOrWhiteSpace(movesXmlPath)
+                ? DEFAULT_MOVES_XML_PATH
+                : movesXmlPath;
+
+            return ModelAnimation.ResolveFullPath(path);
+        }
+
+        string ResolveBinsFolderPath()
+        {
+            string path = string.IsNullOrWhiteSpace(binsFolderPath)
+                ? DEFAULT_BINS_FOLDER_PATH
+                : binsFolderPath;
+
+            return ModelAnimation.ResolveFullPath(path);
+        }
+
         // ================= WINDOW ================= //
 
         [MenuItem("Vectorier/Tools/Move Visualizer", false, 34)]
-        static void OpenWindow() => GetWindow<MoveVisualizer>("Move Visualizer");
+        public static MoveVisualizer OpenWindow()
+        {
+            var window = GetWindow<MoveVisualizer>("Move Visualizer");
+            window.Show();
+            return window;
+        }
+
+        public static void OpenAndPreviewAreaComponent(AreaComponent areaComponent)
+        {
+            MoveVisualizer window = OpenWindow();
+            window.PreviewAreaComponent(areaComponent);
+        }
 
         Transform GetPreviewParentTransform()
         {
@@ -143,9 +340,19 @@ namespace Vectorier.EditorScript.Tools
 
         void OnGUI()
         {
+            RefreshSelectedAreaComponent();
+
+            bool hasSelectedTrickArea = selectedAreaComponent != null &&
+                                        selectedAreaComponent.Type == AreaComponent.AreaType.Trick;
+
             GUILayout.Space(5);
-            EditorGUILayout.LabelField("Model XML", EditorStyles.boldLabel);
-            modelXmlPath = EditorGUILayout.TextField("XML Path", modelXmlPath);
+            EditorGUILayout.LabelField("XML Path", EditorStyles.boldLabel);
+            modelXmlPath = EditorGUILayout.TextField("Model XML", modelXmlPath);
+            movesXmlPath = EditorGUILayout.TextField("Moves XML", movesXmlPath);
+            binsFolderPath = EditorGUILayout.TextField("Bins Folder", binsFolderPath);
+
+            GUILayout.Space(5);
+            EditorGUILayout.LabelField("Settings", EditorStyles.boldLabel);
             renderModel = EditorGUILayout.Toggle("Render Model", renderModel);
 
             if (renderModel)
@@ -160,10 +367,7 @@ namespace Vectorier.EditorScript.Tools
 
             modelDebug.RenderEdges = EditorGUILayout.Toggle("Render Edges", modelDebug.RenderEdges);
             modelDebug.RenderTrajectory = EditorGUILayout.Toggle("Render Trajectory", modelDebug.RenderTrajectory);
-            modelDebug.FollowCamera = EditorGUILayout.Toggle("Follow Camera", modelDebug.FollowCamera);
-
             modelDebug.RenderDetector = EditorGUILayout.Toggle("Render Detector", modelDebug.RenderDetector);
-
             if (modelDebug.RenderDetector)
             {
                 EditorGUI.indentLevel++;
@@ -171,18 +375,59 @@ namespace Vectorier.EditorScript.Tools
                 modelDebug.DeltaDetectorV = EditorGUILayout.IntField("Detector V", modelDebug.DeltaDetectorV);
                 EditorGUI.indentLevel--;
             }
+            modelDebug.FollowCamera = EditorGUILayout.Toggle("Follow Camera", modelDebug.FollowCamera);
+            bool prevReverse = reverse;
+            reverse = EditorGUILayout.Toggle("Reverse", reverse);
+            if (prevReverse != reverse)
+            {
+                animation.Reverse = reverse;
+                if (isPlaced)
+                {
+                    // Instantly re-place the animation at the tracked location to reflect the reversed axis
+                    if (hasSelectedTrickArea)
+                        PreviewAreaComponent(selectedAreaComponent);
+                    else
+                        PlaceAt(lastPlacedWorldPosition);
+                }
+            }
+
             GUILayout.Space(10);
-            currentPlacementMode = (PlacementMode)EditorGUILayout.EnumPopup("Placement Mode", currentPlacementMode);
 
-            DrawPlacementModeUI();
+            if (!hasSelectedTrickArea)
+            {
+                currentPlacementMode = (PlacementMode)EditorGUILayout.EnumPopup("Placement Mode", currentPlacementMode);
 
-            pivotNodeName = EditorGUILayout.TextField("Pivot Node", pivotNodeName);
-            stayInPlace = EditorGUILayout.Toggle("Stay In Place", stayInPlace);
+                DrawPlacementModeUI();
+
+                pivotNodeName = EditorGUILayout.TextField("Pivot Node", pivotNodeName);
+                stayInPlace = EditorGUILayout.Toggle("Stay In Place", stayInPlace);
+            }
+            else
+            {
+                using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
+                {
+                    EditorGUILayout.LabelField("Selected AreaComponent", selectedAreaComponent.name);
+                    EditorGUILayout.LabelField("Preview Source", "moves.xml > ReactionGroups > TrickGroup");
+                }
+            }
 
             GUILayout.Space(12);
 
-            if (GUILayout.Button(placementEnabled ? "Stop Placement" : "Start Placement", GUILayout.Height(60)))
-                placementEnabled = !placementEnabled;
+            string mainButtonName = hasSelectedTrickArea
+                ? "Preview Animation"
+                : (placementEnabled ? "Stop Placement" : "Start Placement");
+
+            if (GUILayout.Button(mainButtonName, GUILayout.Height(60)))
+            {
+                if (hasSelectedTrickArea)
+                {
+                    PreviewAreaComponent(selectedAreaComponent);
+                }
+                else
+                {
+                    placementEnabled = !placementEnabled;
+                }
+            }
 
             if (GUILayout.Button("Clear", GUILayout.Height(40)))
             {
@@ -217,6 +462,7 @@ namespace Vectorier.EditorScript.Tools
             int maxFrame = Mathf.Max(0, animation.AnimationFrames.Count - 1);
 
             animation.StartFrame = Mathf.Clamp(animation.StartFrame, 0, maxFrame);
+
             if (animation.EndFrame > maxFrame || animation.EndFrame == int.MaxValue)
                 animation.EndFrame = maxFrame;
 
@@ -230,13 +476,17 @@ namespace Vectorier.EditorScript.Tools
                 animation.EndFrame
             );
 
-            EditorGUILayout.Space();
-
-            using (new EditorGUILayout.HorizontalScope())
+            if (!hasSelectedTrickArea)
             {
-                animation.StartFrame = EditorGUILayout.IntField("Start", animation.StartFrame);
-                animation.EndFrame = EditorGUILayout.IntField("End", animation.EndFrame);
+                EditorGUILayout.Space();
+
+                using (new EditorGUILayout.HorizontalScope())
+                {
+                    animation.StartFrame = EditorGUILayout.IntField("Start", animation.StartFrame);
+                    animation.EndFrame = EditorGUILayout.IntField("End", animation.EndFrame);
+                }
             }
+
             if (newFrame != animation.CurrentFrameIndex)
             {
                 animation.IsPlaying = false;
@@ -328,6 +578,82 @@ namespace Vectorier.EditorScript.Tools
             binFileName = discoveredTrickBins[currentTrickIdentifier];
         }
 
+        void RefreshSelectedAreaComponent()
+        {
+            selectedAreaComponent = null;
+
+            GameObject selectedObject = Selection.activeGameObject;
+
+            if (selectedObject == null)
+                return;
+
+            selectedAreaComponent = selectedObject.GetComponent<AreaComponent>();
+        }
+
+        public void PreviewAreaComponent(AreaComponent areaComponent)
+        {
+            if (areaComponent == null)
+            {
+                Debug.LogWarning("Preview Animation failed: AreaComponent is null.");
+                return;
+            }
+
+            if (areaComponent.Type != AreaComponent.AreaType.Trick)
+            {
+                Debug.LogWarning("Preview Animation is only available when AreaComponent Type is Trick.");
+                return;
+            }
+
+            try
+            {
+                animation.Reverse = reverse;
+                TrickMovePreviewData previewData = ResolveTrickMovePreviewData(areaComponent);
+
+                lastPlacedWorldPosition = previewData.WorldPosition;
+                isPlaced = true;
+
+                modelDebug?.Destroy();
+                modelRenderer?.Destroy();
+
+                placementEnabled = false;
+                placementHostTransform = null;
+
+                animation.StartFrame = previewData.FirstFrame;
+                animation.PlaceAt(
+                    previewData.WorldPosition,
+                    null,
+                    ResolveXmlPath(),
+                    previewData.BinFullPath,
+                    previewData.PivotNode,
+                    false
+                );
+
+                pivotNodeName = previewData.PivotNode;
+                stayInPlace = false;
+
+                if (renderModel && animation.Model != null)
+                {
+                    modelRenderer?.Create(animation.Model, animation.AnimationNodes, null, renderBlack);
+                    modelDebug?.AttachToModel(animation.Model, modelRenderer?.RootObject);
+                }
+                else
+                {
+                    modelDebug?.AttachToModel(animation.Model, null);
+                }
+
+                SyncAnimationSpaceTransform();
+                modelDebug?.UpdateNodeWorldPositions(animation.AnimationNodes, null);
+                modelDebug?.FollowSceneViewCameraToNodeXY(animation);
+
+                Repaint();
+                SceneView.RepaintAll();
+            }
+            catch (Exception exception)
+            {
+                Debug.LogError($"Preview Animation failed for '{areaComponent.name}': {exception.Message}");
+            }
+        }
+
         // ================= SCENE ================= //
 
         void OnSceneGUI(SceneView sceneView)
@@ -371,6 +697,9 @@ namespace Vectorier.EditorScript.Tools
 
         void PlaceAt(Vector3 worldPosition)
         {
+            lastPlacedWorldPosition = worldPosition;
+            isPlaced = true;
+
             modelDebug?.Destroy();
             modelRenderer?.Destroy();
 
@@ -428,8 +757,11 @@ namespace Vectorier.EditorScript.Tools
 
         void ResetAll()
         {
+            isPlaced = false;
             placementHostTransform = null;
             animation?.ResetAll();
+            if (animation != null)
+                animation.Reverse = reverse;
         }
 
         string ResolveXmlPath()
@@ -459,6 +791,15 @@ namespace Vectorier.EditorScript.Tools
                 discoveredTrickBins[identifier] = fileName;
             }
         }
+    }
+
+    sealed class TrickMovePreviewData
+    {
+        public int FirstFrame;
+        public string FileName;
+        public string PivotNode;
+        public string BinFullPath;
+        public Vector3 WorldPosition;
     }
 
     // ================= TRICK SELECTION WINDOW ================= //

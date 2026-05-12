@@ -120,9 +120,11 @@ namespace Vectorier.Model
 
             for (int i = 0; i < nodePositions.Length; i++)
             {
+                Vector3 localPushedPos = nodePositions[i] + ModelAnimation.AnimZPushVector;
+
                 lastNodeWorldPositions[i] = parentTransform != null
-                    ? parentTransform.TransformPoint(nodePositions[i])
-                    : nodePositions[i];
+                    ? parentTransform.TransformPoint(localPushedPos)
+                    : localPushedPos;
             }
 
             UpdateDetectorLines(lastNodeWorldPositions);
@@ -238,9 +240,11 @@ namespace Vectorier.Model
             {
                 bool isCamera = i == cameraIndex;
 
+                Vector3 pushedNodePosition = nodeSet[i] + ModelAnimation.AnimZPushVector;
+
                 Vector3 worldPos = parentTransform != null
-                    ? parentTransform.TransformPoint(nodeSet[i])
-                    : nodeSet[i];
+                    ? parentTransform.TransformPoint(pushedNodePosition)
+                    : pushedNodePosition;
 
                 unlitMaterial.SetColor("_Color", isCamera ? cameraColor : normalColor);
                 unlitMaterial.SetPass(0);
@@ -264,9 +268,8 @@ namespace Vectorier.Model
             Vector3[] points = new Vector3[animation.CenterOfMassPath.Count];
             for (int i = 0; i < points.Length; i++)
             {
-                points[i] = parentTransform != null
-                    ? parentTransform.TransformPoint(animation.CenterOfMassPath[i])
-                    : animation.CenterOfMassPath[i];
+                Vector3 pushedPoint = animation.CenterOfMassPath[i] + ModelAnimation.AnimZPushVector;
+                points[i] = parentTransform != null ? parentTransform.TransformPoint(pushedPoint) : pushedPoint;
             }
 
             Handles.color = Color.red;
@@ -304,12 +307,12 @@ namespace Vectorier.Model
                     continue;
 
                 Vector3 a = parentTransform != null
-                    ? parentTransform.TransformPoint(nodeSet[e.A])
-                    : nodeSet[e.A];
+                    ? parentTransform.TransformPoint(nodeSet[e.A] + ModelAnimation.AnimZPushVector)
+                    : nodeSet[e.A] + ModelAnimation.AnimZPushVector;
 
                 Vector3 b = parentTransform != null
-                    ? parentTransform.TransformPoint(nodeSet[e.B])
-                    : nodeSet[e.B];
+                    ? parentTransform.TransformPoint(nodeSet[e.B] + ModelAnimation.AnimZPushVector)
+                    : nodeSet[e.B] + ModelAnimation.AnimZPushVector;
 
                 Handles.DrawLine(a, b);
             }

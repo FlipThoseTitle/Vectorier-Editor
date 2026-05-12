@@ -13,11 +13,11 @@ MonoBehaviour:
   m_Name: ImportConfig
   m_EditorClassIdentifier: 
   filePathDirectory: Assets/XML/level_xml
-  xmlName: buildings_downtown
-  selectedObject: City
+  xmlName: DOWNTOWN_BONUS_05
+  selectedObject: 
   ignoreTags: 
   untagChildren: 0
   includeBuildingsMarker: 0
-  applyConfig: 0
+  applyConfig: 1
   textureFolders:
   - Images/Vector

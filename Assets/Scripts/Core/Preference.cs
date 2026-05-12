@@ -14,6 +14,7 @@ namespace Vectorier.Core.Preferences
         private const string KEY_SHOW_PLATFORM_OUTLINE = "Vectorier_ShowPlatformOutline";
         private const string KEY_SHOW_TRIGGER_TEXT = "Vectorier_ShowTriggerText";
         private const string KEY_SHOW_AREA_TEXT = "Vectorier_ShowAreaText";
+        private const string KEY_TEXT_ANCHOR = "Vectorier_TextAnchor";
 
         // ================= CACHED VALUES ================= //
 
@@ -21,6 +22,7 @@ namespace Vectorier.Core.Preferences
         private bool showPlatformOutline;
         private bool showTriggerText;
         private bool showAreaText;
+        private TextAnchor textAnchor;
 
         // ================= MAIN ================= //
 
@@ -36,6 +38,7 @@ namespace Vectorier.Core.Preferences
         {
             LoadPrefs();
         }
+        
         private void OnGUI()
         {
             var subHeaderStyle = new GUIStyle(EditorStyles.label)
@@ -54,10 +57,12 @@ namespace Vectorier.Core.Preferences
             showPlatformOutline = Toggle("Show Platform Outline", showPlatformOutline);
             showTriggerText = Toggle("Show Trigger Text", showTriggerText);
             showAreaText = Toggle("Show Area Text", showAreaText);
+            textAnchor = (TextAnchor)EnumPopup("Text Anchor", textAnchor);
 
             if (EditorGUI.EndChangeCheck())
             {
                 SavePrefs();
+                SceneView.RepaintAll();
             }
         }
 
@@ -67,6 +72,7 @@ namespace Vectorier.Core.Preferences
             showPlatformOutline = EditorPrefs.GetBool(KEY_SHOW_PLATFORM_OUTLINE, false);
             showTriggerText = EditorPrefs.GetBool(KEY_SHOW_TRIGGER_TEXT, true);
             showAreaText = EditorPrefs.GetBool(KEY_SHOW_AREA_TEXT, false);
+            textAnchor = (TextAnchor)EditorPrefs.GetInt(KEY_TEXT_ANCHOR, (int)TextAnchor.UpperLeft);
         }
 
         private void SavePrefs()
@@ -75,6 +81,7 @@ namespace Vectorier.Core.Preferences
             EditorPrefs.SetBool(KEY_SHOW_PLATFORM_OUTLINE, showPlatformOutline);
             EditorPrefs.SetBool(KEY_SHOW_TRIGGER_TEXT, showTriggerText);
             EditorPrefs.SetBool(KEY_SHOW_AREA_TEXT, showAreaText);
+            EditorPrefs.SetInt(KEY_TEXT_ANCHOR, (int)textAnchor);
         }
     }
 }

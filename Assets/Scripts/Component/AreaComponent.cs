@@ -1,5 +1,6 @@
 using UnityEditor;
 using UnityEngine;
+using Vectorier.EditorScript.Tools;
 
 namespace Vectorier.Component
 {
@@ -61,6 +62,19 @@ namespace Vectorier.Component
                 case AreaComponent.AreaType.Trick:
                     EditorGUILayout.PropertyField(itemName);
                     EditorGUILayout.PropertyField(score);
+
+                    GUILayout.Space(10);
+
+                    if (GUILayout.Button("Preview Animation", GUILayout.Height(32)))
+                    {
+                        serializedObject.ApplyModifiedProperties();
+
+                        AreaComponent areaComponent = (AreaComponent)target;
+                        MoveVisualizer.OpenAndPreviewAreaComponent(areaComponent);
+
+                        return;
+                    }
+
                     break;
 
                 case AreaComponent.AreaType.Help:

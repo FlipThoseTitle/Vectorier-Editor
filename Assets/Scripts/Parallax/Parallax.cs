@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
+using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using System;
 using System.Globalization;
 
@@ -25,29 +27,17 @@ namespace Vectorier.Parallax
         [Header("Zoom")]
         public float zoomValue = 1f;
 
-        private bool _isActive;
-        private Vector3 _cameraStartPosition;
-        private float _currentZoom = 1f;
+        // [NonSerialized] prevents the undo
+        [NonSerialized] private bool _isActive;
+        [NonSerialized] private Vector3 _cameraStartPosition;
+        [NonSerialized] private float _currentZoom = 1f;
+        [NonSerialized] private Renderer[] _selfRenderers;
+        [NonSerialized] private bool[] _selfRenderersEnabled;
+        [NonSerialized] private Vector3 _lastSceneCamPos;
+        [NonSerialized] private Quaternion _lastSceneCamRot;
+        [NonSerialized] private bool _wasActiveBeforeSave;
 
-        private Renderer[] _selfRenderers;
-        private bool[] _selfRenderersEnabled;
-
-        private Vector3 _lastSceneCamPos;
-        private Quaternion _lastSceneCamRot;
-
-        private bool IsUnderTaggedParent(Transform transform, string tag)
-        {
-            Transform current = transform.parent;
-            while (current != null)
-            {
-                if (current.CompareTag(tag))
-                    return true;
-                current = current.parent;
-            }
-            return false;
-        }
-
-        private static bool Approximately1(float v) => Mathf.Abs(v - 1f) <= 0.0001f;
+        public bool IsActive => _isActive;
 
         private class ParallaxTarget
         {
@@ -67,7 +57,60 @@ namespace Vectorier.Parallax
         private readonly List<ParallaxTarget> _targets = new List<ParallaxTarget>();
         private readonly Dictionary<float, ParallaxGroup> _groups = new Dictionary<float, ParallaxGroup>();
 
-        // Stop parallax if scripts reload
+        private void OnEnable()
+        {
+            // Hook into the scene saving events
+            EditorSceneManager.sceneSaving += OnSceneSaving;
+            EditorSceneManager.sceneSaved += OnSceneSaved;
+        }
+
+        private void OnDisable()
+        {
+            if (_isActive) StopParallax();
+            
+            // Unhook to prevent memory leaks or duplicate calls
+            EditorSceneManager.sceneSaving -= OnSceneSaving;
+            EditorSceneManager.sceneSaved -= OnSceneSaved;
+        }
+
+        private void OnSceneSaving(Scene scene, string path)
+        {
+            // If there is a save while parallax is running, turn it off temporarily.
+            if (_isActive)
+            {
+                _wasActiveBeforeSave = true;
+                StopParallax();
+            }
+        }
+
+        private void OnSceneSaved(Scene scene)
+        {
+            // turn it back once the save is finished
+            if (_wasActiveBeforeSave)
+            {
+                _wasActiveBeforeSave = false;
+                StartParallax();
+            }
+        }
+
+        private void OnDestroy() { if (_isActive) StopParallax(); }
+        private void OnApplicationQuit() { if (_isActive) StopParallax(); }
+
+        // ================= UTILITY ================= //
+
+        private bool IsUnderTaggedParent(Transform transform, string tag)
+        {
+            Transform current = transform.parent;
+            while (current != null)
+            {
+                if (current.CompareTag(tag)) return true;
+                current = current.parent;
+            }
+            return false;
+        }
+
+        private static bool Approximately1(float v) => Mathf.Abs(v - 1f) <= 0.0001f;
+
         [InitializeOnLoadMethod]
         private static void EnsureEditorCleanup()
         {
@@ -80,24 +123,23 @@ namespace Vectorier.Parallax
 
         private void SafeStopOnReload()
         {
-            if (_isActive)
-                StopParallax();
+            if (_isActive) StopParallax();
         }
+
+        // ================= SCENE GUI ================= //
 
         private void OnSceneGUI(SceneView sceneView)
         {
-            if (!_isActive || !AttachSceneCamera) return;
-
-            if (Event.current.type != EventType.Repaint) return;
+            if (!_isActive || !AttachSceneCamera || Event.current.type != EventType.Repaint) return;
 
             var sceneCam = sceneView.camera;
             var cam = GetComponent<Camera>();
             if (!sceneCam || !cam) return;
+
             var pos = sceneCam.transform.position;
             var rot = sceneCam.transform.rotation;
 
-            if (pos == _lastSceneCamPos && rot == _lastSceneCamRot)
-                return;
+            if (pos == _lastSceneCamPos && rot == _lastSceneCamRot) return;
 
             _lastSceneCamPos = pos;
             _lastSceneCamRot = rot;
@@ -108,45 +150,35 @@ namespace Vectorier.Parallax
             UpdateParallax();
         }
 
-        //---------------------------------------------------------
+        // ================= PARALLAX ================= //
 
         [MenuItem("Vectorier/Tools/Toggle Parallax", false, 35)]
         private static void ToggleParallaxFromMenu()
         {
-            var candidates = GameObject.FindGameObjectsWithTag("Camera")
-                .Select(go => go.GetComponent<Parallax>())
-                .Where(p => p != null)
-                .ToList();
+            var candidates = FindObjectsByType<Parallax>(FindObjectsSortMode.None);
 
-            // No camera found
-            if (candidates.Count == 0)
+            if (candidates.Length == 0)
             {
-                EditorUtility.DisplayDialog("Parallax", "There are no camera in the scene!", "OK");
+                EditorUtility.DisplayDialog("Parallax", "There are no cameras with a Parallax component in the scene!", "OK");
                 return;
             }
 
-            Parallax targetParallax = null;
+            Parallax targetParallax = candidates[0];
 
-            // Multiple cameras found
-            if (candidates.Count > 1)
+            if (candidates.Length > 1)
             {
-                var selected = Selection.activeGameObject != null ? Selection.activeGameObject.GetComponent<Parallax>() : null;
-
+                var selected = Selection.activeGameObject?.GetComponent<Parallax>();
                 if (selected == null || !candidates.Contains(selected))
                 {
-                    EditorUtility.DisplayDialog("Parallax", "There are multiple cameras in the scene! Select the camera to proceed", "OK");
+                    EditorUtility.DisplayDialog("Parallax", "There are multiple parallax cameras! Select one to proceed.", "OK");
                     return;
                 }
-
                 targetParallax = selected;
-            }
-            else
-            {
-                targetParallax = candidates[0];
             }
 
             targetParallax.ToggleParallax();
-            EditorUtility.SetDirty(targetParallax);
+            
+            // Forced UI repaints
             EditorApplication.DirtyHierarchyWindowSorting();
             EditorApplication.RepaintHierarchyWindow();
             EditorApplication.RepaintProjectWindow();
@@ -157,10 +189,8 @@ namespace Vectorier.Parallax
 
         public void ToggleParallax()
         {
-            if (_isActive)
-                StopParallax();
-            else
-                StartParallax();
+            if (_isActive) StopParallax();
+            else StartParallax();
         }
 
         private void StartParallax()
@@ -176,33 +206,36 @@ namespace Vectorier.Parallax
             _targets.Clear();
             _groups.Clear();
 
-            var tags = targetTags.Split(',')
-                .Select(t => t.Trim())
-                .Where(t => !string.IsNullOrEmpty(t))
-                .ToList();
+            var tags = targetTags.Split(',').Select(t => t.Trim()).Where(t => !string.IsNullOrEmpty(t));
+            var layerFactorCache = new Dictionary<int, float>();
 
-            foreach (var gameObject in FindObjectsByType<GameObject>(FindObjectsSortMode.None))
+            foreach (var tag in tags)
             {
-                if (!gameObject.activeInHierarchy) continue;
-                if (tags.Count > 0 && !tags.Contains(gameObject.tag)) continue;
-
-                if (IsUnderTaggedParent(gameObject.transform, "Object"))
-                    continue;
-
-                string layerName = LayerMask.LayerToName(gameObject.layer);
-                if (!float.TryParse(layerName, NumberStyles.Float, CultureInfo.InvariantCulture, out float factor))
-                    factor = 1f;
-
-                if (!_groups.ContainsKey(factor))
-                    _groups[factor] = new ParallaxGroup();
-
-                _targets.Add(new ParallaxTarget
+                foreach (var gameObject in GameObject.FindGameObjectsWithTag(tag))
                 {
-                    transform = gameObject.transform,
-                    factor = factor,
-                    originalPosition = gameObject.transform.position,
-                    originalScale = gameObject.transform.localScale
-                });
+                    if (!gameObject.activeInHierarchy || IsUnderTaggedParent(gameObject.transform, "Object")) 
+                        continue;
+
+                    int layer = gameObject.layer;
+                    
+                    // Cache layer to float conversions so we dont string parse thousands of times
+                    if (!layerFactorCache.TryGetValue(layer, out float factor))
+                    {
+                        if (!float.TryParse(LayerMask.LayerToName(layer), NumberStyles.Float, CultureInfo.InvariantCulture, out factor))
+                            factor = 1f;
+                        layerFactorCache[layer] = factor;
+                    }
+
+                    if (!_groups.ContainsKey(factor)) _groups[factor] = new ParallaxGroup();
+
+                    _targets.Add(new ParallaxTarget
+                    {
+                        transform = gameObject.transform,
+                        factor = factor,
+                        originalPosition = gameObject.transform.position,
+                        originalScale = gameObject.transform.localScale
+                    });
+                }
             }
 
             SceneView.duringSceneGui += OnSceneGUI;
@@ -227,14 +260,12 @@ namespace Vectorier.Parallax
             _groups.Clear();
 
             var camera = GetComponent<Camera>();
-            if (camera != null)
-                camera.transform.position = _cameraStartPosition;
+            if (camera != null) camera.transform.position = _cameraStartPosition;
         }
 
         private void EditorUpdate()
         {
-            if (!_isActive)
-                return;
+            if (!_isActive) return;
 
             if (AttachSceneCamera && SceneView.lastActiveSceneView != null)
             {
@@ -273,12 +304,10 @@ namespace Vectorier.Parallax
                 var parallaxGroup = groupPair.Value;
                 float factor = groupPair.Key;
 
-                float scale;
-                if (effectiveZoom <= 0f)
-                    scale = 1f;
-                else
+                float scale = 1f;
+                if (effectiveZoom > 0f)
                 {
-                    float denominator = ((1f / effectiveZoom - 1f) * factor + 1f);
+                    float denominator = (1f / effectiveZoom - 1f) * factor + 1f;
                     scale = Mathf.Approximately(denominator, 0f) ? 1f : (1f / denominator);
                 }
 
@@ -293,10 +322,7 @@ namespace Vectorier.Parallax
             foreach (var target in _targets)
             {
                 if (target.transform == null) continue;
-
-                if (skipFactor1 && Approximately1(target.factor))
-                    continue;
-
+                if (skipFactor1 && Approximately1(target.factor)) continue;
                 if (!_groups.TryGetValue(target.factor, out var group)) continue;
 
                 target.transform.localScale = target.originalScale * group.frameScale;
@@ -310,24 +336,17 @@ namespace Vectorier.Parallax
         {
             if (!Approximately1(_currentZoom)) return;
 
-            for (int i = 0; i < _targets.Count; i++)
+            foreach (var t in _targets)
             {
-                var t = _targets[i];
-                if (t.transform == null) continue;
-
-                if (Approximately1(t.factor))
-                {
-                    t.originalPosition = t.transform.position;
-                    t.originalScale = t.transform.localScale;
-                }
+                if (t.transform == null || !Approximately1(t.factor)) continue;
+                t.originalPosition = t.transform.position;
+                t.originalScale = t.transform.localScale;
             }
         }
 
-        // hide
         private void HideSelf()
         {
             var go = gameObject;
-
             _selfRenderers = go.GetComponentsInChildren<Renderer>(true);
             _selfRenderersEnabled = new bool[_selfRenderers.Length];
 
@@ -342,40 +361,19 @@ namespace Vectorier.Parallax
 
         private void UnhideSelf()
         {
-            var go = gameObject;
-
             if (_selfRenderers != null && _selfRenderersEnabled != null)
             {
                 for (int i = 0; i < _selfRenderers.Length; i++)
                 {
-                    if (_selfRenderers[i] == null) continue;
-                    _selfRenderers[i].enabled = _selfRenderersEnabled[i];
+                    if (_selfRenderers[i] != null)
+                        _selfRenderers[i].enabled = _selfRenderersEnabled[i];
                 }
             }
 
             _selfRenderers = null;
             _selfRenderersEnabled = null;
 
-            SceneVisibilityManager.instance.Show(go, true);
-        }
-
-        // cleanup
-        private void OnDisable()
-        {
-            if (_isActive)
-                StopParallax();
-        }
-
-        private void OnDestroy()
-        {
-            if (_isActive)
-                StopParallax();
-        }
-
-        private void OnApplicationQuit()
-        {
-            if (_isActive)
-                StopParallax();
+            SceneVisibilityManager.instance.Show(gameObject, true);
         }
     }
 }

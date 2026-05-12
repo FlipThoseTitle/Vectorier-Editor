@@ -6,7 +6,6 @@ using UnityEngine.Rendering;
 using Vectorier.XML;
 using Vectorier.Handler;
 using Vectorier.Component;
-using Vectorier.Dynamic;
 
 namespace Vectorier.Element
 {
@@ -28,26 +27,24 @@ namespace Vectorier.Element
 
             XmlElement objectXmlElement = xmlUtility.AddElement(parentXmlElement, "Object");
 
-            WriteName(sourceObject, xmlUtility, objectXmlElement);
+            Element.WriteName(sourceObject, xmlUtility, objectXmlElement);
             WriteExportSpecificData(sourceObject, xmlUtility, objectXmlElement, exportMode);
-
             WriteSelection(sourceObject, xmlUtility, objectXmlElement);
-            WriteDynamic(sourceObject, xmlUtility, objectXmlElement);
+            Element.WriteDynamic(xmlUtility, sourceObject, GetPropertiesElementIfDynamicExists(sourceObject, xmlUtility, objectXmlElement));
 
             return objectXmlElement;
         }
 
         private static void WriteExportSpecificData(GameObject sourceObject, XmlUtility xmlUtility, XmlElement objectXmlElement, ExportHandler.ExportMode exportMode)
         {
-            bool hasChildren = sourceObject.transform.childCount > 0;
-
             switch (exportMode)
             {
                 case ExportHandler.ExportMode.Level:
                     Element.WritePosition(xmlUtility, objectXmlElement, sourceObject);
 
-                    if (hasChildren)
+                    if (sourceObject.transform.childCount > 0)
                         WriteContent(sourceObject, xmlUtility, objectXmlElement, exportMode);
+
                     break;
 
                 case ExportHandler.ExportMode.Objects:
@@ -75,29 +72,39 @@ namespace Vectorier.Element
             if (xmlElement == null)
                 return null;
 
-            GameObject gameObject = CreateObject(xmlElement, parentTransform);
-            Element.ApplyLayer(gameObject, layerName);
+            GameObject gameObject = Element.CreateObject("Object", parentTransform, xmlElement);
 
+            ApplyObjectPosition(gameObject, xmlElement);
+            Element.ApplyLayer(gameObject, layerName);
             ApplySortingGroupLayering(xmlElement, gameObject, layerName);
 
             CreateInOutMarkers(xmlElement, gameObject, includeBuildingsMarker);
             WriteSceneChildren(xmlElement, gameObject.transform, layerName, includeBuildingsMarker, xmlUtility);
-            ApplyDynamic(gameObject, xmlUtility, xmlElement);
+
+            XmlElement propertiesElement = xmlElement.SelectSingleNode("Properties") as XmlElement;
+            XmlElement staticElement = propertiesElement?.SelectSingleNode("Static") as XmlElement;
+
+            Element.ApplySelectionComponent(staticElement, gameObject);
+            Element.ApplyDynamic(propertiesElement, gameObject);
 
             return gameObject;
         }
 
-        private static GameObject CreateObject(XmlElement xmlElement, Transform parentTransform)
+        private static void ApplyObjectPosition(GameObject gameObject, XmlElement xmlElement)
         {
-            string objectName = xmlElement.HasAttribute("Name") ? xmlElement.GetAttribute("Name") : "Object";
+            if (xmlElement.HasAttribute("X") && xmlElement.HasAttribute("Y"))
+            {
+                Element.ApplyPosition(gameObject, xmlElement);
+                return;
+            }
 
-            Vector3 position = GetPosition(xmlElement);
+            if (!xmlElement.HasAttribute("InX") || !xmlElement.HasAttribute("InY"))
+                return;
 
-            GameObject gameObject = new GameObject(objectName);
-            gameObject.transform.SetParent(parentTransform, false);
-            gameObject.transform.localPosition = position;
+            float x = Element.ParseFloat(xmlElement.GetAttribute("InX"));
+            float y = -Element.ParseFloat(xmlElement.GetAttribute("InY"));
 
-            return gameObject;
+            Element.ApplyPosition(gameObject, xmlElement, x, y);
         }
 
         private static void WriteSceneChildren(XmlElement xmlElement, Transform parentTransform, string layerName, bool includeBuildingsMarker, XmlUtility xmlUtility)
@@ -124,54 +131,54 @@ namespace Vectorier.Element
 
             ImportDepthGroup depth = GetDepthGroupFromXML(xmlElement);
 
-            float factorValue = float.Parse(factor, CultureInfo.InvariantCulture);
-            int factorBand = Mathf.RoundToInt(factorValue * 10000);
+            int factorBand = 0;
+            if (float.TryParse(factor, NumberStyles.Float, CultureInfo.InvariantCulture, out float factorValue))
+                factorBand = Mathf.RoundToInt(factorValue * 10000f);
 
-            int sortOffset =
-                depth == ImportDepthGroup.Front ? 200 + ImportHandler.GlobalOrder_Front++ :
-                depth == ImportDepthGroup.Back ? 0 + ImportHandler.GlobalOrder_Back++ :
-                100 + ImportHandler.GlobalOrder_Middle++;
+            int sortOffset;
+
+            switch (depth)
+            {
+                case ImportDepthGroup.Front:
+                    sortOffset = 200 + ImportHandler.GlobalOrder_Front++;
+                    break;
+
+                case ImportDepthGroup.Back:
+                    sortOffset = ImportHandler.GlobalOrder_Back++;
+                    break;
+
+                default:
+                    sortOffset = 100 + ImportHandler.GlobalOrder_Middle++;
+                    break;
+            }
 
             group.sortingOrder = factorBand + sortOffset;
         }
 
         private static ImportDepthGroup GetDepthGroupFromXML(XmlElement xmlElement)
         {
-            if (xmlElement != null && xmlElement.HasAttribute("Depth") && int.TryParse(xmlElement.GetAttribute("Depth"), out int depthValue))
-            {
-                if (depthValue == 0) return ImportDepthGroup.Front;
-                if (depthValue == 1) return ImportDepthGroup.Back;
-            }
+            if (xmlElement == null || !xmlElement.HasAttribute("Depth"))
+                return ImportDepthGroup.Middle;
+
+            int depthValue;
+            if (!int.TryParse(xmlElement.GetAttribute("Depth"), out depthValue))
+                return ImportDepthGroup.Middle;
+
+            if (depthValue == 0)
+                return ImportDepthGroup.Front;
+
+            if (depthValue == 1)
+                return ImportDepthGroup.Back;
 
             return ImportDepthGroup.Middle;
-        }
-
-        // ================= POSITION ================= //
-
-        private static Vector3 GetPosition(XmlElement xmlElement)
-        {
-            float positionX = 0f;
-            float positionY = 0f;
-
-            if (xmlElement.HasAttribute("X") && xmlElement.HasAttribute("Y"))
-            {
-                positionX = Element.ParseFloat(xmlElement.GetAttribute("X"));
-                positionY = -Element.ParseFloat(xmlElement.GetAttribute("Y"));
-            }
-            else if (xmlElement.HasAttribute("InX") && xmlElement.HasAttribute("InY"))
-            {
-                positionX = Element.ParseFloat(xmlElement.GetAttribute("InX"));
-                positionY = -Element.ParseFloat(xmlElement.GetAttribute("InY"));
-            }
-
-            return new Vector3(positionX, positionY, 0f);
         }
 
         // ================= CHILDREN EXPORT ================= //
 
         private static void WriteChildren(GameObject parentObject, XmlUtility xmlUtility, XmlElement parentXmlElement, ExportHandler.ExportMode exportMode)
         {
-            List<GameObject> exportables = new List<GameObject>();
+            List<GameObject> orderedObjects = new List<GameObject>();
+            List<GameObject> unorderedObjects = new List<GameObject>();
 
             foreach (Transform childTransform in parentObject.transform)
             {
@@ -183,83 +190,85 @@ namespace Vectorier.Element
                 if (string.IsNullOrEmpty(childObject.tag) || childObject.CompareTag("Untagged"))
                     continue;
 
-                // Only things that affect ordering here r Image + Object.
-                // Everything else can be exported after.
-                exportables.Add(childObject);
-            }
-
-            var ordered = exportables.FindAll(o => o.CompareTag("Image") || o.CompareTag("Object"));
-
-            ordered.Sort((a, b) =>
-            {
-                int aDepth = GetDepthGroup(a);
-                int bDepth = GetDepthGroup(b);
-                if (aDepth != bDepth) return aDepth.CompareTo(bDepth);
-
-                int aOrder = GetEffectiveOrder(a);
-                int bOrder = GetEffectiveOrder(b);
-                if (aOrder != bOrder) return aOrder.CompareTo(bOrder);
-
-                return 0;
-            });
-
-            foreach (var go in ordered)
-            {
-                if (go.CompareTag("Object"))
-                    WriteToXML(go, xmlUtility, parentXmlElement, exportMode);
+                if (childObject.CompareTag("Image") || childObject.CompareTag("Object"))
+                    orderedObjects.Add(childObject);
                 else
-                    ExportHandler.WriteByTag(go, xmlUtility, parentXmlElement);
+                    unorderedObjects.Add(childObject);
             }
 
-            foreach (var go in exportables)
-            {
-                if (go.CompareTag("Image") || go.CompareTag("Object"))
-                    continue;
+            orderedObjects.Sort(CompareExportOrder);
 
-                ExportHandler.WriteByTag(go, xmlUtility, parentXmlElement);
-            }
+            foreach (GameObject childObject in orderedObjects)
+                WriteChild(childObject, xmlUtility, parentXmlElement, exportMode);
+
+            foreach (GameObject childObject in unorderedObjects)
+                ExportHandler.WriteByTag(childObject, xmlUtility, parentXmlElement);
         }
 
-        private static int GetDepthGroup(GameObject gameObject)
+        private static void WriteChild(GameObject childObject, XmlUtility xmlUtility, XmlElement parentXmlElement, ExportHandler.ExportMode exportMode)
+        {
+            if (childObject.CompareTag("Object"))
+                WriteToXML(childObject, xmlUtility, parentXmlElement, exportMode);
+            else
+                ExportHandler.WriteByTag(childObject, xmlUtility, parentXmlElement);
+        }
+
+        private static int CompareExportOrder(GameObject a, GameObject b)
+        {
+            int depthCompare = GetExportDepthGroup(a).CompareTo(GetExportDepthGroup(b));
+            if (depthCompare != 0)
+                return depthCompare;
+
+            return GetEffectiveOrder(a).CompareTo(GetEffectiveOrder(b));
+        }
+
+        private static int GetExportDepthGroup(GameObject gameObject)
         {
             if (!gameObject.CompareTag("Image"))
                 return 1;
 
             int? depth = TryGetDepthValue(gameObject);
-            if (depth == 1) return 0;   // back
-            if (depth == 0) return 2;   // front
-            return 1;                   // middle (no depth)
+
+            if (depth == 1)
+                return 0;
+
+            if (depth == 0)
+                return 2;
+
+            return 1;
         }
 
         private static int GetEffectiveOrder(GameObject gameObject)
         {
             if (gameObject.CompareTag("Object"))
             {
-                var group = gameObject.GetComponent<SortingGroup>();
+                SortingGroup group = gameObject.GetComponent<SortingGroup>();
                 return group != null ? group.sortingOrder : 0;
             }
 
-            var renderer = gameObject.GetComponent<SpriteRenderer>();
+            SpriteRenderer renderer = gameObject.GetComponent<SpriteRenderer>();
             return renderer != null ? renderer.sortingOrder : 0;
         }
 
         private static int? TryGetDepthValue(GameObject imageObject)
         {
-            var components = imageObject.GetComponents<ImageComponent>();
+            ImageComponent[] components = imageObject.GetComponents<ImageComponent>();
+
             for (int i = 0; i < components.Length; i++)
             {
-                var component = components[i];
-                if (component == null) continue;
+                ImageComponent component = components[i];
+                if (component == null)
+                    continue;
 
-                var transform = component.GetType();
+                System.Type componentType = component.GetType();
 
-                var prop = transform.GetProperty("Depth");
-                if (prop != null && prop.PropertyType == typeof(int))
-                    return (int)prop.GetValue(component);
+                System.Reflection.PropertyInfo depthProperty = componentType.GetProperty("Depth");
+                if (depthProperty != null && depthProperty.PropertyType == typeof(int))
+                    return (int)depthProperty.GetValue(component);
 
-                var field = transform.GetField("Depth");
-                if (field != null && field.FieldType == typeof(int))
-                    return (int)field.GetValue(component);
+                System.Reflection.FieldInfo depthField = componentType.GetField("Depth");
+                if (depthField != null && depthField.FieldType == typeof(int))
+                    return (int)depthField.GetValue(component);
             }
 
             return null;
@@ -289,13 +298,12 @@ namespace Vectorier.Element
             GameObject markerObject = new GameObject(markerName);
             markerObject.transform.SetParent(parentObject.transform, false);
             markerObject.transform.localPosition = new Vector3(positionX, positionY, 0f);
+            markerObject.tag = "EditorOnly";
 
             SpriteRenderer renderer = markerObject.AddComponent<SpriteRenderer>();
             renderer.sprite = markerSprite;
             renderer.sortingLayerName = "OnTop";
             renderer.color = Color.green;
-
-            markerObject.tag = "EditorOnly";
         }
 
         private static void WriteInOut(GameObject sourceObject, XmlUtility xmlUtility, XmlElement objectXmlElement)
@@ -306,7 +314,7 @@ namespace Vectorier.Element
             Vector3 outPosition = outTransform != null ? outTransform.position : Vector3.zero;
 
             if (outTransform == null)
-                Debug.LogWarning("[ObjectElement] 'Out' child is null for object: " + sourceObject.name + ". Defaulting to 0");
+                Debug.LogWarning("[ObjectElement] 'Out' child is null for object: " + sourceObject.name + ". Defaulting to 0.");
 
             xmlUtility.SetAttribute(objectXmlElement, "InX", inPosition.x.ToString(CultureInfo.InvariantCulture));
             xmlUtility.SetAttribute(objectXmlElement, "InY", (-inPosition.y).ToString(CultureInfo.InvariantCulture));
@@ -324,91 +332,53 @@ namespace Vectorier.Element
                 if (renderer == null)
                     continue;
 
-                combinedBounds = combinedBounds == null ? renderer.bounds : Encapsulate(combinedBounds.Value, renderer.bounds);
+                if (combinedBounds == null)
+                {
+                    combinedBounds = renderer.bounds;
+                }
+                else
+                {
+                    Bounds bounds = combinedBounds.Value;
+                    bounds.Encapsulate(renderer.bounds);
+                    combinedBounds = bounds;
+                }
             }
 
             if (combinedBounds == null)
                 return;
 
-            Bounds bounds = combinedBounds.Value;
+            Bounds finalBounds = combinedBounds.Value;
 
-            Vector3 topLeft = new Vector3(bounds.min.x, bounds.max.y);
-            Vector3 topRight = new Vector3(bounds.max.x, bounds.max.y);
-            Vector3 bottomLeft = new Vector3(bounds.min.x, bounds.min.y);
+            float boxX = finalBounds.min.x;
+            float boxY = -finalBounds.max.y;
+            float boxWidth = finalBounds.max.x - finalBounds.min.x;
+            float boxHeight = finalBounds.max.y - finalBounds.min.y;
 
-            xmlUtility.SetAttribute(objectXmlElement, "BoxX", topLeft.x.ToString(CultureInfo.InvariantCulture));
-            xmlUtility.SetAttribute(objectXmlElement, "BoxY", (-topLeft.y).ToString(CultureInfo.InvariantCulture));
-            xmlUtility.SetAttribute(objectXmlElement, "BoxWidth", (topRight.x - topLeft.x).ToString(CultureInfo.InvariantCulture));
-            xmlUtility.SetAttribute(objectXmlElement, "BoxHeight", (topLeft.y - bottomLeft.y).ToString(CultureInfo.InvariantCulture));
-        }
-
-        private static Bounds Encapsulate(Bounds baseBounds, Bounds additionalBounds)
-        {
-            baseBounds.Encapsulate(additionalBounds);
-            return baseBounds;
+            xmlUtility.SetAttribute(objectXmlElement, "BoxX", boxX.ToString(CultureInfo.InvariantCulture));
+            xmlUtility.SetAttribute(objectXmlElement, "BoxY", boxY.ToString(CultureInfo.InvariantCulture));
+            xmlUtility.SetAttribute(objectXmlElement, "BoxWidth", boxWidth.ToString(CultureInfo.InvariantCulture));
+            xmlUtility.SetAttribute(objectXmlElement, "BoxHeight", boxHeight.ToString(CultureInfo.InvariantCulture));
         }
 
         // ================= COMPONENTS ================= //
 
-        private static void WriteSelection( GameObject sourceObject, XmlUtility xmlUtility, XmlElement parentXmlElement)
+        private static void WriteSelection(GameObject sourceObject, XmlUtility xmlUtility, XmlElement parentXmlElement)
         {
-            SelectionComponent selectionComponent = sourceObject.GetComponent<SelectionComponent>();
-            if (selectionComponent == null)
+            if (!sourceObject.TryGetComponent<SelectionComponent>(out _))
                 return;
 
             XmlElement propertiesElement = xmlUtility.GetOrCreateElement(parentXmlElement, "Properties");
             XmlElement staticElement = xmlUtility.GetOrCreateElement(propertiesElement, "Static");
 
-            XmlElement selectionElement = xmlUtility.AddElement(staticElement, "Selection");
-            xmlUtility.SetAttribute(selectionElement, "Choice", "AITriggers");
-            xmlUtility.SetAttribute(selectionElement, "Variant", selectionComponent.Variant.ToString());
+            Element.WriteSelectionComponent(xmlUtility, staticElement, sourceObject);
         }
 
-        private static void WriteDynamic(GameObject sourceObject, XmlUtility xmlUtility, XmlElement parentXmlElement)
+        private static XmlElement GetPropertiesElementIfDynamicExists(GameObject sourceObject, XmlUtility xmlUtility, XmlElement parentXmlElement)
         {
-        DynamicTransform[] dynamicTransforms = sourceObject.GetComponents<DynamicTransform>();
-           if (dynamicTransforms.Length == 0)
-                return;
+            if (sourceObject == null || sourceObject.GetComponents<Vectorier.Dynamic.DynamicTransform>().Length == 0)
+                return null;
 
-            XmlElement propertiesElement = xmlUtility.GetOrCreateElement(parentXmlElement, "Properties");
-            foreach (var dynamic in dynamicTransforms)
-            {
-                dynamic.WriteToXML(xmlUtility, propertiesElement);
-            }
-        }
-
-        private static void ApplyDynamic(GameObject sourceObject, XmlUtility xmlUtility, XmlElement parentXmlElement)
-        {
-            XmlElement propertiesElement = xmlUtility.GetOrCreateElement(parentXmlElement, "Properties");
-
-            if (propertiesElement == null || sourceObject == null)
-                return;
-
-            foreach (XmlNode node in propertiesElement.ChildNodes)
-            {
-                if (node is not XmlElement dynamicElement || dynamicElement.Name != "Dynamic")
-                    continue;
-
-                foreach (XmlNode child in dynamicElement.ChildNodes)
-                {
-                    if (child is XmlElement transformationElement && transformationElement.Name == "Transformation")
-                        DynamicTransform.WriteToScene(transformationElement, sourceObject);
-                }
-            }
-        }
-
-        // ================= NAME ================= //
-
-        private static void WriteName(GameObject sourceObject, XmlUtility xmlUtility, XmlElement objectXmlElement)
-        {
-            string cleanName = CleanName(sourceObject.name);
-            if (!string.IsNullOrEmpty(cleanName))
-                xmlUtility.SetAttribute(objectXmlElement, "Name", cleanName);
-        }
-
-        private static string CleanName(string objectName)
-        {
-            return System.Text.RegularExpressions.Regex.Replace(objectName, @"\s*\(\d+\)$", "");
+            return xmlUtility.GetOrCreateElement(parentXmlElement, "Properties");
         }
     }
 }

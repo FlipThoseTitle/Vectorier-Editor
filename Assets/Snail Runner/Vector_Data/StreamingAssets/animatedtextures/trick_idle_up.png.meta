@@ -1,0 +1,897 @@
+fileFormatVersion: 2
+guid: ac897d6cdfe4855449e694a2eb0c2f74
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 1951961337276601571
+    second: trick_idle_up_0
+  - first:
+      213: -6169026873234404363
+    second: trick_idle_up_1
+  - first:
+      213: 1213058115588956465
+    second: trick_idle_up_2
+  - first:
+      213: 5155198152383062923
+    second: trick_idle_up_3
+  - first:
+      213: 4517550382482339102
+    second: trick_idle_up_4
+  - first:
+      213: -7876218608736783377
+    second: trick_idle_up_5
+  - first:
+      213: 3050829467840944220
+    second: trick_idle_up_6
+  - first:
+      213: 8708144673568568304
+    second: trick_idle_up_7
+  - first:
+      213: -2103548821880228565
+    second: trick_idle_up_8
+  - first:
+      213: 3127963903146227119
+    second: trick_idle_up_9
+  - first:
+      213: 6679307976602087588
+    second: trick_idle_up_10
+  - first:
+      213: 1486033647204742701
+    second: trick_idle_up_11
+  - first:
+      213: -3391814218725629333
+    second: trick_idle_up_12
+  - first:
+      213: -2167221689843194005
+    second: trick_idle_up_13
+  - first:
+      213: 7913634435029527319
+    second: trick_idle_up_14
+  - first:
+      213: 2818574020356910193
+    second: trick_idle_up_15
+  - first:
+      213: -6281371421962514611
+    second: trick_idle_up_16
+  - first:
+      213: -8415545454701675614
+    second: trick_idle_up_17
+  - first:
+      213: 490413979284586770
+    second: trick_idle_up_18
+  - first:
+      213: -2174023803273062021
+    second: trick_idle_up_19
+  - first:
+      213: 7204608012370791264
+    second: trick_idle_up_20
+  - first:
+      213: 7922064446326172606
+    second: trick_idle_up_21
+  - first:
+      213: -2641648726621958386
+    second: trick_idle_up_22
+  - first:
+      213: -957807794959611790
+    second: trick_idle_up_23
+  - first:
+      213: 7444935935806955168
+    second: trick_idle_up_24
+  - first:
+      213: 3438391571764997574
+    second: trick_idle_up_25
+  - first:
+      213: -5620445900641569963
+    second: trick_idle_up_26
+  - first:
+      213: -9034781866468638458
+    second: trick_idle_up_27
+  - first:
+      213: -1587187537586359248
+    second: trick_idle_up_28
+  - first:
+      213: -8705887372614989810
+    second: trick_idle_up_29
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: trick_idle_up_0
+      rect:
+        serializedVersion: 2
+        x: 1
+        y: 911
+        width: 109
+        height: 111
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3e41bab8e72c61b10800000000000000
+      internalID: 1951961337276601571
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: trick_idle_up_1
+      rect:
+        serializedVersion: 2
+        x: 109
+        y: 928
+        width: 47
+        height: 75
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5fb46036eb6336aa0800000000000000
+      internalID: -6169026873234404363
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: trick_idle_up_2
+      rect:
+        serializedVersion: 2
+        x: 156
+        y: 911
+        width: 109
+        height: 111
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 131a597dde5a5d010800000000000000
+      internalID: 1213058115588956465
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: trick_idle_up_3
+      rect:
+        serializedVersion: 2
+        x: 264
+        y: 928
+        width: 47
+        height: 75
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b83ea8bf761fa8740800000000000000
+      internalID: 5155198152383062923
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: trick_idle_up_4
+      rect:
+        serializedVersion: 2
+        x: 311
+        y: 911
+        width: 109
+        height: 111
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e153aca432091be30800000000000000
+      internalID: 4517550382482339102
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: trick_idle_up_5
+      rect:
+        serializedVersion: 2
+        x: 419
+        y: 928
+        width: 47
+        height: 75
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fe33ce4c7ec02b290800000000000000
+      internalID: -7876218608736783377
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: trick_idle_up_6
+      rect:
+        serializedVersion: 2
+        x: 1
+        y: 799
+        width: 109
+        height: 111
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c5814fcac39b65a20800000000000000
+      internalID: 3050829467840944220
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: trick_idle_up_7
+      rect:
+        serializedVersion: 2
+        x: 109
+        y: 816
+        width: 47
+        height: 75
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0f3b3c0617b89d870800000000000000
+      internalID: 8708144673568568304
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: trick_idle_up_8
+      rect:
+        serializedVersion: 2
+        x: 156
+        y: 799
+        width: 109
+        height: 111
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b253328dd71bec2e0800000000000000
+      internalID: -2103548821880228565
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: trick_idle_up_9
+      rect:
+        serializedVersion: 2
+        x: 264
+        y: 816
+        width: 47
+        height: 75
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fa57645e892c86b20800000000000000
+      internalID: 3127963903146227119
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: trick_idle_up_10
+      rect:
+        serializedVersion: 2
+        x: 311
+        y: 799
+        width: 155
+        height: 111
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4a0fcca573ba1bc50800000000000000
+      internalID: 6679307976602087588
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: trick_idle_up_11
+      rect:
+        serializedVersion: 2
+        x: 1
+        y: 687
+        width: 155
+        height: 111
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d26bae19ab37f9410800000000000000
+      internalID: 1486033647204742701
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: trick_idle_up_12
+      rect:
+        serializedVersion: 2
+        x: 156
+        y: 687
+        width: 109
+        height: 111
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b626dbc40fadde0d0800000000000000
+      internalID: -3391814218725629333
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: trick_idle_up_13
+      rect:
+        serializedVersion: 2
+        x: 264
+        y: 704
+        width: 47
+        height: 75
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b67ef530b5b7ce1e0800000000000000
+      internalID: -2167221689843194005
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: trick_idle_up_14
+      rect:
+        serializedVersion: 2
+        x: 311
+        y: 687
+        width: 109
+        height: 111
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 71beb362790e2dd60800000000000000
+      internalID: 7913634435029527319
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: trick_idle_up_15
+      rect:
+        serializedVersion: 2
+        x: 419
+        y: 704
+        width: 47
+        height: 75
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 17ca48853269d1720800000000000000
+      internalID: 2818574020356910193
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: trick_idle_up_16
+      rect:
+        serializedVersion: 2
+        x: 1
+        y: 575
+        width: 109
+        height: 111
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d4f42abc8f514d8a0800000000000000
+      internalID: -6281371421962514611
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: trick_idle_up_17
+      rect:
+        serializedVersion: 2
+        x: 109
+        y: 592
+        width: 47
+        height: 75
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2ab7a551ff9f53b80800000000000000
+      internalID: -8415545454701675614
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: trick_idle_up_18
+      rect:
+        serializedVersion: 2
+        x: 156
+        y: 575
+        width: 109
+        height: 111
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 211c4247aec4ec600800000000000000
+      internalID: 490413979284586770
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: trick_idle_up_19
+      rect:
+        serializedVersion: 2
+        x: 264
+        y: 592
+        width: 47
+        height: 75
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b795aa09ed054d1e0800000000000000
+      internalID: -2174023803273062021
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: trick_idle_up_20
+      rect:
+        serializedVersion: 2
+        x: 311
+        y: 575
+        width: 109
+        height: 111
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 06b4b4bc0d8ebf360800000000000000
+      internalID: 7204608012370791264
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: trick_idle_up_21
+      rect:
+        serializedVersion: 2
+        x: 419
+        y: 592
+        width: 47
+        height: 75
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ebbe50b14a3d0fd60800000000000000
+      internalID: 7922064446326172606
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: trick_idle_up_22
+      rect:
+        serializedVersion: 2
+        x: 1
+        y: 463
+        width: 109
+        height: 111
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e0fc55caa7af65bd0800000000000000
+      internalID: -2641648726621958386
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: trick_idle_up_23
+      rect:
+        serializedVersion: 2
+        x: 109
+        y: 480
+        width: 47
+        height: 75
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 278055a92ee25b2f0800000000000000
+      internalID: -957807794959611790
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: trick_idle_up_24
+      rect:
+        serializedVersion: 2
+        x: 156
+        y: 463
+        width: 109
+        height: 111
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0ae5055e9c9b15760800000000000000
+      internalID: 7444935935806955168
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: trick_idle_up_25
+      rect:
+        serializedVersion: 2
+        x: 264
+        y: 480
+        width: 47
+        height: 75
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6cdefb9caee97bf20800000000000000
+      internalID: 3438391571764997574
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: trick_idle_up_26
+      rect:
+        serializedVersion: 2
+        x: 311
+        y: 463
+        width: 109
+        height: 111
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 55375f45b3a2002b0800000000000000
+      internalID: -5620445900641569963
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: trick_idle_up_27
+      rect:
+        serializedVersion: 2
+        x: 419
+        y: 480
+        width: 47
+        height: 75
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6010ff1c2c10e9280800000000000000
+      internalID: -9034781866468638458
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: trick_idle_up_28
+      rect:
+        serializedVersion: 2
+        x: 2
+        y: 308
+        width: 111
+        height: 109
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 034fc36085d29f9e0800000000000000
+      internalID: -1587187537586359248
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: trick_idle_up_29
+      rect:
+        serializedVersion: 2
+        x: 21
+        y: 416
+        width: 75
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e0889b47f897e2780800000000000000
+      internalID: -8705887372614989810
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      trick_idle_up_0: 1951961337276601571
+      trick_idle_up_1: -6169026873234404363
+      trick_idle_up_10: 6679307976602087588
+      trick_idle_up_11: 1486033647204742701
+      trick_idle_up_12: -3391814218725629333
+      trick_idle_up_13: -2167221689843194005
+      trick_idle_up_14: 7913634435029527319
+      trick_idle_up_15: 2818574020356910193
+      trick_idle_up_16: -6281371421962514611
+      trick_idle_up_17: -8415545454701675614
+      trick_idle_up_18: 490413979284586770
+      trick_idle_up_19: -2174023803273062021
+      trick_idle_up_2: 1213058115588956465
+      trick_idle_up_20: 7204608012370791264
+      trick_idle_up_21: 7922064446326172606
+      trick_idle_up_22: -2641648726621958386
+      trick_idle_up_23: -957807794959611790
+      trick_idle_up_24: 7444935935806955168
+      trick_idle_up_25: 3438391571764997574
+      trick_idle_up_26: -5620445900641569963
+      trick_idle_up_27: -9034781866468638458
+      trick_idle_up_28: -1587187537586359248
+      trick_idle_up_29: -8705887372614989810
+      trick_idle_up_3: 5155198152383062923
+      trick_idle_up_4: 4517550382482339102
+      trick_idle_up_5: -7876218608736783377
+      trick_idle_up_6: 3050829467840944220
+      trick_idle_up_7: 8708144673568568304
+      trick_idle_up_8: -2103548821880228565
+      trick_idle_up_9: 3127963903146227119
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

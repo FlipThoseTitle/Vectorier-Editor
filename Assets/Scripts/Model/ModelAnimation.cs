@@ -67,6 +67,7 @@ namespace Vectorier.Model
 
         public bool IsPlaying { get; set; } = true;
         bool stayInPlace;
+        public bool Reverse { get; set; }
 
         public int StartFrame { get; set; } = 0;
         public int EndFrame { get; set; } = int.MaxValue;
@@ -115,18 +116,40 @@ namespace Vectorier.Model
             {
                 Model = ModelData.LoadOrThrow(xmlPath);
                 State.AllocateNodeBuffers(Model.NodeCount);
-                State.PreviewPose = Model.PreviewPose;
+                State.PreviewPose = null;
             }
 
-            if (State.PreviewPose == null || State.PreviewPose.Length == 0)
-                State.PreviewPose = Model.PreviewPose;
+            // Initialize or refresh the preview pose mirroring the X-axis if ReverseX is true
+            if (State.PreviewPose == null || State.PreviewPose.Length != Model.PreviewPose.Length)
+            {
+                State.PreviewPose = new Vector3[Model.PreviewPose.Length];
+                for (int i = 0; i < Model.PreviewPose.Length; i++)
+                {
+                    Vector3 p = Model.PreviewPose[i];
+                    State.PreviewPose[i] = new Vector3(Reverse ? -p.x : p.x, p.y, p.z);
+                }
+            }
+            else
+            {
+                for (int i = 0; i < Model.PreviewPose.Length; i++)
+                {
+                    float originalX = Model.PreviewPose[i].x;
+                    State.PreviewPose[i].x = Reverse ? -originalX : originalX;
+                }
+            }
         }
 
         public void LoadModel(string xmlPath)
         {
             Model = ModelData.LoadOrThrow(xmlPath);
             State.AllocateNodeBuffers(Model.NodeCount);
-            State.PreviewPose = Model.PreviewPose;
+            
+            State.PreviewPose = new Vector3[Model.PreviewPose.Length];
+            for (int i = 0; i < Model.PreviewPose.Length; i++)
+            {
+                Vector3 p = Model.PreviewPose[i];
+                State.PreviewPose[i] = new Vector3(Reverse ? -p.x : p.x, p.y, p.z);
+            }
         }
 
         public void UpdatePreview(Vector3 cursorWorldPosition, Transform parentTransform, string pivotNodeName)
@@ -335,7 +358,7 @@ namespace Vectorier.Model
 
                 if (expectedNodeCount > 0 && nodeCount != expectedNodeCount)
                 {
-                    throw new Exception(string.Format(System.Globalization.CultureInfo.InvariantCulture, "Animation node count mismatch. Model expects {0}, but frame {1} contains {2} nodes.", expectedNodeCount, frameIndex, nodeCount));
+                    throw new Exception(string.Format(CultureInfo.InvariantCulture, "Animation node count mismatch. Model expects {0}, but frame {1} contains {2} nodes.", expectedNodeCount, frameIndex, nodeCount));
                 }
 
                 var frame = new Vector3[nodeCount];
@@ -345,7 +368,9 @@ namespace Vectorier.Model
                     float x = reader.ReadSingle();
                     float y = reader.ReadSingle();
                     float z = reader.ReadSingle();
-                    frame[nodeIndex] = new Vector3(x, y, -z);
+                    
+                    // Negate X coordinate if reverse mode is enabled
+                    frame[nodeIndex] = new Vector3(Reverse ? -x : x, y, -z);
                 }
 
                 State.AnimationFrames.Add(frame);
