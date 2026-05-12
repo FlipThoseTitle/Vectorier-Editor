@@ -9,6 +9,7 @@ Vectorier is a community-developed level editor for the game Vector to build you
 - Dynamic Timeline to easily create dynamic objects
 - Trigger Editor to quickly tweak the game's rule
 - Move Visualizer to easily preview animations
+- Parallax Preview directly in the Editor
 - Support for both Unity and Marmalade version
 
 A Discord server is open for the project : https://discord.com/invite/pVRuFBVwC2
