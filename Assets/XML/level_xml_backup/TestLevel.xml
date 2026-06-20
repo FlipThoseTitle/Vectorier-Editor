@@ -1,0 +1,437 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Root>
+  <Music Name="music_dinamic" Volume="0.3" />
+  <Models Choice="AITriggers" Variant="CommonMode">
+    <Model Name="Player" Type="1" Color="0" BirthSpawn="DefaultSpawn" AI="0" Time="0" Respawns="Hunter" ForceBlasts="Hunter" Trick="1" Item="1" Victory="1" Lose="1" />
+    <Model Name="Hunter" Type="0" Color="0" BirthSpawn="DefaultSpawn" AI="1" Time="0.8" AllowedSpawns="Respawn" Skins="hunter" Murders="Player" Arrests="Player" Icon="1" />
+  </Models>
+  <Models Choice="AITriggers" Variant="HunterMode">
+    <Model Name="Player" Type="0" Color="0" BirthSpawn="DefaultSpawn" AI="5" Time="0" Victory="1" Respawns="Hunter" />
+    <Model Name="Hunter" Type="1" Color="0" BirthSpawn="DefaultSpawn" AI="0" Time="0.8" Trick="1" Item="1" Skins="hunter" Murders="Player" Arrests="Player" Lose="1" AllowedSpawns="Despawn" />
+  </Models>
+  <Coins Value="50" />
+  <Objects Name="Money" />
+  <Track>
+    <Object Factor="0.05">
+      <Content>
+        <Object Name="Background" X="-1430" Y="-410">
+          <Content>
+            <Image X="-3.407227" Y="-11.37096" ClassName="v_bg" Width="2048" Height="1036" NativeX="2048" NativeY="1036" />
+            <Image X="2036.593" Y="-11.37096" ClassName="v_bg" Width="2048" Height="1036" NativeX="2048" NativeY="1036" />
+            <Image X="4076.594" Y="-11.37096" ClassName="v_bg" Width="2048" Height="1036" NativeX="2048" NativeY="1036" />
+          </Content>
+        </Object>
+      </Content>
+    </Object>
+    <Object Factor="0.5">
+      <Content>
+        <Object Name="Backdrop" X="0" Y="0">
+          <Content>
+            <Image X="3063" Y="219" ClassName="v_building_3" Width="758.2503" Height="1516.501" NativeX="512" NativeY="1024" />
+            <Image X="-562" Y="-43" ClassName="v_building_1" Width="1225.784" Height="1780.429" NativeX="705" NativeY="1024" />
+            <Image X="1170.179" Y="8.028" ClassName="v_billboard_1" Width="314.3705" Height="577.2986" NativeX="165" NativeY="303" />
+            <Image X="3853.444" Y="71.1276" ClassName="v_billboard_2" Width="236.0914" Height="433.5497" NativeX="165" NativeY="303" />
+            <Image X="1791.275" Y="-56" ClassName="v_building_1" Width="1114.149" Height="1618.282" NativeX="705" NativeY="1024" />
+            <Image X="792" Y="148.6505" ClassName="v_building_3" Width="774.3295" Height="1548.659" NativeX="512" NativeY="1024" />
+          </Content>
+        </Object>
+      </Content>
+    </Object>
+    <Object Factor="1">
+      <Content>
+        <Image X="2495" Y="595" ClassName="stand" Width="251" Height="382" NativeX="251" NativeY="382" />
+        <Image X="5550" Y="265" ClassName="volts" Width="120" Height="200" NativeX="120" NativeY="200" />
+        <Image X="2385" Y="799.3563" ClassName="v_fan_1_1" Width="200" Height="91" NativeX="200" NativeY="91" />
+        <Image X="2406.305" Y="862.9474" ClassName="v_fence" Width="225" Height="100" NativeX="225" NativeY="100" />
+        <Image X="3170" Y="862.9474" ClassName="v_fence" Width="225" Height="100" NativeX="225" NativeY="100" />
+        <Image X="5732.094" Y="292.1984" ClassName="v_fan_1_2" Width="366" Height="91" NativeX="366" NativeY="91" />
+        <Image X="2285" Y="790" ClassName="v_venthole_1_1" Width="127" Height="173" NativeX="127" NativeY="173" />
+        <Image X="590.5021" Y="488.5483" ClassName="v_grating_1" Width="1010.343" Height="207.5896" NativeX="915" NativeY="188" />
+        <Image X="5580.208" Y="336.0921" ClassName="ventilation_holes_roof" Width="552.5942" Height="128.91" NativeX="643" NativeY="150" />
+        <Image X="3388" Y="814" ClassName="v_bar_binocular" Width="64" Height="145" NativeX="64" NativeY="145" />
+        <Image X="630" Y="284.7219" ClassName="v_boothAngle_1_1" Width="655.5033" Height="412.2501" NativeX="512" NativeY="322" />
+        <Image X="2610" Y="551" ClassName="v_boothAngle_1_1" Width="655.5033" Height="412.2501" NativeX="512" NativeY="322" />
+        <Image X="911.3311" Y="548.2472" ClassName="vent_bar" Width="20" Height="320" NativeX="20" NativeY="320" />
+        <Image X="900" Y="385.6556" ClassName="vent_wire1" Width="170" Height="420" NativeX="170" NativeY="420" />
+        <Image X="8280" Y="-1394" ClassName="v_black" Width="2068" Height="1722" NativeX="50" NativeY="50" Type="3" Depth="0" />
+        <Image X="8280" Y="296" ClassName="v_black" Width="70" Height="106" NativeX="50" NativeY="50" Depth="0" />
+        <Image X="6827" Y="835" ClassName="v_black" Width="3510" Height="2651" NativeX="50" NativeY="50" Type="3" Depth="0" />
+        <Image X="3962" Y="575" ClassName="partyroof" Width="1635" Height="385" NativeX="1635" NativeY="385" />
+        <Image X="7957" Y="690" ClassName="v_black" Width="2379" Height="155" NativeX="50" NativeY="50" Depth="0" />
+        <Image X="3335" Y="1939" ClassName="v_LongCornerUp_R_02" Width="128" Height="427" NativeX="128" NativeY="427" />
+        <Image X="719.9999" Y="819" ClassName="v_black" Width="795.4141" Height="1461.363" NativeX="50" NativeY="50" />
+        <Image X="2417.091" Y="957" ClassName="v_LongFloor_03" Width="427" Height="128" NativeX="427" NativeY="128" />
+        <Image X="2289.091" Y="957" ClassName="v_CornerUp_L_02" Width="128" Height="128" NativeX="128" NativeY="128" />
+        <Image X="5500" Y="2298" ClassName="v_Wall_L_01" Width="128" Height="128" NativeX="128" NativeY="128" />
+        <Image X="5381.589" Y="1085" ClassName="v_LongCornerUp_R_03" Width="128" Height="427" NativeX="128" NativeY="427" />
+        <Image X="3948" Y="2366" ClassName="v_Wall_L_02" Width="128" Height="128" NativeX="128" NativeY="128" />
+        <Object Name="Respawn" X="6665" Y="825">
+          <Content>
+            <Spawn X="75" Y="-100" Name="Respawn" Animation="JumpOff|18" />
+            <Trigger Name="TriggerRespawn" X="0" Y="-500" Width="150" Height="500">
+              <Properties>
+                <Static>
+                  <Selection Choice="AITriggers" Variant="CommonMode" />
+                </Static>
+              </Properties>
+              <Content>
+                <Init>
+                  <SetVariable Name="$Active" Value="1" />
+                  <SetVariable Name="$Node" Value="COM" />
+                  <SetVariable Name="Spawn" Value="Respawn" />
+                  <SetVariable Name="Frames" Value="90" />
+                  <SetVariable Name="SpawnModel" Value="Hunter" />
+                  <SetVariable Name="$AI" Value="0" />
+                  <SetVariable Name="Flag1" Value="0" />
+                </Init>
+                <Template Name="Respawn" />
+              </Content>
+            </Trigger>
+          </Content>
+        </Object>
+        <Image X="6072" Y="590" ClassName="v_LongCornerUp_R_03" Width="128" Height="427" NativeX="128" NativeY="427" />
+        <Image X="591.9999" Y="1246" ClassName="v_LongCornerUp_L_01" Width="128" Height="427" NativeX="128" NativeY="427" />
+        <Image X="1515.414" Y="1246" ClassName="v_LongCornerUp_R_03" Width="128" Height="427" NativeX="128" NativeY="427" />
+        <Image X="2289.091" Y="1085" ClassName="v_LongCornerUp_L_01" Width="128" Height="427" NativeX="128" NativeY="427" />
+        <Image X="591.9999" Y="2280.363" ClassName="v_CornerDown_L_03" Width="150" Height="150" NativeX="150" NativeY="150" />
+        <Image X="5381.589" Y="1512" ClassName="v_LongCornerUp_R_02" Width="128" Height="427" NativeX="128" NativeY="427" />
+        <Image X="5381.589" Y="2494" ClassName="v_Wall_R_03" Width="128" Height="128" NativeX="128" NativeY="128" />
+        <Image X="3335" Y="957" ClassName="v_CornerUp_R_01" Width="128" Height="128" NativeX="128" NativeY="128" />
+        <Image X="5500" Y="590" ClassName="v_LongCornerUp_L_01" Width="128" Height="427" NativeX="128" NativeY="427" />
+        <Image X="1515.414" Y="1673" ClassName="v_LongCornerUp_R_01" Width="128" Height="427" NativeX="128" NativeY="427" />
+        <Image X="3948" Y="1939" ClassName="v_LongCornerUp_L_03" Width="128" Height="427" NativeX="128" NativeY="427" />
+        <Image X="1515.414" Y="2228" ClassName="v_Wall_R_01" Width="128" Height="128" NativeX="128" NativeY="128" />
+        <Image X="591.9999" Y="819" ClassName="v_LongCornerUp_L_02" Width="128" Height="427" NativeX="128" NativeY="427" />
+        <Image X="3948" Y="2546.363" ClassName="v_CornerDown_L_03" Width="150" Height="150" NativeX="150" NativeY="150" />
+        <Image X="4930" Y="957" ClassName="v_LongFloor_02" Width="427" Height="128" NativeX="427" NativeY="128" />
+        <Image X="5381.589" Y="2366" ClassName="v_Wall_R_02" Width="128" Height="128" NativeX="128" NativeY="128" />
+        <Image X="4954.589" Y="957" ClassName="v_LongFloor_03" Width="427" Height="128" NativeX="427" NativeY="128" />
+        <Image X="2289.091" Y="2494" ClassName="v_Wall_L_03" Width="128" Height="128" NativeX="128" NativeY="128" />
+        <Image X="2289.091" Y="2366" ClassName="v_Wall_L_03" Width="128" Height="128" NativeX="128" NativeY="128" />
+        <Image X="3948" Y="2494" ClassName="v_Wall_L_01" Width="128" Height="128" NativeX="128" NativeY="128" />
+        <Image X="2975" Y="785" ClassName="vent_redbox" Width="50" Height="85" NativeX="50" NativeY="85" />
+        <Image X="5628" Y="462" ClassName="v_LongFloor_03" Width="427" Height="128" NativeX="427" NativeY="128" />
+        <Image X="6072" Y="462" ClassName="v_CornerUp_R_01" Width="128" Height="128" NativeX="128" NativeY="128" />
+        <Image X="4076" Y="957" ClassName="v_LongFloor_03" Width="427" Height="128" NativeX="427" NativeY="128" />
+        <Image X="2844.091" Y="957" ClassName="v_LongFloor_03" Width="427" Height="128" NativeX="427" NativeY="128" />
+        <Image X="5500" Y="2426" ClassName="v_Wall_L_02" Width="128" Height="128" NativeX="128" NativeY="128" />
+        <Image X="1515.414" Y="2100" ClassName="v_Wall_R_03" Width="128" Height="128" NativeX="128" NativeY="128" />
+        <Object Name="Respawn" X="3795" Y="1065">
+          <Content>
+            <Spawn X="75" Y="-100" Name="Respawn" Animation="JumpOff|18" />
+            <Trigger Name="TriggerRespawn" X="0" Y="-500" Width="150" Height="500">
+              <Properties>
+                <Static>
+                  <Selection Choice="AITriggers" Variant="CommonMode" />
+                </Static>
+              </Properties>
+              <Content>
+                <Init>
+                  <SetVariable Name="$Active" Value="1" />
+                  <SetVariable Name="$Node" Value="COM" />
+                  <SetVariable Name="Spawn" Value="Respawn" />
+                  <SetVariable Name="Frames" Value="90" />
+                  <SetVariable Name="SpawnModel" Value="Hunter" />
+                  <SetVariable Name="$AI" Value="0" />
+                  <SetVariable Name="Flag1" Value="0" />
+                </Init>
+                <Template Name="Respawn" />
+              </Content>
+            </Trigger>
+          </Content>
+        </Object>
+        <Image X="6072" Y="1017" ClassName="v_LongCornerUp_R_02" Width="128" Height="427" NativeX="128" NativeY="427" />
+        <Image X="2417.091" Y="1085" ClassName="v_black" Width="917.9091" Height="1483.363" NativeX="50" NativeY="50" />
+        <Image X="3335" Y="2494" ClassName="v_Wall_R_02" Width="128" Height="128" NativeX="128" NativeY="128" />
+        <Image X="5500" Y="2534" ClassName="v_CornerDown_L_01" Width="128" Height="128" NativeX="128" NativeY="128" />
+        <Image X="5381.589" Y="1939" ClassName="v_LongCornerUp_R_01" Width="128" Height="427" NativeX="128" NativeY="427" />
+        <Image X="1515.414" Y="2302.363" ClassName="v_CornerDown_R_03" Width="128" Height="128" NativeX="128" NativeY="128" />
+        <Image X="5381.589" Y="957" ClassName="v_CornerUp_R_01" Width="128" Height="128" NativeX="128" NativeY="128" />
+        <Image X="3335" Y="2366" ClassName="v_Wall_R_01" Width="128" Height="128" NativeX="128" NativeY="128" />
+        <Image X="2289.091" Y="1512" ClassName="v_LongCornerUp_L_01" Width="128" Height="427" NativeX="128" NativeY="427" />
+        <Image X="2289.091" Y="2568.363" ClassName="v_CornerDown_L_02" Width="128" Height="128" NativeX="128" NativeY="128" />
+        <Image X="1088.414" Y="691" ClassName="v_LongFloor_01" Width="427" Height="128" NativeX="427" NativeY="128" />
+        <Image X="3335" Y="1512" ClassName="v_LongCornerUp_R_03" Width="128" Height="427" NativeX="128" NativeY="427" />
+        <Image X="4076" Y="1085" ClassName="v_black" Width="1305.589" Height="1461.363" NativeX="50" NativeY="50" />
+        <Image X="6072" Y="1871" ClassName="v_LongCornerUp_R_02" Width="128" Height="427" NativeX="128" NativeY="427" />
+        <Image X="591.9999" Y="2228" ClassName="v_Wall_L_03" Width="128" Height="128" NativeX="128" NativeY="128" />
+        <Image X="5500" Y="1871" ClassName="v_LongCornerUp_L_03" Width="128" Height="427" NativeX="128" NativeY="427" />
+        <Image X="6072" Y="2534" ClassName="v_CornerDown_R_03" Width="128" Height="128" NativeX="128" NativeY="128" />
+        <Image X="5500" Y="1444" ClassName="v_LongCornerUp_L_02" Width="128" Height="427" NativeX="128" NativeY="427" />
+        <Image X="1515.414" Y="691" ClassName="v_CornerUp_R_01" Width="128" Height="128" NativeX="128" NativeY="128" />
+        <Image X="6072" Y="2426" ClassName="v_Wall_R_02" Width="128" Height="128" NativeX="128" NativeY="128" />
+        <Image X="3335" Y="2568.363" ClassName="v_CornerDown_R_01" Width="128" Height="128" NativeX="128" NativeY="128" />
+        <Image X="3948" Y="1512" ClassName="v_LongCornerUp_L_03" Width="128" Height="427" NativeX="128" NativeY="427" />
+        <Image X="5500" Y="462" ClassName="v_CornerUp_L_01" Width="128" Height="128" NativeX="128" NativeY="128" />
+        <Image X="6072" Y="1444" ClassName="v_LongCornerUp_R_01" Width="128" Height="427" NativeX="128" NativeY="427" />
+        <Image X="5645" Y="462" ClassName="v_LongFloor_02" Width="427" Height="128" NativeX="427" NativeY="128" />
+        <Image X="719.9999" Y="691" ClassName="v_LongFloor_02" Width="427" Height="128" NativeX="427" NativeY="128" />
+        <Image X="2908" Y="957" ClassName="v_LongFloor_03" Width="427" Height="128" NativeX="427" NativeY="128" />
+        <Image X="3948" Y="957" ClassName="v_CornerUp_L_03" Width="128" Height="128" NativeX="128" NativeY="128" />
+        <Image X="4503" Y="957" ClassName="v_LongFloor_02" Width="427" Height="128" NativeX="427" NativeY="128" />
+        <Image X="5381.589" Y="2568.363" ClassName="v_CornerDown_R_03" Width="128" Height="128" NativeX="128" NativeY="128" />
+        <Image X="591.9999" Y="1673" ClassName="v_LongCornerUp_L_02" Width="128" Height="427" NativeX="128" NativeY="427" />
+        <Object Name="SlopeUp" X="4508" Y="965">
+          <Content>
+            <Image X="0" Y="-500" ClassName="v_descent_2" Width="1000" Height="499.9999" NativeX="431" NativeY="220">
+              <Properties>
+                <Static>
+                  <Matrix A="-1000.000000" B="0.000000" C="0.000000" D="499.999900" Tx="1000.000000" Ty="0.000000" />
+                </Static>
+              </Properties>
+            </Image>
+            <Trapezoid X="0" Y="0" Width="1000" Height="1" Height1="501" Type="1" />
+          </Content>
+        </Object>
+        <Image X="5628" Y="590" ClassName="v_black" Width="444" Height="1944" NativeX="50" NativeY="50" />
+        <Image X="3335" Y="1085" ClassName="v_LongCornerUp_R_01" Width="128" Height="427" NativeX="128" NativeY="427" />
+        <Image X="591.9999" Y="691" ClassName="v_CornerUp_L_02" Width="128" Height="128" NativeX="128" NativeY="128" />
+        <Image X="591.9999" Y="2100" ClassName="v_Wall_L_03" Width="128" Height="128" NativeX="128" NativeY="128" />
+        <Image X="2289.091" Y="1939" ClassName="v_LongCornerUp_L_03" Width="128" Height="427" NativeX="128" NativeY="427" />
+        <Image X="6072" Y="2298" ClassName="v_Wall_R_02" Width="128" Height="128" NativeX="128" NativeY="128" />
+        <Object Name="Door" X="8168" Y="391">
+          <Content>
+            <Trigger Name="TriggerDoor" X="172" Y="0" Width="50" Height="300">
+              <Content>
+                <Init>
+                  <SetVariable Name="$Active" Value="1" />
+                  <SetVariable Name="$AI" Value="-1" />
+                  <SetVariable Name="Sound" Value="door_close" />
+                  <SetVariable Name="AnimName" Value="Door" />
+                  <SetVariable Name="AnimFrame" Value="1" />
+                  <SetVariable Name="$Node" Value="COM" />
+                  <SetVariable Name="Flag1" Value="0" />
+                </Init>
+                <Loop>
+                  <Events>
+                    <EventBlock Template="ModelAnimation.Only" />
+                    <EventBlock Template="CommonLib.ActiveDeath" />
+                  </Events>
+                  <Actions>
+                    <ActionBlock Template="ModelAnimation.Only" />
+                    <ActionBlock Template="CommonLib.Sound" />
+                  </Actions>
+                </Loop>
+              </Content>
+            </Trigger>
+            <Model X="112" Y="0" Type="1" ClassName="door_3" LifeTime="10" />
+          </Content>
+        </Object>
+        <Image X="5500" Y="1017" ClassName="v_LongCornerUp_L_03" Width="128" Height="427" NativeX="128" NativeY="427" />
+        <Image X="1515.414" Y="819" ClassName="v_LongCornerUp_R_03" Width="128" Height="427" NativeX="128" NativeY="427" />
+        <Image X="994.0051" Y="511.0439" ClassName="vent_redbox" Width="50" Height="85" NativeX="50" NativeY="85" />
+        <Image X="3948" Y="1085" ClassName="v_LongCornerUp_L_03" Width="128" Height="427" NativeX="128" NativeY="427" />
+        <Image X="7387" Y="595" ClassName="v_fence" Width="225" Height="100" NativeX="225" NativeY="100" />
+        <Image X="6901" Y="314" ClassName="v_boothAngle_1_1" Width="612" Height="385" NativeX="512" NativeY="322" />
+        <Image X="7287" Y="540" ClassName="vent_bar" Width="20" Height="320" NativeX="20" NativeY="320" />
+        <Image X="7912" Y="465" ClassName="v_venthole_1_1" Width="127" Height="173" NativeX="127" NativeY="173" />
+        <Image X="7609" Y="595" ClassName="v_fence" Width="225" Height="100" NativeX="225" NativeY="100" />
+        <Image X="7834" Y="595" ClassName="v_fence" Width="225" Height="100" NativeX="225" NativeY="100" />
+        <Image X="8056" Y="595" ClassName="v_fence" Width="225" Height="100" NativeX="225" NativeY="100" />
+        <Image X="9075" Y="326" ClassName="v_office_blank" Width="1255" Height="430" NativeX="1024" NativeY="351" Type="3" />
+        <Image X="8280" Y="327" ClassName="v_office_lightened_piece" Width="795" Height="430" NativeX="795" NativeY="430" Type="3" />
+        <Image X="8730" Y="441" ClassName="office_door" Width="182" Height="256" NativeX="182" NativeY="256" />
+        <Object Name="V_office_socket" X="8373" Y="644">
+          <Content>
+            <Image X="112" Y="0" ClassName="v_office_socket" Width="26" Height="27" NativeX="26" NativeY="27" />
+          </Content>
+        </Object>
+        <Image X="6824" Y="689" ClassName="v_CornerUp_L_01" Width="150" Height="150" NativeX="128" NativeY="128" />
+        <Image X="6972" Y="689" ClassName="v_LongFloor_01" Width="500" Height="150" NativeX="427" NativeY="128" />
+        <Image X="7472" Y="689" ClassName="v_LongFloor_01" Width="500" Height="150" NativeX="427" NativeY="128" />
+        <Image X="6822" Y="837" ClassName="v_LongCornerUp_L_01" Width="150" Height="500" NativeX="128" NativeY="427" />
+        <Image X="6822" Y="1190" ClassName="v_LongCornerUp_L_01" Width="150" Height="500" NativeX="128" NativeY="427" />
+        <Camera X="780" Y="475" />
+        <Platform X="6827" Y="690" Width="3500" Height="1930" />
+        <Area Name="TriggerCatch" X="2870" Y="650.8839" Width="100" Height="309.12" Type="Catch" Distance="300" />
+        <Trigger Name="TriggerJump" X="1563" Y="389" Width="83.21862" Height="300">
+          <Content>
+            <Init>
+              <SetVariable Name="$Active" Value="1" />
+              <SetVariable Name="$AI" Value="1" />
+              <SetVariable Name="$Node" Value="COM" />
+              <SetVariable Name="Key" Value="Up" />
+              <SetVariable Name="Flag1" Value="0" />
+            </Init>
+            <Template Name="AI_noFollow" />
+          </Content>
+        </Trigger>
+        <Trigger Name="TriggerLossPanic" X="3320" Y="1506" Width="801.1236" Height="73.02219">
+          <Content>
+            <Init>
+              <SetVariable Name="$Active" Value="1" />
+              <SetVariable Name="$Node" Value="COM" />
+              <SetVariable Name="Time" Value="120" />
+              <SetVariable Name="Start" Value="FlyPanic" />
+              <SetVariable Name="StartFrame" Value="1" />
+              <SetVariable Name="ReversedStart" Value="0" />
+              <SetVariable Name="End" Value="FlyPanic" />
+              <SetVariable Name="ReversedEnd" Value="0" />
+              <SetVariable Name="EndFrame" Value="1" />
+              <SetVariable Name="$AI" Value="-1" />
+              <SetVariable Name="Flag1" Value="0" />
+            </Init>
+            <Template Name="TriggerLoss" />
+          </Content>
+        </Trigger>
+        <Area Name="TriggerCatch" X="5765" Y="155" Width="100" Height="309.12" Type="Catch" Distance="300" />
+        <Trigger Name="TriggerZoomNormal" X="2310" Y="-420" Width="51.51475" Height="2431.336">
+          <Content>
+            <Init>
+              <SetVariable Name="$Active" Value="1" />
+              <SetVariable Name="$Node" Value="COM" />
+              <SetVariable Name="Zoom" Value="1" />
+              <SetVariable Name="$AI" Value="0" />
+              <SetVariable Name="Flag1" Value="0" />
+            </Init>
+            <Template Name="CameraZoom" />
+          </Content>
+        </Trigger>
+        <Trigger Name="TriggerJump" X="6121" Y="173" Width="83.21862" Height="300">
+          <Content>
+            <Init>
+              <SetVariable Name="$Active" Value="1" />
+              <SetVariable Name="$AI" Value="1" />
+              <SetVariable Name="$Node" Value="COM" />
+              <SetVariable Name="Key" Value="Up" />
+              <SetVariable Name="Flag1" Value="0" />
+            </Init>
+            <Template Name="AI_noFollow" />
+          </Content>
+        </Trigger>
+        <Platform X="3953" Y="957" Width="1554.718" Height="1739.363" />
+        <Trigger Name="TriggerJump" X="3390" Y="659" Width="83.21862" Height="300">
+          <Content>
+            <Init>
+              <SetVariable Name="$Active" Value="1" />
+              <SetVariable Name="$AI" Value="1" />
+              <SetVariable Name="$Node" Value="COM" />
+              <SetVariable Name="Key" Value="Up" />
+              <SetVariable Name="Flag1" Value="0" />
+            </Init>
+            <Template Name="AI_noFollow" />
+          </Content>
+        </Trigger>
+        <Trigger Name="TriggerLossPanic" X="6087" Y="1232" Width="801.1236" Height="73.02219">
+          <Content>
+            <Init>
+              <SetVariable Name="$Active" Value="1" />
+              <SetVariable Name="$Node" Value="COM" />
+              <SetVariable Name="Time" Value="120" />
+              <SetVariable Name="Start" Value="FlyPanic" />
+              <SetVariable Name="StartFrame" Value="1" />
+              <SetVariable Name="ReversedStart" Value="0" />
+              <SetVariable Name="End" Value="FlyPanic" />
+              <SetVariable Name="ReversedEnd" Value="0" />
+              <SetVariable Name="EndFrame" Value="1" />
+              <SetVariable Name="$AI" Value="-1" />
+              <SetVariable Name="Flag1" Value="0" />
+            </Init>
+            <Template Name="TriggerLoss" />
+          </Content>
+        </Trigger>
+        <Trigger Name="TriggerLossPanic" X="1594.581" Y="1438" Width="801.1236" Height="73.02219">
+          <Content>
+            <Init>
+              <SetVariable Name="$Active" Value="1" />
+              <SetVariable Name="$Node" Value="COM" />
+              <SetVariable Name="Time" Value="120" />
+              <SetVariable Name="Start" Value="FlyPanic" />
+              <SetVariable Name="StartFrame" Value="1" />
+              <SetVariable Name="ReversedStart" Value="0" />
+              <SetVariable Name="End" Value="FlyPanic" />
+              <SetVariable Name="ReversedEnd" Value="0" />
+              <SetVariable Name="EndFrame" Value="1" />
+              <SetVariable Name="$AI" Value="-1" />
+              <SetVariable Name="Flag1" Value="0" />
+            </Init>
+            <Template Name="TriggerLoss" />
+          </Content>
+        </Trigger>
+        <Trigger Name="TriggerCameraStart" X="731" Y="291" Width="91.11205" Height="396.57">
+          <Content>
+            <Init>
+              <SetVariable Name="$Active" Value="1" />
+              <SetVariable Name="$Node" Value="COM" />
+              <SetVariable Name="Follow" Value="_$Model" />
+              <SetVariable Name="$AI" Value="0" />
+              <SetVariable Name="Flag1" Value="0" />
+            </Init>
+            <Template Name="CameraFollow" />
+          </Content>
+        </Trigger>
+        <Platform X="2295.091" Y="957" Width="1164.753" Height="1739.363" />
+        <Trigger Name="TriggerVictory" X="7950" Y="391" Width="100" Height="300">
+          <Content>
+            <Init>
+              <SetVariable Name="$Active" Value="1" />
+              <SetVariable Name="Time" Value="240" />
+              <SetVariable Name="End" Value="Loose" />
+              <SetVariable Name="EndFrame" Value="20" />
+              <SetVariable Name="Start" Value="" />
+              <SetVariable Name="ReversedStart" Value="0" />
+              <SetVariable Name="StartFrame" Value="" />
+              <SetVariable Name="$AI" Value="-1" />
+              <SetVariable Name="$Node" Value="COM" />
+              <SetVariable Name="ReversedEnd" Value="0" />
+              <SetVariable Name="Flag1" Value="0" />
+            </Init>
+            <Template Name="TriggerVictory" />
+          </Content>
+        </Trigger>
+        <Platform X="5508" Y="465" Width="689.36" Height="2200" />
+        <Platform X="592" Y="691" Width="1051.414" Height="1739.363" />
+        <Trigger Name="TriggerZoomMin" X="5560" Y="-950" Width="51.51475" Height="2431.336">
+          <Content>
+            <Init>
+              <SetVariable Name="$Active" Value="1" />
+              <SetVariable Name="$Node" Value="COM" />
+              <SetVariable Name="Zoom" Value="0.65" />
+              <SetVariable Name="$AI" Value="0" />
+              <SetVariable Name="Flag1" Value="0" />
+            </Init>
+            <Template Name="CameraZoom" />
+          </Content>
+        </Trigger>
+        <Trigger Name="TriggerZoom80" X="3565" Y="-435" Width="51.51475" Height="2431.336">
+          <Content>
+            <Init>
+              <SetVariable Name="$Active" Value="1" />
+              <SetVariable Name="$Node" Value="COM" />
+              <SetVariable Name="Zoom" Value="0.8" />
+              <SetVariable Name="$AI" Value="0" />
+              <SetVariable Name="Flag1" Value="0" />
+            </Init>
+            <Template Name="CameraZoom" />
+          </Content>
+        </Trigger>
+        <Trigger Name="TriggerZoom80" X="1575" Y="-670" Width="51.51475" Height="2431.336">
+          <Content>
+            <Init>
+              <SetVariable Name="$Active" Value="1" />
+              <SetVariable Name="$Node" Value="COM" />
+              <SetVariable Name="Zoom" Value="0.8" />
+              <SetVariable Name="$AI" Value="0" />
+              <SetVariable Name="Flag1" Value="0" />
+            </Init>
+            <Template Name="CameraZoom" />
+          </Content>
+        </Trigger>
+        <Spawn X="0" Y="0" Name="DefaultSpawn" Animation="JumpOff|18" />
+        <Trigger Name="TriggerZoomNormal" X="7500" Y="-735" Width="51.51475" Height="2431.336">
+          <Content>
+            <Init>
+              <SetVariable Name="$Active" Value="1" />
+              <SetVariable Name="$Node" Value="COM" />
+              <SetVariable Name="Zoom" Value="1" />
+              <SetVariable Name="$AI" Value="0" />
+              <SetVariable Name="Flag1" Value="0" />
+            </Init>
+            <Template Name="CameraZoom" />
+          </Content>
+        </Trigger>
+        <Area Name="TriggerCatch" X="7485" Y="390" Width="100" Height="309.12" Type="Catch" Distance="300" />
+      </Content>
+    </Object>
+  </Track>
+</Root>

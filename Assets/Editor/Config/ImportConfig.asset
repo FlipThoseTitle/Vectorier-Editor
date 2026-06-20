@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: ImportConfig
   m_EditorClassIdentifier: 
   filePathDirectory: Assets/XML/level_xml
-  xmlName: DOWNTOWN_BONUS_05
+  xmlName: DOWNTOWN_STORY_02
   selectedObject: 
   ignoreTags: 
   untagChildren: 0
