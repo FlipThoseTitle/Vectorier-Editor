@@ -79,7 +79,12 @@ namespace Vectorier.Element
             ApplySortingGroupLayering(xmlElement, gameObject, layerName);
 
             CreateInOutMarkers(xmlElement, gameObject, includeBuildingsMarker);
+
+            ImportHandler.LayerOrderStack.Push(0);
+
             WriteSceneChildren(xmlElement, gameObject.transform, layerName, includeBuildingsMarker, xmlUtility);
+
+            ImportHandler.LayerOrderStack.Pop();
 
             XmlElement propertiesElement = xmlElement.SelectSingleNode("Properties") as XmlElement;
             XmlElement staticElement = propertiesElement?.SelectSingleNode("Static") as XmlElement;
@@ -120,39 +125,18 @@ namespace Vectorier.Element
             }
         }
 
-        private static void ApplySortingGroupLayering(XmlElement xmlElement, GameObject objectRoot, string factor)
+        private static void ApplySortingGroupLayering(XmlElement xmlElement, GameObject gameObject, string layerName)
         {
-            if (objectRoot == null)
-                return;
+            SortingGroup group = gameObject.AddComponent<SortingGroup>();
+            group.sortingLayerName = layerName;
 
-            SortingGroup group = objectRoot.GetComponent<SortingGroup>();
-            if (group == null)
-                group = objectRoot.AddComponent<SortingGroup>();
+            ImportDepthGroup depthGroup = GetDepthGroupFromXML(xmlElement);
 
-            ImportDepthGroup depth = GetDepthGroupFromXML(xmlElement);
+            int depthValue = 2; // Middle Default
+            if (depthGroup == ImportDepthGroup.Front) depthValue = 0;
+            else if (depthGroup == ImportDepthGroup.Back) depthValue = 1;
 
-            int factorBand = 0;
-            if (float.TryParse(factor, NumberStyles.Float, CultureInfo.InvariantCulture, out float factorValue))
-                factorBand = Mathf.RoundToInt(factorValue * 10000f);
-
-            int sortOffset;
-
-            switch (depth)
-            {
-                case ImportDepthGroup.Front:
-                    sortOffset = 200 + ImportHandler.GlobalOrder_Front++;
-                    break;
-
-                case ImportDepthGroup.Back:
-                    sortOffset = ImportHandler.GlobalOrder_Back++;
-                    break;
-
-                default:
-                    sortOffset = 100 + ImportHandler.GlobalOrder_Middle++;
-                    break;
-            }
-
-            group.sortingOrder = factorBand + sortOffset;
+            group.sortingOrder = ImportHandler.GetNextLayerOrder(depthValue);
         }
 
         private static ImportDepthGroup GetDepthGroupFromXML(XmlElement xmlElement)

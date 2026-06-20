@@ -16,11 +16,24 @@ namespace Vectorier.Handler
         public static Dictionary<string, Sprite> SpriteCache = new Dictionary<string, Sprite>();
         public static bool SpriteCacheBuilt = false;
 
-        // ================= SPRITE LAYER COUNTER ================= //
+        // ================= SPRITE LAYER ================= //
 
-        public static int GlobalOrder_Front = 0;   // depth=0
-        public static int GlobalOrder_Middle = 0;  // default
-        public static int GlobalOrder_Back = 0;    // depth=1
+        public static Stack<int> LayerOrderStack = new Stack<int>();
+        public static int GetNextLayerOrder(int depthValue)
+        {
+            if (LayerOrderStack.Count == 0)
+                LayerOrderStack.Push(0); // Failsafe
+
+            int current = LayerOrderStack.Pop();
+            LayerOrderStack.Push(current + 1);
+
+            if (depthValue == 0) // Front
+                return current + 10000;
+            else if (depthValue == 1) // Back
+                return current - 10000;
+            else
+                return current; // Middle
+        }
 
         // ================= OBJECT DEFINITIONS ================= //
 
@@ -51,9 +64,8 @@ namespace Vectorier.Handler
             SpriteCacheBuilt = false;
             ObjectDefinitions.Clear();
             LoadedSetFiles.Clear();
-            GlobalOrder_Front = 0;
-            GlobalOrder_Middle = 0;
-            GlobalOrder_Back = 0;
+            LayerOrderStack.Clear();
+            LayerOrderStack.Push(0);
             TextureFolderPaths = textureFolders;
 
             // Load XML
@@ -225,12 +237,26 @@ namespace Vectorier.Handler
 
         private static void ImportObjects(XmlElement mainSection, Transform parent, bool isLevelFile, HashSet<string> allowedNames, bool includeBuildingsMarker, XmlUtility xmlUtility)
         {
+            List<XmlElement> objectElements = new List<XmlElement>();
             foreach (XmlNode node in mainSection.ChildNodes)
             {
-                XmlElement element = node as XmlElement;
-                if (element == null || element.Name != "Object")
-                    continue;
+                if (node is XmlElement element && element.Name == "Object")
+                    objectElements.Add(element);
+            }
 
+            // Sort factors from least to highest
+            if (isLevelFile)
+            {
+                objectElements.Sort((a, b) => 
+                {
+                    float factorA = Element.Element.ParseFloat(a.GetAttribute("Factor"));
+                    float factorB = Element.Element.ParseFloat(b.GetAttribute("Factor"));
+                    return factorA.CompareTo(factorB);
+                });
+            }
+
+            foreach (XmlElement element in objectElements)
+            {
                 if (!isLevelFile && allowedNames != null)
                 {
                     string objectName = element.GetAttribute("Name");

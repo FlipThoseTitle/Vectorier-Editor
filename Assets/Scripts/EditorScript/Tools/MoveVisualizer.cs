@@ -300,7 +300,7 @@ namespace Vectorier.EditorScript.Tools
 
         Transform GetPlaybackParentTransform()
         {
-            return null;
+            return placementHostTransform;
         }
 
         void SyncAnimationSpaceTransform()
@@ -588,6 +588,24 @@ namespace Vectorier.EditorScript.Tools
                 return;
 
             selectedAreaComponent = selectedObject.GetComponent<AreaComponent>();
+
+            if (selectedAreaComponent == null)
+            {
+                AreaComponent[] childComponents = selectedObject.GetComponentsInChildren<AreaComponent>(true);
+
+                foreach (var comp in childComponents)
+                {
+                    GameObject childObj = comp.gameObject;
+
+                    if (childObj != selectedObject && 
+                        childObj.name == selectedObject.name && 
+                        childObj.CompareTag("Area"))
+                    {
+                        selectedAreaComponent = comp;
+                        break;
+                    }
+                }
+            }
         }
 
         public void PreviewAreaComponent(AreaComponent areaComponent)
@@ -616,12 +634,15 @@ namespace Vectorier.EditorScript.Tools
                 modelRenderer?.Destroy();
 
                 placementEnabled = false;
-                placementHostTransform = null;
+
+                placementHostTransform = areaComponent.transform.parent != null 
+                    ? areaComponent.transform.parent 
+                    : areaComponent.transform;
 
                 animation.StartFrame = previewData.FirstFrame;
                 animation.PlaceAt(
                     previewData.WorldPosition,
-                    null,
+                    placementHostTransform,
                     ResolveXmlPath(),
                     previewData.BinFullPath,
                     previewData.PivotNode,
@@ -633,7 +654,7 @@ namespace Vectorier.EditorScript.Tools
 
                 if (renderModel && animation.Model != null)
                 {
-                    modelRenderer?.Create(animation.Model, animation.AnimationNodes, null, renderBlack);
+                    modelRenderer?.Create(animation.Model, animation.AnimationNodes, placementHostTransform, renderBlack);
                     modelDebug?.AttachToModel(animation.Model, modelRenderer?.RootObject);
                 }
                 else
@@ -642,7 +663,7 @@ namespace Vectorier.EditorScript.Tools
                 }
 
                 SyncAnimationSpaceTransform();
-                modelDebug?.UpdateNodeWorldPositions(animation.AnimationNodes, null);
+                modelDebug?.UpdateNodeWorldPositions(animation.AnimationNodes, GetPlaybackParentTransform());
                 modelDebug?.FollowSceneViewCameraToNodeXY(animation);
 
                 Repaint();

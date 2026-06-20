@@ -82,16 +82,11 @@ namespace Vectorier.Element
                     ImageComponent.ImageDepth.Middle;
             }
 
-            // Factor Parsing
-            float factorValue = Element.ParseFloat(factor);
-            int factorBand = Mathf.RoundToInt(factorValue * 10000);
+            int stackDepthValue = 2; // Default to Middle
+            if (imageComponent.depth == ImageComponent.ImageDepth.Front) stackDepthValue = 0;
+            else if (imageComponent.depth == ImageComponent.ImageDepth.Back) stackDepthValue = 1;
 
-            int sortOffset =
-                imageComponent.depth == ImageComponent.ImageDepth.Front ? 200 + ImportHandler.GlobalOrder_Front++ :
-                imageComponent.depth == ImageComponent.ImageDepth.Back ? 0 + ImportHandler.GlobalOrder_Back++ :
-                100 + ImportHandler.GlobalOrder_Middle++;
-
-            renderer.sortingOrder = factorBand + sortOffset;
+            renderer.sortingOrder = ImportHandler.GetNextLayerOrder(stackDepthValue);
 
             // Build cache if needed
             if (!ImportHandler.SpriteCacheBuilt)

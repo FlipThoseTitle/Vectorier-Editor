@@ -208,8 +208,17 @@ namespace Vectorier.Model
                 hideFlags = HideFlags.DontSave
             };
 
-            rootObject.transform.SetParent(null);
-            rootObject.transform.localPosition = new Vector3(0, 0, -300);
+            rootObject.transform.SetParent(parentTransform, false);
+            
+            if (parentTransform == null)
+            {
+                rootObject.transform.localPosition = new Vector3(0, 0, -300);
+            }
+            else
+            {
+                rootObject.transform.position = new Vector3(parentTransform.position.x, parentTransform.position.y, -300f);
+            }
+            
             rootObject.transform.localRotation = Quaternion.identity;
             rootObject.transform.localScale = Vector3.one;
 
