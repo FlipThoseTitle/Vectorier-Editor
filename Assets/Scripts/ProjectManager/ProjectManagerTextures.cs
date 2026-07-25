@@ -9,6 +9,21 @@ namespace Vectorier.ProjectManager
     public class ProjectManagerTextures : EditorWindow
     {
         private string activeProjectName = "";
+
+        // Exclusion list for normal textures that should not be deleted
+        private readonly HashSet<string> excludedNormalTextures = new HashSet<string>
+        {
+            "bonus_num", "circle", "GStick_arrow", "GStick_circle", 
+            "parrot01", "parrot02", "parrot03", "v_back", "tap", "rect"
+        };
+
+        private readonly HashSet<string> excludedAnimatedTextures = new HashSet<string>
+        {
+            "antibot", "bonus_v4", "bonus_v4_off", "credits", "glass_1", "credits_off", 
+            "lightning_expl_v2", "lightning_hands", "lightning_paraliz_v2", "paper_v1", 
+            "reverse_indicator_left", "reverse_indicator_right", "run_indicator", "stopsign", 
+            "trick_active_up", "trick_idle_up", "bird_v0", "bird_v2", "bird_v3"
+        };
         
         // Data for grid display
         private List<Texture2D> loadedTextures = new List<Texture2D>();
@@ -46,8 +61,7 @@ namespace Vectorier.ProjectManager
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
             
-            // -> NEW: Total Textures Text <-
-            GUIStyle totalLabelStyle = new GUIStyle(EditorStyles.label) { alignment = TextAnchor.MiddleRight };
+            GUIStyle totalLabelStyle = new GUIStyle(EditorStyles.boldLabel) { alignment = TextAnchor.MiddleRight };
             GUILayout.Label("Total Textures - " + loadedTextures.Count, totalLabelStyle, GUILayout.Height(30));
             
             GUILayout.Space(10); // Small gap between the text and the buttons
@@ -118,7 +132,7 @@ namespace Vectorier.ProjectManager
             GUILayout.EndScrollView();
 
             // Catch background clicks specifically inside the scroll area to clear selection.
-            // Because the items 'Use' the click event, this will only trigger on empty space!
+            // Because the items 'Use' the click event, this will only trigger on empty space
             Rect scrollRect = GUILayoutUtility.GetLastRect();
             if (Event.current.type == EventType.MouseDown && Event.current.button == 0 && scrollRect.Contains(Event.current.mousePosition))
             {
@@ -306,19 +320,37 @@ namespace Vectorier.ProjectManager
         {
             if (selectedIndices.Count > 0)
             {
-                // Gather paths first so indices don't shift as we delete them
                 List<string> pathsToDelete = new List<string>();
+                int excludedCount = 0;
+
                 foreach (int index in selectedIndices)
                 {
                     if (index >= 0 && index < loadedTexturePaths.Count)
                     {
-                        pathsToDelete.Add(loadedTexturePaths[index]);
+                        string path = loadedTexturePaths[index];
+                        
+                        if (IsFileExcluded(path))
+                        {
+                            excludedCount++;
+                        }
+                        else
+                        {
+                            pathsToDelete.Add(path);
+                        }
                     }
                 }
 
+                // If ONLY excluded files were selected, show the prompt and stop.
+                if (pathsToDelete.Count == 0 && excludedCount > 0)
+                {
+                    EditorUtility.DisplayDialog("Cannot Delete", excludedCount + " File isn't deletable!", "OK");
+                    return;
+                }
+
+                // If we reach here, we have at least one deletable file.
+                // It will silently ignore the excluded ones (if any) and delete the valid ones.
                 try
                 {
-                    // Suspend asset imports/updates
                     AssetDatabase.StartAssetEditing();
 
                     foreach (string pathToDelete in pathsToDelete)
@@ -334,7 +366,6 @@ namespace Vectorier.ProjectManager
                 }
                 finally
                 {
-                    // Resume and process all deletions at once
                     AssetDatabase.StopAssetEditing();
                 }
 
@@ -345,14 +376,27 @@ namespace Vectorier.ProjectManager
 
         private void ClearAllTextures()
         {
-            if (EditorUtility.DisplayDialog("Clear All Textures", "Are you sure you want to delete all imported textures for this project? This cannot be undone.", "Yes, Delete All", "Cancel"))
+            List<string> pathsToDelete = new List<string>();
+            
+            // Filter out excluded files first
+            foreach (string path in loadedTexturePaths)
+            {
+                if (!IsFileExcluded(path))
+                {
+                    pathsToDelete.Add(path);
+                }
+            }
+
+            // If there is nothing to delete (only excluded files exist), do nothing and don't prompt.
+            if (pathsToDelete.Count == 0) return;
+
+            if (EditorUtility.DisplayDialog("Clear All Textures", "Are you sure you want to delete all imported textures for this project? This cannot be undone.", "Delete All", "Cancel"))
             {
                 try
                 {
-                    // Suspend asset imports/updates to vastly speed up bulk operations
                     AssetDatabase.StartAssetEditing();
 
-                    foreach (string path in loadedTexturePaths)
+                    foreach (string path in pathsToDelete)
                     {
                         AssetDatabase.DeleteAsset(path);
                         string plistPath = Path.ChangeExtension(path, ".plist");
@@ -364,7 +408,6 @@ namespace Vectorier.ProjectManager
                 }
                 finally
                 {
-                    // Resume and process all deletions at once
                     AssetDatabase.StopAssetEditing();
                 }
 
@@ -402,6 +445,21 @@ namespace Vectorier.ProjectManager
             }
 
             Repaint();
+        }
+
+        private bool IsFileExcluded(string path)
+        {
+            string fileName = Path.GetFileNameWithoutExtension(path);
+            // Get the name of the folder immediately containing the file (textures or animatedtextures)
+            string directoryName = Path.GetFileName(Path.GetDirectoryName(path));
+
+            if (directoryName == "textures" && excludedNormalTextures.Contains(fileName))
+                return true;
+            
+            if (directoryName == "animatedtextures" && excludedAnimatedTextures.Contains(fileName))
+                return true;
+
+            return false;
         }
     }
 }

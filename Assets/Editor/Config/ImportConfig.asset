@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8168d00812ad81b4c81b68d8e9dafa2c, type: 3}
   m_Name: ImportConfig
   m_EditorClassIdentifier: 
-  filePathDirectory: Assets/XML/level_xml
-  xmlName: DOWNTOWN_STORY_02
+  filePathDirectory: DZIP/level
+  xmlName: 
   selectedObject: 
   ignoreTags: 
   untagChildren: 0

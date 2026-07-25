@@ -1,0 +1,29 @@
+<List>
+	<Russian 	  Index="rus"  FontFile="Fonts/Play-Bold"         ISO1="ru" />
+	<English 	  Index="eng"  FontFile="Fonts/Play-Bold"         ISO1="en" />
+	<German  	  Index="ger"  FontFile="Fonts/Play-Bold"         ISO1="de" />
+	<Italya  	  Index="ita"  FontFile="Fonts/Play-Bold"         ISO1="it" />
+	<France  	  Index="fre"  FontFile="Fonts/Play-Bold"         ISO1="fr" />
+	<Spanish 	  Index="spa"  FontFile="Fonts/Play-Bold"         ISO1="es" />
+	<Turkie    	  Index="tur"  FontFile="Fonts/Play-Bold"         ISO1="tr" />
+	<Portugal  	  Index="por"  FontFile="Fonts/Play-Bold"         ISO1="pt" />
+	<Japan     	  Index="jap"  FontFile="Fonts/MSJhengHeiBold"    ISO1="ja" />
+	<Korean    	  Index="kor"  FontFile="Fonts/UnDotum"           ISO1="ko" />
+	<TradChinese  Index="chi1" FontFile="Fonts/MSJhengHeiBold"    ISO1="zh_TW" />
+	<SimplChinese Index="chi2" FontFile="Fonts/MSJhengHeiBold"    ISO1="zh_CN" />
+	<Vietnamese   Index="viet" FontFile="Fonts/corbelb"           ISO1="vi" />
+	<Hindi 		  Index="hin"  FontFile="Fonts/aparaj"            ISO1="hi" />
+	<Arabic 	  Index="arab" FontFile="Fonts/MYRIADARABIC-BOLD" ISO1="ar" />
+	<Hebrew 	  Index="heb"  FontFile="Fonts/Arial"             ISO1="he" />
+	<Thai 		  Index="thai" FontFile="Fonts/angsa"             ISO1="th" />
+	<Polish 	  Index="pol"  FontFile="Fonts/Play-Bold"         ISO1="pl" />
+	<Czech 		  Index="cze"  FontFile="Fonts/Play-Bold"         ISO1="cs" />
+	<Latvian 	  Index="lat"  FontFile="Fonts/Play-Bold"         ISO1="lv" />
+	<Dutch 		  Index="dut"  FontFile="Fonts/Play-Bold"         ISO1="nl" />
+	<Norwegian 	  Index="nor"  FontFile="Fonts/Play-Bold"         ISO1="no" />
+	<Danish 	  Index="dan"  FontFile="Fonts/Play-Bold"         ISO1="da" />
+	<Finnish 	  Index="finn" FontFile="Fonts/Play-Bold"         ISO1="fi" />
+	<Swedish 	  Index="swe"  FontFile="Fonts/Play-Bold"         ISO1="sv" />
+	<Ukranian 	  Index="ukr"  FontFile="Fonts/Play-Bold"         ISO1="uk" />
+	<Greek 		  Index="gre"  FontFile="Fonts/Play-Bold"         ISO1="el" />
+</List>

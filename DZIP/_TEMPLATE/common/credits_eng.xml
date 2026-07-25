@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+
+<Caption> VECTOR CREDITS </Caption>
+
+<SubCaption value="PRODUCERS">
+<str value="DMITRY TEREKHIN"/>
+<str value="EVGENY DYABIN"/>
+</SubCaption>
+
+<SubCaption value="LEAD GAME DESIGNER">
+<str value="OLEG EGOROV"/>
+</SubCaption>
+
+<SubCaption value="PROJECT MANAGER">
+<str value="ANDREY REVENKO"/>
+</SubCaption>
+
+<SubCaption value="ADDITIONAL GAME DESIGN">
+<str value="VICTOR KOROTEEV"/>
+</SubCaption>
+
+<SubCaption value="ADDITIONAL PROJECT MANAGER">
+<str value="SERGEY SOROKIN"/>
+</SubCaption>
+
+<SubCaption value="LEVEL DESIGNERS">
+<str value="KIRILL BUTKO"/>
+<str value="KONSTANTIN ZHAVORONKOV"/>
+<str value="ANDREY RYBOLOVLEV"/>
+</SubCaption>
+
+<SubCaption value="ADDITIONAL LEVEL DESIGN">
+<str value="PHILIP SHULEYKO"/>
+<str value="VICTOR TRUKHNOV"/>
+<str value="MAXIM NEYZHMAK"/>
+<str value="STANISLAV KOROLEV"/>
+</SubCaption>
+
+<SubCaption value="ANIMATORS">
+<str value="EVGENY KHAPUGIN"/>
+<str value="ALEXEY PANTELEEV"/>
+<str value="DMITRY TERESHCHENKO"/>
+</SubCaption>
+
+<SubCaption value="LEAD PROGRAMMERS">
+<str value="ALEXANDER PANOV"/>
+<str value="ALEXEY MOISEEV"/>
+</SubCaption>
+
+<SubCaption value="SERVER PROGRAMMER (FACEBOOK VERSION)">
+<str value="DMITRY ZHAROV"/>
+</SubCaption>
+
+<SubCaption value="PROGRAMMERS">
+<str value="ILYA VOLKOV"/>
+<str value="OLEG DUROV"/>
+<str value="OLEG SHIKUN"/>
+<str value="VLADIMIR PISHCHIDA"/>
+</SubCaption>
+
+<SubCaption value="LEVEL EDITOR PROGRAMMERS">
+<str value="ALEXANDER BLEDNOV"/>
+<str value="PAVEL FOT"/>
+</SubCaption>
+
+<SubCaption value="ART DIRECTORS">
+<str value="ANTON VASILYEV"/>
+<str value="DMITRY KURKIN"/>
+</SubCaption>
+
+<SubCaption value="ARTISTS">
+<str value="ALEXANDER NEMOV"/>
+<str value="EVGENY NOVOSILTSEV"/>
+<str value="OLGA IVANOVA"/>
+</SubCaption>
+
+<SubCaption value="DESIGNER">
+<str value="ALISA KHUSNUTDINOVA"/>
+<str value="DENIS ROMANKO"/>
+</SubCaption>
+
+<SubCaption value="EFFECTS">
+<str value="GREGORY TERENTYEV"/>
+<str value="DENIS ROMANKO"/>
+</SubCaption>
+
+<SubCaption value="MUSIC">
+<str value="LIND EREBROS"/>
+<str value="VIKTOR KRASNOKUTSKY"/>
+</SubCaption>
+
+<SubCaption value="SOUND">
+<str value="VIKTOR KRASNOKUTSKY"/>
+</SubCaption>
+
+<SubCaption value="TESTERS">
+<str value="SERGEY KOSTAREV"/>
+<str value="ALYONA NATALUKHA"/>
+<str value="DENIS POTEKHIN"/>
+<str value="ALEKSANDR KLINOVOY"/>
+<str value="ROMAN KOPACH"/>
+<str value="TATIANA MUROMCEVA"/>
+</SubCaption>
+
+<SubCaption value="TECHNICAL SUPPORT">
+<str value="IVAN KIREEV"/>
+</SubCaption>
+
+<SubCaption value="HEAD OF MARKETING IN NORTH AMERICA">
+<str value="DAVID NIXON"/>
+</SubCaption>
+
+<SubCaption value="HEAD OF MARKETING IN GERMANY">
+<str value="TOM BOROVSKIS"/>
+</SubCaption>
+ 
+ 
+ <SubCaption value="SPECIAL THANKS" main="1"/>
+
+<strings>
+<str value="MAXIM SLOBODYANYUK"/>
+<str value="MAXIM KOBLOV"/>
+<str value="SHAMIL MAGOMEDOV"/>
+<str value="MAXIM CHULYUCHKIN"/>
+<str value="PEKA GERNET"/>
+<str value="SEBASTIAN BILLMEIER"/> 
+<str value="MIKHAIL VINOGRADOV"/>
+<str value="ALEXEY ILYUKHIN"/>
+<str value="MARINA LUNEVA"/>
+<str value="ANNA GORYACHEVA"/>
+<str value="KONSTANTIN SAKHAROV"/>
+<str value="ANTON UKRAINSKY"/>
+<str value="ROMAN RYK"/>
+<str value="KSENIA DYABINA"/>
+<str value="VLADIMIR SHAPOVALENKO"/>
+<str value="ELENA SHAPOVALOVA"/>
+<str value="STANISLAV KOROTAEV"/>
+<str value="VIKTOR SMIRNOV"/>
+<str value="KIRILL KOREPANOV"/>
+<str value="VALENTIN VOZNESENSKY"/>
+<str value="ARTUR MURTAZIN"/>
+<str value="VASILIY SKOBELEV"/>
+</strings>
+
+    <SubCaption value="THANKS TO OUR FAMILIES" main="1"/>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</root>

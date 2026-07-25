@@ -55,6 +55,11 @@ namespace Vectorier.ProjectManager
             GUILayout.BeginHorizontal();
             GUILayout.Label("Gears", EditorStyles.largeLabel);
             GUILayout.FlexibleSpace();
+
+            // --- Total Count ---
+            GUIStyle countStyle = new GUIStyle(EditorStyles.boldLabel) { alignment = TextAnchor.MiddleCenter };
+            GUILayout.Label($"Total Gears - {gearList.Count}", countStyle, GUILayout.Height(30));
+            GUILayout.Space(10);
             
             if (GUILayout.Button("+", GUILayout.Width(30), GUILayout.Height(30)))
             {
@@ -70,7 +75,7 @@ namespace Vectorier.ProjectManager
             }
             GUI.enabled = true;
 
-            // Added C button
+            // Clear
             GUI.enabled = gearList.Count > 0;
             if (GUILayout.Button("C", GUILayout.Width(30), GUILayout.Height(30)))
             {
@@ -159,7 +164,7 @@ namespace Vectorier.ProjectManager
 
             GUILayout.Space(5);
 
-            // 1. Model XML Pointer
+            // Model XML Pointer
             EditorGUI.BeginChangeCheck();
             TextAsset newXml = (TextAsset)EditorGUILayout.ObjectField("Model XML", item.modelXml, typeof(TextAsset), false);
             if (EditorGUI.EndChangeCheck())
@@ -168,7 +173,7 @@ namespace Vectorier.ProjectManager
                 SaveToXml();
             }
 
-            // 2. Gear Name (Delayed)
+            // Gear Name
             EditorGUI.BeginChangeCheck();
             string newName = EditorGUILayout.DelayedTextField("Gear Name", item.gearName);
             if (EditorGUI.EndChangeCheck())
@@ -182,7 +187,7 @@ namespace Vectorier.ProjectManager
                 }
             }
 
-            // 3. Display Name / Localization (Delayed)
+            // Display Name / Localization
             EditorGUI.BeginChangeCheck();
             string newDisplayName = EditorGUILayout.DelayedTextField("Display Name", item.displayName);
             if (EditorGUI.EndChangeCheck())
@@ -191,17 +196,17 @@ namespace Vectorier.ProjectManager
                 SaveToXml(); // Save to sync the localization file
             }
 
-            // 4. Price (Delayed)
+            // Price
             EditorGUI.BeginChangeCheck();
             item.rawPriceInput = EditorGUILayout.DelayedTextField("Price", item.rawPriceInput);
             if (EditorGUI.EndChangeCheck())
             {
                 item.price = ParsePrice(item.rawPriceInput);
-                item.rawPriceInput = item.price.ToString(); // Visually update field back to int
+                item.rawPriceInput = item.price.ToString(); // update field back to int
                 SaveToXml();
             }
 
-            // 5. Shop Image Preview
+            // Shop Image Preview
             GUILayout.BeginHorizontal();
             GUILayout.Label("Shop Image", GUILayout.Width(EditorGUIUtility.labelWidth - 5));
             
@@ -211,6 +216,19 @@ namespace Vectorier.ProjectManager
             
             Texture displayTex = item.shopImage != null ? item.shopImage : EditorGUIUtility.whiteTexture;
             GUI.DrawTexture(imageRect, displayTex, ScaleMode.ScaleToFit);
+            
+            // --- TEXT OVERLAY ---
+            if (item.shopImage == null)
+            {
+                GUIStyle centeredTextStyle = new GUIStyle(EditorStyles.label)
+                {
+                    alignment = TextAnchor.MiddleCenter,
+                    normal = { textColor = Color.black } // Dark text so it shows up well on the white texture
+                };
+                
+                GUI.Label(imageRect, "Click Here to Change Thumbnail", centeredTextStyle);
+            }
+            // --------------------------
             
             if (GUI.Button(imageRect, new GUIContent("", "Click to assign shop image (.png, .jpg)"), GUIStyle.none))
             {
@@ -230,7 +248,7 @@ namespace Vectorier.ProjectManager
 
             GearItem newItem = new GearItem();
             newItem.gearName = ""; 
-            newItem.displayName = ""; // Added
+            newItem.displayName = "";
             newItem.price = 0;
             newItem.rawPriceInput = "0";
 
@@ -438,7 +456,7 @@ namespace Vectorier.ProjectManager
             doc.Save(relativePath);
             AssetDatabase.ImportAsset(relativePath);
 
-            // --- NEW: Handle Localization Syncing ---
+            // --- Handle Localization Syncing ---
             SaveLocalizationToXml();
         }
 
@@ -465,7 +483,7 @@ namespace Vectorier.ProjectManager
 
             string[] langs = { "eng", "rus", "ger", "ita", "fre", "spa", "tur", "por", "jap", "kor", "chi1", "chi2", "viet", "hin", "arab", "heb", "thai", "pol", "cze", "lat", "dut", "nor", "dan", "finn", "swe", "ukr", "gre" };
 
-            // Clean up items that are no longer in our Gear List (Handles "Removing" gear)
+            // Clean up items that are no longer in our Gear List
             HashSet<string> currentGearTags = new HashSet<string>(gearList.Select(g => "item_" + g.gearName));
             var itemsToRemove = root.Elements().Where(e => e.Name.LocalName.StartsWith("item_GEAR_") && !currentGearTags.Contains(e.Name.LocalName)).ToList();
             
@@ -546,7 +564,7 @@ namespace Vectorier.ProjectManager
                 gearList.Add(item);
             }
 
-            // --- NEW: Load corresponding display names ---
+            // --- Load corresponding display names ---
             LoadLocalizationFromXml();
         }
 

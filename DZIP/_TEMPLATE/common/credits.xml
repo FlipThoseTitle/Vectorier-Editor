@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+
+<Caption> Vector Credits </Caption>
+
+<SubCaption value="PRODUCERS">
+<str value="DMITRY TEREKHIN"/>
+<str value="EVGENY DYABIN"/>
+</SubCaption>
+
+<SubCaption value="TECHNICAL DIRECTOR">
+<str value="EVGENY DYABIN"/>
+</SubCaption>
+
+<SubCaption value="IT DIRECTOR">
+<str value="DMITRY ZHAROV"/>
+</SubCaption>
+
+<SubCaption value="PROJECT MANAGER">
+<str value="VICTOR KOROTEEV"/>
+</SubCaption>
+
+<SubCaption value="LEAD GAME DESIGNER">
+<str value="OLEG EGOROV"/>
+</SubCaption>
+
+<SubCaption value="GAME DESIGN">
+<str value="ANDREY REVENKO"/>
+<str value="VICTOR KOROTEEV"/>
+</SubCaption>
+
+<SubCaption value="LEVEL DESIGN">
+<str value="ANDREY REVENKO"/>
+<str value="VICTOR TRUKHNOV"/>
+<str value="KONSTANTIN ZHAVORONKOV"/>
+<str value="MAXIM NEYZHMAK"/>
+<str value="KIRILL BUTKO"/>
+</SubCaption>
+
+<SubCaption value="ANIMATORS">
+<str value="EVGENY KHAPUGIN"/>
+<str value="ALEXEY PANTELEEV"/>
+<str value="DMITRY TERESHCHENKO"/>
+</SubCaption>
+
+<SubCaption value="ANIMATION TOOLSET(CASCADEUR)">
+<str value="EVGENY DYABIN"/>
+</SubCaption>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<SubCaption value="TECHNICAL DIRECTOR">
+<str value="EVGENY DYABIN"/>
+</SubCaption>
+
+<SubCaption value="IT DIRECTOR">
+<str value="DMITRY ZHAROV"/>
+</SubCaption>
+
+<SubCaption value="PROJECT MANAGER">
+<str value="VICTOR KOROTEEV"/>
+</SubCaption>
+
+<SubCaption value="LEAD GAME DESIGNER">
+<str value="OLEG EGOROV"/>
+</SubCaption>
+
+<SubCaption value="GAME DESIGN">
+<str value="ANDREY REVENKO"/>
+<str value="VICTOR KOROTEEV"/>
+</SubCaption>
+
+<SubCaption value="LEVEL DESIGN">
+<str value="ANDREY REVENKO"/>
+<str value="VICTOR TRUKHNOV"/>
+<str value="KONSTANTIN ZHAVORONKOV"/>
+<str value="MAXIM NEYZHMAK"/>
+<str value="KIRILL BUTKO"/>
+</SubCaption>
+
+<SubCaption value="ANIMATORS">
+<str value="EVGENY KHAPUGIN"/>
+<str value="ALEXEY PANTELEEV"/>
+<str value="DMITRY TERESHCHENKO"/>
+</SubCaption>
+
+<SubCaption value="ANIMATION TOOLSET(CASCADEUR)">
+<str value="EVGENY DYABIN"/>
+</SubCaption>
+
+
+
+
+<SubCaption value="TECHNICAL DIRECTOR">
+<str value="EVGENY DYABIN"/>
+</SubCaption>
+
+<SubCaption value="IT DIRECTOR">
+<str value="DMITRY ZHAROV"/>
+</SubCaption>
+
+<SubCaption value="PROJECT MANAGER">
+<str value="VICTOR KOROTEEV"/>
+</SubCaption>
+
+<SubCaption value="LEAD GAME DESIGNER">
+<str value="OLEG EGOROV"/>
+</SubCaption>
+
+<SubCaption value="GAME DESIGN">
+<str value="ANDREY REVENKO"/>
+<str value="VICTOR KOROTEEV"/>
+</SubCaption>
+
+<SubCaption value="LEVEL DESIGN">
+<str value="ANDREY REVENKO"/>
+<str value="VICTOR TRUKHNOV"/>
+<str value="KONSTANTIN ZHAVORONKOV"/>
+<str value="MAXIM NEYZHMAK"/>
+<str value="KIRILL BUTKO"/>
+</SubCaption>
+
+<SubCaption value="ANIMATORS">
+<str value="EVGENY KHAPUGIN"/>
+<str value="ALEXEY PANTELEEV"/>
+<str value="DMITRY TERESHCHENKO"/>
+</SubCaption>
+
+<SubCaption value="ANIMATION TOOLSET(CASCADEUR)">
+<str value="EVGENY DYABIN"/>
+</SubCaption>
+
+
+
+
+
+
+
+
+
+
+
+
+</root>

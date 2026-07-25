@@ -1,0 +1,507 @@
+fileFormatVersion: 2
+guid: b24049712399ffa439c494bcae6ce659
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -9180064437687235117
+    second: trick_active_up_0
+  - first:
+      213: -9177976285327213923
+    second: trick_active_up_1
+  - first:
+      213: -4688454164476104575
+    second: trick_active_up_2
+  - first:
+      213: -3506819143828736998
+    second: trick_active_up_3
+  - first:
+      213: 7074201498047280986
+    second: trick_active_up_4
+  - first:
+      213: 8457688218347378580
+    second: trick_active_up_5
+  - first:
+      213: 6775321414761852497
+    second: trick_active_up_6
+  - first:
+      213: -398466431357366214
+    second: trick_active_up_7
+  - first:
+      213: 3351916560498851383
+    second: trick_active_up_8
+  - first:
+      213: 5514601651444525371
+    second: trick_active_up_9
+  - first:
+      213: 5156991336215558792
+    second: trick_active_up_10
+  - first:
+      213: -8943682847409921974
+    second: trick_active_up_11
+  - first:
+      213: -2649721126603431739
+    second: trick_active_up_12
+  - first:
+      213: 1260318264169162170
+    second: trick_active_up_13
+  - first:
+      213: 2429589013499342358
+    second: trick_active_up_14
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: trick_active_up_0
+      rect:
+        serializedVersion: 2
+        x: 1
+        y: 881
+        width: 177
+        height: 142
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3ddc470380cd99080800000000000000
+      internalID: -9180064437687235117
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: trick_active_up_1
+      rect:
+        serializedVersion: 2
+        x: 1
+        y: 739
+        width: 177
+        height: 142
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d9abc1c023741a080800000000000000
+      internalID: -9177976285327213923
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: trick_active_up_2
+      rect:
+        serializedVersion: 2
+        x: 178
+        y: 881
+        width: 9
+        height: 129
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 18073b427c34feeb0800000000000000
+      internalID: -4688454164476104575
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: trick_active_up_3
+      rect:
+        serializedVersion: 2
+        x: 178
+        y: 739
+        width: 177
+        height: 142
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a147c809196455fc0800000000000000
+      internalID: -3506819143828736998
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: trick_active_up_4
+      rect:
+        serializedVersion: 2
+        x: 189
+        y: 881
+        width: 166
+        height: 142
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a57f4a028cc9c2260800000000000000
+      internalID: 7074201498047280986
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: trick_active_up_5
+      rect:
+        serializedVersion: 2
+        x: 355
+        y: 846
+        width: 142
+        height: 177
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4971a93bf9ebf5570800000000000000
+      internalID: 8457688218347378580
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: trick_active_up_6
+      rect:
+        serializedVersion: 2
+        x: 1
+        y: 597
+        width: 177
+        height: 142
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 15e2af5fde6c60e50800000000000000
+      internalID: 6775321414761852497
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: trick_active_up_7
+      rect:
+        serializedVersion: 2
+        x: 178
+        y: 597
+        width: 177
+        height: 142
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a30d60054ec587af0800000000000000
+      internalID: -398466431357366214
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: trick_active_up_8
+      rect:
+        serializedVersion: 2
+        x: 355
+        y: 669
+        width: 142
+        height: 177
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 73e78414a56648e20800000000000000
+      internalID: 3351916560498851383
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: trick_active_up_9
+      rect:
+        serializedVersion: 2
+        x: 355
+        y: 492
+        width: 142
+        height: 177
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b3922200cfcc78c40800000000000000
+      internalID: 5514601651444525371
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: trick_active_up_10
+      rect:
+        serializedVersion: 2
+        x: 1
+        y: 455
+        width: 177
+        height: 142
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 88a35e02c40519740800000000000000
+      internalID: 5156991336215558792
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: trick_active_up_11
+      rect:
+        serializedVersion: 2
+        x: 178
+        y: 455
+        width: 177
+        height: 142
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a40a06006d7a1e380800000000000000
+      internalID: -8943682847409921974
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: trick_active_up_12
+      rect:
+        serializedVersion: 2
+        x: 355
+        y: 315
+        width: 142
+        height: 177
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5c064f69cac4a3bd0800000000000000
+      internalID: -2649721126603431739
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: trick_active_up_13
+      rect:
+        serializedVersion: 2
+        x: 1
+        y: 138
+        width: 142
+        height: 177
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ab56db7a8cc8d7110800000000000000
+      internalID: 1260318264169162170
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: trick_active_up_14
+      rect:
+        serializedVersion: 2
+        x: 1
+        y: 26
+        width: 156
+        height: 111
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 61ee1d3d552a7b120800000000000000
+      internalID: 2429589013499342358
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      trick_active_up_0: -9180064437687235117
+      trick_active_up_1: -9177976285327213923
+      trick_active_up_10: 5156991336215558792
+      trick_active_up_11: -8943682847409921974
+      trick_active_up_12: -2649721126603431739
+      trick_active_up_13: 1260318264169162170
+      trick_active_up_14: 2429589013499342358
+      trick_active_up_2: -4688454164476104575
+      trick_active_up_3: -3506819143828736998
+      trick_active_up_4: 7074201498047280986
+      trick_active_up_5: 8457688218347378580
+      trick_active_up_6: 6775321414761852497
+      trick_active_up_7: -398466431357366214
+      trick_active_up_8: 3351916560498851383
+      trick_active_up_9: 5514601651444525371
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

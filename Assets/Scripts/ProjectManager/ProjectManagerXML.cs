@@ -48,13 +48,10 @@ namespace Vectorier.ProjectManager
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
             
-            // -> NEW: Total XMLs Text <-
-            GUIStyle totalLabelStyle = new GUIStyle(EditorStyles.label) { alignment = TextAnchor.MiddleRight };
+            GUIStyle totalLabelStyle = new GUIStyle(EditorStyles.boldLabel) { alignment = TextAnchor.MiddleRight };
             GUILayout.Label("Total XMLs - " + loadedXMLPaths.Count, totalLabelStyle, GUILayout.Height(30));
             
             GUILayout.Space(10); // Small gap between the text and the buttons
-
-            // Note: The '+' button was intentionally omitted based on instructions.
 
             GUI.enabled = selectedIndices.Count > 0;
             if (GUILayout.Button("-", GUILayout.Width(30), GUILayout.Height(30)))
@@ -254,28 +251,51 @@ namespace Vectorier.ProjectManager
             if (selectedIndices.Count > 0)
             {
                 List<string> pathsToDelete = new List<string>();
+                bool triggerTemplateSelected = false;
+
                 foreach (int index in selectedIndices)
                 {
                     if (index >= 0 && index < loadedXMLPaths.Count)
                     {
-                        pathsToDelete.Add(loadedXMLPaths[index]);
+                        string path = loadedXMLPaths[index];
+                        
+                        // Check if the file is TriggerTemplates
+                        if (Path.GetFileNameWithoutExtension(path) == "TriggerTemplates")
+                        {
+                            triggerTemplateSelected = true;
+                        }
+                        else
+                        {
+                            pathsToDelete.Add(path);
+                        }
                     }
                 }
 
-                try
+                // If ONLY TriggerTemplates was selected, show the prompt
+                if (triggerTemplateSelected && pathsToDelete.Count == 0)
                 {
-                    // Suspend asset imports/updates for bulk optimization
-                    AssetDatabase.StartAssetEditing();
+                    EditorUtility.DisplayDialog("Notice", "The 'TriggerTemplates' file cannot be deleted.", "OK");
+                    return; // Stop execution so we don't clear indices or refresh unnecessarily
+                }
 
-                    foreach (string pathToDelete in pathsToDelete)
+                // Proceed with deleting other selected files silently
+                if (pathsToDelete.Count > 0)
+                {
+                    try
                     {
-                        AssetDatabase.DeleteAsset(pathToDelete);
+                        // Suspend asset imports/updates for bulk optimization
+                        AssetDatabase.StartAssetEditing();
+
+                        foreach (string pathToDelete in pathsToDelete)
+                        {
+                            AssetDatabase.DeleteAsset(pathToDelete);
+                        }
                     }
-                }
-                finally
-                {
-                    // Resume and process all deletions at once
-                    AssetDatabase.StopAssetEditing();
+                    finally
+                    {
+                        // Resume and process all deletions at once
+                        AssetDatabase.StopAssetEditing();
+                    }
                 }
 
                 selectedIndices.Clear();
@@ -285,27 +305,28 @@ namespace Vectorier.ProjectManager
 
         private void ClearAllXMLs()
         {
-            if (EditorUtility.DisplayDialog("Clear All XML Files", "Are you sure you want to delete all imported XML files for this project?", "Yes, Delete All", "Cancel"))
+            try
             {
-                try
-                {
-                    // Suspend asset imports/updates for bulk optimization
-                    AssetDatabase.StartAssetEditing();
+                // Suspend asset imports/updates for bulk optimization
+                AssetDatabase.StartAssetEditing();
 
-                    foreach (string path in loadedXMLPaths)
+                foreach (string path in loadedXMLPaths)
+                {
+                    // Delete everything EXCEPT TriggerTemplates
+                    if (Path.GetFileNameWithoutExtension(path) != "TriggerTemplates")
                     {
                         AssetDatabase.DeleteAsset(path);
                     }
                 }
-                finally
-                {
-                    // Resume and process all deletions at once
-                    AssetDatabase.StopAssetEditing();
-                }
-
-                selectedIndices.Clear();
-                RefreshXMLList();
             }
+            finally
+            {
+                // Resume and process all deletions at once
+                AssetDatabase.StopAssetEditing();
+            }
+
+            selectedIndices.Clear();
+            RefreshXMLList();
         }
 
         private void RefreshXMLList()

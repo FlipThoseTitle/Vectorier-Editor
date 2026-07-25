@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+
+<Caption> КОМАНДА РАЗРАБОТЧИКОВ </Caption>
+
+<SubCaption value="ПРОДЮСЕРЫ">
+<str value="ДМИТРИЙ ТЕРЁХИН"/>
+<str value="ЕВГЕНИЙ ДЯБИН"/>
+</SubCaption>
+
+<SubCaption value="ВЕДУЩИЙ ГЕЙМДИЗАЙНЕР">
+<str value="ОЛЕГ ЕГОРОВ"/>
+</SubCaption>
+
+<SubCaption value="МЕНЕДЖЕР">
+<str value="АНДРЕЙ РЕВЕНКО"/>
+</SubCaption>
+
+<SubCaption value="ДОПОЛНИТЕЛЬНЫЙ ГЕЙМДИЗАЙНЕР">
+<str value="ВИКТОР КОРОТЕЕВ"/>
+</SubCaption>
+
+<SubCaption value="ДОПОЛНИТЕЛЬНЫЙ МЕНЕДЖЕР">
+<str value="СЕРГЕЙ СОРОКИН"/>
+</SubCaption>
+
+<SubCaption value="ЛЕВЕЛДИЗАЙНЕРЫ">
+<str value="КИРИЛЛ БУТКО"/>
+<str value="КОНСТАНТИН ЖАВОРОНКОВ"/>
+<str value="АНДРЕЙ РЫБОЛОВЛЕВ"/>
+</SubCaption>
+
+<SubCaption value="ДОПОЛНИТЕЛЬНЫЕ ЛЕВЕЛДИЗАЙНЕРЫ">
+<str value="ФИЛИПП ШУЛЕЙКО"/>
+<str value="ВИКТОР ТРУХНОВ"/>
+<str value="МАКСИМ НЕЙЖМАК"/>
+<str value="СТАНИСЛАВ КОРОЛЕВ"/>
+</SubCaption>
+
+<SubCaption value="АНИМАТОРЫ">
+<str value="ЕВГЕНИЙ ХАПУГИН"/>
+<str value="АЛЕКСЕЙ ПАНТЕЛЕЕВ"/>
+<str value="ДМИТРИЙ ТЕРЕЩЕНКО"/>
+</SubCaption>
+
+<SubCaption value="ВЕДУЩИЕ ПРОГРАММИСТЫ">
+<str value="АЛЕКСАНДР ПАНОВ"/>
+<str value="АЛЕКСЕЙ МОИСЕЕВ"/>
+</SubCaption>
+
+<SubCaption value="СЕРВЕРНЫЙ ПРОГРАММИСТ (FACEBOOK)">
+<str value="ДМИТРИЙ ЖАРОВ"/>
+</SubCaption>
+
+<SubCaption value="ПРОГРАММИСТЫ">
+<str value="ИЛЬЯ ВОЛКОВ"/>
+<str value="ОЛЕГ ДУРОВ"/>
+<str value="ОЛЕГ ШИКУН"/>
+<str value="ВЛАДИМИР ПИЩИДА"/>
+</SubCaption>
+
+<SubCaption value="ПРОГРАММИСТЫ СРЕДСТВ РАЗРАБОТКИ">
+<str value="АЛЕКСАНДР БЛЕДНОВ"/>
+<str value="ПАВЕЛ ФОТ"/>
+</SubCaption>
+
+<SubCaption value="АРТ-ДИРЕКТОРЫ">
+<str value="АНТОН ВАСИЛЬЕВ"/>
+<str value="ДМИТРИЙ КУРКИН"/>
+</SubCaption>
+
+<SubCaption value="ХУДОЖНИКИ">
+<str value="АЛЕКСАНДР НЕМОВ"/>
+<str value="ЕВГЕНИЙ НОВОСИЛЬЦЕВ"/>
+<str value="ОЛЬГА ИВАНОВА"/>
+</SubCaption>
+
+<SubCaption value="ДИЗАЙНЕРЫ">
+<str value="АЛИСА ХУСНУТДИНОВА"/>
+<str value="ДЕНИС РОМАНКО"/>
+</SubCaption>
+
+<SubCaption value="ЭФФЕКТЫ">
+<str value="ГРИГОРИЙ ТЕРЕНТЬЕВ"/>
+<str value="ДЕНИС РОМАНКО"/>
+</SubCaption>
+
+<SubCaption value="МУЗЫКА">
+<str value="ЛИНД ЭРЕБРОС"/>
+<str value="ВИКТОР КРАСНОКУТСКИЙ"/>
+</SubCaption>
+
+<SubCaption value="ЗВУК">
+<str value="ВИКТОР КРАСНОКУТСКИЙ"/>
+</SubCaption>
+
+<SubCaption value="ТЕСТИРОВЩИКИ">
+<str value="СЕРГЕЙ КОСТАРЕВ"/>
+<str value="АЛЁНА НАТАЛУХА"/>
+<str value="ДЕНИС ПОТЕХИН"/>
+<str value="АЛЕКСАНДР КЛИНОВОЙ"/>
+<str value="РОМАН КОПАЧ"/>
+<str value="ТАТЬЯНА МУРОМЦЕВА"/>
+</SubCaption>
+
+<SubCaption value="ТЕХНИЧЕСКАЯ ПОДДЕРЖКА">
+<str value="ИВАН КИРЕЕВ"/>
+</SubCaption>
+
+<SubCaption value="ДИРЕКТОР ПО МАРКЕТИНГУ В СЕВЕРНОЙ АМЕРИКЕ">
+<str value="ДЭВИД НИКСОН"/>
+</SubCaption>
+
+<SubCaption value="ДИРЕКТОР ПО МАРКЕТИНГУ В ГЕРМАНИИ">
+<str value="ТОМ БОРОВСКИС"/>
+</SubCaption>
+
+
+<SubCaption value="ОСОБАЯ БЛАГОДАРНОСТЬ" main="1"/>
+
+<strings>
+<str value="МАКСИМ СЛОБОДЯНЮК"/>
+<str value="МАКСИМ КОБЛОВ"/>
+<str value="ШАМИЛЬ МАГОМЕДОВ"/>
+<str value="МАКСИМ ЧЮЛЮЧКИН"/>
+<str value="ПЕКА ГЕРНЕТ"/>
+<str value="СЕБАСТЬЯН БИЛЛЬМИЕР"/>
+<str value="МИХАИЛ ВИНОГРАДОВ"/>
+<str value="АЛЕКСЕЙ ИЛЮХИН"/>
+<str value="МАРИНА ЛУНЕВА"/>
+<str value="АННА ГОРЯЧЕВА"/>
+<str value="КОНСТАНТИН САХАРОВ"/>
+<str value="АНТОН УКРАИНСКИЙ"/>
+<str value="РОМАН РЫК"/>
+<str value="КСЕНИЯ ДЯБИНА"/>
+<str value="ВЛАДИМИР ШАПОВАЛЕНКО"/>
+<str value="ЕЛЕНА ШАПОВАЛОВА"/>
+<str value="СТАНИСЛАВ КОРОТАЕВ"/>
+<str value="ВИКТОР СМИРНОВ"/>
+<str value="КИРИЛЛ КОРЕПАНОВ"/>
+<str value="ВАЛЕНТИН ВОЗНЕСЕНСКИЙ"/>
+<str value="АРТУР МУРТАЗИН"/>
+<str value="ВАСИЛИЙ СКОБЕЛЕВ"/>
+</strings>
+
+<SubCaption value="А ТАКЖЕ БЛАГОДАРИМ НАШИ СЕМЬИ" main="1"/>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</root>

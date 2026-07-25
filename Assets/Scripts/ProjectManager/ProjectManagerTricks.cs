@@ -55,6 +55,10 @@ namespace Vectorier.ProjectManager
             GUILayout.BeginHorizontal();
             GUILayout.Label("Tricks", EditorStyles.largeLabel);
             GUILayout.FlexibleSpace();
+
+            GUIStyle countStyle = new GUIStyle(EditorStyles.boldLabel) { alignment = TextAnchor.MiddleCenter };
+            GUILayout.Label($"Total Tricks - {trickList.Count}", countStyle, GUILayout.Height(30));
+            GUILayout.Space(10);
             
             if (GUILayout.Button("+", GUILayout.Width(30), GUILayout.Height(30)))
             {
@@ -70,7 +74,6 @@ namespace Vectorier.ProjectManager
             }
             GUI.enabled = true;
 
-            // Added C button
             GUI.enabled = trickList.Count > 0;
             if (GUILayout.Button("C", GUILayout.Width(30), GUILayout.Height(30)))
             {
@@ -159,7 +162,7 @@ namespace Vectorier.ProjectManager
 
             GUILayout.Space(5);
 
-            // 1. Trick Name (Delayed)
+            // Trick Name
             EditorGUI.BeginChangeCheck();
             string newName = EditorGUILayout.DelayedTextField("Trick Name", item.trickName);
             if (EditorGUI.EndChangeCheck())
@@ -173,7 +176,7 @@ namespace Vectorier.ProjectManager
                 }
             }
 
-            // 2. Display Name / Localization (Delayed)
+            // Display Name / Localization
             EditorGUI.BeginChangeCheck();
             string newDisplayName = EditorGUILayout.DelayedTextField("Display Name", item.displayName);
             if (EditorGUI.EndChangeCheck())
@@ -182,7 +185,7 @@ namespace Vectorier.ProjectManager
                 SaveToXml(); // Save to sync the localization file
             }
 
-            // 3. Price (Delayed)
+            // Price
             EditorGUI.BeginChangeCheck();
             item.rawPriceInput = EditorGUILayout.DelayedTextField("Price", item.rawPriceInput);
             if (EditorGUI.EndChangeCheck())
@@ -194,7 +197,15 @@ namespace Vectorier.ProjectManager
 
             GUILayout.Space(10);
 
-            // 4. Shop Image Preview (256x226)
+            // --- Shared Text Style for Empty Thumbnails ---
+            GUIStyle centeredTextStyle = new GUIStyle(EditorStyles.label)
+            {
+                alignment = TextAnchor.MiddleCenter,
+                wordWrap = true, // wordWrap so it fits inside the smaller Track Image box
+                normal = { textColor = Color.black } // Dark text so it shows up well on the white texture
+            };
+
+            // Shop Image Preview (256x226)
             GUILayout.BeginHorizontal();
             GUILayout.Label("Shop Image", GUILayout.Width(EditorGUIUtility.labelWidth - 5));
             
@@ -205,6 +216,12 @@ namespace Vectorier.ProjectManager
             Texture shopDisplayTex = item.shopImage != null ? item.shopImage : EditorGUIUtility.whiteTexture;
             GUI.DrawTexture(shopImageRect, shopDisplayTex, ScaleMode.ScaleToFit);
             
+            // --- ADDED TEXT OVERLAY ---
+            if (item.shopImage == null)
+            {
+                GUI.Label(shopImageRect, "Click Here to Change Thumbnail", centeredTextStyle);
+            }
+            
             if (GUI.Button(shopImageRect, new GUIContent("", "Click to assign shop image (256x226)"), GUIStyle.none))
             {
                 SelectAndImportImage(item, true);
@@ -214,7 +231,7 @@ namespace Vectorier.ProjectManager
 
             GUILayout.Space(5);
 
-            // 5. Track Image Preview (117x117)
+            // Track Image Preview (117x117)
             GUILayout.BeginHorizontal();
             GUILayout.Label("Track Image", GUILayout.Width(EditorGUIUtility.labelWidth - 5));
             
@@ -225,6 +242,12 @@ namespace Vectorier.ProjectManager
             Texture trackDisplayTex = item.trackImage != null ? item.trackImage : EditorGUIUtility.whiteTexture;
             GUI.DrawTexture(trackImageRect, trackDisplayTex, ScaleMode.ScaleToFit);
             
+            // --- TEXT OVERLAY ---
+            if (item.trackImage == null)
+            {
+                GUI.Label(trackImageRect, "Click Here to Change Thumbnail", centeredTextStyle);
+            }
+
             if (GUI.Button(trackImageRect, new GUIContent("", "Click to assign track image (117x117)"), GUIStyle.none))
             {
                 SelectAndImportImage(item, false);

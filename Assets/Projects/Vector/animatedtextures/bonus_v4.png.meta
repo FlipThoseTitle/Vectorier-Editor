@@ -1,0 +1,533 @@
+fileFormatVersion: 2
+guid: 55b4ebe8fb5620b4aba57ec75a241b6c
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -3690435787367774044
+    second: bonus_v4_0
+  - first:
+      213: -1030864060526324466
+    second: bonus_v4_1
+  - first:
+      213: -3849855505332695283
+    second: bonus_v4_2
+  - first:
+      213: 5465437848259632184
+    second: bonus_v4_3
+  - first:
+      213: -1252659944316075908
+    second: bonus_v4_4
+  - first:
+      213: -3787339355473615528
+    second: bonus_v4_5
+  - first:
+      213: 2541647293258970533
+    second: bonus_v4_6
+  - first:
+      213: -3372220779039760759
+    second: bonus_v4_7
+  - first:
+      213: 1732679228747702921
+    second: bonus_v4_8
+  - first:
+      213: -5074596866069839161
+    second: bonus_v4_9
+  - first:
+      213: -2145396157069969049
+    second: bonus_v4_10
+  - first:
+      213: 8173618340293942739
+    second: bonus_v4_11
+  - first:
+      213: 8279983214253222808
+    second: bonus_v4_12
+  - first:
+      213: -2826076234675573602
+    second: bonus_v4_13
+  - first:
+      213: -2831613595876821957
+    second: bonus_v4_14
+  - first:
+      213: -8158432194396326035
+    second: bonus_v4_15
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: bonus_v4_0
+      rect:
+        serializedVersion: 2
+        x: 2
+        y: 425
+        width: 89
+        height: 85
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4a80e834430f8ccc0800000000000000
+      internalID: -3690435787367774044
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: bonus_v4_1
+      rect:
+        serializedVersion: 2
+        x: 91
+        y: 427
+        width: 90
+        height: 84
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e059c944992a1b1f0800000000000000
+      internalID: -1030864060526324466
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: bonus_v4_2
+      rect:
+        serializedVersion: 2
+        x: 182
+        y: 423
+        width: 73
+        height: 87
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d0f0018b0d0929ac0800000000000000
+      internalID: -3849855505332695283
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: bonus_v4_3
+      rect:
+        serializedVersion: 2
+        x: 1
+        y: 341
+        width: 87
+        height: 83
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 83c9d7f04c229db40800000000000000
+      internalID: 5465437848259632184
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: bonus_v4_4
+      rect:
+        serializedVersion: 2
+        x: 91
+        y: 343
+        width: 87
+        height: 83
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c700ea2ea68ad9ee0800000000000000
+      internalID: -1252659944316075908
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: bonus_v4_5
+      rect:
+        serializedVersion: 2
+        x: 179
+        y: 335
+        width: 76
+        height: 87
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 85563212ceaa07bc0800000000000000
+      internalID: -3787339355473615528
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: bonus_v4_6
+      rect:
+        serializedVersion: 2
+        x: 1
+        y: 251
+        width: 82
+        height: 90
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5a5b80b3fbeb54320800000000000000
+      internalID: 2541647293258970533
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: bonus_v4_7
+      rect:
+        serializedVersion: 2
+        x: 89
+        y: 259
+        width: 87
+        height: 83
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 98ed42971177331d0800000000000000
+      internalID: -3372220779039760759
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: bonus_v4_8
+      rect:
+        serializedVersion: 2
+        x: 177
+        y: 247
+        width: 76
+        height: 87
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 98264331496bb0810800000000000000
+      internalID: 1732679228747702921
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: bonus_v4_9
+      rect:
+        serializedVersion: 2
+        x: 1
+        y: 161
+        width: 82
+        height: 90
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7c2c89369096399b0800000000000000
+      internalID: -5074596866069839161
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: bonus_v4_10
+      rect:
+        serializedVersion: 2
+        x: 84
+        y: 177
+        width: 89
+        height: 81
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7693b5bdf850a32e0800000000000000
+      internalID: -2145396157069969049
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: bonus_v4_11
+      rect:
+        serializedVersion: 2
+        x: 174
+        y: 157
+        width: 81
+        height: 90
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3dd96d623968e6170800000000000000
+      internalID: 8173618340293942739
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: bonus_v4_12
+      rect:
+        serializedVersion: 2
+        x: 1
+        y: 71
+        width: 80
+        height: 90
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 89ba2c73dd868e270800000000000000
+      internalID: 8279983214253222808
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: bonus_v4_13
+      rect:
+        serializedVersion: 2
+        x: 83
+        y: 95
+        width: 87
+        height: 81
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e9c2df343a2c7c8d0800000000000000
+      internalID: -2826076234675573602
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: bonus_v4_14
+      rect:
+        serializedVersion: 2
+        x: 171
+        y: 69
+        width: 82
+        height: 87
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b347894ef6614b8d0800000000000000
+      internalID: -2831613595876821957
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: bonus_v4_15
+      rect:
+        serializedVersion: 2
+        x: 81
+        y: 15
+        width: 90
+        height: 79
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d6775e8f42d67ce80800000000000000
+      internalID: -8158432194396326035
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      bonus_v4_0: -3690435787367774044
+      bonus_v4_1: -1030864060526324466
+      bonus_v4_10: -2145396157069969049
+      bonus_v4_11: 8173618340293942739
+      bonus_v4_12: 8279983214253222808
+      bonus_v4_13: -2826076234675573602
+      bonus_v4_14: -2831613595876821957
+      bonus_v4_15: -8158432194396326035
+      bonus_v4_2: -3849855505332695283
+      bonus_v4_3: 5465437848259632184
+      bonus_v4_4: -1252659944316075908
+      bonus_v4_5: -3787339355473615528
+      bonus_v4_6: 2541647293258970533
+      bonus_v4_7: -3372220779039760759
+      bonus_v4_8: 1732679228747702921
+      bonus_v4_9: -5074596866069839161
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

@@ -48,7 +48,7 @@ namespace Vectorier.ProjectManager
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
             
-            GUIStyle totalLabelStyle = new GUIStyle(EditorStyles.label) { alignment = TextAnchor.MiddleRight };
+            GUIStyle totalLabelStyle = new GUIStyle(EditorStyles.boldLabel) { alignment = TextAnchor.MiddleRight };
             GUILayout.Label("Total Musics - " + loadedMusicPaths.Count, totalLabelStyle, GUILayout.Height(30));
             
             GUILayout.Space(10); // Small gap between the text and the buttons
@@ -251,28 +251,50 @@ namespace Vectorier.ProjectManager
             if (selectedIndices.Count > 0)
             {
                 List<string> pathsToDelete = new List<string>();
+                bool menuSelected = false;
+
                 foreach (int index in selectedIndices)
                 {
                     if (index >= 0 && index < loadedMusicPaths.Count)
                     {
-                        pathsToDelete.Add(loadedMusicPaths[index]);
+                        string path = loadedMusicPaths[index];
+                        
+                        // Check if the file is "menu"
+                        if (Path.GetFileNameWithoutExtension(path) == "menu")
+                        {
+                            menuSelected = true;
+                        }
+                        else
+                        {
+                            pathsToDelete.Add(path);
+                        }
                     }
                 }
 
-                try
+                // If ONLY the "menu" music was selected, show the prompt
+                if (menuSelected && pathsToDelete.Count == 0)
                 {
-                    // Suspend asset imports/updates for bulk optimization
-                    AssetDatabase.StartAssetEditing();
+                    EditorUtility.DisplayDialog("Notice", "The 'menu' music cannot be deleted.", "OK");
+                    return; // Stop execution so we don't clear indices or refresh unnecessarily
+                }
 
-                    foreach (string pathToDelete in pathsToDelete)
+                if (pathsToDelete.Count > 0)
+                {
+                    try
                     {
-                        AssetDatabase.DeleteAsset(pathToDelete);
+                        // Suspend asset imports/updates for bulk optimization
+                        AssetDatabase.StartAssetEditing();
+
+                        foreach (string pathToDelete in pathsToDelete)
+                        {
+                            AssetDatabase.DeleteAsset(pathToDelete);
+                        }
                     }
-                }
-                finally
-                {
-                    // Resume and process all deletions at once
-                    AssetDatabase.StopAssetEditing();
+                    finally
+                    {
+                        // Resume and process all deletions at once
+                        AssetDatabase.StopAssetEditing();
+                    }
                 }
 
                 selectedIndices.Clear();
@@ -282,27 +304,28 @@ namespace Vectorier.ProjectManager
 
         private void ClearAllMusic()
         {
-            if (EditorUtility.DisplayDialog("Clear All Music", "Are you sure you want to delete all imported music (.mp3, .wav) for this project?", "Yes, Delete All", "Cancel"))
+            try
             {
-                try
-                {
-                    // Suspend asset imports/updates for bulk optimization
-                    AssetDatabase.StartAssetEditing();
+                // Suspend asset imports/updates for bulk optimization
+                AssetDatabase.StartAssetEditing();
 
-                    foreach (string path in loadedMusicPaths)
+                foreach (string path in loadedMusicPaths)
+                {
+                    // Delete everything EXCEPT the "menu" music
+                    if (Path.GetFileNameWithoutExtension(path) != "menu")
                     {
                         AssetDatabase.DeleteAsset(path);
                     }
                 }
-                finally
-                {
-                    // Resume and process all deletions at once
-                    AssetDatabase.StopAssetEditing();
-                }
-
-                selectedIndices.Clear();
-                RefreshMusicList();
             }
+            finally
+            {
+                // Resume and process all deletions at once
+                AssetDatabase.StopAssetEditing();
+            }
+
+            selectedIndices.Clear();
+            RefreshMusicList();
         }
 
         private void RefreshMusicList()

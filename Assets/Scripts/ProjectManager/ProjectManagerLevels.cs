@@ -76,6 +76,7 @@ namespace Vectorier.ProjectManager
         private List<LevelItem> levelList = new List<LevelItem>();
         private List<string> availableTracks = new List<string>();
         private List<string> availableLocations = new List<string>();
+        private List<string> availableTricksFromShop = new List<string>();
         private List<StarsTemplate> starsTemplates = new List<StarsTemplate>();
         private List<RewardTemplate> rewardTemplates = new List<RewardTemplate>();
         
@@ -106,6 +107,7 @@ namespace Vectorier.ProjectManager
         {
             LoadTemplatesFromXml();
             LoadAvailableSubjects();
+            LoadAvailableTricks();
         }
 
         private void OnGUI()
@@ -197,11 +199,23 @@ namespace Vectorier.ProjectManager
             string properModeName = activeMode == "STORY" ? "Story" : "Bonus";
             GUILayout.Label($"{activeLocationName} - {properModeName}", EditorStyles.largeLabel);
             GUILayout.FlexibleSpace();
+
+            GUIStyle countStyle = new GUIStyle(EditorStyles.boldLabel) { alignment = TextAnchor.MiddleCenter };
+            GUILayout.Label($"Total Levels - {levelList.Count}", countStyle, GUILayout.Height(25));
+            GUILayout.Space(10);
             
             if (GUILayout.Button("+", GUILayout.Width(30), GUILayout.Height(25))) AddLevel();
             
+            // Enabled only if a specific level is selected
             GUI.enabled = selectedIndex >= 0 && selectedIndex < levelList.Count;
             if (GUILayout.Button("-", GUILayout.Width(30), GUILayout.Height(25))) RemoveLevel();
+            
+            // Enabled as long as there is at least one level to clear
+            GUI.enabled = levelList.Count > 0;
+            if (GUILayout.Button("C", GUILayout.Width(30), GUILayout.Height(25))) ClearAllLevels();
+            
+            // Enabled only if a specific level is selected
+            GUI.enabled = selectedIndex >= 0 && selectedIndex < levelList.Count;
             if (GUILayout.Button("^", GUILayout.Width(30), GUILayout.Height(25))) ReorderLevel(-1);
             if (GUILayout.Button("v", GUILayout.Width(30), GUILayout.Height(25))) ReorderLevel(1);
             GUI.enabled = true;
@@ -246,12 +260,14 @@ namespace Vectorier.ProjectManager
 
             GUILayout.Space(10);
 
-            // 1. Thumbnail
+            // Thumbnail
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
+            
             float imgWidth = 512f;
             float imgHeight = 340f;
             float availableWidth = position.width - 40; 
+            
             if (availableWidth < imgWidth)
             {
                 float scale = availableWidth / imgWidth;
@@ -260,27 +276,38 @@ namespace Vectorier.ProjectManager
             }
 
             Rect imageRect = GUILayoutUtility.GetRect(imgWidth, imgHeight, GUILayout.Width(imgWidth), GUILayout.Height(imgHeight));
-            Texture displayTex = item.thumbnail != null ? item.thumbnail : EditorGUIUtility.whiteTexture;
             
-            GUI.Box(imageRect, "", GUI.skin.textField); 
-            GUI.DrawTexture(imageRect, displayTex, ScaleMode.ScaleToFit);
-            
-            if (item.thumbnail == null)
+            // --- THUMBNAIL LOGIC ---
+            if (item.thumbnail != null)
             {
-                GUIStyle labelStyle = new GUIStyle(GUI.skin.label) { alignment = TextAnchor.MiddleCenter, normal = { textColor = Color.black } };
-                GUI.Label(imageRect, "Thumbnail", labelStyle);
+                // Draw actual image scaled to fit correctly
+                GUI.DrawTexture(imageRect, item.thumbnail, ScaleMode.ScaleToFit);
+            }
+            else
+            {
+                // Draw white texture stretched to fill the entire expected bounds
+                GUI.DrawTexture(imageRect, EditorGUIUtility.whiteTexture, ScaleMode.StretchToFill);
+
+                GUIStyle centeredTextStyle = new GUIStyle(EditorStyles.label)
+                {
+                    alignment = TextAnchor.MiddleCenter,
+                    normal = { textColor = Color.black } // Dark text so it shows up well on the white texture
+                };
+                GUI.Label(imageRect, "Click Here to Change Thumbnail", centeredTextStyle);
             }
 
+            // Invisible button covering the entire image area
             if (GUI.Button(imageRect, new GUIContent("", "Click to assign thumbnail"), GUIStyle.none))
             {
                 SelectAndImportImage(item);
             }
+            
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
 
             GUILayout.Space(10);
 
-            GUILayout.Label("Level Scene XML", EditorStyles.boldLabel);
+            GUILayout.Label("Level XML", EditorStyles.boldLabel);
             item.xmlAsset = (TextAsset)EditorGUILayout.ObjectField("XML Asset", item.xmlAsset, typeof(TextAsset), false);
 
             GUILayout.BeginHorizontal();
@@ -296,7 +323,7 @@ namespace Vectorier.ProjectManager
 
             GUILayout.Space(10);
 
-            // 2. Display Name
+            // Display Name
             EditorGUI.BeginChangeCheck();
             item.displayName = EditorGUILayout.DelayedTextField("Display Name", item.displayName);
             if (EditorGUI.EndChangeCheck())
@@ -320,7 +347,7 @@ namespace Vectorier.ProjectManager
             GUILayout.Label(title, EditorStyles.boldLabel);
             GUILayout.Space(5);
 
-            // 3. Unlock Conditions
+            // Unlock Conditions
             EditorGUI.BeginChangeCheck();
             data.rawPriceInput = EditorGUILayout.DelayedTextField("Unlock Price", data.rawPriceInput);
             if (EditorGUI.EndChangeCheck())
@@ -382,13 +409,25 @@ namespace Vectorier.ProjectManager
 
             GUILayout.Space(5);
 
-            // 4. Tricks
+            // Tricks
             GUILayout.Label("Tricks", EditorStyles.boldLabel);
             for (int t = 0; t < data.tricks.Count; t++)
             {
                 GUILayout.BeginHorizontal();
                 EditorGUI.BeginChangeCheck();
-                data.tricks[t] = EditorGUILayout.TextField(data.tricks[t]);
+
+                if (availableTricksFromShop != null && availableTricksFromShop.Count > 0)
+                {
+                    int currentIndex = Mathf.Max(0, availableTricksFromShop.IndexOf(data.tricks[t]));
+                    int newIndex = EditorGUILayout.Popup(currentIndex, availableTricksFromShop.ToArray());
+                    data.tricks[t] = availableTricksFromShop[newIndex];
+                }
+                else
+                {
+                    // Fallback to text field just in case Shop_payed.xml fails to load
+                    data.tricks[t] = EditorGUILayout.TextField(data.tricks[t]);
+                }
+
                 if (GUILayout.Button("-", GUILayout.Width(25)))
                 {
                     data.tricks.RemoveAt(t);
@@ -398,15 +437,24 @@ namespace Vectorier.ProjectManager
                 if (EditorGUI.EndChangeCheck()) SaveToXml();
                 GUILayout.EndHorizontal();
             }
+            
             if (GUILayout.Button("+ Add Trick", GUILayout.Width(100)))
             {
-                data.tricks.Add("TRICK_NEW");
+                if (availableTricksFromShop != null && availableTricksFromShop.Count > 0)
+                {
+                    // Assign the first valid trick on the list instead of "TRICK_NEW"
+                    data.tricks.Add(availableTricksFromShop[0]);
+                }
+                else
+                {
+                    data.tricks.Add("TRICK_NEW");
+                }
                 SaveToXml();
             }
 
             GUILayout.Space(10);
 
-            // 5. Templates
+            // Templates
             string[] starsNames = starsTemplates.Select(t => t.name).ToArray();
             string[] rewardNames = rewardTemplates.Select(t => t.name).ToArray();
             
@@ -566,6 +614,76 @@ namespace Vectorier.ProjectManager
             levelList.RemoveAt(selectedIndex);
             selectedIndex = -1;
             RefreshLevelNamesAndOrders();
+        }
+
+        private void ClearAllLevels()
+        {
+            if (levelList.Count == 0) return;
+
+            string properModeName = activeMode == "STORY" ? "Story" : "Bonus";
+            bool confirm = EditorUtility.DisplayDialog(
+                "Clear All Levels", 
+                $"Are you sure you want to delete ALL {levelList.Count} {properModeName} levels? This action cannot be undone.", 
+                "Yes, Clear All", 
+                "Cancel"
+            );
+
+            if (!confirm) return;
+
+            // Load the localization document once to avoid reading/writing for every single item
+            string locPath = $"Assets/Projects/{activeProjectName}/localization/localization_all.xml";
+            XDocument doc = null;
+            if (File.Exists(locPath))
+            {
+                doc = XDocument.Load(locPath);
+            }
+
+            // Loop backwards when deleting to safely remove items without throwing off indexes
+            for (int i = levelList.Count - 1; i >= 0; i--)
+            {
+                LevelItem item = levelList[i];
+                
+                // Delete Thumbnail
+                if (item.thumbnail != null)
+                {
+                    string path = AssetDatabase.GetAssetPath(item.thumbnail);
+                    if (!string.IsNullOrEmpty(path)) AssetDatabase.DeleteAsset(path);
+                }
+
+                // Delete XML
+                if (item.xmlAsset != null)
+                {
+                    AssetDatabase.DeleteAsset(AssetDatabase.GetAssetPath(item.xmlAsset));
+                }
+                else 
+                {
+                    string xmlPath = $"Assets/Projects/{activeProjectName}/xmlroot/levels/{item.internalName}.xml";
+                    if (File.Exists(xmlPath)) AssetDatabase.DeleteAsset(xmlPath);
+                }
+
+                // Remove from Localization
+                if (doc != null)
+                {
+                    XElement node = doc.Root?.Element($"item_{item.internalName}");
+                    if (node != null)
+                    {
+                        node.Remove();
+                    }
+                }
+            }
+
+            // Save localization once all items are removed
+            if (doc != null)
+            {
+                doc.Save(locPath);
+            }
+
+            levelList.Clear();
+            selectedIndex = -1;
+            
+            // Update the main XML configuration file and exit GUI to prevent Layout mismatch errors
+            SaveToXml();
+            GUIUtility.ExitGUI();
         }
 
         private void ReorderLevel(int dir)
@@ -1114,6 +1232,37 @@ namespace Vectorier.ProjectManager
                         }
                     }
                 }
+            }
+        }
+
+        private void LoadAvailableTricks()
+        {
+            availableTricksFromShop.Clear();
+            string path = $"Assets/Projects/{activeProjectName}/commons/Shop_payed.xml";
+            
+            if (!File.Exists(path))
+            {
+                Debug.LogWarning($"[ProjectManager] Could not find {path}. Tricks dropdown might be empty.");
+                return;
+            }
+
+            try
+            {
+                XDocument doc = XDocument.Load(path);
+                
+                // Use Descendants to grab all <Item> nodes regardless of the XML root structure
+                foreach (XElement item in doc.Descendants("Item"))
+                {
+                    string trickName = (string)item.Attribute("Name");
+                    if (!string.IsNullOrEmpty(trickName) && !availableTricksFromShop.Contains(trickName))
+                    {
+                        availableTricksFromShop.Add(trickName);
+                    }
+                }
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError($"[ProjectManager] Error parsing Shop_payed.xml: {e.Message}");
             }
         }
 

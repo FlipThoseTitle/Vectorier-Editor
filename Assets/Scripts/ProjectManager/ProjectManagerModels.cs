@@ -48,13 +48,11 @@ namespace Vectorier.ProjectManager
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
             
-            // -> NEW: Total Models Text <-
-            GUIStyle totalLabelStyle = new GUIStyle(EditorStyles.label) { alignment = TextAnchor.MiddleRight };
+            // Total Models Text
+            GUIStyle totalLabelStyle = new GUIStyle(EditorStyles.boldLabel) { alignment = TextAnchor.MiddleRight };
             GUILayout.Label("Total Models - " + loadedModelPaths.Count, totalLabelStyle, GUILayout.Height(30));
             
             GUILayout.Space(10); // Small gap between the text and the buttons
-
-            // Note: The '+' button was intentionally omitted based on instructions.
 
             GUI.enabled = selectedIndices.Count > 0;
             if (GUILayout.Button("-", GUILayout.Width(30), GUILayout.Height(30)))
@@ -253,28 +251,56 @@ namespace Vectorier.ProjectManager
             if (selectedIndices.Count > 0)
             {
                 List<string> pathsToDelete = new List<string>();
+                int undeletableCount = 0;
+
+                // Define the protected models list
+                HashSet<string> protectedModels = new HashSet<string> { "0", "1" };
+
                 foreach (int index in selectedIndices)
                 {
                     if (index >= 0 && index < loadedModelPaths.Count)
                     {
-                        pathsToDelete.Add(loadedModelPaths[index]);
+                        string path = loadedModelPaths[index];
+                        string fileName = Path.GetFileNameWithoutExtension(path);
+                        
+                        // Check if the file is in the protected list
+                        if (protectedModels.Contains(fileName))
+                        {
+                            undeletableCount++;
+                        }
+                        else
+                        {
+                            pathsToDelete.Add(path);
+                        }
                     }
                 }
 
-                try
+                // Trigger a prompt showing how many undeletable files were selected
+                if (undeletableCount > 0)
                 {
-                    // Suspend asset imports/updates for bulk optimization
-                    AssetDatabase.StartAssetEditing();
+                    EditorUtility.DisplayDialog("Notice", $"{undeletableCount} selected file(s) cannot be deleted because they are protected.", "OK");
+                    
+                    // If ONLY undeletable files were selected, stop here
+                    if (pathsToDelete.Count == 0) return;
+                }
 
-                    foreach (string pathToDelete in pathsToDelete)
+                if (pathsToDelete.Count > 0)
+                {
+                    try
                     {
-                        AssetDatabase.DeleteAsset(pathToDelete);
+                        // Suspend asset imports/updates for bulk optimization
+                        AssetDatabase.StartAssetEditing();
+
+                        foreach (string pathToDelete in pathsToDelete)
+                        {
+                            AssetDatabase.DeleteAsset(pathToDelete);
+                        }
                     }
-                }
-                finally
-                {
-                    // Resume and process all deletions at once
-                    AssetDatabase.StopAssetEditing();
+                    finally
+                    {
+                        // Resume and process all deletions at once
+                        AssetDatabase.StopAssetEditing();
+                    }
                 }
 
                 selectedIndices.Clear();
@@ -284,27 +310,33 @@ namespace Vectorier.ProjectManager
 
         private void ClearAllModels()
         {
-            if (EditorUtility.DisplayDialog("Clear All Models", "Are you sure you want to delete all imported models (.xml) for this project?", "Yes, Delete All", "Cancel"))
-            {
-                try
-                {
-                    // Suspend asset imports/updates for bulk optimization
-                    AssetDatabase.StartAssetEditing();
+            // Define the protected models list
+            HashSet<string> protectedModels = new HashSet<string> { "0", "1" };
 
-                    foreach (string path in loadedModelPaths)
+            try
+            {
+                // Suspend asset imports/updates for bulk optimization
+                AssetDatabase.StartAssetEditing();
+
+                foreach (string path in loadedModelPaths)
+                {
+                    string fileName = Path.GetFileNameWithoutExtension(path);
+                    
+                    // Delete everything EXCEPT the protected models
+                    if (!protectedModels.Contains(fileName))
                     {
                         AssetDatabase.DeleteAsset(path);
                     }
                 }
-                finally
-                {
-                    // Resume and process all deletions at once
-                    AssetDatabase.StopAssetEditing();
-                }
-
-                selectedIndices.Clear();
-                RefreshModelList();
             }
+            finally
+            {
+                // Resume and process all deletions at once
+                AssetDatabase.StopAssetEditing();
+            }
+
+            selectedIndices.Clear();
+            RefreshModelList();
         }
 
         private void RefreshModelList()

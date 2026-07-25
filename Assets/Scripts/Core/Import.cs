@@ -82,19 +82,19 @@ namespace Vectorier.Core
         {
             DrawDirectoryFieldWithBrowse("File Path Directory", ref config.filePathDirectory);
             DrawXmlNameFieldWithBrowse("XML Name", ref config.xmlName, ref config.filePathDirectory);
-            config.selectedObject = EditorGUILayout.TextField("Selected Objects", config.selectedObject);
-            config.ignoreTags = EditorGUILayout.TextField("Ignore Tags", config.ignoreTags);
+            config.selectedObject = EditorGUILayout.TextField(new GUIContent("Selected Objects", "Names of the objects to import.\nUse 'Open Object List' button to select your objects."), config.selectedObject);
+            config.ignoreTags = EditorGUILayout.TextField(new GUIContent("Ignore Tags", "Enter tags to ignore during import.\nEx: Object,Platform,Image"), config.ignoreTags);
 
 
-            if (GUILayout.Button("Open Object List", GUILayout.Height(25)))
+            if (GUILayout.Button(new GUIContent("Open Object List", "Open the object list window to select objects for import."), GUILayout.Height(25)))
             {
                 ObjectListWindow.Open(config);
             }
 
             DrawTextureFoldersUI();
-            config.untagChildren = EditorGUILayout.Toggle("Untag Object's Children", config.untagChildren);
-            config.includeBuildingsMarker = EditorGUILayout.Toggle("Include Buildings Marker", config.includeBuildingsMarker);
-            config.applyConfig = EditorGUILayout.Toggle("Apply Config", config.applyConfig);
+            config.untagChildren = EditorGUILayout.Toggle(new GUIContent("Untag Object's Children", "Untag every single gameObject under the gameObject tagged as 'Object'.\nThis makes it so that the Object tagged gameObject will references from sets XML.\nRecommended to be disabled."), config.untagChildren);
+            config.includeBuildingsMarker = EditorGUILayout.Toggle(new GUIContent("Include Buildings Marker", "Include the buildings marker texture during import. (In and Out)"), config.includeBuildingsMarker);
+            config.applyConfig = EditorGUILayout.Toggle(new GUIContent("Apply Config", "Apply the level's configuration settings to Export during import."), config.applyConfig);
         }
 
         private void DrawTextureFoldersUI()
@@ -112,7 +112,7 @@ namespace Vectorier.Core
             if (removeIndex >= 0)
                 config.textureFolders.RemoveAt(removeIndex);
 
-            if (GUILayout.Button("Add Texture Folder"))
+            if (GUILayout.Button(new GUIContent("Add Texture Folder", "Add a texture folder path to the list.\nThis is required for importing textures.")))
                 config.textureFolders.Add("");
         }
 
@@ -122,13 +122,26 @@ namespace Vectorier.Core
             EditorGUILayout.BeginHorizontal();
             directoryPath = EditorGUILayout.TextField(label, directoryPath);
 
-            if (GUILayout.Button("...", GUILayout.Width(28)))
+            if (GUILayout.Button(new GUIContent("...", "Browse"), GUILayout.Width(28)))
             {
-                string startPath = string.IsNullOrEmpty(directoryPath) ? Application.dataPath : directoryPath;
+                string defaultStart = Path.GetDirectoryName(Application.dataPath);
+                string startPath = string.IsNullOrEmpty(directoryPath) ? defaultStart : directoryPath;
+                
                 string picked = EditorUtility.OpenFolderPanel($"Select {label}", startPath, "");
 
                 if (!string.IsNullOrEmpty(picked))
+                {
                     directoryPath = picked;
+                    GUI.FocusControl(null);
+                }
+            }
+
+            if (GUILayout.Button(new GUIContent("R", "Reset the directory path to default."), GUILayout.Width(28)))
+            {
+                string projectRoot = Path.GetDirectoryName(Application.dataPath);
+                directoryPath = Path.Combine(projectRoot, "DZIP", "level").Replace("\\", "/");
+                
+                GUI.FocusControl(null);
             }
 
             EditorGUILayout.EndHorizontal();
@@ -139,13 +152,18 @@ namespace Vectorier.Core
             EditorGUILayout.BeginHorizontal();
             xmlName = EditorGUILayout.TextField(label, xmlName);
 
-            if (GUILayout.Button("...", GUILayout.Width(28)))
+            if (GUILayout.Button(new GUIContent("...", "Browse"), GUILayout.Width(28)))
             {
-                string startPath = string.IsNullOrEmpty(directoryPath) ? Application.dataPath : directoryPath;
+                string defaultStart = Path.GetDirectoryName(Application.dataPath);
+                string startPath = string.IsNullOrEmpty(directoryPath) ? defaultStart : directoryPath;
+                
                 string picked = EditorUtility.OpenFilePanel($"Select {label}", startPath, "xml");
 
                 if (!string.IsNullOrEmpty(picked))
+                {
                     xmlName = Path.GetFileNameWithoutExtension(picked);
+                    GUI.FocusControl(null);
+                }
             }
 
             EditorGUILayout.EndHorizontal();

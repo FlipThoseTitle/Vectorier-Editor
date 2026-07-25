@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Shop>
+  <Group Name="TRICK" />
+  <Group Name="GADGETS">
+    <Item Price="400" Name="GADGET_FORCEBLASTER" ShopImage="SHOP_GADGET_FORCEBLASTER" TrackImage="TRACK_GADGET_FORCEBLASTER" />
+  </Group>
+  <Group Name="CLOTHING" />
+</Shop>

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Achievements>
+	<Group Type="STAR">
+		<Achievement ID="3/0" API_NAME="Serjeant" name="Serjeant" value="11"/>
+    	<Achievement ID="3/1" API_NAME="Lieutenant" name="Lieutenant" value="33"/>
+    	<Achievement ID="3/2" API_NAME="Captain" name="Captain" value="66"/>
+    	<Achievement ID="3/3" API_NAME="Colonel" name="Colonel" value="99"/>
+    	<Achievement ID="3/4" API_NAME="General" name="General" value="150"/>
+        <Achievement ID="3/4" API_NAME="stars_225" name="General" value="225"/>
+        <Achievement ID="3/4" API_NAME="stars_300" name="General" value="300"/>
+        <Achievement ID="3/4" API_NAME="stars_360" name="General" value="360"/>
+	</Group>
+	<Group Type="SPEND_COINS">
+    	<Achievement ID="3/5" API_NAME="Miser" name="Miser" value="6000"/>
+    	<Achievement ID="3/6" API_NAME="Buyer" name="Buyer" value="15000"/>
+    	<Achievement ID="3/7" API_NAME="Rich_Buyer" name="Rich Buyer" value="25000"/>
+    	<Achievement ID="3/8" API_NAME="Spender" name="Spender" value="40000"/> 
+	</Group>
+	<Group Type="RUN_METERS">
+    	<Achievement ID="3/9" API_NAME="Runner" name="Runner" value="5000"/>
+    	<Achievement ID="3/10" API_NAME="Sprinter" name="Sprinter" value="15000"/>
+    	<Achievement ID="3/11" API_NAME="Distance_runner" name="Distance runner" value="50000"/>
+    	<Achievement ID="3/12" API_NAME="Marathon_runner" name="Marathon runner" value="100000"/> 
+	</Group>
+	<Group Type="DIE_SOME_TIMES">
+    	<Achievement ID="3/13" API_NAME="Unlucky" name="Unlucky" value="25"/>
+    	<Achievement ID="3/14" API_NAME="Feckles" name="Feckles" value="50"/>
+    	<Achievement ID="3/15" API_NAME="Deathlover" name="Deathlover" value="100"/>
+        <Achievement ID="4/9" API_NAME="Death" name="Death" value="5"/>
+	</Group>
+	<Group Type="ALL_BUY">
+		<Achievement ID="3/16" API_NAME="Phillumenist" name="Phillumenist" value="TRICK"/>
+		<Achievement ID="3/17" API_NAME="Trendy" name="Trendy" value="CLOTHING"/>
+	</Group>
+	<Group Type="DOWNTOWN_ACH">
+		<Achievement ID="3/19" API_NAME="Beginner" name="Beginner" value="1"/>
+		<Achievement ID="3/20" API_NAME="Storyteller" name="Storyteller" value="2"/>
+		<Achievement ID="3/21" API_NAME="Downtown_man" name="Downtown man" value="3"/>
+		<Achievement ID="3/22" API_NAME="Worker" name="Worker" value="4"/>
+	</Group>
+	<Group Type="CONSTRUCT_ACH">
+		<Achievement ID="3/23" API_NAME="Porter" name="Porter" value="1"/>
+		<Achievement ID="3/24" API_NAME="Advanced_teller" name="Advanced teller" value="2"/>
+		<Achievement ID="3/25" API_NAME="Foreman" name="Foreman" value="3"/>
+		<Achievement ID="3/26" API_NAME="Greenlight" name="Greenlight" value="4"/>
+	</Group>
+	<Group Type="TECHNO_ACH">
+		<Achievement ID="3/27" API_NAME="Green_star" name="Green star" value="1"/>
+		<Achievement ID="3/28" API_NAME="Green_lantern" name="Green lantern" value="2"/>
+        <Achievement ID="3/26" API_NAME="techpark_full" name="Greenlight" value="3"/>
+	</Group>
+    
+    <Group Type="DOWNTOWN_HUNTER_ACH">
+		<Achievement ID="3/19" API_NAME="downtown_story1_hm" name="Beginner" value="1"/>
+		<Achievement ID="3/20" API_NAME="downtown_story3_hm" name="Storyteller" value="2"/>
+		<Achievement ID="3/21" API_NAME="downtown_full_hm" name="Downtown man" value="3"/>
+		<Achievement ID="3/22" API_NAME="construction_open_hm" name="Worker" value="4"/>
+	</Group>
+	<Group Type="CONSTRUCT_HUNTER_ACH">
+		<Achievement ID="3/23" API_NAME="construction_story1_hm" name="Porter" value="1"/>
+		<Achievement ID="3/24" API_NAME="construction_story3_hm" name="Advanced teller" value="2"/>
+		<Achievement ID="3/25" API_NAME="construction_full_hm" name="Foreman" value="3"/>
+		<Achievement ID="3/26" API_NAME="techpark_open_hm" name="Greenlight" value="4"/>
+	</Group>
+	<Group Type="TECHNO_HUNTER_ACH">
+		<Achievement ID="3/27" API_NAME="techpark_story1_hm" name="Green star" value="1"/>
+		<Achievement ID="3/28" API_NAME="techpark_story3_hm" name="Green lantern" value="2"/>
+        <Achievement ID="3/28" API_NAME="techpark_full_hm" name="Green lantern" value="3"/>
+	</Group>
+</Achievements>

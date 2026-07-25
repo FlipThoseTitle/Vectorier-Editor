@@ -47,8 +47,7 @@ namespace Vectorier.ProjectManager
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
             
-            // Added text to show total videos, vertically centered to match button heights
-            GUIStyle labelStyle = new GUIStyle(EditorStyles.label) { alignment = TextAnchor.MiddleRight };
+            GUIStyle labelStyle = new GUIStyle(EditorStyles.boldLabel) { alignment = TextAnchor.MiddleRight };
             GUILayout.Label("Total Videos - " + loadedVideos.Count, labelStyle, GUILayout.Height(30));
             
             GUILayout.Space(5); // Adds a small gap before the buttons
@@ -286,28 +285,50 @@ namespace Vectorier.ProjectManager
             {
                 // Gather paths first so indices don't shift as we delete them
                 List<string> pathsToDelete = new List<string>();
+                bool introSelected = false;
+
                 foreach (int index in selectedIndices)
                 {
                     if (index >= 0 && index < loadedVideoPaths.Count)
                     {
-                        pathsToDelete.Add(loadedVideoPaths[index]);
+                        string path = loadedVideoPaths[index];
+                        
+                        // Check if the file is "intro"
+                        if (Path.GetFileNameWithoutExtension(path) == "intro")
+                        {
+                            introSelected = true;
+                        }
+                        else
+                        {
+                            pathsToDelete.Add(path);
+                        }
                     }
                 }
 
-                try
+                // If ONLY the "intro" video was selected, show the prompt
+                if (introSelected && pathsToDelete.Count == 0)
                 {
-                    // Suspend asset imports/updates
-                    AssetDatabase.StartAssetEditing();
+                    EditorUtility.DisplayDialog("Notice", "The 'intro' video cannot be deleted.", "OK");
+                    return; // Stop execution so we don't clear indices or refresh unnecessarily
+                }
 
-                    foreach (string pathToDelete in pathsToDelete)
+                if (pathsToDelete.Count > 0)
+                {
+                    try
                     {
-                        AssetDatabase.DeleteAsset(pathToDelete);
+                        // Suspend asset imports/updates
+                        AssetDatabase.StartAssetEditing();
+
+                        foreach (string pathToDelete in pathsToDelete)
+                        {
+                            AssetDatabase.DeleteAsset(pathToDelete);
+                        }
                     }
-                }
-                finally
-                {
-                    // Resume and process all deletions at once
-                    AssetDatabase.StopAssetEditing();
+                    finally
+                    {
+                        // Resume and process all deletions at once
+                        AssetDatabase.StopAssetEditing();
+                    }
                 }
 
                 selectedIndices.Clear();
@@ -317,27 +338,28 @@ namespace Vectorier.ProjectManager
 
         private void ClearAllVideos()
         {
-            if (EditorUtility.DisplayDialog("Clear All Videos", "Are you sure you want to delete all imported videos for this project? This cannot be undone.", "Yes, Delete All", "Cancel"))
+            try
             {
-                try
-                {
-                    // Suspend asset imports/updates to vastly speed up bulk operations
-                    AssetDatabase.StartAssetEditing();
+                // Suspend asset imports/updates to vastly speed up bulk operations
+                AssetDatabase.StartAssetEditing();
 
-                    foreach (string path in loadedVideoPaths)
+                foreach (string path in loadedVideoPaths)
+                {
+                    // Delete everything EXCEPT the "intro" video
+                    if (Path.GetFileNameWithoutExtension(path) != "intro")
                     {
                         AssetDatabase.DeleteAsset(path);
                     }
                 }
-                finally
-                {
-                    // Resume and process all deletions at once
-                    AssetDatabase.StopAssetEditing();
-                }
-
-                selectedIndices.Clear();
-                RefreshVideoList();
             }
+            finally
+            {
+                // Resume and process all deletions at once
+                AssetDatabase.StopAssetEditing();
+            }
+
+            selectedIndices.Clear();
+            RefreshVideoList();
         }
 
         private void RefreshVideoList()

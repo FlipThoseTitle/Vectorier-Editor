@@ -1,0 +1,14 @@
+<?xml<?xml version="1.0" encoding="utf-8"?>
+<!--
+ Types
+ type = 1 -  coins
+ -->
+
+<Coins id="0" type="1" iOS="com.nekki.shadowrunner.coins100.test" android="android.test.purchase" />
+<Coins id="1" type="1" iOS="com.nekki.shadowrunner.coins550.test" android="android.test.canceled" />
+<Coins id="2" type="1" iOS="com.nekki.shadowrunner.coins1000.test" android="android.test.refunded" />
+<Coins id="3" type="1" iOS="om.nekki.shadowrunner.coins5000.test" android="android.test.item_unavailable" />
+<Coins id="4" type="1" iOS="com.nekki.shadowrunner.coins1000.test" android="android.test.item_unavailable" />
+<Coins id="5" type="1" iOS="com.nekki.shadowrunner.coins1000.test" android="com.nekki.vector.pack1" />
+
+<Unlock id="100" type="2" iOS="com.nekki." android="android.test.purchased"

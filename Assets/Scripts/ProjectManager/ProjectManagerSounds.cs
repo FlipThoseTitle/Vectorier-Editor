@@ -47,11 +47,9 @@ namespace Vectorier.ProjectManager
             // Action Buttons (- and C)
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
-            
-            // Note: The '+' button was intentionally omitted based on instructions.
 
-            // Added text to show total sounds, vertically centered to match button heights
-            GUIStyle labelStyle = new GUIStyle(EditorStyles.label) { alignment = TextAnchor.MiddleRight };
+            // total sounds
+            GUIStyle labelStyle = new GUIStyle(EditorStyles.boldLabel) { alignment = TextAnchor.MiddleRight };
             GUILayout.Label("Total Sounds - " + loadedSoundPaths.Count, labelStyle, GUILayout.Height(30));
             
             GUILayout.Space(5); // Adds a small gap before the buttons
@@ -253,28 +251,63 @@ namespace Vectorier.ProjectManager
             if (selectedIndices.Count > 0)
             {
                 List<string> pathsToDelete = new List<string>();
+                int undeletableCount = 0;
+
+                // Define the protected sounds list
+                HashSet<string> protectedSounds = new HashSet<string>
+                {
+                    "bonus_pickup", "cash_register", "enemy_charge", "enemy_discharge", 
+                    "glass_break", "glass_item_drop1", "glass_item_drop2", "glass_item_drop3", 
+                    "papers1", "papers2", "trick_activate", "ui_button_big_release", 
+                    "ui_button_big_toggle", "ui_button_round_toggle", "ui_button_square_toggle", 
+                    "ui_click", "ui_window_options", "ui_window_profile", "ui_window_shop"
+                };
+
                 foreach (int index in selectedIndices)
                 {
                     if (index >= 0 && index < loadedSoundPaths.Count)
                     {
-                        pathsToDelete.Add(loadedSoundPaths[index]);
+                        string path = loadedSoundPaths[index];
+                        string fileName = Path.GetFileNameWithoutExtension(path);
+                        
+                        // Check if the file is in the protected list
+                        if (protectedSounds.Contains(fileName))
+                        {
+                            undeletableCount++;
+                        }
+                        else
+                        {
+                            pathsToDelete.Add(path);
+                        }
                     }
                 }
 
-                try
+                // Trigger a prompt showing how many undeletable files were selected
+                if (undeletableCount > 0)
                 {
-                    // Suspend asset imports/updates for bulk optimization
-                    AssetDatabase.StartAssetEditing();
+                    EditorUtility.DisplayDialog("Notice", $"{undeletableCount} selected file(s) cannot be deleted because they are protected.", "OK");
+                    
+                    // If ONLY undeletable files were selected, stop here
+                    if (pathsToDelete.Count == 0) return;
+                }
 
-                    foreach (string pathToDelete in pathsToDelete)
+                if (pathsToDelete.Count > 0)
+                {
+                    try
                     {
-                        AssetDatabase.DeleteAsset(pathToDelete);
+                        // Suspend asset imports/updates for bulk optimization
+                        AssetDatabase.StartAssetEditing();
+
+                        foreach (string pathToDelete in pathsToDelete)
+                        {
+                            AssetDatabase.DeleteAsset(pathToDelete);
+                        }
                     }
-                }
-                finally
-                {
-                    // Resume and process all deletions at once
-                    AssetDatabase.StopAssetEditing();
+                    finally
+                    {
+                        // Resume and process all deletions at once
+                        AssetDatabase.StopAssetEditing();
+                    }
                 }
 
                 selectedIndices.Clear();
@@ -284,27 +317,40 @@ namespace Vectorier.ProjectManager
 
         private void ClearAllSounds()
         {
-            if (EditorUtility.DisplayDialog("Clear All Sounds", "Are you sure you want to delete all imported sounds (.wav) for this project?", "Yes, Delete All", "Cancel"))
+            // Define the protected sounds list
+            HashSet<string> protectedSounds = new HashSet<string>
             {
-                try
-                {
-                    // Suspend asset imports/updates for bulk optimization
-                    AssetDatabase.StartAssetEditing();
+                "bonus_pickup", "cash_register", "enemy_charge", "enemy_discharge", 
+                "glass_break", "glass_item_drop1", "glass_item_drop2", "glass_item_drop3", 
+                "papers1", "papers2", "trick_activate", "ui_button_big_release", 
+                "ui_button_big_toggle", "ui_button_round_toggle", "ui_button_square_toggle", 
+                "ui_click", "ui_window_options", "ui_window_profile", "ui_window_shop"
+            };
 
-                    foreach (string path in loadedSoundPaths)
+            try
+            {
+                // Suspend asset imports/updates for bulk optimization
+                AssetDatabase.StartAssetEditing();
+
+                foreach (string path in loadedSoundPaths)
+                {
+                    string fileName = Path.GetFileNameWithoutExtension(path);
+                    
+                    // Delete everything EXCEPT the protected sounds
+                    if (!protectedSounds.Contains(fileName))
                     {
                         AssetDatabase.DeleteAsset(path);
                     }
                 }
-                finally
-                {
-                    // Resume and process all deletions at once
-                    AssetDatabase.StopAssetEditing();
-                }
-
-                selectedIndices.Clear();
-                RefreshSoundList();
             }
+            finally
+            {
+                // Resume and process all deletions at once
+                AssetDatabase.StopAssetEditing();
+            }
+
+            selectedIndices.Clear();
+            RefreshSoundList();
         }
 
         private void RefreshSoundList()

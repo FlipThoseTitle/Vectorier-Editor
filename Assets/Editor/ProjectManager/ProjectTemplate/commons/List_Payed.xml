@@ -1,0 +1,38 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<LocationList>
+  <CoinSettings>
+    <Coins Name="CoinsDefault">
+      <Coins Type="Silver" Chance="1" Nominal="10" Count="-1" />
+      <Coins Type="Gold" Chance="0.33" Nominal="100" Count="1" />
+      <Coins Type="Ruby" Chance="0.01" Nominal="300" Count="1" />
+    </Coins>
+    <Coins Name="CoinsAfterVideo">
+      <Coins Type="Silver" Chance="1" Nominal="10" Count="-1" />
+      <Coins Type="Gold" Chance="1" Nominal="100" Count="1" />
+      <Coins Type="Ruby" Chance="0.2" Nominal="300" Count="1" />
+    </Coins>
+    <Coins Name="CoinsAfterPush">
+      <Coins Type="Silver" Chance="1" Nominal="10" Count="-1" />
+      <Coins Type="Gold" Chance="1" Nominal="100" Count="1" />
+      <Coins Type="Ruby" Chance="0.5" Nominal="300" Count="1" />
+    </Coins>
+  </CoinSettings>
+  <Templates>
+    <Stars Name="Stars_Default">
+      <Completed />
+      <Bonuses />
+      <Tricks />
+    </Stars>
+    <Reward Name="Reward_Story">
+      <Stars Count="1" Coins="100" />
+      <Stars Count="2" Coins="150" />
+      <Stars Count="3" Coins="250" />
+    </Reward>
+    <Reward Name="Reward_Bonus">
+      <Stars Count="1" Coins="200" />
+      <Stars Count="2" Coins="300" />
+      <Stars Count="3" Coins="500" />
+    </Reward>
+  </Templates>
+  <Locations />
+</LocationList>

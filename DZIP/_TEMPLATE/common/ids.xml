@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<IDS>
+    <!--locs -->
+    <id old="106" new="DOWNTOWN" />
+    <id old="107" new="CONSTRUCTION" />
+    <id old="116" new="TECHPARK" />
+    
+    <!-- DOWNTOWN STORY TRACKS -->
+    <id old="34" new="DOWNTOWN_STORY_01" />
+    <id old="35" new="DOWNTOWN_STORY_02" />
+    <id old="37" new="DOWNTOWN_STORY_03" />
+    <id old="63" new="DOWNTOWN_STORY_04" />
+    <id old="59" new="DOWNTOWN_STORY_05" />
+    <id old="38" new="DOWNTOWN_STORY_06" />
+    <id old="65" new="DOWNTOWN_STORY_07" />
+    <id old="36" new="DOWNTOWN_STORY_08" />
+    <id old="76" new="DOWNTOWN_STORY_09" />
+    <id old="39" new="DOWNTOWN_STORY_10" />
+    <id old="95" new="DOWNTOWN_STORY_11" />
+    
+    <!-- DOWNTOWN BONUS TRACKS -->
+    <id old="86" new="DOWNTOWN_BONUS_01" />
+    <id old="55" new="DOWNTOWN_BONUS_02" />
+    <id old="64" new="DOWNTOWN_BONUS_03" />
+    <id old="69" new="DOWNTOWN_BONUS_04" />
+    <id old="23" new="DOWNTOWN_BONUS_05" />
+    <id old="128" new="DOWNTOWN_BONUS_06" />
+    <id old="134" new="DOWNTOWN_BONUS_07" />
+    <id old="132" new="DOWNTOWN_BONUS_08" />
+    <id old="131" new="DOWNTOWN_BONUS_09" /> <!--!!!-->
+    
+    <!-- CONSTRUCTION STORY TRACKS -->
+    <id old="16" new="CONSTRUCTION_STORY_01" />
+    <id old="87" new="CONSTRUCTION_STORY_02" />
+    <id old="91" new="CONSTRUCTION_STORY_03" />
+    <id old="4" new="CONSTRUCTION_STORY_04" />
+    <id old="90" new="CONSTRUCTION_STORY_05" />
+    <id old="20" new="CONSTRUCTION_STORY_06" />
+    <id old="21" new="CONSTRUCTION_STORY_07" />
+    <id old="19" new="CONSTRUCTION_STORY_08" />
+    <id old="3" new="CONSTRUCTION_STORY_09" />
+    <id old="74" new="CONSTRUCTION_STORY_10" />
+    <id old="139" new="CONSTRUCTION_STORY_11" />
+    
+    <!-- CONSTRUCTION BONUS TRACKS -->
+    <id old="68" new="CONSTRUCTION_BONUS_01" />
+    <id old="118" new="CONSTRUCTION_BONUS_02" />
+    <id old="117" new="CONSTRUCTION_BONUS_03" />
+    <id old="120" new="CONSTRUCTION_BONUS_04" />
+    <id old="126" new="CONSTRUCTION_BONUS_05" />
+    <id old="127" new="CONSTRUCTION_BONUS_06" />
+    <id old="121" new="CONSTRUCTION_BONUS_07" />
+    <id old="125" new="CONSTRUCTION_BONUS_08" />
+    <id old="130" new="CONSTRUCTION_BONUS_09" />
+    
+    <!-- TECHNOPARK STORY TRACKS -->
+    <id old="142" new="TECHPARK_STORY_01" />
+    <id old="144" new="TECHPARK_STORY_02" />
+    <id old="155" new="TECHPARK_STORY_03" />
+    <id old="156" new="TECHPARK_STORY_04" />
+    <id old="151" new="TECHPARK_STORY_05" />
+    <id old="141" new="TECHPARK_STORY_06" />
+    <id old="177" new="TECHPARK_STORY_07" />
+    <id old="179" new="TECHPARK_STORY_08" />
+    <id old="169" new="TECHPARK_STORY_09" />
+    <id old="152" new="TECHPARK_STORY_10" />
+    <id old="154" new="TECHPARK_STORY_11" />
+    
+    <!-- DOWNTOWN STORY -->
+    <id old="8" new="TRICK_JUMPTUMBLE" />
+    <id old="12" new="TRICK_SPINNINGVAULT" />
+    <id old="33" new="TRICK_THIEFVAULT" />
+    <id old="31" new="TRICK_REVERSEVAULT" />
+    <id old="14" new="TRICK_BACKFLIP" />
+    <id old="29" new="TRICK_JUMPOBSTACLE" />
+    <id old="28" new="TRICK_BARJUMPSALTOLESS" />
+    <id old="32" new="TRICK_SCREWDRIVER" />
+    <id old="41" new="TRICK_RAILFLIP" />
+    <id old="11" new="TRICK_BARRELVAULT" />
+    <id old="13" new="TRICK_OBSTACLEFRONTFLIP" />
+    <id old="30" new="TRICK_MONKEYVAULT" />
+    
+    <!-- DOWNTOWN BONUS TRICKS -->
+    <id old="110" new="TRICK_VERTVAULT" />
+    <id old="42"  new="TRICK_ROCKETVAULT" />
+    <id old="79"  new="TRICK_AIRSPIN" />
+    <id old="124" new="TRICK_SIDEBOMB" />
+    <id old="82"  new="TRICK_WEBSTERWITHSALTO" />
+    <id old="99"  new="TRICK_DASHTOFRONTFLIP" />
+    <id old="105" new="TRICK_TRIPLETRICKTOSWALLOW" />
+    <id old="7"   new="TRICK_HANDSPRING" />
+    <id old="102" new="" /> <!--!!!-->
+    
+    <!-- CONSTRUCTION STORY-->
+    <id old="24"  new="TRICK_DOUBLEKONG" />
+    <id old="27"  new="TRICK_BARJUMP" />
+    <id old="25"  new="TRICK_DASHVAULT" />
+    <id old="80"  new="TRICK_AIRBOMB" />
+    <id old="93"  new="TRICK_SPLITONE" />
+    <id old="100" new="TRICK_DESCENTVAULT" />
+    <id old="92"  new="TRICK_STRAIGHTLEGSFLIP" />
+    <id old="44"  new="TRICK_SWALLOW" />
+    <id old="26"  new="TRICK_FOLDFLIP" />
+    <id old="83"  new="TRICK_FLIPANDROLL" />
+    <id old="112" new="TRICK_BOOMBOOMSHHUH" />
+    
+    <!-- CONSTRUCTION BONUS TRICKS -->
+    <id old="109" new="TRICK_HANDSPRINGTOROLL" />
+    <id old="108" new="TRICK_DIVEDOWN" />
+    <id old="40"  new="TRICK_TRIPLEHIT" />
+    <id old="96"  new="TRICK_SIDEFLIP" />
+    <id old="43"  new="TRICK_TRIPLESWING" />
+    <id old="103" new="TRICK_MONKEYTOBOMB" />
+    <id old="10"  new="TRICK_JUMPWHEEL" />
+    <id old="9"   new="TRICK_GATEVAULT" />
+    <id old="113" new="TRICK_DOUBLEBACK" />
+    
+    <!-- TECHNOPARK STORY TRICKS -->
+    <id old="122" new="TRICK_360WALLCLING" />
+    <id old="101" new="TRICK_SLOWSPIN" />
+    <id old="123" new="TRICK_UNDERBAR" />
+    <id old="159" new="TRICK_JUMPDOWNROLL" />
+    <id old="111" new="TRICK_CHEATGAINER" />
+    <id old="145" new="TRICK_FLYINGARROW" />
+    <id old="147" new="TRICK_DOUBLESPINVAULT" />
+    <id old="149" new="TRICK_SPIN360" />
+    <id old="162" new="TRICK_KINGKONGJUMP" />
+    <id old="157" new="TRICK_SPINBICYCLE" />
+    <id old="146" new="TRICK_LONGCIRCLE" />
+    
+    <id old="48" new="GEAR_CAP" />
+    <id old="51" new="GEAR_SHORTS" />
+    <id old="50" new="GEAR_SCARF" />
+    <id old="18" new="GADGET_FORCEBLASTER" />
+</IDS>

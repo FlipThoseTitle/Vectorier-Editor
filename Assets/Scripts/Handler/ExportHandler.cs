@@ -5,7 +5,6 @@ using System.Linq;
 using UnityEngine;
 using Vectorier.XML;
 using Vectorier.Element;
-using UnityEngine.SceneManagement;
 using UnityEngine.Rendering;
 using Vectorier.Component;
 

@@ -1,0 +1,156 @@
+<LocationList>
+	<Templates>
+		<Stars Name="Stars_default">
+			<Completed/>
+			<Bonuses/>
+			<Tricks/>
+		</Stars>
+		<Reward Name="Reward_Downtown_Story">
+			<Stars Count="1" Coins="100"/>
+			<Stars Count="2" Coins="150"/>
+			<Stars Count="3" Coins="200"/>
+		</Reward>
+		<Reward Name="Reward_Construction_Story">
+			<Stars Count="1" Coins="150"/>
+			<Stars Count="2" Coins="250"/>
+			<Stars Count="3" Coins="400"/>
+		</Reward>
+		<Reward Name="Reward_Techpark_Story">
+			<Stars Count="1" Coins="200"/>
+			<Stars Count="2" Coins="300"/>
+			<Stars Count="3" Coins="500"/>
+		</Reward>
+	</Templates>
+	<Locations>
+		<Location Name="DOWNTOWN">
+			<Groups>
+				<Group Name="STORY">
+					<Track Name="DOWNTOWN_STORY_01">
+						<Tricks>
+							<Trick Name="TRICK_JUMPTUMBLE"/>
+						</Tricks>
+						<Stars Template="Stars_default"/>
+						<Reward Template="Reward_Downtown_Story"/>
+					</Track>
+					
+					<Track Name="DOWNTOWN_STORY_05">
+						<Conditions>
+							<Stars Required="1" Subject="Track" Name="DOWNTOWN_STORY_01"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_JUMPOBSTACLE"/>
+							<Trick Name="TRICK_BACKFLIP"/>
+							<Trick Name="TRICK_THIEFVAULT"/>
+						</Tricks>
+						<Stars Template="Stars_default"/>
+						<Reward Template="Reward_Downtown_Story"/>
+					</Track>
+					
+					<Track Name="DOWNTOWN_STORY_04">
+						<Conditions>
+							<Stars Required="1" Subject="Track" Name="DOWNTOWN_STORY_05"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_BACKFLIP"/>
+							<Trick Name="TRICK_REVERSEVAULT"/>
+							<Trick Name="TRICK_JUMPTUMBLE"/>
+						</Tricks>
+						<Stars Template="Stars_default"/>
+						<Reward Template="Reward_Downtown_Story"/>
+					</Track>
+					
+					<Track Name="CONSTRUCTION_STORY_01">
+						<Conditions>
+							<Stars Required="1" Subject="Track" Name="DOWNTOWN_STORY_04"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_DOUBLEKONG"/>
+							<Trick Name="TRICK_OBSTACLEFRONTFLIP"/>
+							<Trick Name="TRICK_BARRELVAULT"/>
+						</Tricks>
+						<Stars Template="Stars_default"/>
+						<Reward Template="Reward_Construction_Story"/>
+					</Track>
+					
+					<Track Name="CONSTRUCTION_STORY_06">
+						<Conditions>
+							<Stars Required="1" Subject="Track" Name="CONSTRUCTION_STORY_01"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_DESCENTVAULT"/>
+							<Trick Name="TRICK_SPLITONE"/>
+							<Trick Name="TRICK_AIRBOMB"/>
+						</Tricks>
+						<Stars Template="Stars_default"/>
+						<Reward Template="Reward_Construction_Story"/>
+					</Track>
+					
+					<Track Name="CONSTRUCTION_BONUS_02">
+						<Conditions>
+							<Stars Required="1" Subject="Track" Name="CONSTRUCTION_STORY_06"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_DIVEDOWN"/>
+							<Trick Name="TRICK_HANDSPRINGTOROLL"/>
+							<Trick Name="TRICK_DASHVAULT"/>
+						</Tricks>
+						<Stars Template="Stars_default"/>
+						<Reward Template="Reward_Construction_Story"/>
+					</Track>
+					
+					<Track Name="TECHPARK_STORY_01">
+						<Conditions>
+							<Stars Required="1" Subject="Track" Name="CONSTRUCTION_BONUS_02"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_360WALLCLING"/>
+							<Trick Name="TRICK_AIRSPIN"/>
+							<Trick Name="TRICK_SPLITONE"/>
+						</Tricks>
+						<Stars Template="Stars_default"/>
+						<Reward Template="Reward_Techpark_Story"/>
+					</Track>
+					
+					<Track Name="TECHPARK_STORY_03">
+						<Conditions>
+							<Stars Required="1" Subject="Track" Name="TECHPARK_STORY_01"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_UNDERBAR"/>
+							<Trick Name="TRICK_SLOWSPIN"/>
+							<Trick Name="TRICK_360WALLCLING"/>
+						</Tricks>
+						<Stars Template="Stars_default"/>
+						<Reward Template="Reward_Techpark_Story"/>
+					</Track>
+					
+					<Track Name="TECHPARK_STORY_06">
+						<Conditions>
+							<Stars Required="1" Subject="Track" Name="TECHPARK_STORY_03"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_FLYINGARROW"/>
+							<Trick Name="TRICK_CHEATGAINER"/>
+							<Trick Name="TRICK_HANDSPRINGTOROLL"/>
+						</Tricks>
+						<Stars Template="Stars_default"/>
+						<Reward Template="Reward_Techpark_Story"/>
+					</Track>
+					
+					<Track Name="TECHPARK_STORY_07">
+						<Conditions>
+							<Stars Required="1" Subject="Track" Name="TECHPARK_STORY_06"/>
+						</Conditions>
+						<Tricks>
+							<Trick Name="TRICK_DOUBLESPINVAULT"/>
+							<Trick Name="TRICK_FLYINGARROW"/>
+							<Trick Name="TRICK_JUMPOBSTACLE"/>
+						</Tricks>
+						<Stars Template="Stars_default"/>
+						<Reward Template="Reward_Techpark_Story"/>
+					</Track>
+				</Group>
+			</Groups>
+		</Location>
+	</Locations>
+</LocationList>

@@ -1,0 +1,689 @@
+fileFormatVersion: 2
+guid: 221fee5357b65ca48869426dbb0ad1c6
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 8139617375950174810
+    second: reverse_indicator_left_0
+  - first:
+      213: -6248123499817451500
+    second: reverse_indicator_left_1
+  - first:
+      213: 5785050876349738951
+    second: reverse_indicator_left_2
+  - first:
+      213: -3035307851934888882
+    second: reverse_indicator_left_3
+  - first:
+      213: 114689688189083766
+    second: reverse_indicator_left_4
+  - first:
+      213: -7186226084143131923
+    second: reverse_indicator_left_5
+  - first:
+      213: -7766802804385498544
+    second: reverse_indicator_left_6
+  - first:
+      213: 2302435317319127029
+    second: reverse_indicator_left_7
+  - first:
+      213: -1300554810641092086
+    second: reverse_indicator_left_8
+  - first:
+      213: 4851883305081646682
+    second: reverse_indicator_left_9
+  - first:
+      213: -5038977040775362589
+    second: reverse_indicator_left_10
+  - first:
+      213: 7237298740259387572
+    second: reverse_indicator_left_11
+  - first:
+      213: -6501286354890946009
+    second: reverse_indicator_left_12
+  - first:
+      213: -4368597849081197476
+    second: reverse_indicator_left_13
+  - first:
+      213: -6775078108347091455
+    second: reverse_indicator_left_14
+  - first:
+      213: 1131689036831054896
+    second: reverse_indicator_left_15
+  - first:
+      213: 2249553385075358798
+    second: reverse_indicator_left_16
+  - first:
+      213: 168327294357525379
+    second: reverse_indicator_left_17
+  - first:
+      213: -8455144676991145951
+    second: reverse_indicator_left_18
+  - first:
+      213: 3163697356416645877
+    second: reverse_indicator_left_19
+  - first:
+      213: -4937989389263633047
+    second: reverse_indicator_left_20
+  - first:
+      213: 2679049147765096904
+    second: reverse_indicator_left_21
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: reverse_indicator_left_0
+      rect:
+        serializedVersion: 2
+        x: 1
+        y: 449
+        width: 115
+        height: 62
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a5a7b1db0eab5f070800000000000000
+      internalID: 8139617375950174810
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: reverse_indicator_left_1
+      rect:
+        serializedVersion: 2
+        x: 1
+        y: 334
+        width: 62
+        height: 115
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4104c98e7c43a49a0800000000000000
+      internalID: -6248123499817451500
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: reverse_indicator_left_2
+      rect:
+        serializedVersion: 2
+        x: 63
+        y: 334
+        width: 62
+        height: 115
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7cf636c1f11a84050800000000000000
+      internalID: 5785050876349738951
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: reverse_indicator_left_3
+      rect:
+        serializedVersion: 2
+        x: 116
+        y: 449
+        width: 115
+        height: 62
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e4c8775279b60e5d0800000000000000
+      internalID: -3035307851934888882
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: reverse_indicator_left_4
+      rect:
+        serializedVersion: 2
+        x: 125
+        y: 334
+        width: 62
+        height: 115
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 67029ebe9a5779100800000000000000
+      internalID: 114689688189083766
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: reverse_indicator_left_5
+      rect:
+        serializedVersion: 2
+        x: 231
+        y: 449
+        width: 115
+        height: 62
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: de290036375654c90800000000000000
+      internalID: -7186226084143131923
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: reverse_indicator_left_6
+      rect:
+        serializedVersion: 2
+        x: 231
+        y: 387
+        width: 115
+        height: 62
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 05a381ceff5c63490800000000000000
+      internalID: -7766802804385498544
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: reverse_indicator_left_7
+      rect:
+        serializedVersion: 2
+        x: 346
+        y: 449
+        width: 115
+        height: 62
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5ffce17e8b4e3ff10800000000000000
+      internalID: 2302435317319127029
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: reverse_indicator_left_8
+      rect:
+        serializedVersion: 2
+        x: 346
+        y: 387
+        width: 115
+        height: 62
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a02ffc45a4083fde0800000000000000
+      internalID: -1300554810641092086
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: reverse_indicator_left_9
+      rect:
+        serializedVersion: 2
+        x: 1
+        y: 219
+        width: 62
+        height: 115
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a5e2a0bd82a555340800000000000000
+      internalID: 4851883305081646682
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: reverse_indicator_left_10
+      rect:
+        serializedVersion: 2
+        x: 63
+        y: 219
+        width: 62
+        height: 115
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3e74c3d3415f11ab0800000000000000
+      internalID: -5038977040775362589
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: reverse_indicator_left_11
+      rect:
+        serializedVersion: 2
+        x: 125
+        y: 219
+        width: 62
+        height: 115
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4b8fa820cdc007460800000000000000
+      internalID: 7237298740259387572
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: reverse_indicator_left_12
+      rect:
+        serializedVersion: 2
+        x: 187
+        y: 210
+        width: 62
+        height: 115
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 72a81a9618ac6c5a0800000000000000
+      internalID: -6501286354890946009
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: reverse_indicator_left_13
+      rect:
+        serializedVersion: 2
+        x: 231
+        y: 325
+        width: 115
+        height: 62
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c5ccafee66f9f53c0800000000000000
+      internalID: -4368597849081197476
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: reverse_indicator_left_14
+      rect:
+        serializedVersion: 2
+        x: 249
+        y: 210
+        width: 62
+        height: 115
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 106327a3b561af1a0800000000000000
+      internalID: -6775078108347091455
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: reverse_indicator_left_15
+      rect:
+        serializedVersion: 2
+        x: 346
+        y: 325
+        width: 115
+        height: 62
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 03cd48cde2194bf00800000000000000
+      internalID: 1131689036831054896
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: reverse_indicator_left_16
+      rect:
+        serializedVersion: 2
+        x: 1
+        y: 104
+        width: 62
+        height: 115
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e4cb1b492e4083f10800000000000000
+      internalID: 2249553385075358798
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: reverse_indicator_left_17
+      rect:
+        serializedVersion: 2
+        x: 63
+        y: 104
+        width: 62
+        height: 115
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 383de2a48c4065200800000000000000
+      internalID: 168327294357525379
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: reverse_indicator_left_18
+      rect:
+        serializedVersion: 2
+        x: 125
+        y: 104
+        width: 62
+        height: 115
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 128686ba6ba49aa80800000000000000
+      internalID: -8455144676991145951
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: reverse_indicator_left_19
+      rect:
+        serializedVersion: 2
+        x: 187
+        y: 148
+        width: 115
+        height: 62
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5fa7e02dbf5b7eb20800000000000000
+      internalID: 3163697356416645877
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: reverse_indicator_left_20
+      rect:
+        serializedVersion: 2
+        x: 1
+        y: 42
+        width: 115
+        height: 62
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9650b4420dcb87bb0800000000000000
+      internalID: -4937989389263633047
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: reverse_indicator_left_21
+      rect:
+        serializedVersion: 2
+        x: 116
+        y: 42
+        width: 115
+        height: 62
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8c10a547105ed2520800000000000000
+      internalID: 2679049147765096904
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      reverse_indicator_left_0: 8139617375950174810
+      reverse_indicator_left_1: -6248123499817451500
+      reverse_indicator_left_10: -5038977040775362589
+      reverse_indicator_left_11: 7237298740259387572
+      reverse_indicator_left_12: -6501286354890946009
+      reverse_indicator_left_13: -4368597849081197476
+      reverse_indicator_left_14: -6775078108347091455
+      reverse_indicator_left_15: 1131689036831054896
+      reverse_indicator_left_16: 2249553385075358798
+      reverse_indicator_left_17: 168327294357525379
+      reverse_indicator_left_18: -8455144676991145951
+      reverse_indicator_left_19: 3163697356416645877
+      reverse_indicator_left_2: 5785050876349738951
+      reverse_indicator_left_20: -4937989389263633047
+      reverse_indicator_left_21: 2679049147765096904
+      reverse_indicator_left_3: -3035307851934888882
+      reverse_indicator_left_4: 114689688189083766
+      reverse_indicator_left_5: -7186226084143131923
+      reverse_indicator_left_6: -7766802804385498544
+      reverse_indicator_left_7: 2302435317319127029
+      reverse_indicator_left_8: -1300554810641092086
+      reverse_indicator_left_9: 4851883305081646682
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

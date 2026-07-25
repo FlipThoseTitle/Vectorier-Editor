@@ -31,16 +31,16 @@ namespace Vectorier.Core
             EditorGUILayout.Space();
 
             DrawXmlNameFieldWithBrowse("Level Name", ref levelName);
-            noUI = EditorGUILayout.Toggle("Disable Debug UI", noUI);
-            hunterMode = EditorGUILayout.Toggle("Hunter Mode", hunterMode);
-            showPlatforms = EditorGUILayout.Toggle("Show Platforms", showPlatforms);
-            showTriggers = EditorGUILayout.Toggle("Show Triggers", showTriggers);
-            showAreas = EditorGUILayout.Toggle("Show Areas", showAreas);
-            showDetectors = EditorGUILayout.Toggle("Show Detectors", showDetectors);
+            noUI = EditorGUILayout.Toggle(new GUIContent("Disable Debug UI", "Disable the debug UI when playing the level."), noUI);
+            hunterMode = EditorGUILayout.Toggle(new GUIContent("Hunter Mode", "Play the level in Hunter Mode."), hunterMode);
+            showPlatforms = EditorGUILayout.Toggle(new GUIContent("Show Platforms", "Show platforms bound in the level."), showPlatforms);
+            showTriggers = EditorGUILayout.Toggle(new GUIContent("Show Triggers", "Show triggers bound in the level."), showTriggers);
+            showAreas = EditorGUILayout.Toggle(new GUIContent("Show Areas", "Show areas bound in the level."), showAreas);
+            showDetectors = EditorGUILayout.Toggle(new GUIContent("Show Detectors", "Show detectors for the model's character."), showDetectors);
 
             EditorGUILayout.Space(10);
 
-            if (GUILayout.Button("Play", GUILayout.Height(60)))
+            if (GUILayout.Button(new GUIContent("Play", "Play the selected level."), GUILayout.Height(60)))
             {
                 TryRunLevel();
             }
@@ -52,16 +52,21 @@ namespace Vectorier.Core
 
             xmlName = EditorGUILayout.TextField(label, xmlName);
 
-            if (GUILayout.Button("...", GUILayout.Width(28)))
+            if (GUILayout.Button(new GUIContent("...", "Browse"), GUILayout.Width(28)))
             {
-                string startPath = Path.Combine(Application.dataPath, "Snail Runner/Vector_Data/StreamingAssets/xmlroot/levels");
+                string projectRoot = Path.GetDirectoryName(Application.dataPath);
+                string startPath = Path.Combine(projectRoot, "Snail Runner/Vector_Data/StreamingAssets/xmlroot/levels");
+                
                 if (!Directory.Exists(startPath))
-                    startPath = Application.dataPath;
+                    startPath = projectRoot;
 
                 string picked = EditorUtility.OpenFilePanel($"Select {label}", startPath, "xml");
 
                 if (!string.IsNullOrEmpty(picked))
+                {
                     xmlName = Path.GetFileNameWithoutExtension(picked);
+                    GUI.FocusControl(null);
+                }
             }
 
             EditorGUILayout.EndHorizontal();
@@ -75,7 +80,8 @@ namespace Vectorier.Core
                 return;
             }
 
-            string xmlDir = Path.Combine(Application.dataPath, "Snail Runner/Vector_Data/StreamingAssets/xmlroot/levels");
+            string projectRoot = Path.GetDirectoryName(Application.dataPath);
+            string xmlDir = Path.Combine(projectRoot, "Snail Runner/Vector_Data/StreamingAssets/xmlroot/levels");
             string xmlPath = Path.Combine(xmlDir, levelName + ".xml");
 
             if (!File.Exists(xmlPath))
@@ -106,7 +112,8 @@ namespace Vectorier.Core
 
         private void RunVector(string level)
         {
-            string baseDir = Path.Combine(Application.dataPath, "Snail Runner");
+            string projectRoot = Path.GetDirectoryName(Application.dataPath);
+            string baseDir = Path.Combine(projectRoot, "Snail Runner");
             string exePath = Path.Combine(baseDir, "Vector.exe");
 
             if (!File.Exists(exePath))

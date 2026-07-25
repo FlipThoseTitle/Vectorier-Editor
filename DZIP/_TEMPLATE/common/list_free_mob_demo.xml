@@ -1,0 +1,1915 @@
+<?xml version="1.0" encoding="utf-8"?>
+<List>
+  <Items>
+
+<!-- DOWNTOWN STORY TRACKS -->
+
+    <Item Name="Story 1-1" ItemID="34" 
+		TypeID="8" SubtypeID="0" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="5" Virality="0">
+      <Conditions>
+        <Condition TypeID="0" ObjectID="0|0" Number="1|0"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Story 1-2" ItemID="35" 
+		TypeID="8" SubtypeID="0" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="5" Virality="0">
+      <Conditions>
+        <Condition TypeID="1" ObjectID="0|34" Number="1|0"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Story 1-3" ItemID="37" 
+		TypeID="8" SubtypeID="0" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="5" Virality="0">
+      <Conditions>
+        <Condition TypeID="1" ObjectID="0|35" Number="1|0"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Story 1-4" ItemID="63" 
+		TypeID="8" SubtypeID="0" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="5" Virality="0">
+      <Conditions>
+        <Condition TypeID="1" ObjectID="0|59" Number="1|0"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Story 1-5" ItemID="59" 
+		TypeID="8" SubtypeID="0" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="5" Virality="0">
+      <Conditions>
+        <Condition TypeID="1" ObjectID="0|34" Number="1|0"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Story 1-6" ItemID="38" 
+		TypeID="8" SubtypeID="0" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="5" Virality="0">
+      <Conditions>
+        <Condition TypeID="1" ObjectID="0|59" Number="1|0"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Story 1-7" ItemID="65" 
+		TypeID="8" SubtypeID="0" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="5" Virality="0">
+      <Conditions>
+        <Condition TypeID="1" ObjectID="0|38" Number="1|0"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Story 1-8" ItemID="36" 
+		TypeID="8" SubtypeID="0" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="5" Virality="0">
+      <Conditions>
+        <Condition TypeID="1" ObjectID="0|65" Number="1|0"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Story 1-9" ItemID="76" 
+		TypeID="8" SubtypeID="0" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="5" Virality="0">
+      <Conditions>
+        <Condition TypeID="1" ObjectID="0|36" Number="1|0"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Story 1-10" ItemID="39" 
+		TypeID="8" SubtypeID="0" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="5" Virality="0">
+      <Conditions>
+        <Condition TypeID="1" ObjectID="0|76" Number="1|0"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Story 1-11" ItemID="95" 
+		TypeID="8" SubtypeID="0" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="5" Virality="0">
+      <Conditions>
+        <Condition TypeID="1" ObjectID="0|39" Number="1|1"></Condition>
+      </Conditions>
+    </Item>
+
+<!-- DOWNTOWN BONUS TRACKS -->
+
+    <Item Name="Bonus 1-1" ItemID="86" 
+		TypeID="8" SubtypeID="1" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="6" Virality="5">
+      <Conditions>
+        <Condition TypeID="2" ObjectID="2|0" Number="15|1"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Bonus 1-2" ItemID="55" 
+		TypeID="8" SubtypeID="1" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="2" Virality="0">
+      <Conditions>
+        <Condition TypeID="2" ObjectID="2|0" Number="20|0"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Bonus 1-3" ItemID="64" 
+		TypeID="8" SubtypeID="1" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="6" Virality="0">
+      <Conditions>
+        <Condition TypeID="2" ObjectID="2|0" Number="25|1"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Bonus 1-4" ItemID="69" 
+		TypeID="8" SubtypeID="1" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="5" Virality="0">
+      <Conditions>
+        <Condition TypeID="2" ObjectID="2|0" Number="30|0"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Bonus 1-5" ItemID="23" 
+		TypeID="8" SubtypeID="1" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="5" Virality="0">
+      <Conditions>
+        <Condition TypeID="2" ObjectID="2|0" Number="35|1"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Bonus 1-6" ItemID="128" 
+		TypeID="8" SubtypeID="1" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="5" Virality="0">
+      <Conditions>
+        <Condition TypeID="2" ObjectID="2|0" Number="40|0"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Bonus 1-7" ItemID="134" 
+		TypeID="8" SubtypeID="1" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="5" Virality="0">
+      <Conditions>
+        <Condition TypeID="2" ObjectID="2|0" Number="45|0"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Bonus 1-8" ItemID="132" 
+		TypeID="8" SubtypeID="1" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="5" Virality="0">
+      <Conditions>
+        <Condition TypeID="2" ObjectID="2|0" Number="50|0"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Bonus 1-9" ItemID="131" 
+		TypeID="8" SubtypeID="1" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="5" Virality="0">
+      <Conditions>
+        <Condition TypeID="2" ObjectID="2|0" Number="55|0"></Condition>
+      </Conditions>
+    </Item>
+
+<!-- CONSTRUCTION STORY TRACKS -->
+
+    <Item Name="Story 2-1" ItemID="16" 
+		TypeID="8" SubtypeID="0" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="7" Virality="0">
+      <Conditions>
+        <Condition TypeID="1" ObjectID="0|63" Number="1|0"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Story 2-2" ItemID="87" 
+		TypeID="8" SubtypeID="0" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="6" Virality="0">
+      <Conditions>
+        <Condition TypeID="1" ObjectID="0|16" Number="1|1"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Story 2-3" ItemID="91" 
+		TypeID="8" SubtypeID="0" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="5" Virality="0">
+      <Conditions>
+        <Condition TypeID="1" ObjectID="0|87" Number="1|1"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Story 2-4" ItemID="4" 
+		TypeID="8" SubtypeID="0" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="5" Virality="0">
+      <Conditions>
+        <Condition TypeID="1" ObjectID="0|91" Number="1|1"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Story 2-5" ItemID="90" 
+		TypeID="8" SubtypeID="0" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="6" Virality="0">
+      <Conditions>
+        <Condition TypeID="1" ObjectID="0|4" Number="1|1"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Story 2-6" ItemID="20" 
+		TypeID="8" SubtypeID="0" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="5" Virality="0">
+      <Conditions>
+        <Condition TypeID="1" ObjectID="0|16" Number="1|0"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Story 2-7" ItemID="21" 
+		TypeID="8" SubtypeID="0" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="5" Virality="0">
+      <Conditions>
+        <Condition TypeID="1" ObjectID="0|20" Number="1|1"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Story 2-8" ItemID="19" 
+		TypeID="8" SubtypeID="0" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="5" Virality="0">
+      <Conditions>
+        <Condition TypeID="1" ObjectID="0|21" Number="1|1"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Story 2-9" ItemID="3" 
+		TypeID="8" SubtypeID="0" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="5" Virality="0">
+      <Conditions>
+        <Condition TypeID="1" ObjectID="0|19" Number="1|1"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Story 2-10" ItemID="74" 
+		TypeID="8" SubtypeID="0" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="5" Virality="0">
+      <Conditions>
+        <Condition TypeID="1" ObjectID="0|3" Number="1|1"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Story 2-11" ItemID="139" 
+		TypeID="8" SubtypeID="0" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="5" Virality="0">
+      <Conditions>
+        <Condition TypeID="1" ObjectID="0|74" Number="1|1"></Condition>
+      </Conditions>
+    </Item>
+
+<!-- CONSTRUCTION BONUS TRACKS -->
+
+
+    <Item Name="Bonus 2-1" ItemID="68" 
+		TypeID="8" SubtypeID="1" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="6" Virality="10">
+      <Conditions>
+        <Condition TypeID="2" ObjectID="1|0" Number="15|1"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Bonus 2-2" ItemID="118" 
+		TypeID="8" SubtypeID="0" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="5" Virality="0">
+      <Conditions>
+        <Condition TypeID="1" ObjectID="0|20" Number="1|0"></Condition>
+      </Conditions>
+    </Item>
+
+		<Item Name="Bonus 2-3" ItemID="117" 
+		TypeID="8" SubtypeID="1" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="5" Virality="0">
+      <Conditions>
+        <Condition TypeID="2" ObjectID="1|0" Number="25|0"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Bonus 2-4" ItemID="120" 
+		TypeID="8" SubtypeID="1" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="5" Virality="0">
+      <Conditions>
+        <Condition TypeID="2" ObjectID="1|0" Number="30|0"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Bonus 2-5" ItemID="126" 
+		TypeID="8" SubtypeID="1" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="5" Virality="0">
+      <Conditions>
+        <Condition TypeID="2" ObjectID="1|0" Number="35|0"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Bonus 2-6" ItemID="127" 
+		TypeID="8" SubtypeID="1" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="5" Virality="0">
+      <Conditions>
+        <Condition TypeID="2" ObjectID="1|0" Number="40|0"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Bonus 2-7" ItemID="121" 
+		TypeID="8" SubtypeID="1" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="5" Virality="0">
+      <Conditions>
+        <Condition TypeID="2" ObjectID="1|0" Number="44|0"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Bonus 2-8" ItemID="125" 
+		TypeID="8" SubtypeID="1" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="5" Virality="0">
+      <Conditions>
+        <Condition TypeID="2" ObjectID="1|0" Number="48|0"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Bonus 2-9" ItemID="130" 
+		TypeID="8" SubtypeID="1" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="5" Virality="0">
+      <Conditions>
+        <Condition TypeID="2" ObjectID="1|0" Number="52|0"></Condition>
+      </Conditions>
+    </Item>
+
+<!-- TECHNOPARK STORY TRACKS -->
+	
+    <Item Name="Story 3-1" ItemID="142"
+		TypeID="8" SubtypeID="0" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="7" Virality="0">
+      <Conditions>
+        <Condition TypeID="1" ObjectID="0|118" Number="1|0"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Story 3-2" ItemID="144" 
+		TypeID="8" SubtypeID="0" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="6" Virality="0">
+      <Conditions>
+        <Condition TypeID="1" ObjectID="0|142" Number="1|1"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Story 3-3" ItemID="155" 
+		TypeID="8" SubtypeID="0" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="5" Virality="0">
+      <Conditions>
+        <Condition TypeID="1" ObjectID="0|142" Number="1|0"></Condition>
+      </Conditions>
+    </Item>	
+
+    <Item Name="Story 3-4" ItemID="156" 
+		TypeID="8" SubtypeID="0" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="5" Virality="0">
+      <Conditions>
+        <Condition TypeID="1" ObjectID="0|144" Number="1|1"></Condition>
+      </Conditions>
+    </Item>		
+
+    <Item Name="Story 3-5" ItemID="151" 
+		TypeID="8" SubtypeID="0" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="5" Virality="0">
+      <Conditions>
+        <Condition TypeID="1" ObjectID="0|156" Number="1|1"></Condition>
+      </Conditions>
+    </Item>	
+
+    <Item Name="Story 3-6" ItemID="141" 
+		TypeID="8" SubtypeID="0" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="5" Virality="0">
+      <Conditions>
+        <Condition TypeID="1" ObjectID="0|155" Number="1|0"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Story 3-7" ItemID="177" 
+		TypeID="8" SubtypeID="0" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="5" Virality="0">
+      <Conditions>
+        <Condition TypeID="1" ObjectID="0|141" Number="1|0"></Condition>
+      </Conditions>
+    </Item>	
+	
+    <Item Name="Story 3-8" ItemID="179" 
+		TypeID="8" SubtypeID="0" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="5" Virality="0">
+      <Conditions>
+        <Condition TypeID="1" ObjectID="0|177" Number="1|1"></Condition>
+      </Conditions>
+    </Item>
+	
+    <Item Name="Story 3-9" ItemID="169" 
+		TypeID="8" SubtypeID="0" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="5" Virality="0">
+      <Conditions>
+        <Condition TypeID="1" ObjectID="0|179" Number="1|1"></Condition>
+      </Conditions>
+    </Item>
+	
+    <Item Name="Story 3-10" ItemID="152" 
+		TypeID="8" SubtypeID="0" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="5" Virality="0">
+      <Conditions>
+        <Condition TypeID="1" ObjectID="0|169" Number="1|1"></Condition>
+      </Conditions>
+    </Item>
+	
+    <Item Name="Story 3-11" ItemID="154" 
+		TypeID="8" SubtypeID="0" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="5" Virality="0">
+      <Conditions>
+        <Condition TypeID="1" ObjectID="0|152" Number="1|1"></Condition>
+      </Conditions>
+    </Item>
+	
+<!-- DOWNTOWN STORY TRICKS -->
+
+    <Item Name="Jump Tumble" ItemID="8" 
+		TypeID="9" SubtypeID="" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="" Virality="0">
+      <Conditions>
+        <Condition TypeID="0" ObjectID="0|0" Number="1|1"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Spinning Vault" ItemID="12" 
+		TypeID="9" SubtypeID="" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="" Virality="0">
+      <Conditions>
+        <Condition TypeID="0" ObjectID="0|0" Number="0|0"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Thief Vault" ItemID="33" 
+		TypeID="9" SubtypeID="" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="" Virality="0">
+      <Conditions>
+        <Condition TypeID="0" ObjectID="2|0" Number="7|1"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Reverse Vault" ItemID="31" 
+		TypeID="9" SubtypeID="" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="" Virality="0">
+      <Conditions>
+        <Condition TypeID="0" ObjectID="2|0" Number="2|3"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Backflip" ItemID="14" 
+		TypeID="9" SubtypeID="" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="" Virality="0">
+      <Conditions>
+        <Condition TypeID="0" ObjectID="0|0" Number="10|1"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Obstacle Vault" ItemID="29" 
+		TypeID="9" SubtypeID="" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="" Virality="0">
+      <Conditions>
+        <Condition TypeID="0" ObjectID="0|0" Number="1|7"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Bar Jump" ItemID="28" 
+		TypeID="9" SubtypeID="" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="" Virality="0">
+      <Conditions>
+        <Condition TypeID="0" ObjectID="0|0" Number="1|1"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Screwdriver" ItemID="32" 
+		TypeID="9" SubtypeID="" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="" Virality="0">
+      <Conditions>
+        <Condition TypeID="0" ObjectID="0|0" Number="1|1"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Railflip Vault" ItemID="41" 
+		TypeID="9" SubtypeID="" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="" Virality="0">
+      <Conditions>
+        <Condition TypeID="0" ObjectID="0|0" Number="1|1"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Barrel Vault" ItemID="11" 
+		TypeID="9" SubtypeID="" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="" Virality="0">
+      <Conditions>
+        <Condition TypeID="0" ObjectID="0|0" Number="0|0"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Obstacle Frontflip" ItemID="13" 
+		TypeID="9" SubtypeID="" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="" Virality="0">
+      <Conditions>
+        <Condition TypeID="0" ObjectID="2|0" Number="50|0"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Monkey Vault" ItemID="30" 
+		TypeID="9" SubtypeID="" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="" Virality="0">
+      <Conditions>
+        <Condition TypeID="0" ObjectID="0|0" Number="0|0"></Condition>
+      </Conditions>
+    </Item>
+
+<!-- DOWNTOWN BONUS TRICKS -->
+
+    <Item Name="Vert Vault" ItemID="110" 
+		TypeID="9" SubtypeID="" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="" Virality="0">
+      <Conditions>
+        <Condition TypeID="0" ObjectID="0|0" Number="0|0"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Rocket Vault" ItemID="42" 
+		TypeID="9" SubtypeID="" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="" Virality="0">
+      <Conditions>
+        <Condition TypeID="0" ObjectID="0|0" Number="0|0"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Air Spin" ItemID="79" 
+		TypeID="9" SubtypeID="" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="" Virality="0">
+      <Conditions>
+        <Condition TypeID="0" ObjectID="0|0" Number="0|0"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Side Bomb" ItemID="124" 
+		TypeID="9" SubtypeID="" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="" Virality="0">
+      <Conditions>
+        <Condition TypeID="0" ObjectID="0|0" Number="0|0"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Webster with Salto" ItemID="82" 
+		TypeID="9" SubtypeID="" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="" Virality="0">
+      <Conditions>
+        <Condition TypeID="0" ObjectID="0|0" Number="1|1"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Dash to Frontflip" ItemID="99" 
+		TypeID="9" SubtypeID="" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="" Virality="0">
+      <Conditions>
+        <Condition TypeID="0" ObjectID="0|0" Number="0|0"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Triple Trick to Swallow" ItemID="105" 
+		TypeID="9" SubtypeID="" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="" Virality="0">
+      <Conditions>
+        <Condition TypeID="0" ObjectID="0|0" Number="0|0"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Back Hand Spring" ItemID="7" 
+		TypeID="9" SubtypeID="" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="" Virality="0">
+      <Conditions>
+        <Condition TypeID="0" ObjectID="0|0" Number="0|0"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Monkey to Backflip" ItemID="102" 
+		TypeID="9" SubtypeID="" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="" Virality="0">
+      <Conditions>
+        <Condition TypeID="0" ObjectID="0|0" Number="0|0"></Condition>
+      </Conditions>
+    </Item>
+
+<!-- CONSTRUCTION STORY TRICKS -->
+
+    <Item Name="Double Kong" ItemID="24" 
+		TypeID="9" SubtypeID="" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="" Virality="0">
+      <Conditions>
+        <Condition TypeID="0" ObjectID="0|0" Number="0|0"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Bar Backflip" ItemID="27" 
+		TypeID="9" SubtypeID="" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="" Virality="0">
+      <Conditions>
+        <Condition TypeID="0" ObjectID="0|0" Number="1|1"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Dash Vault" ItemID="25" 
+		TypeID="9" SubtypeID="" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="" Virality="0">
+      <Conditions>
+        <Condition TypeID="0" ObjectID="0|0" Number="0|0"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Air Bomb" ItemID="80" 
+		TypeID="9" SubtypeID="" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="" Virality="0">
+      <Conditions>
+        <Condition TypeID="0" ObjectID="0|0" Number="0|0"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Split Vault" ItemID="93" 
+		TypeID="9" SubtypeID="" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="" Virality="0">
+      <Conditions>
+        <Condition TypeID="0" ObjectID="0|0" Number="1|1"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Descent Vault" ItemID="100" 
+		TypeID="9" SubtypeID="" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="" Virality="0">
+      <Conditions>
+        <Condition TypeID="0" ObjectID="0|0" Number="0|0"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Straight Legs Flip" ItemID="92" 
+		TypeID="9" SubtypeID="" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="" Virality="0">
+      <Conditions>
+        <Condition TypeID="0" ObjectID="0|0" Number="1|1"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Swallow" ItemID="44" 
+		TypeID="9" SubtypeID="" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="" Virality="0">
+      <Conditions>
+        <Condition TypeID="0" ObjectID="0|0" Number="0|0"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Fold Flip" ItemID="26" 
+		TypeID="9" SubtypeID="" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="" Virality="0">
+      <Conditions>
+        <Condition TypeID="0" ObjectID="0|0" Number="0|0"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Flip and Roll" ItemID="83" 
+		TypeID="9" SubtypeID="" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="" Virality="0">
+      <Conditions>
+        <Condition TypeID="0" ObjectID="0|0" Number="1|1"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Boom Boom Shhhhhuh" ItemID="112" 
+		TypeID="9" SubtypeID="" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="" Virality="0">
+      <Conditions>
+        <Condition TypeID="0" ObjectID="0|0" Number="0|0"></Condition>
+      </Conditions>
+    </Item>
+
+<!-- CONSTRUCTION BONUS TRICKS -->
+
+    <Item Name="Handspring to Roll" ItemID="109"
+		TypeID="9" SubtypeID="" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="" Virality="0">
+      <Conditions>
+        <Condition TypeID="0" ObjectID="0|0" Number="0|0"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Dive Down" ItemID="108" 
+		TypeID="9" SubtypeID="" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="" Virality="0">
+      <Conditions>
+        <Condition TypeID="0" ObjectID="0|0" Number="0|0"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Triple Hit Trick" ItemID="40" 
+		TypeID="9" SubtypeID="" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="" Virality="0">
+      <Conditions>
+        <Condition TypeID="0" ObjectID="0|0" Number="0|0"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Side Flip" ItemID="96" 
+		TypeID="9" SubtypeID="" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="" Virality="0">
+      <Conditions>
+        <Condition TypeID="0" ObjectID="0|0" Number="0|0"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Triple Swing" ItemID="43" 
+		TypeID="9" SubtypeID="" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="" Virality="0">
+      <Conditions>
+        <Condition TypeID="0" ObjectID="0|0" Number="0|0"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Monkey to Bomb" ItemID="103" 
+		TypeID="9" SubtypeID="" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="" Virality="0">
+      <Conditions>
+        <Condition TypeID="0" ObjectID="0|0" Number="0|0"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Jump Wheel" ItemID="10" 
+		TypeID="9" SubtypeID="" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="" Virality="">
+      <Conditions>
+        <Condition TypeID="" ObjectID="|" Number="|"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Gate Vault" ItemID="9" 
+		TypeID="9" SubtypeID="" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="" Virality="0">
+      <Conditions>
+        <Condition TypeID="0" ObjectID="0|0" Number="0|0"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Double Back" ItemID="113" 
+		TypeID="9" SubtypeID="" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="" Virality="0">
+      <Conditions>
+        <Condition TypeID="0" ObjectID="0|0" Number="0|0"></Condition>
+      </Conditions>
+    </Item>
+
+<!-- TECHNOPARK STORY TRICKS -->
+
+	   <Item Name="360 Wall Cling" ItemID="122"
+	 TypeID="9" SubtypeID="" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+	 Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="" Virality="0">
+      <Conditions>
+        <Condition TypeID="0" ObjectID="0|0" Number="0|0"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Slow Spin" ItemID="101" 
+		TypeID="9" SubtypeID="" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="" Virality="0">
+      <Conditions>
+        <Condition TypeID="0" ObjectID="0|0" Number="0|0"></Condition>
+      </Conditions>
+    </Item>
+	
+    <Item Name="Underbar" ItemID="123" 
+		TypeID="9" SubtypeID="" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="" Virality="0">
+      <Conditions>
+        <Condition TypeID="0" ObjectID="0|0" Number="0|0"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="JumpDownRoll" ItemID="159" 
+		TypeID="9" SubtypeID="" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="" Virality="0">
+      <Conditions>
+        <Condition TypeID="0" ObjectID="0|0" Number="0|0"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Cheat Gainer" ItemID="111" 
+		TypeID="9" SubtypeID="" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="" Virality="0">
+      <Conditions>
+        <Condition TypeID="0" ObjectID="0|0" Number="0|0"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Flying Arrow" ItemID="145" 
+		TypeID="9" SubtypeID="" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="" Virality="0">
+      <Conditions>
+        <Condition TypeID="0" ObjectID="0|0" Number="0|0"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Double Spin Vault" ItemID="147" 
+		TypeID="9" SubtypeID="" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="" Virality="0">
+      <Conditions>
+        <Condition TypeID="0" ObjectID="0|0" Number="0|0"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Spin 360" ItemID="149" 
+		TypeID="9" SubtypeID="" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="" Virality="0">
+      <Conditions>
+        <Condition TypeID="0" ObjectID="0|0" Number="0|0"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="King Kong Jumpoff" ItemID="162" 
+		TypeID="9" SubtypeID="" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="" Virality="0">
+      <Conditions>
+        <Condition TypeID="0" ObjectID="0|0" Number="0|0"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Spin Bicycle" ItemID="157" 
+		TypeID="9" SubtypeID="" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="" Virality="0">
+      <Conditions>
+        <Condition TypeID="0" ObjectID="0|0" Number="0|0"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Long Circle" ItemID="146" 
+		TypeID="9" SubtypeID="" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="" Virality="0">
+      <Conditions>
+        <Condition TypeID="0" ObjectID="0|0" Number="0|0"></Condition>
+      </Conditions>
+    </Item>	
+<!-- OTHER TRICKS -->
+
+    <Item Name="Webster" ItemID="81" 
+		TypeID="9" SubtypeID="" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="" Virality="0">
+      <Conditions>
+        <Condition TypeID="0" ObjectID="0|0" Number="0|0"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Cool Swing" ItemID="94" 
+		TypeID="9" SubtypeID="" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="" Virality="0">
+      <Conditions>
+        <Condition TypeID="0" ObjectID="0|0" Number="1|1"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Spin Vault" ItemID="104" 
+		TypeID="9" SubtypeID="" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="" Virality="0">
+      <Conditions>
+        <Condition TypeID="0" ObjectID="0|0" Number="0|0"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="360 Wall Hop" ItemID="114" 
+		TypeID="9" SubtypeID="" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="" Virality="0">
+      <Conditions>
+        <Condition TypeID="0" ObjectID="0|0" Number="0|0"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Frontflip Legs Up" ItemID="115" 
+		TypeID="9" SubtypeID="" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="" Virality="0">
+      <Conditions>
+        <Condition TypeID="0" ObjectID="0|0" Number="0|0"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Jump Spin Vault" ItemID="148" 
+		TypeID="9" SubtypeID="" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="" Virality="0">
+      <Conditions>
+        <Condition TypeID="0" ObjectID="0|0" Number="0|0"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Long Circle" ItemID="146" 
+		TypeID="9" SubtypeID="" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="" Virality="0">
+      <Conditions>
+        <Condition TypeID="0" ObjectID="0|0" Number="0|0"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Spin 360" ItemID="149" 
+		TypeID="9" SubtypeID="" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="" Virality="0">
+      <Conditions>
+        <Condition TypeID="0" ObjectID="0|0" Number="0|0"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="New Trick" ItemID="150" 
+		TypeID="9" SubtypeID="" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="" Virality="0">
+      <Conditions>
+        <Condition TypeID="0" ObjectID="0|0" Number="0|0"></Condition>
+      </Conditions>
+    </Item>
+
+<!-- GADGETS -->
+
+    <Item Name="Double Jump" ItemID="15" 
+		TypeID="4" SubtypeID="1" StatusID="" Level="0" Price="3" BonusPrice="0.00" Description="Allows you to jump in the air. Reach heights you've never dared!" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="1" Damage="" MusicID="" Virality="">
+      <Conditions>
+        <Condition TypeID="" ObjectID="|" Number="|"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Slow Time" ItemID="17" 
+		TypeID="4" SubtypeID="1" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="Can't keep the pace? Don't panic! Slow Time will give you a break" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="1" Damage="" MusicID="" Virality="0">
+      <Conditions>
+        <Condition TypeID="0" ObjectID="0|0" Number="1|1"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Force Blaster" ItemID="18" 
+		TypeID="4" SubtypeID="1" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="Unleash a killing shockwave to get rid of nearby hunter" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="1" Damage="" MusicID="" Virality="0">
+      <Conditions>
+        <Condition TypeID="0" ObjectID="0|0" Number="1|1"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Checkpoint" ItemID="47" TypeID="4" SubtypeID="1" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="When you're tired of rerunning same roof over and over again - just save wherever you want." Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="1" Damage="" MusicID="" Virality="">
+      <Conditions>
+        <Condition TypeID="" ObjectID="|" Number="|"></Condition>
+      </Conditions>
+    </Item>
+
+<!-- GEAR -->
+
+    <Item Name="Cap" ItemID="48" 
+		TypeID="2" SubtypeID="1" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="" Virality="0">
+      <Conditions>
+        <Condition TypeID="0" ObjectID="0|0" Number="0|0"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Jacket" ItemID="49" 
+		TypeID="2" SubtypeID="" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="" Virality="">
+      <Conditions>
+        <Condition TypeID="" ObjectID="|" Number="|"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Scarf" ItemID="50" 
+		TypeID="2" SubtypeID="2" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="" Virality="0">
+      <Conditions>
+        <Condition TypeID="0" ObjectID="0|0" Number="0|0"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Shorts" ItemID="51" 
+		TypeID="2" SubtypeID="4" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="" Virality="0">
+      <Conditions>
+        <Condition TypeID="0" ObjectID="0|0" Number="0|0"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Sneakers" ItemID="52" 
+		TypeID="2" SubtypeID="" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="" Virality="">
+      <Conditions>
+        <Condition TypeID="" ObjectID="|" Number="|"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="T-Shirt" ItemID="53" 
+		TypeID="2" SubtypeID="" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="" Virality="">
+      <Conditions>
+        <Condition TypeID="" ObjectID="|" Number="|"></Condition>
+      </Conditions>
+    </Item>
+
+<!-- LOCATIONS -->
+
+    <Item Name="Downtown" ItemID="106" 
+		TypeID="10" SubtypeID="" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="" Virality="0">
+      <Conditions>
+        <Condition TypeID="0" ObjectID="0|0" Number="0|0"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Construction Yard" ItemID="107" 
+		TypeID="10" SubtypeID="" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="" Virality="0">
+      <Conditions>
+        <Condition TypeID="2" ObjectID="2|0" Number="25|0"></Condition>
+      </Conditions>
+    </Item>
+
+    <Item Name="Technology park" ItemID="116" 
+		TypeID="10" SubtypeID="" StatusID="" Level="0" Price="0" BonusPrice="0.00" Description="" 
+		Rang="0" TransferTypeID="0" Rating="0" Gender="" Durability="" Damage="" MusicID="" Virality="0">
+      <Conditions>
+        <Condition TypeID="2" ObjectID="1|0" Number="25|0"></Condition>
+      </Conditions>
+    </Item>
+
+  </Items>
+  <Shop>
+
+<!-- SHOP TRACKS -->
+    <Item ID="23" Name="Story 1-1" ItemID="34" Price="0" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="0"    />
+    <Item ID="24" Name="Story 1-2" ItemID="35" Price="0" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="0"    />
+    <Item ID="26" Name="Story 1-3" ItemID="37" Price="0" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="0"    />
+    <Item ID="36" Name="Story 1-4" ItemID="63" Price="0" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="0"    />
+    <Item ID="35" Name="Story 1-5" ItemID="59" Price="0" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="0"    />
+    <Item ID="27" Name="Story 1-6" ItemID="38" Price="0" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="0"    />
+    <Item ID="20" Name="Story 1-7" ItemID="65" Price="0" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="0"    />
+    <Item ID="25" Name="Story 1-8" ItemID="36" Price="0" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="0"    />
+    <Item ID="21" Name="Story 1-9" ItemID="76" Price="0" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="0"    />
+    <Item ID="28" Name="Story 1-10" ItemID="39" Price="0" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="0"    />
+    <Item ID="64" Name="Story 1-11" ItemID="95" Price="0" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="11"    />
+
+    <Item ID="16" Name="Bonus 1-1" ItemID="86" Price="0" BonusPrice="0" BlitzBonusPrice="1250" Number="1" StatusID="2" X="0" Y="0" Rang="1"    />
+    <Item ID="37" Name="Bonus 1-2" ItemID="55" Price="0" BonusPrice="0" BlitzBonusPrice="1500" Number="1" StatusID="2" X="0" Y="0" Rang="2"    />
+    <Item ID="43" Name="Bonus 1-3" ItemID="64" Price="0" BonusPrice="0" BlitzBonusPrice="1750" Number="1" StatusID="2" X="0" Y="0" Rang="0"    />
+    <Item ID="44" Name="Bonus 1-4" ItemID="69" Price="0" BonusPrice="0" BlitzBonusPrice="2000" Number="1" StatusID="2" X="0" Y="0" Rang="0"    />
+    <Item ID="50" Name="Bonus 1-5" ItemID="23" Price="0" BonusPrice="0" BlitzBonusPrice="2250" Number="1" StatusID="2" X="0" Y="0" Rang="0"    />
+    <Item ID="84" Name="Bonus 1-6" ItemID="128" Price="0" BonusPrice="0" BlitzBonusPrice="2500" Number="1" StatusID="2" X="0" Y="0" Rang="0"    />
+    <Item ID="85" Name="Bonus 1-7" ItemID="134" Price="0" BonusPrice="0" BlitzBonusPrice="2750" Number="1" StatusID="2" X="0" Y="0" Rang="0"    />
+    <Item ID="86" Name="Bonus 1-8" ItemID="132" Price="0" BonusPrice="0" BlitzBonusPrice="3000" Number="1" StatusID="2" X="0" Y="0" Rang="0"    />
+
+<!---------------------------------------------->
+
+    <Item ID="2" Name="Story 2-1" ItemID="16" Price="0" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="0"    />
+    <Item ID="38" Name="Story 2-2" ItemID="87" Price="0" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="0"    />
+    <Item ID="39" Name="Story 2-3" ItemID="91" Price="0" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="0"    />
+    <Item ID="40" Name="Story 2-4" ItemID="4" Price="0" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="0"    />
+    <Item ID="41" Name="Story 2-5" ItemID="90" Price="0" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="0"    />
+    <Item ID="51" Name="Story 2-6" ItemID="20" Price="0" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="0"    />
+    <Item ID="52" Name="Story 2-7" ItemID="21" Price="0" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="0"    />
+    <Item ID="53" Name="Story 2-8" ItemID="19" Price="0" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="0"    />
+    <Item ID="54" Name="Story 2-9" ItemID="3" Price="0" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="0"    />
+    <Item ID="55" Name="Story 2-10" ItemID="74" Price="0" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="0"    />
+	<Item ID="55" Name="Story 2-11" ItemID="139" Price="0" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="0"    />
+	
+    <Item ID="42" Name="Bonus 2-1" ItemID="68" Price="0" BonusPrice="0" BlitzBonusPrice="1500" Number="1" StatusID="2" X="0" Y="0" Rang="0"    />
+    <Item ID="65" Name="Bonus 2-2" ItemID="118" Price="0" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="0"    />
+    <Item ID="66" Name="Bonus 2-3" ItemID="117" Price="0" BonusPrice="0" BlitzBonusPrice="2500" Number="1" StatusID="2" X="0" Y="0" Rang="0"    />
+    <Item ID="70" Name="Bonus 2-4" ItemID="120" Price="0" BonusPrice="0" BlitzBonusPrice="3000" Number="1" StatusID="2" X="0" Y="0" Rang="0"    />
+    <Item ID="71" Name="Bonus 2-5" ItemID="126" Price="0" BonusPrice="0" BlitzBonusPrice="3500" Number="1" StatusID="2" X="0" Y="0" Rang="0"    />
+    <Item ID="74" Name="Bonus 2-6" ItemID="127" Price="0" BonusPrice="0" BlitzBonusPrice="4000" Number="1" StatusID="2" X="0" Y="0" Rang="0"    />
+    <Item ID="75" Name="Bonus 2-7" ItemID="121" Price="0" BonusPrice="0" BlitzBonusPrice="4500" Number="1" StatusID="2" X="0" Y="0" Rang="0"    />
+    <Item ID="88" Name="Bonus 2-8" ItemID="125" Price="0" BonusPrice="0" BlitzBonusPrice="5000" Number="1" StatusID="2" X="0" Y="0" Rang="0"    />
+    <Item ID="89" Name="Bonus 2-9" ItemID="130" Price="0" BonusPrice="0" BlitzBonusPrice="5500" Number="1" StatusID="2" X="0" Y="0" Rang="0"    />
+    <Item ID="62" Name="Bonus 2-10" ItemID="107" Price="0" BonusPrice="0" BlitzBonusPrice="5000" Number="1" StatusID="2" X="0" Y="0" Rang="0"    />
+
+<!---------------------------------------------->
+
+    <Item Name="Story 3-1" ItemID="142" Price="0" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="0"    />
+    <Item Name="Story 3-2" ItemID="144" Price="0" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="0"    />
+    <Item Name="Story 3-3" ItemID="155" Price="0" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="0"    />
+    <Item Name="Story 3-4" ItemID="156" Price="0" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="0"    />
+    <Item Name="Story 3-5" ItemID="151" Price="0" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="0"    />
+    <Item Name="Story 3-6" ItemID="141" Price="0" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="0"    />
+	<Item Name="Story 3-7" ItemID="177" Price="0" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="0"    />
+	<Item Name="Story 3-8" ItemID="179" Price="0" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="0"    />
+	<Item Name="Story 3-9" ItemID="169" Price="0" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="0"    />
+	<Item Name="Story 3-10" ItemID="152" Price="0" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="0"    />
+	<Item Name="Story 3-11" ItemID="154" Price="0" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="0"    />
+
+<!-- SHOP TRICKS -->
+
+<!--Downtown -->
+    <Item ID="4" Price="0" ItemID="8" Name="JumpTumble" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="1101"    />
+    <Item ID="14" Price="0" ItemID="12" Name="SpinningVault" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="1102"    />
+    <Item ID="9" Price="200" ItemID="33" Name="ThiefVault" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="1103"    />
+    <Item ID="10" Price="300" ItemID="31" Name="ReverseVault" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="1104"    />
+    <Item ID="11" Price="100" ItemID="14" Name="BackFlip" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="1105"    />
+    <Item ID="12" Price="0" ItemID="29" Name="JumpObstacle" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="1106"    />
+    <Item ID="13" Price="550" ItemID="28" Name="BarJump Saltoless" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="1107"    />
+    <Item ID="3" Price="650" ItemID="32" Name="ScrewDriver" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="1108"    />
+    <Item ID="22" Price="750" ItemID="41" Name="RailFlip" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="1109"    />
+    <Item ID="1" Price="250" ItemID="11" Name="BarrelVault" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="1110"    />
+    <Item ID="19" Price="200" ItemID="13" Name="ObstacleFrontflip" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="1111"    />
+    <Item ID="76" Price="1050" ItemID="30" Name="MonkeyVault" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="1112"    />
+
+    <Item ID="77" Price="500" ItemID="110" Name="VertVault" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="1201"    />
+    <Item ID="78" Price="600" ItemID="42" Name="RocketVault" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="1202"    />
+    <Item ID="79" Price="300" ItemID="79" Name="AirSpin" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="1203"    />
+    <Item ID="83" Price="800" ItemID="124" Name="SideBomb" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="1204"    />
+    <Item ID="80" Price="900" ItemID="82" Name="WebsterWithSalto" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="1205"    />
+    <Item ID="90" Price="1000" ItemID="99" Name="Dash to Frontflip" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="1206"    />
+    <Item ID="91" Price="1100" ItemID="105" Name="Triple Trick to Swallow" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="1207"    />
+    <Item ID="92" Price="1200" ItemID="7" Name="Handspring" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="1208"    />
+
+<!-- Construction -->
+    <Item ID="45" Price="150" ItemID="24" Name="Double Kong" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="2101"    />
+    <Item ID="46" Price="450" ItemID="27" Name="BarJump" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="2102"    />
+    <Item ID="47" Price="350" ItemID="25" Name="DashVault" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="2103"    />
+    <Item ID="48" Price="300" ItemID="80" Name="AirBomb" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="2104"    />
+    <Item ID="49" Price="250" ItemID="93" Name="SplitOne" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="2105"    />
+    <Item ID="56" Price="200" ItemID="100" Name="Descent vault" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="2106"    />
+    <Item ID="57" Price="950" ItemID="92" Name="Straight legs flip" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="2107"    />
+    <Item ID="58" Price="1050" ItemID="44" Name="Swallow" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="2108"    />
+    <Item ID="59" Price="1150" ItemID="26" Name="Fold flip" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="2109"    />
+    <Item ID="60" Price="1250" ItemID="83" Name="FlipAndRoll" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="2110"    />
+	<Item ID="60" Price="1350" ItemID="112" Name="BoomBoomShhhuh" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="2111"    />
+	
+    <Item ID="67" Price="300" ItemID="109" Name="HandspringToRollStart" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="2201"    />
+    <Item ID="68" Price="250" ItemID="108" Name="DiveDown" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="2202"    />
+    <Item ID="69" Price="1150" ItemID="40" Name="TripleHit" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="2203"    />
+    <Item ID="72" Price="1300" ItemID="96" Name="Side Flip" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="2204"    />
+    <Item ID="73" Price="1450" ItemID="43" Name="Triple Swing" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="2205"    />
+    <Item ID="81" Price="1600" ItemID="103" Name="MonkeyToBomb" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="2206"    />
+    <Item ID="82" Price="1750" ItemID="10" Name="JumpWheel" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="2207"    />
+    <Item ID="94" Price="1900" ItemID="9" Name="Gate Vault" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="2208"    />
+    <Item ID="95" Price="2050" ItemID="113" Name="Double Back" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="2209"    />
+
+<!-- Technopark -->
+
+    <Item Price="200" ItemID="122" Name="360 Wall Cling" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="3101"    />
+    <Item Price="400" ItemID="101" Name="Slow Spin" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="3102"    />
+    <Item Price="250" ItemID="123" Name="Underbar" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="3103"    />
+    <Item Price="650" ItemID="159" Name="JumpDownRoll" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="3104"    />
+    <Item Price="500" ItemID="111" Name="CheatGainer" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="3105"    />
+	<Item Price="300" ItemID="145" Name="FlyingArrow" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="3106"    />
+	<Item Price="1000" ItemID="147" Name="DoubleSpinVault" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="3107"    />
+    <Item Price="1050" ItemID="149" Name="Spin 360" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="3108"    />
+    <Item Price="1150" ItemID="162" Name="King Kong Jumpoff" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="3109"    />
+    <Item Price="1250" ItemID="157" Name="Spin Bicycle" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="3110"    />
+    <Item Price="1350" ItemID="146" Name="Long Cyrcle" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="3111"    />	
+<!-- SHOP GADGETS&GEAR -->
+
+    <Item ID="17" Price="250" ItemID="17" Name="Slow Time" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="0"    />
+    <Item ID="18" Price="400" ItemID="18" Name="Force Blaster" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="0"    />
+
+    <Item ID="29" Price="1000" ItemID="48" Name="Cap" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="0"    />
+    <Item ID="31" Price="2000" ItemID="50" Name="Scarf" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="0"    />
+    <Item ID="32" Price="1500" ItemID="51" Name="Shorts" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="0"    />
+
+    <Item ID="53" Price="0" ItemID="19" Name="" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="0"    />
+    <Item ID="54" Price="0" ItemID="3" Name="" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="0"    />
+    <Item ID="5" Price="1" ItemID="1" Name="" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="0"    />
+    <Item ID="61" Price="0" ItemID="106" Name="" BonusPrice="0" BlitzBonusPrice="0" Number="1" StatusID="2" X="0" Y="0" Rang="0"    />
+    <Item ID="63" Price="0" ItemID="116" Name="" BonusPrice="0" BlitzBonusPrice="10000" Number="1" StatusID="2" X="0" Y="0" Rang="0"    />
+
+  </Shop>
+
+<!-- LOCATIONS -->
+
+  <Tournaments>
+		<Tournament ID="2" TypeID="2" SubtypeID="22" Name="Downtown" Description="" LevelMin="0" LevelMax="0" RatingMin="0" Dan="0" Power="0" Price="0" Money="0" Experience="0" Rating="0" WeaponsID="" StagesCount="20" Date="0" ItemID="106" Number="0" RItemID="" Health="0" MembersCount="0">
+			<Stages>
+				<Stage ID="1" LocationID="34" LocationItemID="34" />
+				<Stage ID="1" LocationID="59" LocationItemID="59" />
+				<Stage ID="1" LocationID="63" LocationItemID="63" />
+				<Stage ID="1" LocationID="16" LocationItemID="16" />
+				<Stage ID="1" LocationID="20" LocationItemID="20" />
+				<Stage ID="1" LocationID="118" LocationItemID="118" />
+				<Stage ID="1" LocationID="142" LocationItemID="142" />
+				<Stage ID="1" LocationID="155" LocationItemID="155" />
+				<Stage ID="1" LocationID="141" LocationItemID="141" />
+				<Stage ID="1" LocationID="177" LocationItemID="177" />
+				<!--Stage ID="1" LocationID="95" LocationItemID="95" />
+				<Stage ID="1" LocationID="86" LocationItemID="86" />
+				<Stage ID="1" LocationID="55" LocationItemID="55" />
+				<Stage ID="1" LocationID="64" LocationItemID="64" />
+				<Stage ID="1" LocationID="69" LocationItemID="69" />
+				<Stage ID="1" LocationID="23" LocationItemID="23" />
+				<Stage ID="1" LocationID="128" LocationItemID="128" />
+				<Stage ID="1" LocationID="134" LocationItemID="134" />
+				<Stage ID="1" LocationID="132" LocationItemID="132" /-->
+			</Stages>
+		</Tournament>
+
+		<Tournament ID="1" TypeID="1" SubtypeID="22" Name="Construction Yard" Description="" LevelMin="0" LevelMax="0" RatingMin="0" Dan="0" Power="0" Price="0" Money="0" Experience="0" Rating="0" WeaponsID="" StagesCount="19" Date="0" ItemID="107" Number="0" RItemID="" Health="0" MembersCount="0">
+			<Stages>
+				<Stage ID="1" LocationID="16" LocationItemID="16" />
+				<Stage ID="1" LocationID="87" LocationItemID="87" />
+				<Stage ID="1" LocationID="91" LocationItemID="91" />
+				<Stage ID="1" LocationID="4" LocationItemID="4" />
+				<Stage ID="1" LocationID="90" LocationItemID="90" />
+				<Stage ID="1" LocationID="20" LocationItemID="20" />
+				<Stage ID="1" LocationID="21" LocationItemID="21" />
+				<Stage ID="1" LocationID="19" LocationItemID="19" />
+				<Stage ID="1" LocationID="3" LocationItemID="3" />
+				<Stage ID="1" LocationID="74" LocationItemID="74" />
+				<Stage ID="1" LocationID="139" LocationItemID="139" />
+				<Stage ID="1" LocationID="68" LocationItemID="68" />
+				<Stage ID="1" LocationID="118" LocationItemID="118" />
+				<Stage ID="1" LocationID="117" LocationItemID="117" />
+				<Stage ID="1" LocationID="120" LocationItemID="120" />
+				<Stage ID="1" LocationID="126" LocationItemID="126" />
+				<Stage ID="1" LocationID="127" LocationItemID="127" />
+				<Stage ID="1" LocationID="121" LocationItemID="121" />
+				<Stage ID="1" LocationID="125" LocationItemID="125" />
+				<Stage ID="1" LocationID="130" LocationItemID="130" />
+			</Stages>
+		</Tournament>
+
+		<Tournament ID="3" TypeID="3" SubtypeID="22" Name="Technopark" Description="" LevelMin="0" LevelMax="0" RatingMin="0" Dan="0" Power="0" Price="0" Money="0" Experience="0" Rating="0" WeaponsID="" StagesCount="3" Date="0" ItemID="116" Number="0" RItemID="" Health="0" MembersCount="0">
+			<Stages>
+				<Stage ID="1" LocationID="142" LocationItemID="142" />
+				<Stage ID="1" LocationID="144" LocationItemID="144" />
+				<Stage ID="1" LocationID="155" LocationItemID="155" />
+				<Stage ID="1" LocationID="156" LocationItemID="156" />
+				<Stage ID="1" LocationID="151" LocationItemID="151" />
+				<Stage ID="1" LocationID="141" LocationItemID="141" />
+				<Stage ID="1" LocationID="177" LocationItemID="177" />
+				<Stage ID="1" LocationID="179" LocationItemID="179" />
+				<Stage ID="1" LocationID="169" LocationItemID="169" />
+				<Stage ID="1" LocationID="152" LocationItemID="152" />
+				<Stage ID="1" LocationID="154" LocationItemID="154" />
+			</Stages>
+		</Tournament>
+  </Tournaments>
+
+<!-- TRACKS & CONDITIONS & MONEY -->
+
+  <Locations>
+
+<!-- Downtown STORY -->
+
+    <Location Name="Story 1-1" ItemID="34">
+			<Tricks>
+				<Trick ID="8" ItemID="8"/>
+			</Tricks>
+			<Conditions>
+				<Condition TypeID="64" ObjectID="1" Number="1" Money="100"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="600" Money="150"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="700" Money="250"></Condition>
+			</Conditions>
+    </Location>
+
+    <Location Name="Story 1-2" ItemID="35">
+			<Tricks>
+				<Trick ID="12" ItemID="12"/>
+				<Trick ID="33" ItemID="33"/>
+			</Tricks>
+			<Conditions>
+				<Condition TypeID="64" ObjectID="1" Number="1" Money="100"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="600" Money="150"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="700" Money="250"></Condition>
+			</Conditions>
+    </Location>
+
+    <Location Name="Story 1-3" ItemID="37">
+			<Tricks>
+				<Trick ID="12" ItemID="12"/>
+				<Trick ID="31" ItemID="31"/>
+				<Trick ID="8" ItemID="8"/>
+			</Tricks>
+			<Conditions>
+				<Condition TypeID="64" ObjectID="1" Number="1" Money="100"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="700" Money="150"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="800" Money="250"></Condition>
+			</Conditions>
+    </Location>
+
+    <Location Name="Story 1-4" ItemID="63">
+			<Tricks>
+				<Trick ID="14" ItemID="14"/>
+				<Trick ID="31" ItemID="31"/>
+				<Trick ID="8" ItemID="8"/>
+			</Tricks>
+			<Conditions>
+				<Condition TypeID="64" ObjectID="1" Number="1" Money="100"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="2700" Money="150"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="2800" Money="250"></Condition>
+			</Conditions>
+    </Location>
+
+    <Location Name="Story 1-5" ItemID="59">
+			<Tricks>
+				<Trick ID="14" ItemID="14"/>
+				<Trick ID="33" ItemID="33"/>
+				<Trick ID="29" ItemID="29"/>
+			</Tricks>
+			<Conditions>
+				<Condition TypeID="64" ObjectID="1" Number="1" Money="100"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="700" Money="150"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="800" Money="250"></Condition>
+			</Conditions>
+    </Location>
+
+    <Location Name="Story 1-6" ItemID="38">
+			<Tricks>
+				<Trick ID="33" ItemID="33"/>
+				<Trick ID="28" ItemID="28"/>
+				<Trick ID="29" ItemID="29"/>
+			</Tricks>
+			<Conditions>
+				<Condition TypeID="64" ObjectID="1" Number="1" Money="100"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="600" Money="150"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="700" Money="250"></Condition>
+			</Conditions>
+    </Location>
+
+    <Location Name="Story 1-7" ItemID="65">
+			<Tricks>
+				<Trick ID="32" ItemID="32"/>
+				<Trick ID="14" ItemID="14"/>
+				<Trick ID="28" ItemID="28"/>
+			</Tricks>
+			<Conditions>
+				<Condition TypeID="64" ObjectID="1" Number="1" Money="100"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="3300" Money="150"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="3400" Money="250"></Condition>
+			</Conditions>
+    </Location>
+
+   <Location Name="Story 1-8" ItemID="36">
+			<Tricks>
+				<Trick ID="29" ItemID="29"/>
+				<Trick ID="31" ItemID="31"/>
+				<Trick ID="41" ItemID="41"/>
+			</Tricks>
+			<Conditions>
+				<Condition TypeID="64" ObjectID="1" Number="1" Money="100"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="900" Money="150"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="1000" Money="250"></Condition>
+			</Conditions>
+    </Location>
+
+    <Location Name="Story 1-9" ItemID="76">
+			<Tricks>
+				<Trick ID="31" ItemID="31"/>
+				<Trick ID="32" ItemID="32"/>
+				<Trick ID="11" ItemID="11"/>
+			</Tricks>
+			<Conditions>
+				<Condition TypeID="64" ObjectID="1" Number="1" Money="100"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="1500" Money="150"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="1600" Money="250"></Condition>
+			</Conditions>
+    </Location>
+
+    <Location Name="Story 1-10" ItemID="39">
+			<Tricks>
+				<Trick ID="33" ItemID="33"/>
+				<Trick ID="32" ItemID="32"/>
+				<Trick ID="13" ItemID="13"/>
+			</Tricks>
+			<Conditions>
+				<Condition TypeID="64" ObjectID="1" Number="1" Money="100"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="700" Money="150"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="800" Money="250"></Condition>
+			</Conditions>
+    </Location>
+
+    <Location Name="Story 1-11" ItemID="95">
+			<Tricks>
+				<Trick ID="30" ItemID="30"/>
+				<Trick ID="13" ItemID="13"/>
+				<Trick ID="29" ItemID="29"/>
+			</Tricks>
+			<Conditions>
+				<Condition TypeID="64" ObjectID="1" Number="1" Money="100"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="1100" Money="150"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="1200" Money="250"></Condition>
+			</Conditions>
+    </Location>
+
+<!-- Downtown BONUS -->
+
+    <Location Name="Bonus 1-1" ItemID="86">
+			<Tricks>
+				<Trick ID="28" ItemID="28"/>
+				<Trick ID="110" ItemID="110"/>
+				<Trick ID="32" ItemID="32"/>
+			</Tricks>
+			<Conditions>
+				<Condition TypeID="64" ObjectID="1" Number="1" Money="200"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="800" Money="300"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="900" Money="500"></Condition>
+			</Conditions>
+    </Location>
+
+		<Location Name="Bonus 1-2" ItemID="55">
+			<Tricks>
+				<Trick ID="42" ItemID="42"/>
+				<Trick ID="12" ItemID="12"/>
+				<Trick ID="41" ItemID="41"/>
+			</Tricks>
+			<Conditions>
+				<Condition TypeID="64" ObjectID="1" Number="1" Money="200"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="700" Money="300"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="800" Money="500"></Condition>
+			</Conditions>
+    </Location>
+
+    <Location Name="Bonus 1-3" ItemID="64">
+			<Tricks>
+				<Trick ID="12" ItemID="12"/>
+				<Trick ID="79" ItemID="79"/>
+				<Trick ID="13" ItemID="13"/>
+			</Tricks>
+			<Conditions>
+				<Condition TypeID="64" ObjectID="1" Number="1" Money="200"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="600" Money="300"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="700" Money="500"></Condition>
+			</Conditions>
+    </Location>
+
+    <Location Name="Bonus 1-4" ItemID="69">
+			<Tricks>
+				<Trick ID="29" ItemID="29"/>
+				<Trick ID="30" ItemID="30"/>
+				<Trick ID="124" ItemID="124"/>
+			</Tricks>
+			<Conditions>
+				<Condition TypeID="64" ObjectID="1" Number="1" Money="200"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="700" Money="300"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="800" Money="500"></Condition>
+			</Conditions>
+    </Location>
+
+    <Location Name="Bonus 1-5" ItemID="23">
+			<Tricks>
+				<Trick ID="14" ItemID="14"/>
+				<Trick ID="33" ItemID="33"/>
+				<Trick ID="31" ItemID="31"/>
+				<Trick ID="12" ItemID="12"/>
+				<Trick ID="8" ItemID="8"/>
+				<Trick ID="82" ItemID="82"/>
+				<Trick ID="32" ItemID="32"/>
+				<Trick ID="13" ItemID="13"/>
+				<Trick ID="11" ItemID="11"/>
+				<Trick ID="41" ItemID="41"/>
+				<Trick ID="79" ItemID="79"/>
+				<Trick ID="110" ItemID="110"/>
+				<Trick ID="42" ItemID="42"/>
+				<Trick ID="30" ItemID="30"/>
+				<Trick ID="28" ItemID="28"/>
+			</Tricks>
+			<Conditions>
+				<Condition TypeID="64" ObjectID="1" Number="1" Money="200"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="5600" Money="300"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="5700" Money="500"></Condition>
+			</Conditions>
+    </Location>
+
+    <Location Name="Bonus 1-6" ItemID="128">
+			<Tricks>
+				<Trick ID="124" ItemID="124"/>
+				<Trick ID="93" ItemID="93"/>
+				<Trick ID="99" ItemID="99"/>
+			</Tricks>
+			<Conditions>
+				<Condition TypeID="64" ObjectID="1" Number="1" Money="200"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="1100" Money="300"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="1200" Money="500"></Condition>
+			</Conditions>
+    </Location>
+
+    <Location Name="Bonus 1-7" ItemID="134">
+			<Tricks>
+				<Trick ID="82" ItemID="82"/>
+				<Trick ID="105" ItemID="105"/>
+				<Trick ID="44" ItemID="44"/>
+			</Tricks>
+			<Conditions>
+				<Condition TypeID="64" ObjectID="1" Number="1" Money="200"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="3900" Money="300"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="4000" Money="500"></Condition>
+			</Conditions>
+    </Location>
+
+    <Location Name="Bonus 1-8" ItemID="132">
+			<Tricks>
+				<Trick ID="44" ItemID="44"/>
+				<Trick ID="30" ItemID="30"/>
+				<Trick ID="7" ItemID="7"/>
+			</Tricks>
+			<Conditions>
+				<Condition TypeID="64" ObjectID="1" Number="1" Money="200"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="800" Money="300"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="900" Money="500"></Condition>
+			</Conditions>
+    </Location>
+
+<!-- Construction STORY -->
+
+    <Location Name="Story 2-1" ItemID="16">
+			<Tricks>
+				<Trick ID="24" ItemID="24"/>
+				<Trick ID="11" ItemID="11"/>
+				<Trick ID="13" ItemID="13"/>
+			</Tricks>
+			<Conditions>
+				<Condition TypeID="64" ObjectID="1" Number="1" Money="150"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="800" Money="250"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="900" Money="400"></Condition>
+			</Conditions>
+    </Location>
+
+    <Location Name="Story 2-2" ItemID="87">
+			<Tricks>
+				<Trick ID="12" ItemID="12"/>
+				<Trick ID="27" ItemID="27"/>
+				<Trick ID="24" ItemID="24"/>
+			</Tricks>
+			<Conditions>
+				<Condition TypeID="64" ObjectID="1" Number="1" Money="150"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="1000" Money="250"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="1100" Money="400"></Condition>
+			</Conditions>
+    </Location>
+
+    <Location Name="Story 2-3" ItemID="91">
+			<Tricks>
+				<Trick ID="25" ItemID="25"/>
+				<Trick ID="28" ItemID="28"/>
+				<Trick ID="27" ItemID="27"/>
+			</Tricks>
+			<Conditions>
+				<Condition TypeID="64" ObjectID="1" Number="1" Money="150"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="1100" Money="250"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="1200" Money="400"></Condition>
+			</Conditions>
+    </Location>
+
+    <Location Name="Story 2-4" ItemID="4">
+			<Tricks>
+				<Trick ID="41" ItemID="41"/>
+				<Trick ID="25" ItemID="25"/>
+				<Trick ID="80" ItemID="80"/>
+			</Tricks>
+			<Conditions>
+				<Condition TypeID="64" ObjectID="1" Number="1" Money="150"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="800" Money="250"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="900" Money="400"></Condition>
+			</Conditions>
+    </Location>
+
+    <Location Name="Story 2-5" ItemID="90">
+			<Tricks>
+				<Trick ID="80" ItemID="80"/>
+				<Trick ID="24" ItemID="24"/>
+				<Trick ID="93" ItemID="93"/>
+			</Tricks>
+			<Conditions>
+				<Condition TypeID="64" ObjectID="1" Number="1" Money="150"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="800" Money="250"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="900" Money="400"></Condition>
+			</Conditions>
+    </Location>
+
+    <Location Name="Story 2-6" ItemID="20">
+			<Tricks>
+				<Trick ID="100" ItemID="100"/>
+				<Trick ID="80" ItemID="80"/>
+				<Trick ID="93" ItemID="93"/>
+			</Tricks>
+			<Conditions>
+				<Condition TypeID="64" ObjectID="1" Number="1" Money="150"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="5100" Money="250"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="5200" Money="400"></Condition>
+			</Conditions>
+    </Location>
+
+    <Location Name="Story 2-7" ItemID="21">
+			<Tricks>
+				<Trick ID="27" ItemID="27"/>
+				<Trick ID="100" ItemID="100"/>
+				<Trick ID="92" ItemID="92"/>
+			</Tricks>
+			<Conditions>
+				<Condition TypeID="64" ObjectID="1" Number="1" Money="150"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="1100" Money="250"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="1200" Money="400"></Condition>
+			</Conditions>
+    </Location>
+
+    <Location Name="Story 2-8" ItemID="19">
+			<Tricks>
+				<Trick ID="92" ItemID="92"/>
+				<Trick ID="44" ItemID="44"/>
+				<Trick ID="24" ItemID="24"/>
+			</Tricks>
+			<Conditions>
+				<Condition TypeID="64" ObjectID="1" Number="1" Money="150"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="1000" Money="250"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="1100" Money="400"></Condition>
+			</Conditions>
+    </Location>
+
+    <Location Name="Story 2-9" ItemID="3">
+			<Tricks>
+				<Trick ID="44" ItemID="44"/>
+				<Trick ID="26" ItemID="26"/>
+				<Trick ID="25" ItemID="25"/>
+			</Tricks>
+			<Conditions>
+				<Condition TypeID="64" ObjectID="1" Number="1" Money="150"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="1400" Money="250"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="1500" Money="400"></Condition>
+			</Conditions>
+    </Location>
+
+    <Location Name="Story 2-10" ItemID="74">
+			<Tricks>
+				<Trick ID="26" ItemID="26"/>
+				<Trick ID="92" ItemID="92"/>
+				<Trick ID="83" ItemID="83"/>
+			</Tricks>
+			<Conditions>
+				<Condition TypeID="64" ObjectID="1" Number="1" Money="150"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="900" Money="250"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="1000" Money="400"></Condition>
+			</Conditions>
+    </Location>
+
+	<Location Name="Story 2-11" ItemID="139">
+			<Tricks>
+				<Trick ID="112" ItemID="112"/>
+				<Trick ID="11" ItemID="11"/>
+				<Trick ID="83" ItemID="83"/>
+			</Tricks>
+			<Conditions>
+				<Condition TypeID="64" ObjectID="1" Number="1" Money="150"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="800" Money="250"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="900" Money="400"></Condition>
+			</Conditions>
+    </Location>
+
+<!-- Construction BONUS -->
+
+    <Location Name="Bonus 2-1" ItemID="68">
+			<Tricks>
+				<Trick ID="93" ItemID="93"/>
+				<Trick ID="25" ItemID="25"/>
+				<Trick ID="109" ItemID="109"/>
+			</Tricks>
+			<Conditions>
+				<Condition TypeID="64" ObjectID="1" Number="1" Money="250"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="800" Money="500"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="900" Money="750"></Condition>
+			</Conditions>
+    </Location>
+
+    <Location Name="Bonus 2-2" ItemID="118">
+			<Tricks>
+				<Trick ID="108" ItemID="108"/>
+				<Trick ID="25" ItemID="25"/>
+				<Trick ID="109" ItemID="109"/>
+			</Tricks>
+			<Conditions>
+				<Condition TypeID="64" ObjectID="1" Number="1" Money="250"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="4600" Money="500"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="4700" Money="750"></Condition>
+			</Conditions>
+    </Location>
+
+    <Location Name="Bonus 2-3" ItemID="117">
+			<Tricks>
+				<Trick ID="12" ItemID="12"/>
+				<Trick ID="108" ItemID="108"/>
+				<Trick ID="40" ItemID="40"/>
+			</Tricks>
+			<Conditions>
+				<Condition TypeID="64" ObjectID="1" Number="1" Money="250"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="900" Money="500"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="1000" Money="750"></Condition>
+			</Conditions>
+    </Location>
+
+    <Location Name="Bonus 2-4" ItemID="120">
+			<Tricks>
+				<Trick ID="93" ItemID="93"/>
+				<Trick ID="27" ItemID="27"/>
+				<Trick ID="96" ItemID="96"/>
+			</Tricks>
+			<Conditions>
+				<Condition TypeID="64" ObjectID="1" Number="1" Money="250"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="700" Money="500"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="800" Money="750"></Condition>
+			</Conditions>
+    </Location>
+
+    <Location Name="Bonus 2-5" ItemID="126">
+			<Tricks>
+				<Trick ID="40" ItemID="40"/>
+				<Trick ID="43" ItemID="43"/>
+				<Trick ID="83" ItemID="83"/>
+			</Tricks>
+			<Conditions>
+				<Condition TypeID="64" ObjectID="1" Number="1" Money="250"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="700" Money="500"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="800" Money="750"></Condition>
+			</Conditions>
+    </Location>
+
+    <Location Name="Bonus 2-6" ItemID="127">
+			<Tricks>
+				<Trick ID="30" ItemID="30"/>
+				<Trick ID="96" ItemID="96"/>
+				<Trick ID="103" ItemID="103"/>
+			</Tricks>
+			<Conditions>
+				<Condition TypeID="64" ObjectID="1" Number="1" Money="250"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="3400" Money="500"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="3500" Money="750"></Condition>
+			</Conditions>
+    </Location>
+
+    <Location Name="Bonus 2-7" ItemID="121">
+			<Tricks>
+				<Trick ID="100" ItemID="100"/>
+				<Trick ID="10" ItemID="10"/>
+				<Trick ID="43" ItemID="43"/>
+			</Tricks>
+			<Conditions>
+				<Condition TypeID="64" ObjectID="1" Number="1" Money="250"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="800" Money="500"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="900" Money="750"></Condition>
+			</Conditions>
+    </Location>
+
+    <Location Name="Bonus 2-8" ItemID="125">
+			<Tricks>
+				<Trick ID="28" ItemID="28"/>
+				<Trick ID="9" ItemID="9"/>
+				<Trick ID="44" ItemID="44"/>
+			</Tricks>
+			<Conditions>
+				<Condition TypeID="64" ObjectID="1" Number="1" Money="250"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="800" Money="500"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="900" Money="750"></Condition>
+			</Conditions>
+    </Location>
+
+    <Location Name="Bonus 2-9" ItemID="130">
+			<Tricks>
+				<Trick ID="24" ItemID="24"/>
+				<Trick ID="113" ItemID="113"/>
+				<Trick ID="9" ItemID="9"/>
+			</Tricks>
+			<Conditions>
+				<Condition TypeID="64" ObjectID="1" Number="1" Money="250"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="700" Money="500"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="800" Money="750"></Condition>
+			</Conditions>
+    </Location>
+
+<!-- Technopark Story -->	
+	
+	<Location Name="Story 3-1" ItemID="142">
+			<Tricks>
+				<Trick ID="122" ItemID="122"/>
+				<Trick ID="79" ItemID="79"/>
+				<Trick ID="93" ItemID="93"/>
+			</Tricks>
+			<Conditions>
+				<Condition TypeID="64" ObjectID="1" Number="1" Money="200"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="700" Money="300"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="800" Money="500"></Condition>
+			</Conditions>
+    </Location>
+	
+	<Location Name="Story 3-2" ItemID="144">
+			<Tricks>
+				<Trick ID="101" ItemID="101"/>
+				<Trick ID="122" ItemID="122"/>
+				<Trick ID="24" ItemID="24"/>
+			</Tricks>
+			<Conditions>
+				<Condition TypeID="64" ObjectID="1" Number="1" Money="200"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="1000" Money="300"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="1100" Money="500"></Condition>
+			</Conditions>
+    </Location>
+
+	<Location Name="Story 3-3" ItemID="155">
+			<Tricks>
+				<Trick ID="123" ItemID="123"/>
+				<Trick ID="101" ItemID="101"/>
+				<Trick ID="122" ItemID="122"/>
+			</Tricks>
+			<Conditions>
+				<Condition TypeID="64" ObjectID="1" Number="1" Money="200"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="900" Money="300"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="1000" Money="500"></Condition>
+			</Conditions>
+    </Location>
+
+	<Location Name="Story 3-4" ItemID="156">
+			<Tricks>
+				<Trick ID="123" ItemID="123"/>
+				<Trick ID="159" ItemID="159"/>
+				<Trick ID="24" ItemID="24"/>
+			</Tricks>
+			<Conditions>
+				<Condition TypeID="64" ObjectID="1" Number="1" Money="200"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="800" Money="300"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="900" Money="500"></Condition>
+			</Conditions>
+    </Location>
+
+	<Location Name="Story 3-5" ItemID="151">
+			<Tricks>
+				<Trick ID="111" ItemID="123"/>
+				<Trick ID="159" ItemID="159"/>
+				<Trick ID="25" ItemID="25"/>
+			</Tricks>
+			<Conditions>
+				<Condition TypeID="64" ObjectID="1" Number="1" Money="200"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="700" Money="300"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="800" Money="500"></Condition>
+			</Conditions>
+    </Location>
+	
+	<Location Name="Story 3-6" ItemID="141">
+			<Tricks>
+				<Trick ID="111" ItemID="111"/>
+				<Trick ID="145" ItemID="145"/>
+				<Trick ID="109" ItemID="109"/>
+			</Tricks>
+			<Conditions>
+				<Condition TypeID="64" ObjectID="1" Number="1" Money="200"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="700" Money="300"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="800" Money="500"></Condition>
+			</Conditions>
+    </Location>
+	
+	<Location Name="Story 3-7" ItemID="177">
+			<Tricks>
+				<Trick ID="147" ItemID="147"/>
+				<Trick ID="145" ItemID="145"/>
+				<Trick ID="29" ItemID="29"/>
+			</Tricks>
+			<Conditions>
+				<Condition TypeID="64" ObjectID="1" Number="1" Money="200"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="700" Money="300"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="800" Money="500"></Condition>
+			</Conditions>
+     </Location>
+	
+	<Location Name="Story 3-8" ItemID="179">
+			<Tricks>
+				<Trick ID="147" ItemID="147"/>
+				<Trick ID="145" ItemID="145"/>
+				<Trick ID="149" ItemID="149"/>
+			</Tricks>
+			<Conditions>
+				<Condition TypeID="64" ObjectID="1" Number="1" Money="200"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="5500" Money="300"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="5600" Money="500"></Condition>
+			</Conditions>
+     </Location>
+	
+	<Location Name="Story 3-9" ItemID="169">
+			<Tricks>
+				<Trick ID="162" ItemID="162"/>
+				<Trick ID="149" ItemID="149"/>
+				<Trick ID="43" ItemID="43"/>
+			</Tricks>
+			<Conditions>
+				<Condition TypeID="64" ObjectID="1" Number="1" Money="200"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="700" Money="300"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="800" Money="500"></Condition>
+			</Conditions>
+     </Location>
+	
+	<Location Name="Story 3-10" ItemID="152">
+			<Tricks>
+				<Trick ID="157" ItemID="157"/>
+				<Trick ID="162" ItemID="162"/>
+				<Trick ID="40" ItemID="40"/>
+			</Tricks>
+			<Conditions>
+				<Condition TypeID="64" ObjectID="1" Number="1" Money="200"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="1500" Money="300"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="1600" Money="500"></Condition>
+			</Conditions>
+     </Location>
+	
+	<Location Name="Story 3-11" ItemID="154">
+			<Tricks>
+				<Trick ID="157" ItemID="157"/>
+				<Trick ID="146" ItemID="146"/>
+				<Trick ID="93" ItemID="93"/>
+			</Tricks>
+			<Conditions>
+				<Condition TypeID="64" ObjectID="1" Number="1" Money="200"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="1000" Money="300"></Condition>
+				<Condition TypeID="64" ObjectID="5" Number="1100" Money="500"></Condition>
+			</Conditions>
+     </Location>   
+  </Locations>
+</List>

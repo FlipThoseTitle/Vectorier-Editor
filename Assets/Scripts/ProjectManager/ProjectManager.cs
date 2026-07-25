@@ -85,7 +85,7 @@ namespace Vectorier.ProjectManager
             selectedProject = projectName;
             currentProjectName = projectName;
 
-            // Load Thumbnail (Support png, jpg, jpeg)
+            // Load Thumbnail (png, jpg, jpeg)
             string[] possibleExtensions = { ".png", ".jpg", ".jpeg" };
             thumbnailTexture = null;
 
@@ -162,13 +162,20 @@ namespace Vectorier.ProjectManager
             GUILayout.FlexibleSpace();
             if (GUILayout.Button("+", GUILayout.Width(30)))
             {
-                CreateNewProject();
+                if (EditorUtility.DisplayDialog(
+                    "Create New Project",
+                    "Do you want to create a new project?\n\nThis process may take a few minutes.",
+                    "Create",
+                    "Cancel"))
+                {
+                    CreateNewProject();
+                }
             }
             if (GUILayout.Button("-", GUILayout.Width(30)))
             {
                 DeleteSelectedProject();
             }
-            // New Duplicate Button
+            // Duplicate
             if (GUILayout.Button(new GUIContent("D", "Duplicate selected project"), GUILayout.Width(30)))
             {
                 DuplicateSelectedProject();
@@ -215,7 +222,7 @@ namespace Vectorier.ProjectManager
             
             Texture displayTex = thumbnailTexture != null ? thumbnailTexture : EditorGUIUtility.whiteTexture;
             
-            // Define 16:9 dimensions (e.g., 320 Width / 180 Height)
+            // Define 16:9 dimensions
             float imgWidth = 320f;
             float imgHeight = imgWidth / (16f / 9f); 
             
@@ -273,7 +280,6 @@ namespace Vectorier.ProjectManager
                 isDescriptionDirty = true;
             }
 
-            // If the description is dirty, but the user clicked away (focus lost), save it
             if (isDescriptionDirty && GUI.GetNameOfFocusedControl() != "DescriptionTextArea")
             {
                 CheckAndSaveDirtyDescription();
@@ -284,12 +290,22 @@ namespace Vectorier.ProjectManager
             // --- Action Buttons ---
             if (GUILayout.Button("Edit Project", GUILayout.Height(35))) 
             { 
-                ProjectManagerSelection.ShowWindow(selectedProject);
-                this.Close();
+                if (selectedProject == UndeletableProject)
+                {
+                    EditorUtility.DisplayDialog("Action Denied", $"The project '{UndeletableProject}' isn't editable.", "OK");
+                }
+                else
+                {
+                    ProjectManagerSelection.ShowWindow(selectedProject);
+                    this.Close();
+                }
             }
 
             GUILayout.Space(5);
-            if (GUILayout.Button("Apply to Snail Runner", GUILayout.Height(35))) { /* To be implemented */ }
+            if (GUILayout.Button("Apply to Snail Runner", GUILayout.Height(35))) 
+            { 
+                ProjectManagerApply.ApplyProject(selectedProject);
+            }
 
             GUILayout.Space(5);
             if (GUILayout.Button("Publish as Mod...", GUILayout.Height(35))) 
@@ -310,14 +326,30 @@ namespace Vectorier.ProjectManager
             string newName = baseName;
             int counter = 1;
 
-            // Find a unique name
+            // Find a unique name to prevent conflicts
             while (AssetDatabase.IsValidFolder($"{ProjectsFolderPath}/{newName}"))
             {
                 newName = $"{baseName} ({counter})";
                 counter++;
             }
 
-            AssetDatabase.CreateFolder(ProjectsFolderPath, newName);
+            string sourcePath = "Assets/Editor/ProjectManager/ProjectTemplate"; 
+            string newProjectPath = $"{ProjectsFolderPath}/{newName}";
+
+            // Copy the base template project if it exists
+            if (AssetDatabase.IsValidFolder(sourcePath))
+            {
+                if (!AssetDatabase.CopyAsset(sourcePath, newProjectPath))
+                {
+                    Debug.LogError($"Failed to copy base project from '{sourcePath}' to '{newProjectPath}'.");
+                }
+            }
+            else
+            {
+                Debug.LogWarning($"Base project not found at '{sourcePath}'. Creating an empty folder instead.");
+                AssetDatabase.CreateFolder(ProjectsFolderPath, newName);
+            }
+
             RefreshProjectList();
             LoadProjectData(newName);
         }
@@ -343,7 +375,6 @@ namespace Vectorier.ProjectManager
 
                 string newPath = $"{ProjectsFolderPath}/{newName}";
 
-                // AssetDatabase.CopyAsset safely copies the folder, contents, and their .meta files
                 if (AssetDatabase.CopyAsset(originalPath, newPath))
                 {
                     RefreshProjectList();

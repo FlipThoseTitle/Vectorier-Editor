@@ -7244,7 +7244,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   exportType: 0
-  filePathDirectory: Assets/Snail Runner/Vector_Data/StreamingAssets/xmlroot/levels
+  filePathDirectory: Snail Runner/Vector_Data/StreamingAssets/xmlroot/levels
   fileName: TestLevel
   fastBuild: 1
   exportAsXML: 1
@@ -7267,7 +7267,43 @@ MonoBehaviour:
     Color="0" BirthSpawn="DefaultSpawn" AI="0" Time="1.5" Trick="1" Item="1" Lose="1"
     Skins="hunter" Murders="Player" Arrests="Player"/>'
   coinValue: 50
-  commonModeModelDefinitions: []
+  commonModeModelDefinitions:
+  - name: Player
+    type: 1
+    color: 0
+    birthSpawn: DefaultSpawn
+    ai: 0
+    time: 0
+    forceBlasts: Hunter
+    trick: 1
+    victory: 1
+    lose: 1
+    respawns: Hunter
+    allowedSpawns: 
+    skins: 
+    murders: 
+    arrests: 
+    item: 1
+    icon: 0
+    stocks: 
+  - name: Hunter
+    type: 0
+    color: 0
+    birthSpawn: DefaultSpawn
+    ai: 1
+    time: 1.5
+    forceBlasts: 
+    trick: 0
+    victory: 0
+    lose: 0
+    respawns: 
+    allowedSpawns: Respawn
+    skins: hunter
+    murders: Player
+    arrests: Player
+    item: 0
+    icon: 1
+    stocks: 
   hunterModeModelDefinitions:
   - name: Player
     type: 0
@@ -7298,7 +7334,7 @@ MonoBehaviour:
     victory: 0
     lose: 1
     respawns: 
-    allowedSpawns: Despawn
+    allowedSpawns: 
     skins: hunter
     murders: Player
     arrests: Player

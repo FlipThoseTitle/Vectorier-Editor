@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+ Types
+ type = 1 -  coins
+ -->
+
+<Coins id="0" type="1" iOS="com.nekki.vector.free.tier1" android="android1" />
+<Coins id="1" type="1" iOS="com.nekki.vector.free.tier2" android="android2" />
+<Coins id="2" type="1" iOS="com.nekki.vector.free.tier5" android="android3" />
+<Coins id="3" type="1" iOS="com.nekki.vector.free.tier10" android="android4" />
+<Coins id="4" type="1" iOS="com.nekki.vector.free.tier20" android="android5" />
+<Coins id="5" type="1" iOS="com.nekki.vector.free.tier50" android="android6" />
+
+<Unlock id="100" type="2" iOS="com.nekki.vector.free.unlock" android="com.nekki.vector.unlock" samsung="000000065403"/>

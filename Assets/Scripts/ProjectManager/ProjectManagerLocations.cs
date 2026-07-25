@@ -161,7 +161,7 @@ namespace Vectorier.ProjectManager
 
             GUILayout.Space(5);
 
-            // 1. Thumbnail Image Preview
+            // Thumbnail Image Preview
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
             
@@ -177,17 +177,27 @@ namespace Vectorier.ProjectManager
             }
 
             Rect imageRect = GUILayoutUtility.GetRect(imgWidth, imgHeight, GUILayout.Width(imgWidth), GUILayout.Height(imgHeight));
-            Texture displayTex = item.thumbnail != null ? item.thumbnail : EditorGUIUtility.whiteTexture;
             
-            GUI.Box(imageRect, "", GUI.skin.textField); 
-            GUI.DrawTexture(imageRect, displayTex, ScaleMode.ScaleToFit);
-            
-            if (item.thumbnail == null)
+            // --- THUMBNAIL LOGIC ---
+            if (item.thumbnail != null)
             {
-                GUIStyle labelStyle = new GUIStyle(GUI.skin.label) { alignment = TextAnchor.MiddleCenter };
-                GUI.Label(imageRect, "Thumbnail", labelStyle);
+                // Draw actual image scaled to fit correctly
+                GUI.DrawTexture(imageRect, item.thumbnail, ScaleMode.ScaleToFit);
+            }
+            else
+            {
+                // Draw white texture stretched to fill the entire expected bounds
+                GUI.DrawTexture(imageRect, EditorGUIUtility.whiteTexture, ScaleMode.StretchToFill);
+
+                GUIStyle centeredTextStyle = new GUIStyle(EditorStyles.label)
+                {
+                    alignment = TextAnchor.MiddleCenter,
+                    normal = { textColor = Color.black } // Dark text so it shows up well on the white texture
+                };
+                GUI.Label(imageRect, "Click Here to Change Thumbnail", centeredTextStyle);
             }
 
+            // Invisible button covering the entire image area
             if (GUI.Button(imageRect, new GUIContent("", "Click to assign thumbnail"), GUIStyle.none))
             {
                 SelectAndImportImage(item);
@@ -198,7 +208,7 @@ namespace Vectorier.ProjectManager
 
             GUILayout.Space(10);
 
-            // 2. Location Name (Delayed)
+            // Location Name
             EditorGUI.BeginChangeCheck();
             string newName = EditorGUILayout.DelayedTextField("Location Name", item.locationName);
             if (EditorGUI.EndChangeCheck())
@@ -221,7 +231,7 @@ namespace Vectorier.ProjectManager
                 }
             }
 
-            // --- 3. Modes Section ---
+            // --- Modes Section ---
             GUILayout.Space(5);
             DrawModeSettings("Classic Mode", item.classic);
             GUILayout.Space(5);
@@ -229,7 +239,7 @@ namespace Vectorier.ProjectManager
 
             GUILayout.Space(10);
 
-            // 4. Edit Levels Button
+            // Edit Levels Button
             if (GUILayout.Button("Edit Levels", GUILayout.Height(25)))
             {
                 // Set the flag so OnDestroy knows NOT to open the selection window
@@ -340,16 +350,31 @@ namespace Vectorier.ProjectManager
 
             LocationItem item = locationList[selectedIndex];
 
-            // Delete Image
+            // Delete Location Image
             if (item.thumbnail != null)
             {
                 string path = AssetDatabase.GetAssetPath(item.thumbnail);
                 if (!string.IsNullOrEmpty(path)) AssetDatabase.DeleteAsset(path);
             }
 
+            // Delete all related level folders and their contents (XMLs and Icons)
+            string levelsXmlFolder = $"Assets/Projects/{activeProjectName}/xmlroot/levels/{item.locationName}";
+            if (AssetDatabase.IsValidFolder(levelsXmlFolder))
+            {
+                AssetDatabase.DeleteAsset(levelsXmlFolder);
+            }
+
+            string levelsIconsFolder = $"Assets/Projects/{activeProjectName}/icons/levels/{item.locationName}";
+            if (AssetDatabase.IsValidFolder(levelsIconsFolder))
+            {
+                AssetDatabase.DeleteAsset(levelsIconsFolder);
+            }
+
+            // Remove the location from the local list
             locationList.RemoveAt(selectedIndex);
             selectedIndex = -1;
             
+            // Save changes (this inherently drops the location and its nested levels from List_Payed.xml)
             SaveToXml();
         }
 
@@ -539,7 +564,7 @@ namespace Vectorier.ProjectManager
 
             locationsNode.RemoveNodes();
 
-            // 1. Loop and add ALL Classic Nodes first
+            // Loop and add ALL Classic Nodes first
             foreach (LocationItem item in locationList)
             {
                 XElement newLocNode = CreateLocationNode(item.locationName, item.classic);
@@ -550,7 +575,7 @@ namespace Vectorier.ProjectManager
                 locationsNode.Add(newLocNode);
             }
 
-            // 2. Loop and add ALL Hunter Nodes at the bottom
+            // Loop and add ALL Hunter Nodes at the bottom
             foreach (LocationItem item in locationList)
             {
                 string hunterName = item.locationName + "_HUNTER";

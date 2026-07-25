@@ -64,7 +64,7 @@ namespace Vectorier.ProjectManager
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
             
-            GUIStyle totalLabelStyle = new GUIStyle(EditorStyles.label) { alignment = TextAnchor.MiddleRight };
+            GUIStyle totalLabelStyle = new GUIStyle(EditorStyles.boldLabel) { alignment = TextAnchor.MiddleRight };
             GUILayout.Label("Total Animations - " + loadedAnimationPaths.Count, totalLabelStyle, GUILayout.Height(30));
             
             GUILayout.Space(10); // Small gap between the text and the buttons

@@ -9,7 +9,6 @@ using UnityEngine;
 using Vectorier.XML;
 using Vectorier.Handler;
 using Vectorier.EditorScript;
-using Vectorier.Parallax;
 using UnityEngine.SceneManagement;
 
 namespace Vectorier.Core
@@ -115,7 +114,7 @@ namespace Vectorier.Core
 
             EditorGUI.BeginChangeCheck();
 
-            config.exportType = (ExportConfig.ExportType)EditorGUILayout.EnumPopup("Export Type", config.exportType);
+            config.exportType = (ExportConfig.ExportType)EditorGUILayout.EnumPopup(new GUIContent("Export Type", "Select the type of XML to export.\n- Level: Export the current level\n- Objects: Export all objects in the scene into an objects xml.\n- Buildings: Export all buildings in the scene into a buildings xml."), config.exportType);
             EditorGUILayout.Space();
             EditorGUILayout.LabelField("Configuration", EditorStyles.boldLabel);
 
@@ -140,7 +139,7 @@ namespace Vectorier.Core
 
             EditorGUILayout.Space(10);
             
-            if (GUILayout.Button("Export", GUILayout.Height(50)))
+            if (GUILayout.Button(new GUIContent("Export", "Export the level into the file path directory."), GUILayout.Height(50)))
             {
                 EditorSceneManager.MarkSceneDirty(UnityEngine.SceneManagement.SceneManager.GetActiveScene());
 
@@ -155,27 +154,30 @@ namespace Vectorier.Core
                 });
             }
 
-            if (GUILayout.Button("Export and Play", GUILayout.Height(50)))
+            if (config.exportAsXML)
             {
-                EditorSceneManager.MarkSceneDirty(UnityEngine.SceneManagement.SceneManager.GetActiveScene());
-
-                ExecuteWithParallaxDisabled(() => 
+                if (GUILayout.Button(new GUIContent("Export and Play", "Export the level into the file path directory, and start-up Snail Runner."), GUILayout.Height(50)))
                 {
-                    if (config.exportType == ExportConfig.ExportType.Level)
-                        BuildLevel();
-                    else if (config.exportType == ExportConfig.ExportType.Objects)
-                        BuildObjects();
-                    else
-                        BuildBuildings();
-                });
+                    EditorSceneManager.MarkSceneDirty(UnityEngine.SceneManagement.SceneManager.GetActiveScene());
 
-                SnailRunner runner = EditorWindow.GetWindow<SnailRunner>("Play Level");
-                runner.SetLevelAndPlay(config.fileName);
+                    ExecuteWithParallaxDisabled(() => 
+                    {
+                        if (config.exportType == ExportConfig.ExportType.Level)
+                            BuildLevel();
+                        else if (config.exportType == ExportConfig.ExportType.Objects)
+                            BuildObjects();
+                        else
+                            BuildBuildings();
+                    });
+
+                    SnailRunner runner = EditorWindow.GetWindow<SnailRunner>("Play Level");
+                    runner.SetLevelAndPlay(config.fileName);
+                }
             }
 
             if ((config.exportType == ExportConfig.ExportType.Objects || config.exportType == ExportConfig.ExportType.Buildings) && config.exportAsXML)
             {
-                if (GUILayout.Button("Save to Existing", GUILayout.Height(40)))
+                if (GUILayout.Button(new GUIContent("Save to Existing", "Save the exported objects to the selected XML file.\nThe selected XML file is decided from the current file path directory, and the level's name."), GUILayout.Height(40)))
                 {
                     if (string.IsNullOrEmpty(config.filePathDirectory) || string.IsNullOrEmpty(config.fileName))
                     {
@@ -200,6 +202,11 @@ namespace Vectorier.Core
                 }
             }
 
+            if (GUILayout.Button(new GUIContent("Revert to Default", "Revert all levels xml to the original."), GUILayout.Height(40)))
+            {
+                RevertToDefault();
+            }
+
             EditorGUILayout.EndScrollView();
         }
 
@@ -212,14 +219,14 @@ namespace Vectorier.Core
 
             EditorGUILayout.Space();
             EditorGUILayout.LabelField("<Sets>", EditorStyles.boldLabel);
-            DrawSetListUI("City", config.citySets);
-            DrawSetListUI("Ground", config.groundSets);
-            DrawSetListUI("Library", config.librarySets);
+            DrawSetListUI("City", config.citySets, "The list of the buildings sets to use for this level.\nThis is for referencing buildings prefabs from the XML.");
+            DrawSetListUI("Ground", config.groundSets, "The list of the objects sets to use for this level.\nThis is for referencing object prefabs from the XML.");
+            DrawSetListUI("Library", config.librarySets, "(DEPRACATED) May still be used for steam compatibility, but isn't used in Unity.\nThe list of the library sets to use for this level.");
 
             EditorGUILayout.Space();
             EditorGUILayout.LabelField("<Music>", EditorStyles.boldLabel);
-            config.musicName = EditorGUILayout.TextField("Music Name", config.musicName);
-            config.musicVolume = EditorGUILayout.FloatField("Music Volume", config.musicVolume);
+            config.musicName = EditorGUILayout.TextField(new GUIContent("Music Name", "The name of the music track to use for this level."), config.musicName);
+            config.musicVolume = EditorGUILayout.FloatField(new GUIContent("Music Volume", "Adjust the volume of the music track.\nDefault: 0.3"), config.musicVolume);
 
             EditorGUILayout.Space();
             EditorGUILayout.LabelField("<Models>", EditorStyles.boldLabel);
@@ -229,7 +236,7 @@ namespace Vectorier.Core
             config.commonModeModels = EditorGUILayout.TextArea(config.commonModeModels, new GUIStyle(EditorStyles.textArea) { wordWrap = false }, GUILayout.ExpandHeight(true), GUILayout.ExpandWidth(true));
             EditorGUILayout.EndScrollView();
 
-            if (GUILayout.Button("Edit Common Mode Models", GUILayout.Height(24)))
+            if (GUILayout.Button(new GUIContent("Edit Common Mode Models", "Edit the model properties for the common mode."), GUILayout.Height(24)))
             {
                 ModelEditorWindow.Open(config, true);
             }
@@ -240,15 +247,20 @@ namespace Vectorier.Core
             config.hunterModeModels = EditorGUILayout.TextArea(config.hunterModeModels, new GUIStyle(EditorStyles.textArea) { wordWrap = false }, GUILayout.ExpandHeight(true), GUILayout.ExpandWidth(true));
             EditorGUILayout.EndScrollView();
 
-            if (GUILayout.Button("Edit Hunter Mode Models", GUILayout.Height(24)))
+            if (GUILayout.Button(new GUIContent("Edit Hunter Mode Models", "Edit the model properties for the hunter mode."), GUILayout.Height(24)))
             {
                 ModelEditorWindow.Open(config, false);
             }
 
             EditorGUILayout.Space();
             config.coinValue = EditorGUILayout.IntField("Coins Value", config.coinValue);
-            config.fastBuild = EditorGUILayout.Toggle("Fast Build", config.fastBuild);
-            config.exportAsXML = EditorGUILayout.Toggle("Export as XML", config.exportAsXML);
+
+            config.exportAsXML = EditorGUILayout.Toggle(new GUIContent("Export as XML", "Export the level as an XML file instead of compiling it into .dz\nFor Unity and Snail Runner, enable this.\nFor Steam Version, disable this."), config.exportAsXML);
+
+            if (!config.exportAsXML)
+            {
+                config.fastBuild = EditorGUILayout.Toggle(new GUIContent("Fast Build", "Will make the compile time faster, but may increase the size of the final build.\nThis is recommended to be enabled."), config.fastBuild);
+            }
         }
 
         private void DrawObjectsConfigUI()
@@ -258,12 +270,16 @@ namespace Vectorier.Core
 
             EditorGUILayout.Space();
             EditorGUILayout.LabelField("<Sets>", EditorStyles.boldLabel);
-            DrawSetListUI("City", config.citySets);
-            DrawSetListUI("Ground", config.groundSets);
-            DrawSetListUI("Library", config.librarySets);
+            DrawSetListUI("City", config.citySets, "The list of the buildings sets to use for this level.\nThis is for referencing buildings prefabs from the XML.");
+            DrawSetListUI("Ground", config.groundSets, "The list of the objects sets to use for this level.\nThis is for referencing object prefabs from the XML.");
+            DrawSetListUI("Library", config.librarySets, "(DEPRACATED) May still be used for steam compatibility, but isn't used in Unity.\nThe list of the library sets to use for this level.");
 
-            config.fastBuild = EditorGUILayout.Toggle("Fast Build", config.fastBuild);
-            config.exportAsXML = EditorGUILayout.Toggle("Export as XML", config.exportAsXML);
+            config.exportAsXML = EditorGUILayout.Toggle(new GUIContent("Export as XML", "Export the level as an XML file instead of compiling it into .dz\nFor Unity and Snail Runner, enable this.\nFor Steam Version, disable this."), config.exportAsXML);
+
+            if (config.exportAsXML)
+            {
+                config.fastBuild = EditorGUILayout.Toggle(new GUIContent("Fast Build", "Will make the compile time faster, but may increase the size of the final build.\nThis is recommended to be enabled."), config.fastBuild);
+            }
         }
 
         private void DrawBuildingsConfigUI()
@@ -273,15 +289,19 @@ namespace Vectorier.Core
 
             EditorGUILayout.Space();
             EditorGUILayout.LabelField("<Sets>", EditorStyles.boldLabel);
-            DrawSetListUI("City", config.citySets);
-            DrawSetListUI("Ground", config.groundSets);
-            DrawSetListUI("Library", config.librarySets);
+            DrawSetListUI("City", config.citySets, "The list of the buildings sets to use for this level.\nThis is for referencing buildings prefabs from the XML.");
+            DrawSetListUI("Ground", config.groundSets, "The list of the objects sets to use for this level.\nThis is for referencing object prefabs from the XML.");
+            DrawSetListUI("Library", config.librarySets, "(DEPRACATED) May still be used for steam compatibility, but isn't used in Unity.\nThe list of the library sets to use for this level.");
 
-            config.fastBuild = EditorGUILayout.Toggle("Fast Build", config.fastBuild);
-            config.exportAsXML = EditorGUILayout.Toggle("Export as XML", config.exportAsXML);
+            config.exportAsXML = EditorGUILayout.Toggle(new GUIContent("Export as XML", "Export the level as an XML file instead of compiling it into .dz\nFor Unity and Snail Runner, enable this.\nFor Steam Version, disable this."), config.exportAsXML);
+
+            if (!config.exportAsXML)
+            {
+                config.fastBuild = EditorGUILayout.Toggle(new GUIContent("Fast Build", "Will make the compile time faster, but may increase the size of the final build.\nThis is recommended to be enabled."), config.fastBuild);
+            }
         }
 
-        private void DrawSetListUI(string setName, List<string> setList)
+        private void DrawSetListUI(string setName, List<string> setList, string tooltip = "")
         {
             EditorGUILayout.LabelField(setName + " Sets", EditorStyles.boldLabel);
             int removeIndex = -1;
@@ -296,7 +316,7 @@ namespace Vectorier.Core
             if (removeIndex >= 0)
                 setList.RemoveAt(removeIndex);
 
-            if (GUILayout.Button($"Add {setName} Set"))
+            if (GUILayout.Button(new GUIContent($"Add {setName} Set", tooltip)))
                 setList.Add("");
         }
 
@@ -308,9 +328,10 @@ namespace Vectorier.Core
 
         private void BuildCommon(string templateFile, string typeName, ExportHandler.ExportMode mode, string defaultName)
         {
-            string xmlFolder = Path.Combine(Application.dataPath, "XML");
-            string templatePath = Path.Combine(xmlFolder, templateFile);
-            string outputFolder = Path.Combine(xmlFolder, "level_xml");
+            string projectRoot = Path.GetDirectoryName(Application.dataPath);
+            string dzipFolder = Path.Combine(projectRoot, "DZIP");
+            string templatePath = Path.Combine(dzipFolder, templateFile);
+            string outputFolder = Path.Combine(dzipFolder, "level");
 
             EnsureDirectoryExists(outputFolder);
 
@@ -349,19 +370,25 @@ namespace Vectorier.Core
             directoryPath = EditorGUILayout.TextField(label, directoryPath);
 
             // Browse button
-            if (GUILayout.Button("...", GUILayout.Width(28)))
+            if (GUILayout.Button(new GUIContent("...", "Browse"), GUILayout.Width(28)))
             {
                 string startPath = string.IsNullOrEmpty(directoryPath) ? Application.dataPath : directoryPath;
                 string picked = EditorUtility.OpenFolderPanel($"Select {label}", startPath, "");
 
                 if (!string.IsNullOrEmpty(picked))
+                {
                     directoryPath = picked;
+                    GUI.FocusControl(null);
+                }
             }
             
-            // Set to default
-            if (GUILayout.Button("R", GUILayout.Width(28)))
+            // Set to default button
+            if (GUILayout.Button(new GUIContent("R", "Reset the directory path to Snail Runner's path."), GUILayout.Width(28)))
             {
-                directoryPath = "Assets/Snail Runner/Vector_Data/StreamingAssets/xmlroot/levels";
+                string projectRoot = Path.GetDirectoryName(Application.dataPath);
+                directoryPath = Path.Combine(projectRoot, "Snail Runner", "Vector_Data", "StreamingAssets", "xmlroot", "levels").Replace("\\", "/");
+                
+                GUI.FocusControl(null);
             }
 
             EditorGUILayout.EndHorizontal();
@@ -372,7 +399,7 @@ namespace Vectorier.Core
             EditorGUILayout.BeginHorizontal();
             xmlName = EditorGUILayout.TextField(label, xmlName);
 
-            if (GUILayout.Button("...", GUILayout.Width(28)))
+            if (GUILayout.Button(new GUIContent("...", "Browse"), GUILayout.Width(28)))
             {
                 string startPath = string.IsNullOrEmpty(directoryPath) ? Application.dataPath : directoryPath;
                 string picked = EditorUtility.OpenFilePanel($"Select {label}", startPath, "xml");
@@ -475,9 +502,9 @@ namespace Vectorier.Core
                 return;
             }
 
-            // Run batch builder
-            string batchFile = config.fastBuild ? "compile-fast.bat" : "compile.bat";
-            string batchPath = Path.Combine(Application.dataPath, "XML", batchFile);
+            string projectRoot = Path.GetDirectoryName(Application.dataPath);
+            string batchFile = config.fastBuild ? "compile-level-fast.bat" : "compile-level.bat";
+            string batchPath = Path.Combine(projectRoot, "DZIP", batchFile);
 
             if (!File.Exists(batchPath))
             {
@@ -490,7 +517,8 @@ namespace Vectorier.Core
 
             Process process = new Process();
             process.StartInfo.FileName = batchPath;
-            process.StartInfo.WorkingDirectory = Path.Combine(Application.dataPath, "XML");
+            
+            process.StartInfo.WorkingDirectory = Path.Combine(projectRoot, "DZIP");
             process.StartInfo.UseShellExecute = false;
             process.StartInfo.CreateNoWindow = false;
 
@@ -499,7 +527,7 @@ namespace Vectorier.Core
 
             stopwatch.Stop();
 
-            string sourceFile = Path.Combine(Application.dataPath, "XML", "level_xml.dz");
+            string sourceFile = Path.Combine(projectRoot, "DZIP", "level_xml.dz");
             if (File.Exists(sourceFile) && !string.IsNullOrEmpty(config.filePathDirectory))
             {
                 string dest = Path.Combine(config.filePathDirectory, "level_xml.dz");
@@ -508,6 +536,48 @@ namespace Vectorier.Core
             }
 
             UnityEngine.Debug.Log($"[Export] Compilation finished in {stopwatch.ElapsedMilliseconds / 1000f:F2} seconds.");
+        }
+
+        private void RevertToDefault()
+        {
+            if (EditorUtility.DisplayDialog("Revert to Default", 
+                "Are you sure you want to revert every levels xml to default?", 
+                "Yes", 
+                "No"))
+            {
+                string projectRoot = Path.GetDirectoryName(Application.dataPath);
+                string templateDir = Path.Combine(projectRoot, "DZIP", "_TEMPLATE", "level");
+                string targetDir = Path.Combine(projectRoot, "DZIP", "level");
+
+                if (Directory.Exists(targetDir))
+                {
+                    string[] existingFiles = Directory.GetFiles(targetDir);
+                    foreach (string file in existingFiles)
+                    {
+                        File.Delete(file);
+                    }
+                }
+                else
+                {
+                    Directory.CreateDirectory(targetDir);
+                }
+
+                if (Directory.Exists(templateDir))
+                {
+                    string[] templateFiles = Directory.GetFiles(templateDir);
+                    foreach (string file in templateFiles)
+                    {
+                        string fileName = Path.GetFileName(file);
+                        string destFile = Path.Combine(targetDir, fileName);
+                        File.Copy(file, destFile, true);
+                    }
+                    UnityEngine.Debug.Log("[Export] Successfully reverted all level XMLs to default.");
+                }
+                else
+                {
+                    UnityEngine.Debug.LogWarning("[Export] _TEMPLATE/level directory does not exist!");
+                }
+            }
         }
     }
 }
