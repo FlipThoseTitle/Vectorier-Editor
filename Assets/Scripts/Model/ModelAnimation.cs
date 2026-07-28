@@ -12,6 +12,8 @@ namespace Vectorier.Model
     {
         public const float SourceFps = 20f;
         public const float ZOffset = -300f;
+        public const float TargetFps = 60f; // The interpolated playback frame rate
+public float ContinuousFrame { get; set; } // Tracks the floating-point time between frames
 
         public static readonly Vector3 AnimZPushVector = new(0f, 0f, ZOffset);
 
@@ -223,6 +225,9 @@ namespace Vectorier.Model
 
             frameIndex = Mathf.Clamp(frameIndex, StartFrame, EndFrame);
 
+            // Sync continuous frame when scrubbing
+            ContinuousFrame = frameIndex;
+
             Vector3[] frame = State.AnimationFrames[frameIndex];
             Vector3 frameOffset = State.StartOffset;
 
@@ -244,25 +249,81 @@ namespace Vectorier.Model
 
         public bool TryAdvancePlayback()
         {
-            if (!State.IsOffsetInitialized || State.AnimationFrames.Count == 0 || !IsPlaying)
+            if (!State.IsOffsetInitialized || State.AnimationFrames.Count == 0)
                 return false;
 
             double now = EditorApplication.timeSinceStartup;
-            double frameInterval = 1.0 / SourceFps;
 
-            if (now - State.LastPlaybackTime < frameInterval)
+            if (!IsPlaying)
+            {
+                State.LastPlaybackTime = now;
+                return false;
+            }
+
+            double updateInterval = 1.0 / TargetFps;
+
+            // Calculate time passed since last playback update
+            double dt = now - State.LastPlaybackTime;
+
+            if (dt < updateInterval)
                 return false;
 
             State.LastPlaybackTime = now;
 
-            State.CurrentFrameIndex++;
+            // Advance the continuous frame based on the original 20 FPS speed
+            ContinuousFrame += (float)(dt * SourceFps);
 
-            if (State.CurrentFrameIndex > EndFrame)
-                State.CurrentFrameIndex = StartFrame;
+            if (ContinuousFrame > EndFrame)
+            {
+                // Seamlessly wrap around to start
+                ContinuousFrame = StartFrame + (ContinuousFrame - EndFrame);
+            }
 
-            ApplyFrame(State.CurrentFrameIndex);
+            // Keep the main CurrentFrameIndex in sync for the scrubber
+            State.CurrentFrameIndex = Mathf.FloorToInt(ContinuousFrame);
+
+            // Apply the vertex interpolation
+            ApplyInterpolatedFrame(ContinuousFrame);
 
             return true;
+        }
+
+        public void ApplyInterpolatedFrame(float frameTime)
+        {
+            if (State.AnimationFrames.Count == 0 || State.AnimationNodes == null)
+                return;
+
+            frameTime = Mathf.Clamp(frameTime, StartFrame, EndFrame);
+
+            // Identify the two frames we are blending between
+            int frameA = Mathf.FloorToInt(frameTime);
+            int frameB = Mathf.Min(frameA + 1, EndFrame);
+            float t = frameTime - frameA; // Yields a 0.0 to 1.0 value for the Lerp
+
+            Vector3[] nodesA = State.AnimationFrames[frameA];
+            Vector3[] nodesB = State.AnimationFrames[frameB];
+            Vector3 frameOffset = State.StartOffset;
+
+            if (stayInPlace &&
+                stayInPlacePivotNodeIndex >= 0 &&
+                stayInPlacePivotNodeIndex < nodesA.Length)
+            {
+                Vector3 startPivot = State.AnimationFrames[StartFrame][stayInPlacePivotNodeIndex];
+                
+                // Interpolate the pivot point to prevent snapping when staying in place
+                Vector3 currentPivotA = nodesA[stayInPlacePivotNodeIndex];
+                Vector3 currentPivotB = nodesB[stayInPlacePivotNodeIndex];
+                Vector3 currentPivot = Vector3.Lerp(currentPivotA, currentPivotB, t);
+
+                frameOffset += startPivot - currentPivot;
+            }
+
+            for (int i = 0; i < nodesA.Length; i++)
+            {
+                // Linearly interpolate each individual vertex position
+                Vector3 lerpedNode = Vector3.Lerp(nodesA[i], nodesB[i], t);
+                State.AnimationNodes[i] = lerpedNode + frameOffset + AnimZPushVector;
+            }
         }
 
         public bool TryGetNodeIndex(string nodeName, out int index)
