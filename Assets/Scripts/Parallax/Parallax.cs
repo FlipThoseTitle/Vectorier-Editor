@@ -168,12 +168,16 @@ namespace Vectorier.Parallax
             if (candidates.Length > 1)
             {
                 var selected = Selection.activeGameObject?.GetComponent<Parallax>();
-                if (selected == null || !candidates.Contains(selected))
+                if (selected != null && candidates.Contains(selected))
                 {
-                    EditorUtility.DisplayDialog("Parallax", "There are multiple parallax cameras! Select one to proceed.", "OK");
-                    return;
+                    targetParallax = selected;
                 }
-                targetParallax = selected;
+                else
+                {
+                    // Randomly select one
+                    int randomIndex = UnityEngine.Random.Range(0, candidates.Length);
+                    targetParallax = candidates[randomIndex];
+                }
             }
 
             targetParallax.ToggleParallax();

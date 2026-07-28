@@ -183,7 +183,6 @@ namespace Vectorier.EditorScript
 
             Plane[] frustum = GeometryUtility.CalculateFrustumPlanes(camera);
             
-            HashSet<Vector2Int> occupiedScreenCells = new HashSet<Vector2Int>();
             labelsToDrawBuffer.Clear();
 
             foreach (var entry in CachedObjects)
@@ -192,8 +191,8 @@ namespace Vectorier.EditorScript
                     continue;
 
                 if (!entry.GameObject.activeInHierarchy || 
-                   (entry.GameObject.hideFlags & HideFlags.HideInHierarchy) != 0 || 
-                   SceneVisibilityManager.instance.IsHidden(entry.GameObject))
+                (entry.GameObject.hideFlags & HideFlags.HideInHierarchy) != 0 || 
+                SceneVisibilityManager.instance.IsHidden(entry.GameObject))
                     continue;
 
                 Vector3 worldPos = entry.GameObject.transform.position;
@@ -204,14 +203,6 @@ namespace Vectorier.EditorScript
 
                 float fade = ComputeFade(sceneView, worldPos);
                 if (fade < 0.01f) continue;
-
-                // Map the world position to a 20x20 pixel grid cell on the screen.
-                Vector2 screenPos = HandleUtility.WorldToGUIPoint(worldPos);
-                Vector2Int cell = new Vector2Int(Mathf.RoundToInt(screenPos.x / 20f), Mathf.RoundToInt(screenPos.y / 20f));
-
-                // If we've already evaluated an object in this exact visual space, skip to save performance.
-                if (!occupiedScreenCells.Add(cell))
-                    continue;
 
                 bool isPlatform = entry.GameObject.CompareTag("Platform") || IsPlatformBySprite(entry.SpriteRenderer);
                 bool isTrigger = entry.GameObject.GetComponent<TriggerComponent>() != null;
