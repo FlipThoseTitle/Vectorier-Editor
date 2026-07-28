@@ -59,49 +59,61 @@ namespace Vectorier.Handler
                 return;
             }
 
-            // Reset caches
-            SpriteCache.Clear();
-            SpriteCacheBuilt = false;
-            ObjectDefinitions.Clear();
-            LoadedSetFiles.Clear();
-            LayerOrderStack.Clear();
-            LayerOrderStack.Push(0);
-            TextureFolderPaths = textureFolders;
-
-            // Load XML
-            XmlUtility xml = new XmlUtility();
-            xml.Load(fullPath);
-
-            if (applyConfig)
-                ApplyLevelConfig(xml, untagChildren, applyConfig);
-
-            // Load referenced <Sets>
-            LoadSets(directoryPath, xml);
-
-            // Detect file type
-            XmlElement track = xml.RootElement.SelectSingleNode("Track") as XmlElement;
-            bool isLevelFile = track != null;
-
-            XmlElement mainSection = isLevelFile ? track : xml.RootElement.SelectSingleNode("Objects") as XmlElement;
-
-            if (mainSection == null)
+            try
             {
-                Debug.LogError("[ImportHandler] XML must have <Track> or <Objects>.");
-                return;
+                // Start Progress Bar
+                UnityEditor.EditorUtility.DisplayProgressBar("Importing XML", "Initializing import...", 0.05f);
+
+                // Reset caches
+                SpriteCache.Clear();
+                SpriteCacheBuilt = false;
+                ObjectDefinitions.Clear();
+                LoadedSetFiles.Clear();
+                LayerOrderStack.Clear();
+                LayerOrderStack.Push(0);
+                TextureFolderPaths = textureFolders;
+
+                // Load XML
+                XmlUtility xml = new XmlUtility();
+                xml.Load(fullPath);
+
+                if (applyConfig)
+                    ApplyLevelConfig(xml, untagChildren, applyConfig);
+
+                UnityEditor.EditorUtility.DisplayProgressBar("Importing XML", "Loading referenced sets...", 0.1f);
+                
+                // Load referenced <Sets>
+                LoadSets(directoryPath, xml);
+
+                // Detect file type
+                XmlElement track = xml.RootElement.SelectSingleNode("Track") as XmlElement;
+                bool isLevelFile = track != null;
+
+                XmlElement mainSection = isLevelFile ? track : xml.RootElement.SelectSingleNode("Objects") as XmlElement;
+
+                if (mainSection == null)
+                {
+                    Debug.LogError("[ImportHandler] XML must have <Track> or <Objects>.");
+                    return;
+                }
+
+                // Object files override referenced definitions
+                if (!isLevelFile)
+                    AddLocalObjectDefinitions(mainSection);
+
+                HashSet<string> allowedNames = BuildAllowedSet(isLevelFile, selectedNames);
+
+                GameObject root = new GameObject(xmlFileName);
+
+                // Import everything under the main section
+                ImportObjects(mainSection, root.transform, isLevelFile, allowedNames, includeBuildingsMarker, xml);
+
+                Debug.Log("[ImportHandler] Import Completed: " + xmlFileName);
             }
-
-            // Object files override referenced definitions
-            if (!isLevelFile)
-                AddLocalObjectDefinitions(mainSection);
-
-            HashSet<string> allowedNames = BuildAllowedSet(isLevelFile, selectedNames);
-
-            GameObject root = new GameObject(xmlFileName);
-
-            // Import everything under the main section
-            ImportObjects(mainSection, root.transform, isLevelFile, allowedNames, includeBuildingsMarker, xml);
-
-            Debug.Log("[ImportHandler] Import Completed: " + xmlFileName);
+            finally
+            {
+                UnityEditor.EditorUtility.ClearProgressBar();
+            }
         }
 
         // ================= IGNORE TAG PARSER ================= //
@@ -247,6 +259,8 @@ namespace Vectorier.Handler
             // Sort factors from least to highest
             if (isLevelFile)
             {
+                UnityEditor.EditorUtility.DisplayProgressBar("Importing XML", "Sorting level layers...", 0.15f);
+                
                 objectElements.Sort((a, b) => 
                 {
                     float factorA = Element.Element.ParseFloat(a.GetAttribute("Factor"));
@@ -255,14 +269,26 @@ namespace Vectorier.Handler
                 });
             }
 
-            foreach (XmlElement element in objectElements)
+            int totalObjects = objectElements.Count;
+            for (int i = 0; i < totalObjects; i++)
             {
+                XmlElement element = objectElements[i];
+                string objectName = element.GetAttribute("Name");
+
                 if (!isLevelFile && allowedNames != null)
                 {
-                    string objectName = element.GetAttribute("Name");
                     if (!allowedNames.Contains(objectName))
                         continue;
                 }
+
+                float progress = 0.2f + (0.8f * ((float)i / totalObjects));
+                string displayName = string.IsNullOrEmpty(objectName) ? "Layer Factor " + element.GetAttribute("Factor") : objectName;
+                
+                UnityEditor.EditorUtility.DisplayProgressBar(
+                    "Importing XML", 
+                    $"Importing {displayName} ({i + 1}/{totalObjects})...", 
+                    progress
+                );
 
                 if (isLevelFile)
                     ImportLevelLayer(element, parent, includeBuildingsMarker, xmlUtility);

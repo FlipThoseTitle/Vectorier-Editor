@@ -22,6 +22,15 @@ namespace Vectorier.EditorScript
         private static Object[] cachedSelection;
         private static bool isDragging;
 
+        private static bool isBHeld;
+        private static bool isScaleSnapMode;
+        private static Vector3 originalScale;
+        private static Vector3 originalPosition;
+        private static int activeCornerIndex = -1;
+        private static Vector3 grabFixedCorner;
+        private static Vector3 grabOrigDelta;
+        private static Vector3 grabOrigPosDelta;
+
         private struct SourceVertex
         {
             public Vector3 position;
@@ -37,12 +46,17 @@ namespace Vectorier.EditorScript
         {
             Event e = Event.current;
 
+            // Track B key modifier state
+            if (e.type == EventType.KeyDown && e.keyCode == KeyCode.B) isBHeld = true;
+            if (e.type == EventType.KeyUp && e.keyCode == KeyCode.B) isBHeld = false;
+
             if (e.type == EventType.KeyUp)
             {
                 if ((e.keyCode == VSnapKey && currentMode == SnapMode.Normal) ||
                     (e.keyCode == CSnapKey && currentMode == SnapMode.Platform))
                 {
                     currentMode = SnapMode.None;
+                    isScaleSnapMode = false;
                     cachedSelection = null;
                     targetTransforms = null;
                     primaryTransform = null;
@@ -73,6 +87,16 @@ namespace Vectorier.EditorScript
                             primaryTransform = closest.rootTransform;
                             activeSourceVertex = closest.position;
                             isDragging = false;
+                            
+                            isScaleSnapMode = false;
+                            
+                            // Validate Scale Snap Conditions
+                            if (isBHeld && targetTransforms.Length == 1 && primaryTransform.childCount == 0)
+                            {
+                                isScaleSnapMode = true;
+                                InitializeScaleSnapState(activeSourceVertex);
+                            }
+
                             UpdateGrabOffsets();
                         }
                     }
@@ -101,7 +125,16 @@ namespace Vectorier.EditorScript
                 Vector3 mouseWorldPos = HandleUtility.GUIPointToWorldRay(e.mousePosition).origin;
                 mouseWorldPos.z = primaryTransform != null ? primaryTransform.position.z : 0f;
 
-                if (primaryTransform != null && targetTransforms != null)
+                // Keep activeSourceVertex synced accurately based on the mode
+                if (isScaleSnapMode && isDragging && activeCornerIndex != -1)
+                {
+                    SpriteRenderer sr = primaryTransform.GetComponent<SpriteRenderer>();
+                    if (sr != null)
+                    {
+                        activeSourceVertex = GetSpriteCorners(sr)[activeCornerIndex];
+                    }
+                }
+                else if (primaryTransform != null && targetTransforms != null)
                 {
                     int idx = System.Array.IndexOf(targetTransforms, primaryTransform);
                     if (idx >= 0)
@@ -121,6 +154,12 @@ namespace Vectorier.EditorScript
                         activeSourceVertex = closest.position;
                         primaryTransform = closest.rootTransform;
                         UpdateGrabOffsets();
+                        
+                        // Re-initialize state if user shifts focus to a different corner before clicking
+                        if (isScaleSnapMode)
+                        {
+                            InitializeScaleSnapState(activeSourceVertex);
+                        }
                     }
                 }
 
@@ -128,13 +167,47 @@ namespace Vectorier.EditorScript
                 {
                     GUIUtility.hotControl = GUIUtility.GetControlID(FocusType.Passive);
                     isDragging = true;
-                    Undo.RecordObjects(targetTransforms, currentMode == SnapMode.Platform ? "Platform Snap" : "Sprite Snap");
+                    Undo.RecordObjects(targetTransforms, isScaleSnapMode ? "Scale Snap" : (currentMode == SnapMode.Platform ? "Platform Snap" : "Sprite Snap"));
                     
-                    for (int i = 0; i < targetTransforms.Length; i++)
+                    if (isScaleSnapMode && activeCornerIndex != -1)
                     {
-                        if (targetTransforms[i] != null)
+                        // Calculate intent to lock into a single axis
+                        Vector3 originalGrabbedCorner = grabFixedCorner + grabOrigDelta;
+                        Vector3 intentDelta = mouseWorldPos - originalGrabbedCorner;
+                        
+                        float scaleX = 1f;
+                        float scaleY = 1f;
+
+                        // Prevent division by zero if sprite width/height evaluates extremely close to 0
+                        if (Mathf.Abs(intentDelta.x) > Mathf.Abs(intentDelta.y))
                         {
-                            targetTransforms[i].position = newVertexPos + grabOffsets[i];
+                            // Extending horizontally: snap to newVertexPos.x, lock Y to original
+                            float newDeltaX = newVertexPos.x - grabFixedCorner.x;
+                            scaleX = Mathf.Abs(grabOrigDelta.x) > 0.0001f ? newDeltaX / grabOrigDelta.x : 1f;
+                        }
+                        else
+                        {
+                            // Extending vertically: snap to newVertexPos.y, lock X to original
+                            float newDeltaY = newVertexPos.y - grabFixedCorner.y;
+                            scaleY = Mathf.Abs(grabOrigDelta.y) > 0.0001f ? newDeltaY / grabOrigDelta.y : 1f;
+                        }
+
+                        primaryTransform.localScale = new Vector3(originalScale.x * scaleX, originalScale.y * scaleY, originalScale.z);
+                        
+                        Vector3 newPos = grabFixedCorner + new Vector3(grabOrigPosDelta.x * scaleX, grabOrigPosDelta.y * scaleY, grabOrigPosDelta.z);
+                        newPos.z = originalPosition.z;
+                        primaryTransform.position = newPos;
+                    }
+                    else
+                    {
+                        for (int i = 0; i < targetTransforms.Length; i++)
+                        {
+                            if (targetTransforms[i] != null)
+                            {
+                                Vector3 newPos = newVertexPos + grabOffsets[i];
+                                newPos.z = targetTransforms[i].position.z;
+                                targetTransforms[i].position = newPos;
+                            }
                         }
                     }
                     e.Use();
@@ -142,6 +215,34 @@ namespace Vectorier.EditorScript
 
                 DrawVertexVisualizer(activeSourceVertex, Color.green, true);
                 sceneView.Repaint();
+            }
+        }
+
+        private static void InitializeScaleSnapState(Vector3 sourceVertex)
+        {
+            SpriteRenderer sr = primaryTransform.GetComponent<SpriteRenderer>();
+            if (sr != null)
+            {
+                originalScale = primaryTransform.localScale;
+                originalPosition = primaryTransform.position;
+                
+                Vector3[] corners = GetSpriteCorners(sr);
+                float minDist = float.MaxValue;
+                for (int i = 0; i < 4; i++)
+                {
+                    float dist = Vector3.Distance(sourceVertex, corners[i]);
+                    if (dist < minDist)
+                    {
+                        minDist = dist;
+                        activeCornerIndex = i;
+                    }
+                }
+                
+                // 0(BL) opp is 3(TR), 1(BR) opp is 2(TL), 2(TL) opp is 1(BR), 3(TR) opp is 0(BL)
+                int oppositeIndex = 3 - activeCornerIndex;
+                grabFixedCorner = corners[oppositeIndex];
+                grabOrigDelta = corners[activeCornerIndex] - grabFixedCorner;
+                grabOrigPosDelta = originalPosition - grabFixedCorner;
             }
         }
 
@@ -307,6 +408,17 @@ namespace Vectorier.EditorScript
                         bestEdgePoint = pt;
                         targetEdgeSprite = targetSprite;
                     }
+                }
+            }
+
+            var detectorPoints = Tools.MoveVisualizer.GetDetectorSnapPoints();
+            foreach (var pt in detectorPoints)
+            {
+                float dist = Vector2.Distance(mousePos, pt);
+                if (dist < closestCornerDist) // Treat detectors like strong vertex corners
+                {
+                    closestCornerDist = dist;
+                    bestCorner = pt;
                 }
             }
 

@@ -158,31 +158,42 @@ namespace Vectorier.EditorScript
         }
 
         // ================= SCENEVIEW RENDERING ================= //
+        private struct LabelDrawData
+        {
+            public CachedObject Entry;
+            public Vector3 WorldPos;
+            public float Fade;
+        }
+
+        private static readonly List<LabelDrawData> labelsToDrawBuffer = new List<LabelDrawData>(256);
+
         private static void DrawInSceneView(SceneView sceneView)
         {
-            LoadPrefs();
-            RefreshCacheIfNeeded();
+            if (Event.current.type == EventType.Layout)
+            {
+                LoadPrefs();
+                RefreshCacheIfNeeded();
+            }
+
+            if (Event.current.type != EventType.Repaint)
+                return;
 
             Camera camera = sceneView.camera;
             if (camera == null) return;
 
             Plane[] frustum = GeometryUtility.CalculateFrustumPlanes(camera);
+            
+            HashSet<Vector2Int> occupiedScreenCells = new HashSet<Vector2Int>();
+            labelsToDrawBuffer.Clear();
 
             foreach (var entry in CachedObjects)
             {
                 if (entry.GameObject == null)
                     continue;
 
-                // disabled objects
-                if (!entry.GameObject.activeInHierarchy)
-                    continue;
-
-                // objects hidden hideFlags
-                if ((entry.GameObject.hideFlags & HideFlags.HideInHierarchy) != 0)
-                    continue;
-
-                // Scene hidden objects (eye icon)
-                if (SceneVisibilityManager.instance.IsHidden(entry.GameObject))
+                if (!entry.GameObject.activeInHierarchy || 
+                   (entry.GameObject.hideFlags & HideFlags.HideInHierarchy) != 0 || 
+                   SceneVisibilityManager.instance.IsHidden(entry.GameObject))
                     continue;
 
                 Vector3 worldPos = entry.GameObject.transform.position;
@@ -194,21 +205,39 @@ namespace Vectorier.EditorScript
                 float fade = ComputeFade(sceneView, worldPos);
                 if (fade < 0.01f) continue;
 
+                // Map the world position to a 20x20 pixel grid cell on the screen.
+                Vector2 screenPos = HandleUtility.WorldToGUIPoint(worldPos);
+                Vector2Int cell = new Vector2Int(Mathf.RoundToInt(screenPos.x / 20f), Mathf.RoundToInt(screenPos.y / 20f));
+
+                // If we've already evaluated an object in this exact visual space, skip to save performance.
+                if (!occupiedScreenCells.Add(cell))
+                    continue;
+
                 bool isPlatform = entry.GameObject.CompareTag("Platform") || IsPlatformBySprite(entry.SpriteRenderer);
                 bool isTrigger = entry.GameObject.GetComponent<TriggerComponent>() != null;
 
+                // Draw World Space Handles
                 if (showOutline && entry.SpriteRenderer != null)
                     DrawSpriteOutline(entry.SpriteRenderer, fade, isPlatform, isTrigger);
 
-                DrawLabel(entry, worldPos, fade);
+                // Buffer the GUI data to draw in a single batch later
+                labelsToDrawBuffer.Add(new LabelDrawData { Entry = entry, WorldPos = worldPos, Fade = fade });
+            }
+
+            if (labelsToDrawBuffer.Count > 0)
+            {
+                Handles.BeginGUI();
+                foreach (var labelData in labelsToDrawBuffer)
+                {
+                    DrawLabel(labelData.Entry, labelData.WorldPos, labelData.Fade);
+                }
+                Handles.EndGUI();
             }
         }
         
         // ================= LABEL ================= //
         private static void DrawLabel(CachedObject entry, Vector3 worldPos, float fade)
         {
-            Handles.BeginGUI();
-
             SharedTextStyle.normal.textColor = new Color(0, 0, 0, fade);
 
             bool isTrigger = entry.GameObject.GetComponent<TriggerComponent>() != null;
@@ -216,17 +245,12 @@ namespace Vectorier.EditorScript
             bool isPlatform = entry.GameObject.CompareTag("Platform") || IsPlatformBySprite(entry.SpriteRenderer);
 
             if ((isTrigger && !showTriggerText) || (isArea && !showAreaText) || isPlatform)
-            {
-                Handles.EndGUI();
                 return;
-            }
 
             if (entry.SpriteRenderer != null)
                 DrawLabelWithinSprite(entry);
             else
                 DrawLabelForWorldPosition(entry, worldPos);
-
-            Handles.EndGUI();
         }
 
         private static void DrawLabelWithinSprite(CachedObject entry)

@@ -68,6 +68,7 @@ namespace Vectorier.EditorScript.Tools
         };
 
         // ================= UI STATE ================= //
+        public static MoveVisualizer Instance { get; private set; }
 
         string pivotNodeName = "NPivot";
 
@@ -277,6 +278,25 @@ namespace Vectorier.EditorScript.Tools
             return ModelAnimation.ResolveFullPath(path);
         }
 
+        public static List<Vector3> GetDetectorSnapPoints()
+        {
+            List<Vector3> points = new List<Vector3>();
+            
+            // Check if the window is open, an animation is placed, and Render Edges is enabled
+            if (Instance == null || !Instance.isPlaced || Instance.modelDebug == null || !Instance.modelDebug.RenderEdges || Instance.animation == null)
+                return points;
+
+            Vector3? detH = Instance.animation.GetAnimationNodeWorldPosition("DetectorH");
+            if (detH.HasValue) 
+                points.Add(detH.Value);
+                
+            Vector3? detV = Instance.animation.GetAnimationNodeWorldPosition("DetectorV");
+            if (detV.HasValue) 
+                points.Add(detV.Value);
+
+            return points;
+        }
+        
         // ================= WINDOW ================= //
 
         [MenuItem("Vectorier/Tools/Move Visualizer", false, 34)]
@@ -291,6 +311,149 @@ namespace Vectorier.EditorScript.Tools
         {
             MoveVisualizer window = OpenWindow();
             window.PreviewAreaComponent(areaComponent);
+        }
+
+        public static void OpenAndPreviewSpawnComponent(SpawnComponent spawnComponent)
+        {
+            MoveVisualizer window = OpenWindow();
+            window.PreviewSpawnComponent(spawnComponent);
+        }
+
+        public void PreviewSpawnComponent(SpawnComponent spawnComponent)
+        {
+            if (spawnComponent == null)
+            {
+                Debug.LogWarning("Preview Animation failed: SpawnComponent is null.");
+                return;
+            }
+
+            try
+            {
+                animation.Reverse = reverse;
+                SpawnMovePreviewData previewData = ResolveSpawnMovePreviewData(spawnComponent);
+
+                lastPlacedWorldPosition = previewData.WorldPosition;
+                isPlaced = true;
+
+                modelDebug?.Destroy();
+                modelRenderer?.Destroy();
+
+                placementEnabled = false;
+
+                placementHostTransform = spawnComponent.transform.parent != null 
+                    ? spawnComponent.transform.parent 
+                    : spawnComponent.transform;
+
+                animation.StartFrame = previewData.FirstFrame;
+                animation.PlaceAt(
+                    previewData.WorldPosition,
+                    placementHostTransform,
+                    ResolveXmlPath(),
+                    previewData.BinFullPath,
+                    previewData.PivotNode,
+                    false
+                );
+
+                pivotNodeName = previewData.PivotNode;
+                stayInPlace = false;
+
+                if (renderModel && animation.Model != null)
+                {
+                    modelRenderer?.Create(animation.Model, animation.AnimationNodes, placementHostTransform, renderBlack);
+                    modelDebug?.AttachToModel(animation.Model, modelRenderer?.RootObject);
+                }
+                else
+                {
+                    modelDebug?.AttachToModel(animation.Model, null);
+                }
+
+                SyncAnimationSpaceTransform();
+                modelDebug?.UpdateNodeWorldPositions(animation.AnimationNodes, GetPlaybackParentTransform());
+                modelDebug?.FollowSceneViewCameraToNodeXY(animation);
+
+                Repaint();
+                SceneView.RepaintAll();
+            }
+            catch (Exception exception)
+            {
+                Debug.LogError($"Preview Animation failed for '{spawnComponent.name}': {exception.Message}");
+            }
+        }
+
+        SpawnMovePreviewData ResolveSpawnMovePreviewData(SpawnComponent spawnComponent)
+        {
+            if (string.IsNullOrWhiteSpace(spawnComponent.Animation))
+                throw new Exception("Animation string is empty.");
+
+            // Parse "AnimationName|StartFrame"
+            string[] parts = spawnComponent.Animation.Split('|');
+            string animationName = parts[0];
+            int startFrame = 0;
+            
+            if (parts.Length > 1)
+                int.TryParse(parts[1], out startFrame);
+
+            string binFullPath;
+            string pivotNode = "NPivot";
+            string fileName = "";
+
+            // Handle specific overrides
+            if (animationName.Equals("JumpOff", StringComparison.OrdinalIgnoreCase))
+            {
+                fileName = "jump_off_fly.bin";
+                binFullPath = ModelAnimation.ResolveFullPath("Assets/Editor/Tools/MoveVisualizer/Movement/jump_off_fly.bin");
+                startFrame = 0;
+            }
+            else if (animationName.Equals("Run", StringComparison.OrdinalIgnoreCase))
+            {
+                fileName = "run.bin";
+                binFullPath = ModelAnimation.ResolveFullPath("Assets/Editor/Tools/MoveVisualizer/Movement/run.bin");
+                startFrame = 0;
+            }
+            else
+            {
+                // General Case: Read from moves.xml
+                string resolvedMovesXmlPath = ResolveMovesXmlPath();
+                
+                if (string.IsNullOrWhiteSpace(resolvedMovesXmlPath) || !File.Exists(resolvedMovesXmlPath))
+                    throw new FileNotFoundException($"moves.xml not found: {resolvedMovesXmlPath}");
+
+                XDocument document = XDocument.Load(resolvedMovesXmlPath);
+                XElement root = document.Root ?? throw new Exception("moves.xml has no root element.");
+
+                XElement moveElement = root
+                    .Element("Moves")?
+                    .Elements()
+                    .FirstOrDefault(element =>
+                        string.Equals(element.Name.LocalName, animationName, StringComparison.OrdinalIgnoreCase));
+
+                if (moveElement == null)
+                    throw new Exception($"Could not find <Moves><{animationName} ... /> in moves.xml.");
+
+                fileName = (string)moveElement.Attribute("FileName");
+                
+                if (string.IsNullOrWhiteSpace(fileName))
+                    throw new Exception($"Move '{animationName}' does not have a FileName attribute.");
+
+                string attrPivot = (string)moveElement.Attribute("PivotNode");
+                if (!string.IsNullOrWhiteSpace(attrPivot))
+                    pivotNode = attrPivot;
+
+                // Load from specific animations/data folder
+                binFullPath = ModelAnimation.ResolveFullPath(Path.Combine("Assets/Projects/Vector/animations/data/", fileName));
+            }
+
+            if (!File.Exists(binFullPath))
+                throw new FileNotFoundException($"Animation bin not found: {binFullPath}");
+
+            return new SpawnMovePreviewData
+            {
+                FirstFrame = startFrame,
+                FileName = fileName,
+                PivotNode = pivotNode,
+                BinFullPath = binFullPath,
+                WorldPosition = spawnComponent.transform.position // Place right at the spawn component's location
+            };
         }
 
         Transform GetPreviewParentTransform()
@@ -310,6 +473,8 @@ namespace Vectorier.EditorScript.Tools
 
         void OnEnable()
         {
+            Instance = this;
+            
             SceneView.duringSceneGui += OnSceneGUI;
             EditorApplication.update += UpdatePlayback;
 
@@ -322,6 +487,8 @@ namespace Vectorier.EditorScript.Tools
 
         void OnDisable()
         {
+            if (Instance == this) Instance = null;
+            
             SceneView.duringSceneGui -= OnSceneGUI;
             EditorApplication.update -= UpdatePlayback;
 
@@ -815,6 +982,16 @@ namespace Vectorier.EditorScript.Tools
     }
 
     sealed class TrickMovePreviewData
+    {
+        public int FirstFrame;
+        public string FileName;
+        public string PivotNode;
+        public string BinFullPath;
+        public Vector3 WorldPosition;
+        
+    }
+
+    sealed class SpawnMovePreviewData
     {
         public int FirstFrame;
         public string FileName;

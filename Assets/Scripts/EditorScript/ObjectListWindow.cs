@@ -19,6 +19,9 @@ namespace Vectorier.EditorScript
         private const string ScrollYKeyPrefix = "Vectorier_ObjectList_ScrollY_";
         private string scrollKey;
 
+        // Tracks the last toggled index for Shift-Click functionality
+        private int lastToggledIndex = -1;
+
         public static void Open(ImportConfig config)
         {
             string fullPath = Path.Combine(config.filePathDirectory, config.xmlName + ".xml");
@@ -72,6 +75,7 @@ namespace Vectorier.EditorScript
         {
             objectNames.Clear();
             selection.Clear();
+            lastToggledIndex = -1; // Reset on parse
 
             HashSet<string> selectedSet = new HashSet<string>();
             if (!string.IsNullOrEmpty(selected))
@@ -106,7 +110,14 @@ namespace Vectorier.EditorScript
             }
 
             EditorGUILayout.LabelField("Object Name List", EditorStyles.boldLabel);
+            
+            // Reset the last toggled index if the user alters the search bar
+            EditorGUI.BeginChangeCheck();
             search = EditorGUILayout.TextField("Search", search);
+            if (EditorGUI.EndChangeCheck())
+            {
+                lastToggledIndex = -1; 
+            }
 
             EditorGUILayout.Space();
 
@@ -127,13 +138,48 @@ namespace Vectorier.EditorScript
 
             scroll = EditorGUILayout.BeginScrollView(scroll);
 
+            // Build a list of currently visible names based on the search
+            List<string> visibleNames = new List<string>();
             foreach (string name in objectNames)
             {
                 if (!string.IsNullOrEmpty(search) &&
                     !name.ToLower().Contains(search.ToLower()))
                     continue;
+                
+                visibleNames.Add(name);
+            }
 
-                selection[name] = EditorGUILayout.ToggleLeft(name, selection[name]);
+            // Render the toggles and handle the shift click
+            bool isShift = Event.current.shift;
+
+            for (int i = 0; i < visibleNames.Count; i++)
+            {
+                string name = visibleNames[i];
+
+                EditorGUI.BeginChangeCheck();
+                bool newState = EditorGUILayout.ToggleLeft(name, selection[name]);
+                
+                if (EditorGUI.EndChangeCheck())
+                {
+                    if (isShift && lastToggledIndex >= 0)
+                    {
+                        // Toggle everything between the last clicked item and this item
+                        int start = Mathf.Min(lastToggledIndex, i);
+                        int end = Mathf.Max(lastToggledIndex, i);
+                        
+                        for (int j = start; j <= end; j++)
+                        {
+                            selection[visibleNames[j]] = newState;
+                        }
+                    }
+                    else
+                    {
+                        // Standard single click
+                        selection[name] = newState;
+                    }
+                    
+                    lastToggledIndex = i;
+                }
             }
 
             EditorGUILayout.EndScrollView();
