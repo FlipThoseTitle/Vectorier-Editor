@@ -195,7 +195,15 @@ namespace Vectorier.Core
                         {
                             ExecuteWithParallaxDisabled(() => 
                             {
-                                ExportHandler.ExportToExisting(config.exportType == ExportConfig.ExportType.Objects ? ExportHandler.ExportMode.Objects : ExportHandler.ExportMode.Buildings, path);
+                                try
+                                {
+                                    EditorUtility.DisplayProgressBar("Exporting", "Saving to existing XML...", 0.5f);
+                                    ExportHandler.ExportToExisting(config.exportType == ExportConfig.ExportType.Objects ? ExportHandler.ExportMode.Objects : ExportHandler.ExportMode.Buildings, path);
+                                }
+                                finally
+                                {
+                                    EditorUtility.ClearProgressBar();
+                                }
                             });
                         }
                     }
@@ -276,7 +284,7 @@ namespace Vectorier.Core
 
             config.exportAsXML = EditorGUILayout.Toggle(new GUIContent("Export as XML", "Export the level as an XML file instead of compiling it into .dz\nFor Unity and Snail Runner, enable this.\nFor Steam Version, disable this."), config.exportAsXML);
 
-            if (config.exportAsXML)
+            if (!config.exportAsXML)
             {
                 config.fastBuild = EditorGUILayout.Toggle(new GUIContent("Fast Build", "Will make the compile time faster, but may increase the size of the final build.\nThis is recommended to be enabled."), config.fastBuild);
             }
@@ -328,38 +336,50 @@ namespace Vectorier.Core
 
         private void BuildCommon(string templateFile, string typeName, ExportHandler.ExportMode mode, string defaultName)
         {
-            string projectRoot = Path.GetDirectoryName(Application.dataPath);
-            string dzipFolder = Path.Combine(projectRoot, "DZIP");
-            string templatePath = Path.Combine(dzipFolder, templateFile);
-            string outputFolder = Path.Combine(dzipFolder, "level");
-
-            EnsureDirectoryExists(outputFolder);
-
-            XmlUtility xmlUtility = new XmlUtility();
-            xmlUtility.Create("Root");
-            XmlElement root = xmlUtility.RootElement;
-
-            AddSetsToXml(xmlUtility, root);
-            if (mode == ExportHandler.ExportMode.Level)
+            try
             {
-                AddLevelConfigToXml(xmlUtility, root);
+                EditorUtility.DisplayProgressBar("Exporting", $"Initializing {typeName} export...", 0.1f);
+                string projectRoot = Path.GetDirectoryName(Application.dataPath);
+                string dzipFolder = Path.Combine(projectRoot, "DZIP");
+                string templatePath = Path.Combine(dzipFolder, templateFile);
+                string outputFolder = Path.Combine(dzipFolder, "level");
+
+                EnsureDirectoryExists(outputFolder);
+
+                EditorUtility.DisplayProgressBar("Exporting", "Generating XML elements...", 0.3f);
+                XmlUtility xmlUtility = new XmlUtility();
+                xmlUtility.Create("Root");
+                XmlElement root = xmlUtility.RootElement;
+
+                AddSetsToXml(xmlUtility, root);
+                if (mode == ExportHandler.ExportMode.Level)
+                {
+                    AddLevelConfigToXml(xmlUtility, root);
+                }
+
+                xmlUtility.Save(templatePath);
+
+                EditorUtility.DisplayProgressBar("Exporting", "Processing scene data...", 0.5f);
+                ExportHandler.Export(mode, templatePath);
+
+                if (string.IsNullOrEmpty(config.fileName))
+                {
+                    UnityEngine.Debug.LogWarning($"[Export] {typeName} Name is empty. Using '{defaultName}'.");
+                    config.fileName = defaultName;
+                }
+
+                string destXml = Path.Combine(outputFolder, $"{config.fileName}.xml");
+
+                EditorUtility.DisplayProgressBar("Exporting", "Formatting output...", 0.7f);
+                XmlUtility.FormatXML(templatePath, templatePath);
+                File.Copy(templatePath, destXml, true);
+
+                CompileXML(templatePath);
             }
-
-            xmlUtility.Save(templatePath);
-            ExportHandler.Export(mode, templatePath);
-
-            if (string.IsNullOrEmpty(config.fileName))
+            finally
             {
-                UnityEngine.Debug.LogWarning($"[Export] {typeName} Name is empty. Using '{defaultName}'.");
-                config.fileName = defaultName;
+                EditorUtility.ClearProgressBar();
             }
-
-            string destXml = Path.Combine(outputFolder, $"{config.fileName}.xml");
-
-            XmlUtility.FormatXML(templatePath, templatePath);
-            File.Copy(templatePath, destXml, true);
-
-            CompileXML(templatePath);
         }
 
         // ================= HELPERS ================= //
@@ -490,6 +510,7 @@ namespace Vectorier.Core
             // If "Export as XML" is enabled, copy directly to user-specified directory
             if (config.exportAsXML)
             {
+                EditorUtility.DisplayProgressBar("Compiling", "Copying XML to destination...", 0.9f);
                 if (string.IsNullOrEmpty(config.filePathDirectory) || string.IsNullOrEmpty(config.fileName))
                 {
                     UnityEngine.Debug.LogWarning("[Export] File Path Directory or Name is empty. Cannot export XML.");
@@ -502,6 +523,7 @@ namespace Vectorier.Core
                 return;
             }
 
+            EditorUtility.DisplayProgressBar("Compiling", "Preparing batch process...", 0.8f);
             string projectRoot = Path.GetDirectoryName(Application.dataPath);
             string batchFile = config.fastBuild ? "compile-level-fast.bat" : "compile-level.bat";
             string batchPath = Path.Combine(projectRoot, "DZIP", batchFile);
@@ -522,11 +544,13 @@ namespace Vectorier.Core
             process.StartInfo.UseShellExecute = false;
             process.StartInfo.CreateNoWindow = false;
 
+            EditorUtility.DisplayProgressBar("Compiling", "Running batch script... (This may take a moment)", 0.9f);
             process.Start();
             process.WaitForExit();
 
             stopwatch.Stop();
 
+            EditorUtility.DisplayProgressBar("Compiling", "Finalizing build...", 1.0f);
             string sourceFile = Path.Combine(projectRoot, "DZIP", "level_xml.dz");
             if (File.Exists(sourceFile) && !string.IsNullOrEmpty(config.filePathDirectory))
             {
