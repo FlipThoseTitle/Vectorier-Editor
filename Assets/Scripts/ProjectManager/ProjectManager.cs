@@ -235,7 +235,14 @@ namespace Vectorier.ProjectManager
             // Overlay an invisible button to capture clicks
             if (GUI.Button(imageRect, new GUIContent("", "Click to select a new thumbnail (.png, .jpg, .jpeg)"), GUIStyle.none))
             {
-                SelectAndCopyThumbnail();
+                if (selectedProject == UndeletableProject)
+                {
+                    EditorUtility.DisplayDialog("Action Denied", "You cannot change this project's thumbnail.", "OK");
+                }
+                else
+                {
+                    SelectAndCopyThumbnail();
+                }
             }
             
             GUILayout.FlexibleSpace();
@@ -251,6 +258,9 @@ namespace Vectorier.ProjectManager
 
             // --- Name ---
             GUILayout.Label("Name", EditorStyles.boldLabel);
+            
+            EditorGUI.BeginDisabledGroup(selectedProject == UndeletableProject);
+            
             EditorGUI.BeginChangeCheck();
             
             // DelayedTextField only registers changes when Enter is pressed or focus is lost
@@ -279,6 +289,8 @@ namespace Vectorier.ProjectManager
                 currentDescription = newDescription;
                 isDescriptionDirty = true;
             }
+            
+            EditorGUI.EndDisabledGroup();
 
             if (isDescriptionDirty && GUI.GetNameOfFocusedControl() != "DescriptionTextArea")
             {
@@ -322,36 +334,49 @@ namespace Vectorier.ProjectManager
 
         private void CreateNewProject()
         {
-            string baseName = "New Project";
-            string newName = baseName;
-            int counter = 1;
-
-            // Find a unique name to prevent conflicts
-            while (AssetDatabase.IsValidFolder($"{ProjectsFolderPath}/{newName}"))
+            EditorUtility.DisplayProgressBar("Creating Project", "Initializing...", 0f);
+            
+            try
             {
-                newName = $"{baseName} ({counter})";
-                counter++;
-            }
+                string baseName = "New Project";
+                string newName = baseName;
+                int counter = 1;
 
-            string sourcePath = "Assets/Editor/ProjectManager/ProjectTemplate"; 
-            string newProjectPath = $"{ProjectsFolderPath}/{newName}";
-
-            // Copy the base template project if it exists
-            if (AssetDatabase.IsValidFolder(sourcePath))
-            {
-                if (!AssetDatabase.CopyAsset(sourcePath, newProjectPath))
+                // Find a unique name to prevent conflicts
+                while (AssetDatabase.IsValidFolder($"{ProjectsFolderPath}/{newName}"))
                 {
-                    Debug.LogError($"Failed to copy base project from '{sourcePath}' to '{newProjectPath}'.");
+                    newName = $"{baseName} ({counter})";
+                    counter++;
                 }
-            }
-            else
-            {
-                Debug.LogWarning($"Base project not found at '{sourcePath}'. Creating an empty folder instead.");
-                AssetDatabase.CreateFolder(ProjectsFolderPath, newName);
-            }
 
-            RefreshProjectList();
-            LoadProjectData(newName);
+                string sourcePath = "Assets/Editor/ProjectManager/ProjectTemplate"; 
+                string newProjectPath = $"{ProjectsFolderPath}/{newName}";
+
+                EditorUtility.DisplayProgressBar("Creating Project", $"Copying files for '{newName}'...", 0.5f);
+
+                // Copy the base template project if it exists
+                if (AssetDatabase.IsValidFolder(sourcePath))
+                {
+                    if (!AssetDatabase.CopyAsset(sourcePath, newProjectPath))
+                    {
+                        Debug.LogError($"Failed to copy base project from '{sourcePath}' to '{newProjectPath}'.");
+                    }
+                }
+                else
+                {
+                    Debug.LogWarning($"Base project not found at '{sourcePath}'. Creating an empty folder instead.");
+                    AssetDatabase.CreateFolder(ProjectsFolderPath, newName);
+                }
+
+                EditorUtility.DisplayProgressBar("Creating Project", "Refreshing project list...", 0.9f);
+
+                RefreshProjectList();
+                LoadProjectData(newName);
+            }
+            finally
+            {
+                EditorUtility.ClearProgressBar();
+            }
         }
 
         private void DuplicateSelectedProject()
@@ -361,28 +386,41 @@ namespace Vectorier.ProjectManager
             // Confirmation Dialog
             if (EditorUtility.DisplayDialog("Duplicate Project", $"Are you sure you want to duplicate '{selectedProject}'?", "Duplicate", "Cancel"))
             {
-                string originalPath = $"{ProjectsFolderPath}/{selectedProject}";
-                string baseName = selectedProject;
-                string newName = $"{baseName} (Copy)";
-                int counter = 1;
+                EditorUtility.DisplayProgressBar("Duplicating Project", "Initializing...", 0f);
 
-                // Find a unique name to prevent conflicts
-                while (AssetDatabase.IsValidFolder($"{ProjectsFolderPath}/{newName}"))
+                try
                 {
-                    newName = $"{baseName} (Copy {counter})";
-                    counter++;
+                    string originalPath = $"{ProjectsFolderPath}/{selectedProject}";
+                    string baseName = selectedProject;
+                    string newName = $"{baseName} (Copy)";
+                    int counter = 1;
+
+                    // Find a unique name to prevent conflicts
+                    while (AssetDatabase.IsValidFolder($"{ProjectsFolderPath}/{newName}"))
+                    {
+                        newName = $"{baseName} (Copy {counter})";
+                        counter++;
+                    }
+
+                    string newPath = $"{ProjectsFolderPath}/{newName}";
+
+                    EditorUtility.DisplayProgressBar("Duplicating Project", $"Copying '{selectedProject}' to '{newName}'...", 0.5f);
+
+                    if (AssetDatabase.CopyAsset(originalPath, newPath))
+                    {
+                        EditorUtility.DisplayProgressBar("Duplicating Project", "Refreshing project list...", 0.9f);
+
+                        RefreshProjectList();
+                        LoadProjectData(newName); // Automatically select the newly duplicated project
+                    }
+                    else
+                    {
+                        Debug.LogError($"Failed to duplicate project '{selectedProject}'.");
+                    }
                 }
-
-                string newPath = $"{ProjectsFolderPath}/{newName}";
-
-                if (AssetDatabase.CopyAsset(originalPath, newPath))
+                finally
                 {
-                    RefreshProjectList();
-                    LoadProjectData(newName); // Automatically select the newly duplicated project
-                }
-                else
-                {
-                    Debug.LogError($"Failed to duplicate project '{selectedProject}'.");
+                    EditorUtility.ClearProgressBar();
                 }
             }
         }

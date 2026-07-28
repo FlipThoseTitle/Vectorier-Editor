@@ -22,6 +22,7 @@ namespace Vectorier.ProjectManager
 
         private string activeProjectName = "";
         private List<TrickItem> trickList = new List<TrickItem>();
+        private string searchQuery = "";
         private int selectedIndex = -1;
         private Vector2 scrollPosition;
 
@@ -42,7 +43,6 @@ namespace Vectorier.ProjectManager
 
         private void OnGUI()
         {
-            // Catch background clicks to clear focus and trigger delayed inputs
             if (Event.current.type == EventType.MouseDown && Event.current.button == 0)
             {
                 GUI.FocusControl(null);
@@ -51,7 +51,6 @@ namespace Vectorier.ProjectManager
 
             GUILayout.Space(10);
 
-            // --- Header & Action Buttons ---
             GUILayout.BeginHorizontal();
             GUILayout.Label("Tricks", EditorStyles.largeLabel);
             GUILayout.FlexibleSpace();
@@ -86,7 +85,13 @@ namespace Vectorier.ProjectManager
 
             GUILayout.Space(10);
 
-            // --- Trick List ---
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("Search:", GUILayout.Width(50));
+            searchQuery = GUILayout.TextField(searchQuery, GUILayout.ExpandWidth(true));
+            GUILayout.EndHorizontal();
+
+            GUILayout.Space(10);
+
             scrollPosition = GUILayout.BeginScrollView(scrollPosition);
 
             if (trickList.Count == 0)
@@ -95,9 +100,28 @@ namespace Vectorier.ProjectManager
             }
             else
             {
+                List<int> visibleIndices = new List<int>();
                 for (int i = 0; i < trickList.Count; i++)
                 {
-                    DrawTrickItem(i);
+                    bool matchName = trickList[i].trickName != null && trickList[i].trickName.IndexOf(searchQuery, System.StringComparison.OrdinalIgnoreCase) >= 0;
+                    bool matchDisplay = trickList[i].displayName != null && trickList[i].displayName.IndexOf(searchQuery, System.StringComparison.OrdinalIgnoreCase) >= 0;
+                    
+                    if (string.IsNullOrEmpty(searchQuery) || matchName || matchDisplay)
+                    {
+                        visibleIndices.Add(i);
+                    }
+                }
+
+                if (visibleIndices.Count == 0)
+                {
+                    GUILayout.Label("No tricks match the search.", EditorStyles.centeredGreyMiniLabel);
+                }
+                else
+                {
+                    for (int i = 0; i < visibleIndices.Count; i++)
+                    {
+                        DrawTrickItem(visibleIndices[i]);
+                    }
                 }
             }
 

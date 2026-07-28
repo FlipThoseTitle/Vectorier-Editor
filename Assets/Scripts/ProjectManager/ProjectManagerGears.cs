@@ -22,6 +22,7 @@ namespace Vectorier.ProjectManager
 
         private string activeProjectName = "";
         private List<GearItem> gearList = new List<GearItem>();
+        private string searchQuery = "";
         private int selectedIndex = -1;
         private Vector2 scrollPosition;
 
@@ -88,6 +89,13 @@ namespace Vectorier.ProjectManager
 
             GUILayout.Space(10);
 
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("Search:", GUILayout.Width(50));
+            searchQuery = GUILayout.TextField(searchQuery, GUILayout.ExpandWidth(true));
+            GUILayout.EndHorizontal();
+
+            GUILayout.Space(10);
+
             // --- Gear List ---
             scrollPosition = GUILayout.BeginScrollView(scrollPosition);
 
@@ -97,9 +105,28 @@ namespace Vectorier.ProjectManager
             }
             else
             {
+                List<int> visibleIndices = new List<int>();
                 for (int i = 0; i < gearList.Count; i++)
                 {
-                    DrawGearItem(i);
+                    bool matchName = gearList[i].gearName != null && gearList[i].gearName.IndexOf(searchQuery, System.StringComparison.OrdinalIgnoreCase) >= 0;
+                    bool matchDisplay = gearList[i].displayName != null && gearList[i].displayName.IndexOf(searchQuery, System.StringComparison.OrdinalIgnoreCase) >= 0;
+                    
+                    if (string.IsNullOrEmpty(searchQuery) || matchName || matchDisplay)
+                    {
+                        visibleIndices.Add(i);
+                    }
+                }
+
+                if (visibleIndices.Count == 0)
+                {
+                    GUILayout.Label("No gears match the search.", EditorStyles.centeredGreyMiniLabel);
+                }
+                else
+                {
+                    for (int i = 0; i < visibleIndices.Count; i++)
+                    {
+                        DrawGearItem(visibleIndices[i]);
+                    }
                 }
             }
 

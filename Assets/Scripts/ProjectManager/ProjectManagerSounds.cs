@@ -12,6 +12,7 @@ namespace Vectorier.ProjectManager
 
         // Data for list display
         private List<string> loadedSoundPaths = new List<string>();
+        private string searchQuery = "";
         
         // Supports Multi-Selection
         private List<int> selectedIndices = new List<int>();
@@ -40,6 +41,13 @@ namespace Vectorier.ProjectManager
             }
 
             GUILayout.Space(10);
+
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("Search:", GUILayout.Width(50));
+            searchQuery = GUILayout.TextField(searchQuery, GUILayout.ExpandWidth(true));
+            GUILayout.EndHorizontal();
+
+            GUILayout.Space(5);
 
             // --- Enclosing Box for List and Actions ---
             GUILayout.BeginVertical("box");
@@ -94,11 +102,27 @@ namespace Vectorier.ProjectManager
                 return;
             }
 
-            scrollPosition = GUILayout.BeginScrollView(scrollPosition);
-
+            List<int> visibleIndices = new List<int>();
             for (int i = 0; i < loadedSoundPaths.Count; i++)
             {
-                DrawListItem(i);
+                string fileName = Path.GetFileNameWithoutExtension(loadedSoundPaths[i]);
+                if (string.IsNullOrEmpty(searchQuery) || fileName.IndexOf(searchQuery, System.StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    visibleIndices.Add(i);
+                }
+            }
+
+            if (visibleIndices.Count == 0)
+            {
+                GUILayout.Label("No sounds match the search.", EditorStyles.centeredGreyMiniLabel);
+                return;
+            }
+
+            scrollPosition = GUILayout.BeginScrollView(scrollPosition);
+
+            for (int i = 0; i < visibleIndices.Count; i++)
+            {
+                DrawListItem(visibleIndices[i]);
                 GUILayout.Space(2); // Small gap between items
             }
             

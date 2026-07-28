@@ -15,6 +15,7 @@ namespace Vectorier.ProjectManager
 
         // Data for list display
         private List<string> loadedAnimationPaths = new List<string>();
+        private string searchQuery = "";
         
         // Supports Multi-Selection
         private List<int> selectedIndices = new List<int>();
@@ -57,6 +58,13 @@ namespace Vectorier.ProjectManager
 
             GUILayout.Space(10);
 
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("Search:", GUILayout.Width(50));
+            searchQuery = GUILayout.TextField(searchQuery, GUILayout.ExpandWidth(true));
+            GUILayout.EndHorizontal();
+
+            GUILayout.Space(5);
+
             // --- Enclosing Box for List and Actions ---
             GUILayout.BeginVertical("box");
             
@@ -67,7 +75,7 @@ namespace Vectorier.ProjectManager
             GUIStyle totalLabelStyle = new GUIStyle(EditorStyles.boldLabel) { alignment = TextAnchor.MiddleRight };
             GUILayout.Label("Total Animations - " + loadedAnimationPaths.Count, totalLabelStyle, GUILayout.Height(30));
             
-            GUILayout.Space(10); // Small gap between the text and the buttons
+            GUILayout.Space(10); 
 
             GUI.enabled = selectedIndices.Count > 0;
             if (GUILayout.Button("-", GUILayout.Width(30), GUILayout.Height(30)))
@@ -109,17 +117,32 @@ namespace Vectorier.ProjectManager
                 return;
             }
 
-            scrollPosition = GUILayout.BeginScrollView(scrollPosition);
-
+            List<int> visibleIndices = new List<int>();
             for (int i = 0; i < loadedAnimationPaths.Count; i++)
             {
-                DrawListItem(i);
-                GUILayout.Space(2); // Small gap between items
+                string fileName = Path.GetFileNameWithoutExtension(loadedAnimationPaths[i]);
+                if (string.IsNullOrEmpty(searchQuery) || fileName.IndexOf(searchQuery, System.StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    visibleIndices.Add(i);
+                }
+            }
+
+            if (visibleIndices.Count == 0)
+            {
+                GUILayout.Label("No animations match the search.", EditorStyles.centeredGreyMiniLabel);
+                return;
+            }
+
+            scrollPosition = GUILayout.BeginScrollView(scrollPosition);
+
+            for (int i = 0; i < visibleIndices.Count; i++)
+            {
+                DrawListItem(visibleIndices[i]);
+                GUILayout.Space(2); 
             }
             
             GUILayout.EndScrollView();
 
-            // Catch background clicks inside the scroll area to clear selection
             Rect scrollRect = GUILayoutUtility.GetLastRect();
             if (Event.current.type == EventType.MouseDown && Event.current.button == 0 && scrollRect.Contains(Event.current.mousePosition))
             {

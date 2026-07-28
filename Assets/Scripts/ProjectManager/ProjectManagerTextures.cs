@@ -28,6 +28,7 @@ namespace Vectorier.ProjectManager
         // Data for grid display
         private List<Texture2D> loadedTextures = new List<Texture2D>();
         private List<string> loadedTexturePaths = new List<string>();
+        private string searchQuery = "";
         
         // Supports Multi-Selection
         private List<int> selectedIndices = new List<int>();
@@ -49,7 +50,13 @@ namespace Vectorier.ProjectManager
 
             GUILayout.Space(10);
 
-            // --- Import Textures Button ---
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("Search:", GUILayout.Width(50));
+            searchQuery = GUILayout.TextField(searchQuery, GUILayout.ExpandWidth(true));
+            GUILayout.EndHorizontal();
+
+            GUILayout.Space(10);
+
             if (GUILayout.Button("Import Textures", GUILayout.Height(40)))
             {
                 ImportTextureFile();
@@ -57,14 +64,13 @@ namespace Vectorier.ProjectManager
 
             GUILayout.Space(5);
 
-            // --- Action Buttons (- and C) ---
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
             
             GUIStyle totalLabelStyle = new GUIStyle(EditorStyles.boldLabel) { alignment = TextAnchor.MiddleRight };
             GUILayout.Label("Total Textures - " + loadedTextures.Count, totalLabelStyle, GUILayout.Height(30));
             
-            GUILayout.Space(10); // Small gap between the text and the buttons
+            GUILayout.Space(10); 
             
             GUI.enabled = selectedIndices.Count > 0;
             if (GUILayout.Button("-", GUILayout.Width(30), GUILayout.Height(30)))
@@ -83,7 +89,6 @@ namespace Vectorier.ProjectManager
 
             GUILayout.Space(5);
 
-            // --- Images Grid ---
             DrawTextureGrid();
         }
 
@@ -104,9 +109,24 @@ namespace Vectorier.ProjectManager
                 return;
             }
 
+            List<int> visibleIndices = new List<int>();
+            for (int i = 0; i < loadedTextures.Count; i++)
+            {
+                if (string.IsNullOrEmpty(searchQuery) || loadedTextures[i].name.IndexOf(searchQuery, System.StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    visibleIndices.Add(i);
+                }
+            }
+
+            if (visibleIndices.Count == 0)
+            {
+                GUILayout.Label("No textures match the search.", EditorStyles.centeredGreyMiniLabel);
+                return;
+            }
+
             scrollPosition = GUILayout.BeginScrollView(scrollPosition);
 
-            float windowWidth = EditorGUIUtility.currentViewWidth - 20; // Account for scrollbar
+            float windowWidth = EditorGUIUtility.currentViewWidth - 20; 
             float itemSize = 100f;
             int columns = Mathf.FloorToInt(windowWidth / (itemSize + 10f));
             if (columns < 1) columns = 1;
@@ -114,14 +134,14 @@ namespace Vectorier.ProjectManager
             int index = 0;
             GUILayout.BeginVertical();
             
-            while (index < loadedTextures.Count)
+            while (index < visibleIndices.Count)
             {
                 GUILayout.BeginHorizontal();
                 for (int i = 0; i < columns; i++)
                 {
-                    if (index >= loadedTextures.Count) break;
+                    if (index >= visibleIndices.Count) break;
 
-                    DrawTextureItem(index, itemSize);
+                    DrawTextureItem(visibleIndices[index], itemSize);
                     index++;
                 }
                 GUILayout.EndHorizontal();
@@ -131,8 +151,6 @@ namespace Vectorier.ProjectManager
             GUILayout.EndVertical();
             GUILayout.EndScrollView();
 
-            // Catch background clicks specifically inside the scroll area to clear selection.
-            // Because the items 'Use' the click event, this will only trigger on empty space
             Rect scrollRect = GUILayoutUtility.GetLastRect();
             if (Event.current.type == EventType.MouseDown && Event.current.button == 0 && scrollRect.Contains(Event.current.mousePosition))
             {
@@ -147,34 +165,52 @@ namespace Vectorier.ProjectManager
             Texture2D tex = loadedTextures[index];
             bool isSelected = selectedIndices.Contains(index);
 
-            // Reserve space for the item
             Rect boxRect = GUILayoutUtility.GetRect(size, size);
             
-            // Draw Background Color
             if (isSelected)
-                EditorGUI.DrawRect(boxRect, new Color(0.2f, 0.5f, 0.9f, 0.7f)); // Blue highlight
+                EditorGUI.DrawRect(boxRect, new Color(0.2f, 0.5f, 0.9f, 0.7f));
             else
-                EditorGUI.DrawRect(boxRect, new Color(0.2f, 0.2f, 0.2f, 0.5f)); // Dark grey
+                EditorGUI.DrawRect(boxRect, new Color(0.2f, 0.2f, 0.2f, 0.5f));
 
-            // Draw Texture
             Rect texRect = new Rect(boxRect.x + 5, boxRect.y + 5, boxRect.width - 10, boxRect.height - 30);
             if (tex != null) GUI.DrawTexture(texRect, tex, ScaleMode.ScaleToFit);
 
-            // Draw Label
             Rect labelRect = new Rect(boxRect.x + 5, boxRect.y + boxRect.height - 20, boxRect.width - 10, 20);
             string labelName = tex != null ? tex.name : "Null";
             GUI.Label(labelRect, labelName, EditorStyles.miniLabel);
 
-            // --- Multi-Select Logic ---
             Event e = Event.current;
+
+            if (e.type == EventType.MouseDrag && e.button == 0 && boxRect.Contains(e.mousePosition))
+            {
+                DragAndDrop.PrepareStartDrag();
+                
+                List<Object> draggedObjects = new List<Object>();
+                if (isSelected)
+                {
+                    foreach (int i in selectedIndices)
+                    {
+                        draggedObjects.Add(loadedTextures[i]);
+                    }
+                }
+                else
+                {
+                    draggedObjects.Add(tex);
+                }
+
+                DragAndDrop.objectReferences = draggedObjects.ToArray();
+                DragAndDrop.StartDrag("Dragging Textures");
+                e.Use();
+            }
+
             if (e.type == EventType.MouseDown && e.button == 0 && boxRect.Contains(e.mousePosition))
             {
-                if (e.control || e.command) // Ctrl/Cmd Click
+                if (e.control || e.command)
                 {
                     if (isSelected) selectedIndices.Remove(index);
                     else selectedIndices.Add(index);
                 }
-                else if (e.shift && selectedIndices.Count > 0) // Shift Click
+                else if (e.shift && selectedIndices.Count > 0)
                 {
                     int lastSelected = selectedIndices[selectedIndices.Count - 1];
                     int start = Mathf.Min(lastSelected, index);
@@ -182,13 +218,12 @@ namespace Vectorier.ProjectManager
                     selectedIndices.Clear();
                     for (int i = start; i <= end; i++) selectedIndices.Add(i);
                 }
-                else // Normal Click
+                else
                 {
                     selectedIndices.Clear();
                     selectedIndices.Add(index);
                 }
                 
-                // Consume the event so the background doesn't unselect it
                 e.Use();
                 GUI.FocusControl(null);
             }

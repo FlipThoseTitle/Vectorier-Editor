@@ -273,6 +273,12 @@ namespace Vectorier.ProjectManager
             if (EditorGUI.EndChangeCheck())
             {
                 data.starsRequired = ParseInt(data.rawStarsInput);
+                
+                if (data.subject == SubjectType.Track && data.starsRequired > 3)
+                {
+                    data.starsRequired = 3;
+                }
+                
                 data.rawStarsInput = data.starsRequired.ToString();
                 SaveToXml();
             }
@@ -281,7 +287,16 @@ namespace Vectorier.ProjectManager
             {
                 EditorGUI.BeginChangeCheck();
                 data.subject = (SubjectType)EditorGUILayout.EnumPopup("Subject", data.subject);
-                if (EditorGUI.EndChangeCheck()) SaveToXml();
+                if (EditorGUI.EndChangeCheck())
+                {
+                    if (data.subject == SubjectType.Track && data.starsRequired > 3)
+                    {
+                        data.starsRequired = 3;
+                        data.rawStarsInput = data.starsRequired.ToString();
+                    }
+                    
+                    SaveToXml();
+                }
 
                 if (data.subject != SubjectType.None)
                 {
