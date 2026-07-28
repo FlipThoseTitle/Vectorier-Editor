@@ -242,6 +242,11 @@ namespace Vectorier.Parallax
                 }
             }
 
+            // Record initial transforms in Unity's Undo stack before applying parallax updates
+            var transformsToRecord = _targets.Select(t => t.transform).Where(t => t != null).ToList();
+            transformsToRecord.Add(camera.transform);
+            Undo.RecordObjects(transformsToRecord.ToArray(), "Toggle Parallax");
+
             SceneView.duringSceneGui += OnSceneGUI;
             EditorApplication.update += EditorUpdate;
         }
@@ -253,6 +258,16 @@ namespace Vectorier.Parallax
             SceneView.duringSceneGui -= OnSceneGUI;
             EditorApplication.update -= EditorUpdate;
 
+            var camera = GetComponent<Camera>();
+
+            // Record modified transforms in Undo stack before resetting back to original state
+            var transformsToRecord = _targets.Select(t => t.transform).Where(t => t != null).ToList();
+            if (camera != null) transformsToRecord.Add(camera.transform);
+            if (transformsToRecord.Count > 0)
+            {
+                Undo.RecordObjects(transformsToRecord.ToArray(), "Toggle Parallax");
+            }
+
             foreach (var target in _targets)
             {
                 if (target.transform == null) continue;
@@ -263,7 +278,6 @@ namespace Vectorier.Parallax
             _targets.Clear();
             _groups.Clear();
 
-            var camera = GetComponent<Camera>();
             if (camera != null) camera.transform.position = _cameraStartPosition;
         }
 

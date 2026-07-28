@@ -643,15 +643,12 @@ namespace Vectorier.EditorScript.Tools
                 animation.EndFrame
             );
 
-            if (!hasSelectedTrickArea)
-            {
-                EditorGUILayout.Space();
+            EditorGUILayout.Space();
 
-                using (new EditorGUILayout.HorizontalScope())
-                {
-                    animation.StartFrame = EditorGUILayout.IntField("Start", animation.StartFrame);
-                    animation.EndFrame = EditorGUILayout.IntField("End", animation.EndFrame);
-                }
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                animation.StartFrame = EditorGUILayout.IntField("Start", animation.StartFrame);
+                animation.EndFrame = EditorGUILayout.IntField("End", animation.EndFrame);
             }
 
             if (newFrame != animation.CurrentFrameIndex)
