@@ -1,5 +1,35 @@
-# Vectorier-Editor
-<img width="1872" height="721" alt="image" src="https://github.com/user-attachments/assets/aebee1eb-7536-4dd8-9acf-5be96bcc66a6" />
+<img width="1872" height="721" alt="Vectorier-Editor-Title" src="https://github.com/user-attachments/assets/aebee1eb-7536-4dd8-9acf-5be96bcc66a6" />
+
+<div align="center">
+  <h1>
+    Vectorier
+  </h1>
+</div>
+
+<div align="center">
+  A Fan-Made Level Creator to build your own dystopian stage for Vector using Unity
+</div>
+
+<div align="center">
+  <h3>
+    <a href="https://discord.com/invite/pVRuFBVwC2">
+      Discord
+    </a>
+    <span> | </span>
+    <a href="https://github.com/FlipThoseTitle/Vectorier-Editor#introduction">
+      Introduction
+    </a>
+    <span> | </span>
+    <a href="https://github.com/FlipThoseTitle/Vectorier-Editor#installation">
+      Downloads
+    </a>
+    <span> | </span>
+    <a href="https://github.com/FlipThoseTitle/Vectorier-Editor#contributions">
+      Contributions
+    </a>
+  </h3>
+</div>
+
 
 # Introduction
 Vectorier is a community-developed level editor for the game Vector to build your own dystopian stages in Unity. This project includes the following features:
@@ -10,11 +40,12 @@ Vectorier is a community-developed level editor for the game Vector to build you
 - Trigger Editor to quickly tweak the game's rule
 - Move Visualizer to easily preview animations
 - Parallax Preview directly in the Editor
+- Project Manager to package and publish mods.
 - Compatible with both the Unity and Marmalade versions of the game
 
 A Discord server is open for the project : https://discord.com/invite/pVRuFBVwC2
 
-<img width="1068" height="532" alt="image" src="https://github.com/user-attachments/assets/46f3d128-45fc-45a6-8771-30a6144842e3" />
+<img width="1480" height="836" alt="Vectorier-Editor-Preview" src="https://github.com/user-attachments/assets/bf99622b-1260-493c-96f0-c6880c6ee3d3" />
 
 # Installation
 - Download Unity [6000.3.15f1](https://unity.com/releases/editor/whats-new/6000.3.15f1) at the [Official Unity Website](https://unity.com/releases/editor/archive)
