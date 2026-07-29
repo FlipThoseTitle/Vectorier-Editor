@@ -439,20 +439,37 @@ namespace Vectorier.Handler
                 if (string.IsNullOrWhiteSpace(folderPath))
                     continue;
 
-                string normalizedPath = folderPath.TrimEnd('/');
+                // Normalize the path and ensure it starts with "Assets"
+                string normalizedPath = folderPath.Replace("\\", "/").TrimEnd('/');
+                if (!normalizedPath.StartsWith("Assets"))
+                {
+                    normalizedPath = normalizedPath.StartsWith("/") ? "Assets" + normalizedPath : "Assets/" + normalizedPath;
+                }
 
-                Sprite[] loadedSprites = Resources.LoadAll<Sprite>(normalizedPath);
+                // Use AssetDatabase to search for Sprites and Texture2Ds within the specified folder
+                string[] guids = UnityEditor.AssetDatabase.FindAssets("t:Sprite t:Texture2D", new[] { normalizedPath });
 
-                if (loadedSprites == null || loadedSprites.Length == 0)
+                if (guids == null || guids.Length == 0)
                 {
                     Debug.LogWarning("[ImportHandler] No sprites found in '" + normalizedPath + "'.");
                     continue;
                 }
 
-                foreach (Sprite sprite in loadedSprites)
+                foreach (string guid in guids)
                 {
-                    if (!SpriteCache.ContainsKey(sprite.name))
-                        SpriteCache[sprite.name] = sprite;
+                    string assetPath = UnityEditor.AssetDatabase.GUIDToAssetPath(guid);
+                    
+                    // Use LoadAllAssetsAtPath to ensure we get all sliced sprites from a single texture
+                    UnityEngine.Object[] assets = UnityEditor.AssetDatabase.LoadAllAssetsAtPath(assetPath);
+                    
+                    foreach (UnityEngine.Object asset in assets)
+                    {
+                        if (asset is Sprite sprite)
+                        {
+                            if (!SpriteCache.ContainsKey(sprite.name))
+                                SpriteCache[sprite.name] = sprite;
+                        }
+                    }
                 }
             }
         }
