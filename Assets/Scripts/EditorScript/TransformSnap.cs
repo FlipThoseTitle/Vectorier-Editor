@@ -47,8 +47,32 @@ namespace Vectorier.EditorScript
             Event e = Event.current;
 
             // Track B key modifier state
-            if (e.type == EventType.KeyDown && e.keyCode == KeyCode.B) isBHeld = true;
-            if (e.type == EventType.KeyUp && e.keyCode == KeyCode.B) isBHeld = false;
+            if (e.type == EventType.KeyDown && e.keyCode == KeyCode.B)
+            {
+                isBHeld = true;
+                
+                // Transition into scale snap if B is pressed after V/C
+                if (currentMode != SnapMode.None && !isScaleSnapMode)
+                {
+                    if (targetTransforms != null && targetTransforms.Length == 1 && primaryTransform != null && primaryTransform.childCount == 0)
+                    {
+                        isScaleSnapMode = true;
+                        InitializeScaleSnapState(activeSourceVertex);
+                    }
+                }
+            }
+            
+            if (e.type == EventType.KeyUp && e.keyCode == KeyCode.B)
+            {
+                isBHeld = false;
+                
+                // Exit scale snap if B is released, retaining normal snap behavior
+                if (isScaleSnapMode)
+                {
+                    isScaleSnapMode = false;
+                    UpdateGrabOffsets();
+                }
+            }
 
             if (e.type == EventType.KeyUp)
             {
