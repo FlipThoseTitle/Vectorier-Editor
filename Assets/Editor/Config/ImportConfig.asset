@@ -20,4 +20,4 @@ MonoBehaviour:
   includeBuildingsMarker: 0
   applyConfig: 1
   textureFolders:
-  - Images/Vector
+  - Resources/Images/Vector
