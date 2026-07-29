@@ -223,7 +223,9 @@ namespace Vectorier.EditorScript.Tools
 
             Vector3 fillStart = new(topLeft.x + Mathf.Min(TL_H, BL_H), topLeft.y - Mathf.Min(TL_V, TR_V), 0f);
             float sizeX = bounds.size.x - Mathf.Min(TL_H, BL_H) - Mathf.Min(TR_H, BR_H);
-            float sizeY = bounds.size.y - Mathf.Min(TL_V, TR_V) - Mathf.Min(BL_V, BR_V);
+            
+            // We no longer subtract the bottom wall heights so the fill extends fully downwards
+            float sizeY = bounds.size.y - Mathf.Min(TL_V, TR_V);
 
             GameObject fill = new("Fill");
             Undo.RegisterCreatedObjectUndo(fill, "Create Surface Part");
@@ -248,6 +250,9 @@ namespace Vectorier.EditorScript.Tools
             Undo.RegisterCreatedObjectUndo(root, "Create Surface Part");
 
             bool horizontal = Mathf.Approximately(start.y, end.y);
+            
+            // A small tolerance to prevent missing tiles due to Unity's floating point inaccuracies
+            const float EPSILON = 0.01f;
 
             if (group.mode == SideGroup.Choice.RandomFill)
             {
@@ -260,14 +265,20 @@ namespace Vectorier.EditorScript.Tools
                 Vector3 position = start;
                 while (true)
                 {
+                    float current = horizontal ? position.x : position.y;
+                    float target = horizontal ? end.x : end.y;
+                    float remaining = target - current;
+
+                    // Stop if we have reached the target
+                    if (remaining <= EPSILON) break;
+
                     Sprite sprite = group.LoadSprites();
                     if (!sprite) break;
 
                     float spriteSize = horizontal ? sprite.bounds.size.x : sprite.bounds.size.y;
-                    float current = horizontal ? position.x : position.y;
-                    float target = horizontal ? end.x : end.y;
 
-                    if (current + spriteSize > target)
+                    // If this tile covers the rest of the distance, align it exactly backward to the end and finish
+                    if (spriteSize >= remaining - EPSILON)
                     {
                         if (horizontal) position.x = target - spriteSize;
                         else position.y = target - spriteSize;
@@ -275,11 +286,13 @@ namespace Vectorier.EditorScript.Tools
                         group.CreateGameObject(sprite, position, root.transform);
                         break;
                     }
-
-                    group.CreateGameObject(sprite, position, root.transform);
-                    
-                    if (horizontal) position.x += spriteSize;
-                    else position.y += spriteSize;
+                    else
+                    {
+                        group.CreateGameObject(sprite, position, root.transform);
+                        
+                        if (horizontal) position.x += spriteSize;
+                        else position.y += spriteSize;
+                    }
                 }
                 group.ResetSequence();
             }
