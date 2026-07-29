@@ -101,28 +101,34 @@ namespace Vectorier.EditorScript.Tools
             if (mode is SurfaceMode.All or SurfaceMode.RightWall)
                 downRight = CreateSprite(cornerDownRight, bottomRight + new Vector3(-cornerDownRight.bounds.size.x, cornerDownRight.bounds.size.y), root.transform);
 
-            // -------- FLOOR (overlap-safe) --------
+            // A small tolerance to prevent missing tiles due to Unity's floating point inaccuracies
+            const float EPSILON = 0.01f;
+
+            // -------- FLOOR --------
             if (mode is SurfaceMode.All or SurfaceMode.Floor)
             {
                 float start = upLeft.transform.position.x + cornerUpLeft.bounds.size.x;
                 float end = upRight.transform.position.x;
-
                 float x = start;
-                float maxTile = Mathf.Max(floor.bounds.size.x, floorLong.bounds.size.x);
 
-                while (x + maxTile < end)
+                while (end - x > EPSILON)
                 {
-                    bool useLong = x + Load(FLOOR_LONG).bounds.size.x < end;
-
+                    float remaining = end - x;
+                    bool useLong = remaining >= floorLong.bounds.size.x - EPSILON;
                     Sprite chosen = useLong ? LoadRandom(FLOOR_LONG) : LoadRandom(FLOOR);
 
-                    CreateSprite(chosen, new Vector3(x, topLeft.y, 0f), root.transform);
-                    x += chosen.bounds.size.x;
+                    // If this tile covers the rest of the distance, align it exactly to the end and finish
+                    if (chosen.bounds.size.x >= remaining - EPSILON)
+                    {
+                        CreateSprite(chosen, new Vector3(end - chosen.bounds.size.x, topLeft.y, 0f), root.transform);
+                        break;
+                    }
+                    else
+                    {
+                        CreateSprite(chosen, new Vector3(x, topLeft.y, 0f), root.transform);
+                        x += chosen.bounds.size.x;
+                    }
                 }
-
-                // final overlapping tile
-                Sprite final = floorLong && end - maxTile >= start ? floorLong : floor;
-                CreateSprite(final, new Vector3(end - final.bounds.size.x, topLeft.y, 0f), root.transform);
             }
 
             // -------- LEFT WALL --------
@@ -130,32 +136,25 @@ namespace Vectorier.EditorScript.Tools
             {
                 float topY = upLeft.transform.position.y - cornerUpLeft.bounds.size.y;
                 float bottomY = downLeft.transform.position.y;
-
-                float shortH = wallLeft.bounds.size.y;
-                float longH = wallLLong.bounds.size.y;
-
-                float totalHeight = topY - bottomY;
-
-                // Prefer long tiles, but guarantee coverage
-                int longCount = Mathf.FloorToInt(totalHeight / longH);
-                float used = longCount * longH;
-
-                int shortCount = Mathf.CeilToInt((totalHeight - used) / shortH);
-
                 float y = topY;
 
-                // Place long tiles first (top to bottom)
-                for (int i = 0; i < longCount; i++)
+                while (y - bottomY > EPSILON)
                 {
-                    CreateSprite(LoadRandom(WALL_L_LONG), new Vector3(topLeft.x, y, 0f), root.transform);
-                    y -= longH;
-                }
+                    float remaining = y - bottomY;
+                    bool useLong = remaining >= wallLLong.bounds.size.y - EPSILON;
+                    Sprite chosen = useLong ? LoadRandom(WALL_L_LONG) : LoadRandom(WALL_L);
 
-                // Place short tiles
-                for (int i = 0; i < shortCount; i++)
-                {
-                    CreateSprite(LoadRandom(WALL_L), new Vector3(topLeft.x, y, 0f), root.transform);
-                    y -= shortH;
+                    // If this tile covers the rest of the height, snap it to the bottom and finish
+                    if (chosen.bounds.size.y >= remaining - EPSILON)
+                    {
+                        CreateSprite(chosen, new Vector3(topLeft.x, bottomY + chosen.bounds.size.y, 0f), root.transform);
+                        break;
+                    }
+                    else
+                    {
+                        CreateSprite(chosen, new Vector3(topLeft.x, y, 0f), root.transform);
+                        y -= chosen.bounds.size.y;
+                    }
                 }
             }
 
@@ -165,29 +164,25 @@ namespace Vectorier.EditorScript.Tools
                 float topY = upRight.transform.position.y - cornerUpRight.bounds.size.y;
                 float bottomY = downRight.transform.position.y;
                 float x = topRight.x - wallRight.bounds.size.x;
-
-                float shortH = wallRight.bounds.size.y;
-                float longH = wallRLong.bounds.size.y;
-
-                float totalHeight = topY - bottomY;
-
-                int longCount = Mathf.FloorToInt(totalHeight / longH);
-                float used = longCount * longH;
-
-                int shortCount = Mathf.CeilToInt((totalHeight - used) / shortH);
-
                 float y = topY;
 
-                for (int i = 0; i < longCount; i++)
+                while (y - bottomY > EPSILON)
                 {
-                    CreateSprite(LoadRandom(WALL_R_LONG), new Vector3(x, y, 0f), root.transform);
-                    y -= longH;
-                }
+                    float remaining = y - bottomY;
+                    bool useLong = remaining >= wallRLong.bounds.size.y - EPSILON;
+                    Sprite chosen = useLong ? LoadRandom(WALL_R_LONG) : LoadRandom(WALL_R);
 
-                for (int i = 0; i < shortCount; i++)
-                {
-                    CreateSprite(LoadRandom(WALL_R), new Vector3(x, y, 0f), root.transform);
-                    y -= shortH;
+                    // If this tile covers the rest of the height, snap it to the bottom and finish
+                    if (chosen.bounds.size.y >= remaining - EPSILON)
+                    {
+                        CreateSprite(chosen, new Vector3(x, bottomY + chosen.bounds.size.y, 0f), root.transform);
+                        break;
+                    }
+                    else
+                    {
+                        CreateSprite(chosen, new Vector3(x, y, 0f), root.transform);
+                        y -= chosen.bounds.size.y;
+                    }
                 }
             }
 
@@ -195,7 +190,7 @@ namespace Vectorier.EditorScript.Tools
             if (mode == SurfaceMode.All)
             {
                 float top = upLeft.transform.position.y - cornerUpLeft.bounds.size.y;
-                float bottom = downLeft.transform.position.y;
+                float bottom = bounds.min.y;
                 float left = upLeft.transform.position.x + cornerUpLeft.bounds.size.x;
                 float right = upRight.transform.position.x;
 
