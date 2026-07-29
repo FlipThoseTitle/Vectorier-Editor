@@ -22,7 +22,7 @@ namespace Vectorier.EditorScript
         private static Object[] cachedSelection;
         private static bool isDragging;
 
-        private static bool isBHeld;
+        private static bool isAHeld;
         private static bool isScaleSnapMode;
         private static Vector3 originalScale;
         private static Vector3 originalPosition;
@@ -46,12 +46,12 @@ namespace Vectorier.EditorScript
         {
             Event e = Event.current;
 
-            // Track B key modifier state
-            if (e.type == EventType.KeyDown && e.keyCode == KeyCode.B)
+            // Track A key modifier state
+            if (e.type == EventType.KeyDown && e.keyCode == KeyCode.A)
             {
-                isBHeld = true;
+                isAHeld = true;
                 
-                // Transition into scale snap if B is pressed after V/C
+                // Transition into scale snap if A is pressed after V/C
                 if (currentMode != SnapMode.None && !isScaleSnapMode)
                 {
                     if (targetTransforms != null && targetTransforms.Length == 1 && primaryTransform != null && primaryTransform.childCount == 0)
@@ -62,11 +62,11 @@ namespace Vectorier.EditorScript
                 }
             }
             
-            if (e.type == EventType.KeyUp && e.keyCode == KeyCode.B)
+            if (e.type == EventType.KeyUp && e.keyCode == KeyCode.A)
             {
-                isBHeld = false;
+                isAHeld = false;
                 
-                // Exit scale snap if B is released, retaining normal snap behavior
+                // Exit scale snap if A is released, retaining normal snap behavior
                 if (isScaleSnapMode)
                 {
                     isScaleSnapMode = false;
@@ -115,7 +115,7 @@ namespace Vectorier.EditorScript
                             isScaleSnapMode = false;
                             
                             // Validate Scale Snap Conditions
-                            if (isBHeld && targetTransforms.Length == 1 && primaryTransform.childCount == 0)
+                            if (isAHeld && targetTransforms.Length == 1 && primaryTransform.childCount == 0)
                             {
                                 isScaleSnapMode = true;
                                 InitializeScaleSnapState(activeSourceVertex);
