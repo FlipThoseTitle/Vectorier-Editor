@@ -417,7 +417,12 @@ namespace Vectorier.Core
         private void DrawXmlNameFieldWithBrowse(string label, ref string xmlName, ref string directoryPath)
         {
             EditorGUILayout.BeginHorizontal();
-            xmlName = EditorGUILayout.TextField(label, xmlName);
+
+            string newXmlName = EditorGUILayout.DelayedTextField(label, xmlName);
+            if (newXmlName != xmlName)
+            {
+                xmlName = string.IsNullOrEmpty(newXmlName) ? "" : newXmlName.Replace(" ", "_");
+            }
 
             if (GUILayout.Button(new GUIContent("...", "Browse"), GUILayout.Width(28)))
             {
@@ -425,7 +430,10 @@ namespace Vectorier.Core
                 string picked = EditorUtility.OpenFilePanel($"Select {label}", startPath, "xml");
 
                 if (!string.IsNullOrEmpty(picked))
-                    xmlName = Path.GetFileNameWithoutExtension(picked);
+                {
+                    xmlName = Path.GetFileNameWithoutExtension(picked).Replace(" ", "_");
+                    GUI.FocusControl(null);
+                }
             }
 
             EditorGUILayout.EndHorizontal();
