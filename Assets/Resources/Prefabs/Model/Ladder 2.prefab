@@ -54,32 +54,40 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: dba84d9b5b9a15d4c829e7fa113a16d3, type: 3}
       propertyPath: m_TagString
+      value: Untagged
+      objectReference: {fileID: 0}
+    - target: {fileID: 8164078558771037576, guid: dba84d9b5b9a15d4c829e7fa113a16d3, type: 3}
+      propertyPath: m_Name
+      value: ladder_8
+      objectReference: {fileID: 0}
+    - target: {fileID: 8164078558771037576, guid: dba84d9b5b9a15d4c829e7fa113a16d3, type: 3}
+      propertyPath: m_TagString
       value: Model
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: dba84d9b5b9a15d4c829e7fa113a16d3, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 862599284710992905}
+    - targetCorrespondingSourceObject: {fileID: 8164078558771037576, guid: dba84d9b5b9a15d4c829e7fa113a16d3, type: 3}
+      insertIndex: 1
+      addedObject: {fileID: 428049121437068752}
   m_SourcePrefab: {fileID: 100100000, guid: dba84d9b5b9a15d4c829e7fa113a16d3, type: 3}
---- !u!1 &1797136479549768925 stripped
+--- !u!1 &7313139887137799172 stripped
 GameObject:
-  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: dba84d9b5b9a15d4c829e7fa113a16d3, type: 3}
+  m_CorrespondingSourceObject: {fileID: 8164078558771037576, guid: dba84d9b5b9a15d4c829e7fa113a16d3, type: 3}
   m_PrefabInstance: {fileID: 1455190215986051468}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &862599284710992905
+--- !u!114 &428049121437068752
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1797136479549768925}
+  m_GameObject: {fileID: 7313139887137799172}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 813da6a69196e804e8f00a9fe863ada6, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: 
+  m_EditorClassIdentifier: Assembly-CSharp::Vectorier.Component.ModelComponent
   Type: 0
   LifeTime: 10
