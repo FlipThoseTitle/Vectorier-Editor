@@ -27,6 +27,10 @@
     <a href="https://github.com/FlipThoseTitle/Vectorier-Editor#contributions">
       Contributions
     </a>
+    <span> | </span>
+    <a href="https://github.com/FlipThoseTitle/Vectorier-Editor/wiki">
+      Wiki
+    </a>
   </h3>
 </div>
 
@@ -52,6 +56,13 @@ A Discord server is open for the project : https://discord.com/invite/pVRuFBVwC2
 - Download the [Vectorier Editor Project](https://github.com/FlipThoseTitle/Vectorier-Editor/archive/refs/heads/main.zip)
 - Extract the zip file
 - Open the project in Unity Hub
+
+# Getting Started
+Tutorial and Documentation is available on the [Vectorier Editor Documentation Wiki](https://github.com/FlipThoseTitle/Vectorier-Editor/wiki)
+
+<img width="576" height="324" alt="Vectorier-Wiki" src="https://github.com/user-attachments/assets/872f0159-9ff9-4a6c-95c4-ff3b423d7892" />
+
+
 
 # Contributions
 This project was made possible through the collaboration and support of the following contributors. Each person has invested their time, knowledge, and effort to improve, refine, and expand this project. From identifying bugs and implementing new features, their involvement has been invaluable. The project stands as a result of shared effort and collective dedication.
