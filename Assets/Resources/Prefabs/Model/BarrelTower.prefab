@@ -147,7 +147,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6942983593566466050}
   m_Layer: 0
-  m_Name: Barrel Tower
+  m_Name: BarrelTower
   m_TagString: Object
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
