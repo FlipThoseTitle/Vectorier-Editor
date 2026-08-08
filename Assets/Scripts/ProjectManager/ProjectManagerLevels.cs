@@ -50,6 +50,9 @@ namespace Vectorier.ProjectManager
 
             public string starsTemplate = "";
             public string rewardTemplate = "";
+            
+            public string videoStart = "None";
+            public string videoEnd = "None";
         }
 
         private class StarsTemplate
@@ -78,6 +81,7 @@ namespace Vectorier.ProjectManager
         private List<string> availableTracks = new List<string>();
         private List<string> availableLocations = new List<string>();
         private List<string> availableTricksFromShop = new List<string>();
+        private List<string> availableVideos = new List<string>();
         private List<StarsTemplate> starsTemplates = new List<StarsTemplate>();
         private List<RewardTemplate> rewardTemplates = new List<RewardTemplate>();
 
@@ -109,6 +113,7 @@ namespace Vectorier.ProjectManager
             LoadTemplatesFromXml();
             LoadAvailableSubjects();
             LoadAvailableTricks();
+            LoadAvailableVideos();
         }
 
         private void OnGUI()
@@ -500,6 +505,23 @@ namespace Vectorier.ProjectManager
                 currentState = ViewState.TemplateEdit;
             }
             GUILayout.EndHorizontal();
+
+            GUILayout.Space(10);
+            
+            // Video Settings
+            GUILayout.Label("Videos", EditorStyles.boldLabel);
+            EditorGUI.BeginChangeCheck();
+            
+            int startVideoIndex = Mathf.Max(0, availableVideos.IndexOf(data.videoStart));
+            startVideoIndex = EditorGUILayout.Popup("Video Start", startVideoIndex, availableVideos.ToArray());
+            data.videoStart = availableVideos[startVideoIndex];
+
+            int endVideoIndex = Mathf.Max(0, availableVideos.IndexOf(data.videoEnd));
+            endVideoIndex = EditorGUILayout.Popup("Video End", endVideoIndex, availableVideos.ToArray());
+            data.videoEnd = availableVideos[endVideoIndex];
+
+            if (EditorGUI.EndChangeCheck()) SaveToXml();
+            
             GUILayout.EndVertical();
         }
 
@@ -809,6 +831,17 @@ namespace Vectorier.ProjectManager
         {
             XElement trackNode = new XElement("Track", new XAttribute("Name", trackName));
             if (data.unlockPrice > 0) trackNode.Add(new XAttribute("UnlockPrice", data.unlockPrice));
+
+            // Write Video Attributes
+            if (!string.IsNullOrEmpty(data.videoStart) && data.videoStart != "None")
+            {
+                trackNode.Add(new XAttribute("VideoStart", data.videoStart));
+            }
+
+            if (!string.IsNullOrEmpty(data.videoEnd) && data.videoEnd != "None")
+            {
+                trackNode.Add(new XAttribute("VideoEnd", data.videoEnd));
+            }
 
             // Conditions
             if (data.starsRequired > 0 || data.unlockPrice > 0 && data.starsRequired == 0)
@@ -1258,6 +1291,22 @@ namespace Vectorier.ProjectManager
             }
         }
 
+        private void LoadAvailableVideos()
+        {
+            availableVideos.Clear();
+            availableVideos.Add("None"); // Add default option
+
+            string path = $"./Projects/{activeProjectName}/videos/";
+            
+            if (Directory.Exists(path))
+            {
+                foreach (string file in Directory.GetFiles(path, "*.mp4"))
+                {
+                    availableVideos.Add(Path.GetFileName(file));
+                }
+            }
+        }
+
         private void RenameLocalizationKey(string oldName, string newName)
         {
             string locPath = $"./Projects/{activeProjectName}/localization/localization_all.xml";
@@ -1279,6 +1328,9 @@ namespace Vectorier.ProjectManager
                 data.unlockPrice = ParseInt((string)track.Attribute("UnlockPrice"));
                 data.rawPriceInput = data.unlockPrice.ToString();
             }
+
+            data.videoStart = track.Attribute("VideoStart") != null ? (string)track.Attribute("VideoStart") : "None";
+            data.videoEnd = track.Attribute("VideoEnd") != null ? (string)track.Attribute("VideoEnd") : "None";
 
             XElement conditions = track.Element("Conditions");
             if (conditions != null)
