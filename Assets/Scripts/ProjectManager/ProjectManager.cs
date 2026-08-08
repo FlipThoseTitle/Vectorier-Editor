@@ -7,7 +7,7 @@ namespace Vectorier.ProjectManager
 {
     public class ProjectManager : EditorWindow
     {
-        private const string ProjectsFolderPath = "Assets/Projects";
+        private const string ProjectsFolderPath = "./Projects";
         private const string UndeletableProject = "Vector";
 
         private List<string> projectList = new List<string>();
@@ -47,15 +47,15 @@ namespace Vectorier.ProjectManager
 
         private void EnsureDirectories()
         {
-            if (!AssetDatabase.IsValidFolder("Assets")) return;
-
-            if (!AssetDatabase.IsValidFolder(ProjectsFolderPath))
+            if (!Directory.Exists(ProjectsFolderPath))
             {
-                AssetDatabase.CreateFolder("Assets", "Projects");
+                Directory.CreateDirectory(ProjectsFolderPath);
             }
-            if (!AssetDatabase.IsValidFolder($"{ProjectsFolderPath}/{UndeletableProject}"))
+            
+            string undeletablePath = $"{ProjectsFolderPath}/{UndeletableProject}";
+            if (!Directory.Exists(undeletablePath))
             {
-                AssetDatabase.CreateFolder(ProjectsFolderPath, UndeletableProject);
+                Directory.CreateDirectory(undeletablePath);
             }
         }
 
@@ -122,7 +122,6 @@ namespace Vectorier.ProjectManager
             {
                 string descPath = $"{ProjectsFolderPath}/{selectedProject}/description.txt";
                 File.WriteAllText(descPath, currentDescription);
-                AssetDatabase.ImportAsset(descPath);
                 isDescriptionDirty = false;
             }
         }
@@ -164,7 +163,7 @@ namespace Vectorier.ProjectManager
             {
                 if (EditorUtility.DisplayDialog(
                     "Create New Project",
-                    "Do you want to create a new project?\n\nThis process may take a few minutes.",
+                    "Do you want to create a new project?\n\nThis process may take a few seconds.",
                     "Create",
                     "Cancel"))
                 {
@@ -342,8 +341,7 @@ namespace Vectorier.ProjectManager
                 string newName = baseName;
                 int counter = 1;
 
-                // Find a unique name to prevent conflicts
-                while (AssetDatabase.IsValidFolder($"{ProjectsFolderPath}/{newName}"))
+                while (Directory.Exists($"{ProjectsFolderPath}/{newName}"))
                 {
                     newName = $"{baseName} ({counter})";
                     counter++;
@@ -354,18 +352,14 @@ namespace Vectorier.ProjectManager
 
                 EditorUtility.DisplayProgressBar("Creating Project", $"Copying files for '{newName}'...", 0.5f);
 
-                // Copy the base template project if it exists
                 if (AssetDatabase.IsValidFolder(sourcePath))
                 {
-                    if (!AssetDatabase.CopyAsset(sourcePath, newProjectPath))
-                    {
-                        Debug.LogError($"Failed to copy base project from '{sourcePath}' to '{newProjectPath}'.");
-                    }
+                    FileUtil.CopyFileOrDirectory(sourcePath, newProjectPath);
                 }
                 else
                 {
                     Debug.LogWarning($"Base project not found at '{sourcePath}'. Creating an empty folder instead.");
-                    AssetDatabase.CreateFolder(ProjectsFolderPath, newName);
+                    Directory.CreateDirectory(newProjectPath);
                 }
 
                 EditorUtility.DisplayProgressBar("Creating Project", "Refreshing project list...", 0.9f);
@@ -383,7 +377,6 @@ namespace Vectorier.ProjectManager
         {
             if (string.IsNullOrEmpty(selectedProject)) return;
 
-            // Confirmation Dialog
             if (EditorUtility.DisplayDialog("Duplicate Project", $"Are you sure you want to duplicate '{selectedProject}'?", "Duplicate", "Cancel"))
             {
                 EditorUtility.DisplayProgressBar("Duplicating Project", "Initializing...", 0f);
@@ -395,8 +388,7 @@ namespace Vectorier.ProjectManager
                     string newName = $"{baseName} (Copy)";
                     int counter = 1;
 
-                    // Find a unique name to prevent conflicts
-                    while (AssetDatabase.IsValidFolder($"{ProjectsFolderPath}/{newName}"))
+                    while (Directory.Exists($"{ProjectsFolderPath}/{newName}"))
                     {
                         newName = $"{baseName} (Copy {counter})";
                         counter++;
@@ -405,18 +397,15 @@ namespace Vectorier.ProjectManager
                     string newPath = $"{ProjectsFolderPath}/{newName}";
 
                     EditorUtility.DisplayProgressBar("Duplicating Project", $"Copying '{selectedProject}' to '{newName}'...", 0.5f);
+                    FileUtil.CopyFileOrDirectory(originalPath, newPath);
+                    EditorUtility.DisplayProgressBar("Duplicating Project", "Refreshing project list...", 0.9f);
 
-                    if (AssetDatabase.CopyAsset(originalPath, newPath))
-                    {
-                        EditorUtility.DisplayProgressBar("Duplicating Project", "Refreshing project list...", 0.9f);
-
-                        RefreshProjectList();
-                        LoadProjectData(newName); // Automatically select the newly duplicated project
-                    }
-                    else
-                    {
-                        Debug.LogError($"Failed to duplicate project '{selectedProject}'.");
-                    }
+                    RefreshProjectList();
+                    LoadProjectData(newName); 
+                }
+                catch (System.Exception e)
+                {
+                    Debug.LogError($"Failed to duplicate project '{selectedProject}'. Error: {e.Message}");
                 }
                 finally
                 {
@@ -437,9 +426,32 @@ namespace Vectorier.ProjectManager
 
             if (EditorUtility.DisplayDialog("Delete Project", $"Are you sure you want to delete '{selectedProject}'? This cannot be undone.", "Delete", "Cancel"))
             {
-                AssetDatabase.DeleteAsset($"{ProjectsFolderPath}/{selectedProject}");
+                string targetDir = $"{ProjectsFolderPath}/{selectedProject}";
+                if (Directory.Exists(targetDir))
+                {
+                    Directory.Delete(targetDir, true);
+                }
+
+                string imagesPath = $"Assets/Resources/Images/{selectedProject}";
+                
+                if (AssetDatabase.IsValidFolder(imagesPath))
+                {
+                    AssetDatabase.DeleteAsset(imagesPath);
+                }
+                else if (Directory.Exists(imagesPath)) 
+                {
+                    Directory.Delete(imagesPath, true);
+                    string metaFile = $"{imagesPath}.meta";
+                    if (File.Exists(metaFile))
+                    {
+                        File.Delete(metaFile);
+                    }
+                }
+                
                 selectedProject = null;
                 RefreshProjectList();
+                
+                AssetDatabase.Refresh();
             }
         }
 
@@ -451,29 +463,38 @@ namespace Vectorier.ProjectManager
 
             if (selectedProject == UndeletableProject)
             {
-                currentProjectName = selectedProject; // Revert change
+                currentProjectName = selectedProject; 
                 EditorUtility.DisplayDialog("Action Denied", $"The project '{UndeletableProject}' cannot be renamed.", "OK");
                 return;
             }
 
-            string oldPath = $"{ProjectsFolderPath}/{selectedProject}";
-            string error = AssetDatabase.RenameAsset(oldPath, sanitizedName);
-
-            if (string.IsNullOrEmpty(error))
+            // Check for protected names
+            if (sanitizedName.Equals("Vector", System.StringComparison.OrdinalIgnoreCase) || 
+                sanitizedName.Equals("Editor", System.StringComparison.OrdinalIgnoreCase))
             {
+                EditorUtility.DisplayDialog("Action Denied", $"You cannot name it {sanitizedName}!", "OK");
+                currentProjectName = selectedProject; // Revert the UI text field back to the original name
+                return;
+            }
+
+            string oldPath = $"{ProjectsFolderPath}/{selectedProject}";
+            string newPath = $"{ProjectsFolderPath}/{sanitizedName}";
+
+            try
+            {
+                Directory.Move(oldPath, newPath);
                 selectedProject = sanitizedName;
                 RefreshProjectList();
             }
-            else
+            catch (System.Exception e)
             {
-                Debug.LogWarning($"Failed to rename project: {error}");
-                currentProjectName = selectedProject; // Revert visually if failed
+                Debug.LogWarning($"Failed to rename project: {e.Message}");
+                currentProjectName = selectedProject; 
             }
         }
 
         private void SelectAndCopyThumbnail()
         {
-            // Open file panel with filters for images
             string absolutePath = EditorUtility.OpenFilePanelWithFilters(
                 "Select Project Thumbnail", 
                 "", 
@@ -484,23 +505,20 @@ namespace Vectorier.ProjectManager
             {
                 string projPath = $"{ProjectsFolderPath}/{selectedProject}";
                 
-                // Delete old thumbnails so we don't have multiple extensions sitting around
                 string[] possibleExtensions = { ".png", ".jpg", ".jpeg" };
                 foreach (string ext in possibleExtensions)
                 {
                     string oldThumbPath = $"{projPath}/thumbnail{ext}";
                     if (File.Exists(oldThumbPath))
                     {
-                        AssetDatabase.DeleteAsset(oldThumbPath);
+                        File.Delete(oldThumbPath);
                     }
                 }
 
-                // Copy new thumbnail keeping its original extension
                 string newExtension = Path.GetExtension(absolutePath).ToLower();
                 string destinationPath = $"{projPath}/thumbnail{newExtension}";
                 
                 File.Copy(absolutePath, destinationPath, true);
-                AssetDatabase.ImportAsset(destinationPath);
                 LoadProjectData(selectedProject);
             }
         }

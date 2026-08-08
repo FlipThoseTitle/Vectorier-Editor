@@ -77,7 +77,8 @@ namespace Vectorier.ProjectManager
                     "Publish", "Cancel"))
                 {
                     string publishBaseFolder = Path.Combine(publishLocation, activeProjectName);
-                    string sourcePath = Path.Combine(Application.dataPath, "Projects", activeProjectName);
+                    string projectRoot = Directory.GetParent(Application.dataPath).FullName;
+                    string sourcePath = Path.Combine(projectRoot, "Projects", activeProjectName);
 
                     if (!Directory.Exists(sourcePath))
                     {
@@ -116,15 +117,16 @@ namespace Vectorier.ProjectManager
             }
         }
 
-        // --- Publishing Logic ---
-
+        // Publishing Logic
+        
         private void PublishForUnity()
         {
             try
             {
                 EditorUtility.DisplayProgressBar("Publishing", "Initializing Unity Build...", 0f);
 
-                string sourcePath = Path.Combine(Application.dataPath, "Projects", activeProjectName);
+                string projectRoot = Directory.GetParent(Application.dataPath).FullName;
+                string sourcePath = Path.Combine(projectRoot, "Projects", activeProjectName);
                 string publishBaseFolder = Path.Combine(publishLocation, activeProjectName);
                 string unityTargetDir = Path.Combine(publishBaseFolder, "Unity", "Vector_Data", "StreamingAssets");
 
@@ -192,7 +194,7 @@ namespace Vectorier.ProjectManager
                 string projectRoot = Path.GetDirectoryName(Application.dataPath);
                 string dzipDir = Path.Combine(projectRoot, "DZIP");
                 string templateDir = Path.Combine(dzipDir, "_TEMPLATE");
-                string sourcePath = Path.Combine(Application.dataPath, "Projects", activeProjectName);
+                string sourcePath = Path.Combine(projectRoot, "Projects", activeProjectName);
                 string publishBaseFolder = Path.Combine(publishLocation, activeProjectName);
                 string steamTargetDir = Path.Combine(publishBaseFolder, "Steam", "Vector");
 
@@ -296,7 +298,7 @@ namespace Vectorier.ProjectManager
             }
         }
 
-        // --- Helper Methods ---
+        // Helper Methods
 
         private void ProcessBaseFiles(string sourcePath, string publishBaseFolder)
         {

@@ -31,7 +31,7 @@ namespace Vectorier.ProjectManager
         {
             ProjectManagerTricks window = GetWindow<ProjectManagerTricks>("Tricks");
             window.activeProjectName = projectName;
-            window.minSize = new Vector2(400, 600); 
+            window.minSize = new Vector2(400, 600);
             window.Show();
             window.Init();
         }
@@ -58,13 +58,13 @@ namespace Vectorier.ProjectManager
             GUIStyle countStyle = new GUIStyle(EditorStyles.boldLabel) { alignment = TextAnchor.MiddleCenter };
             GUILayout.Label($"Total Tricks - {trickList.Count}", countStyle, GUILayout.Height(30));
             GUILayout.Space(10);
-            
+
             if (GUILayout.Button("+", GUILayout.Width(30), GUILayout.Height(30)))
             {
                 GUI.FocusControl(null);
                 AddTrick();
             }
-            
+
             GUI.enabled = selectedIndex >= 0 && selectedIndex < trickList.Count;
             if (GUILayout.Button("-", GUILayout.Width(30), GUILayout.Height(30)))
             {
@@ -80,7 +80,7 @@ namespace Vectorier.ProjectManager
                 ClearAllTricks();
             }
             GUI.enabled = true;
-            
+
             GUILayout.EndHorizontal();
 
             GUILayout.Space(10);
@@ -105,7 +105,7 @@ namespace Vectorier.ProjectManager
                 {
                     bool matchName = trickList[i].trickName != null && trickList[i].trickName.IndexOf(searchQuery, System.StringComparison.OrdinalIgnoreCase) >= 0;
                     bool matchDisplay = trickList[i].displayName != null && trickList[i].displayName.IndexOf(searchQuery, System.StringComparison.OrdinalIgnoreCase) >= 0;
-                    
+
                     if (string.IsNullOrEmpty(searchQuery) || matchName || matchDisplay)
                     {
                         visibleIndices.Add(i);
@@ -144,20 +144,18 @@ namespace Vectorier.ProjectManager
                 foreach (TrickItem item in trickList)
                 {
                     // Delete Shop Image
-                    if (item.shopImage != null)
+                    if (item.shopImage != null && !string.IsNullOrEmpty(item.shopImage.name))
                     {
-                        string path = AssetDatabase.GetAssetPath(item.shopImage);
-                        if (!string.IsNullOrEmpty(path)) AssetDatabase.DeleteAsset(path);
+                        DeleteImageFiles($"./Projects/{activeProjectName}/icons/shop", item.shopImage.name);
                     }
 
                     // Delete Track Image
-                    if (item.trackImage != null)
+                    if (item.trackImage != null && !string.IsNullOrEmpty(item.trackImage.name))
                     {
-                        string path = AssetDatabase.GetAssetPath(item.trackImage);
-                        if (!string.IsNullOrEmpty(path)) AssetDatabase.DeleteAsset(path);
+                        DeleteImageFiles($"./Projects/{activeProjectName}/icons/tricks", item.trackImage.name);
                     }
                 }
-                
+
                 trickList.Clear();
                 selectedIndex = -1;
                 SaveToXml();
@@ -174,7 +172,7 @@ namespace Vectorier.ProjectManager
             if (isSelected) boxStyle.normal.background = MakeTex(2, 2, new Color(0.2f, 0.5f, 0.9f, 0.5f));
 
             GUILayout.BeginVertical(boxStyle);
-            
+
             // Header for selection
             GUILayout.BeginHorizontal();
             if (GUILayout.Button((index + 1).ToString(), EditorStyles.toolbarButton))
@@ -194,7 +192,7 @@ namespace Vectorier.ProjectManager
                 string formatted = FormatTrickName(newName);
                 if (formatted != item.trickName)
                 {
-                    RenameTrickImages(item, formatted); 
+                    RenameTrickImages(item, formatted);
                     item.trickName = formatted;
                     SaveToXml();
                 }
@@ -232,20 +230,20 @@ namespace Vectorier.ProjectManager
             // Shop Image Preview (256x226)
             GUILayout.BeginHorizontal();
             GUILayout.Label("Shop Image", GUILayout.Width(EditorGUIUtility.labelWidth - 5));
-            
+
             float shopImgWidth = 256f;
             float shopImgHeight = 226f;
             Rect shopImageRect = GUILayoutUtility.GetRect(shopImgWidth, shopImgHeight, GUILayout.Width(shopImgWidth), GUILayout.Height(shopImgHeight));
-            
+
             Texture shopDisplayTex = item.shopImage != null ? item.shopImage : EditorGUIUtility.whiteTexture;
             GUI.DrawTexture(shopImageRect, shopDisplayTex, ScaleMode.ScaleToFit);
-            
+
             // --- ADDED TEXT OVERLAY ---
             if (item.shopImage == null)
             {
                 GUI.Label(shopImageRect, "Click Here to Change Thumbnail", centeredTextStyle);
             }
-            
+
             if (GUI.Button(shopImageRect, new GUIContent("", "Click to assign shop image (256x226)"), GUIStyle.none))
             {
                 SelectAndImportImage(item, true);
@@ -258,14 +256,14 @@ namespace Vectorier.ProjectManager
             // Track Image Preview (117x117)
             GUILayout.BeginHorizontal();
             GUILayout.Label("Track Image", GUILayout.Width(EditorGUIUtility.labelWidth - 5));
-            
+
             float trackImgWidth = 117f;
             float trackImgHeight = 117f;
             Rect trackImageRect = GUILayoutUtility.GetRect(trackImgWidth, trackImgHeight, GUILayout.Width(trackImgWidth), GUILayout.Height(trackImgHeight));
-            
+
             Texture trackDisplayTex = item.trackImage != null ? item.trackImage : EditorGUIUtility.whiteTexture;
             GUI.DrawTexture(trackImageRect, trackDisplayTex, ScaleMode.ScaleToFit);
-            
+
             // --- TEXT OVERLAY ---
             if (item.trackImage == null)
             {
@@ -286,8 +284,8 @@ namespace Vectorier.ProjectManager
         private void AddTrick()
         {
             TrickItem newItem = new TrickItem();
-            newItem.trickName = ""; 
-            newItem.displayName = ""; 
+            newItem.trickName = "";
+            newItem.displayName = "";
             newItem.price = 0;
             newItem.rawPriceInput = "0";
 
@@ -303,73 +301,64 @@ namespace Vectorier.ProjectManager
             TrickItem item = trickList[selectedIndex];
 
             // Delete Shop Image
-            if (item.shopImage != null)
+            if (item.shopImage != null && !string.IsNullOrEmpty(item.shopImage.name))
             {
-                string path = AssetDatabase.GetAssetPath(item.shopImage);
-                if (!string.IsNullOrEmpty(path)) AssetDatabase.DeleteAsset(path);
+                DeleteImageFiles($"./Projects/{activeProjectName}/icons/shop", item.shopImage.name);
             }
 
             // Delete Track Image
-            if (item.trackImage != null)
+            if (item.trackImage != null && !string.IsNullOrEmpty(item.trackImage.name))
             {
-                string path = AssetDatabase.GetAssetPath(item.trackImage);
-                if (!string.IsNullOrEmpty(path)) AssetDatabase.DeleteAsset(path);
+                DeleteImageFiles($"./Projects/{activeProjectName}/icons/tricks", item.trackImage.name);
             }
 
             trickList.RemoveAt(selectedIndex);
             selectedIndex = -1;
-            
+
             SaveToXml();
         }
 
         private void SelectAndImportImage(TrickItem item, bool isShopImage)
         {
             string sourcePath = EditorUtility.OpenFilePanelWithFilters(
-                isShopImage ? "Select Shop Image (256x226)" : "Select Track Image (117x117)", 
+                isShopImage ? "Select Shop Image (256x226)" : "Select Track Image (117x117)",
                 "", new string[] { "Image Files", "png,jpg,jpeg", "All files", "*" });
-            
+
             if (!string.IsNullOrEmpty(sourcePath))
             {
                 EnsureDirectories();
-                
+
                 string targetDir;
                 string newImageName;
-                
+
                 if (isShopImage)
                 {
-                    targetDir = $"Assets/Projects/{activeProjectName}/icons/shop";
+                    targetDir = $"./Projects/{activeProjectName}/icons/shop";
                     newImageName = string.IsNullOrEmpty(item.trickName) ? "SHOP_NEW_TRICK" : $"SHOP_{item.trickName}";
                 }
                 else
                 {
-                    targetDir = $"Assets/Projects/{activeProjectName}/icons/tricks";
+                    targetDir = $"./Projects/{activeProjectName}/icons/tricks";
                     newImageName = string.IsNullOrEmpty(item.trickName) ? "TRACK_NEW_TRICK" : $"TRACK_{item.trickName}";
                 }
-                
+
                 string extension = Path.GetExtension(sourcePath).ToLower();
                 string targetPath = $"{targetDir}/{newImageName}{extension}";
 
                 // Delete old image if it exists
                 Texture2D oldTexture = isShopImage ? item.shopImage : item.trackImage;
-                if (oldTexture != null)
+                if (oldTexture != null && !string.IsNullOrEmpty(oldTexture.name))
                 {
-                    AssetDatabase.DeleteAsset(AssetDatabase.GetAssetPath(oldTexture));
+                    DeleteImageFiles(targetDir, oldTexture.name);
                 }
 
                 File.Copy(sourcePath, targetPath, true);
-                AssetDatabase.ImportAsset(targetPath);
 
-                // Configure as Sprite
-                TextureImporter importer = AssetImporter.GetAtPath(targetPath) as TextureImporter;
-                if (importer != null)
-                {
-                    importer.textureType = TextureImporterType.Sprite;
-                    importer.spriteImportMode = SpriteImportMode.Single;
-                    importer.SaveAndReimport();
-                }
+                // Load Texture outside of Unity's Asset Database
+                Texture2D loadedTex = new Texture2D(2, 2);
+                loadedTex.LoadImage(File.ReadAllBytes(targetPath));
+                loadedTex.name = newImageName; // Assign name for XML saving logic
 
-                Texture2D loadedTex = AssetDatabase.LoadAssetAtPath<Texture2D>(targetPath);
-                
                 if (isShopImage)
                     item.shopImage = loadedTex;
                 else
@@ -382,19 +371,19 @@ namespace Vectorier.ProjectManager
         private void RenameTrickImages(TrickItem item, string newName)
         {
             // Rename Shop Image
-            if (item.shopImage != null)
+            if (item.shopImage != null && !string.IsNullOrEmpty(item.shopImage.name))
             {
-                string path = AssetDatabase.GetAssetPath(item.shopImage);
-                string error = AssetDatabase.RenameAsset(path, $"SHOP_{newName}");
-                if (!string.IsNullOrEmpty(error)) Debug.LogWarning($"Failed to rename Shop Image: {error}");
+                string dir = $"./Projects/{activeProjectName}/icons/shop";
+                RenameImageFile(dir, item.shopImage.name, $"SHOP_{newName}");
+                item.shopImage.name = $"SHOP_{newName}";
             }
 
             // Rename Track Image
-            if (item.trackImage != null)
+            if (item.trackImage != null && !string.IsNullOrEmpty(item.trackImage.name))
             {
-                string path = AssetDatabase.GetAssetPath(item.trackImage);
-                string error = AssetDatabase.RenameAsset(path, $"TRACK_{newName}");
-                if (!string.IsNullOrEmpty(error)) Debug.LogWarning($"Failed to rename Track Image: {error}");
+                string dir = $"./Projects/{activeProjectName}/icons/tricks";
+                RenameImageFile(dir, item.trackImage.name, $"TRACK_{newName}");
+                item.trackImage.name = $"TRACK_{newName}";
             }
         }
 
@@ -403,13 +392,13 @@ namespace Vectorier.ProjectManager
         private string FormatTrickName(string input)
         {
             if (string.IsNullOrWhiteSpace(input)) return "";
-            
+
             string upper = input.ToUpper().Trim();
             string replaced = upper.Replace(" ", "_");
-            
-            if (!replaced.StartsWith("TRICK_")) 
+
+            if (!replaced.StartsWith("TRICK_"))
                 replaced = "TRICK_" + replaced;
-                
+
             return replaced;
         }
 
@@ -429,10 +418,10 @@ namespace Vectorier.ProjectManager
 
         private void EnsureDirectories()
         {
-            CreateFolderRecursive($"Assets/Projects/{activeProjectName}/icons/shop");
-            CreateFolderRecursive($"Assets/Projects/{activeProjectName}/icons/tricks");
-            CreateFolderRecursive($"Assets/Projects/{activeProjectName}/commons");
-            CreateFolderRecursive($"Assets/Projects/{activeProjectName}/localization");
+            Directory.CreateDirectory($"./Projects/{activeProjectName}/icons/shop");
+            Directory.CreateDirectory($"./Projects/{activeProjectName}/icons/tricks");
+            Directory.CreateDirectory($"./Projects/{activeProjectName}/commons");
+            Directory.CreateDirectory($"./Projects/{activeProjectName}/localization");
         }
 
         private void CreateFolderRecursive(string path)
@@ -454,7 +443,7 @@ namespace Vectorier.ProjectManager
         private void SaveToXml()
         {
             EnsureDirectories();
-            string relativePath = $"Assets/Projects/{activeProjectName}/commons/Shop_payed.xml";
+            string relativePath = $"./Projects/{activeProjectName}/commons/Shop_payed.xml";
             
             XDocument doc;
             if (File.Exists(relativePath))
@@ -480,10 +469,8 @@ namespace Vectorier.ProjectManager
                 root.Add(trickGroup);
             }
 
-            // Clear current items in the TRICK group
             trickGroup.RemoveNodes();
 
-            // Rebuild items from list state
             foreach (TrickItem item in trickList)
             {
                 string shopImgName = item.shopImage != null ? item.shopImage.name : (string.IsNullOrEmpty(item.trickName) ? "" : $"SHOP_{item.trickName}");
@@ -500,15 +487,14 @@ namespace Vectorier.ProjectManager
             }
 
             doc.Save(relativePath);
-            AssetDatabase.ImportAsset(relativePath);
-
+            
             // Handle Localization Syncing
             SaveLocalizationToXml();
         }
 
         private void SaveLocalizationToXml()
         {
-            string relativePath = $"Assets/Projects/{activeProjectName}/localization/localization_all.xml";
+            string relativePath = $"./Projects/{activeProjectName}/localization/localization_all.xml";
             
             XDocument doc;
             if (File.Exists(relativePath))
@@ -529,7 +515,6 @@ namespace Vectorier.ProjectManager
 
             string[] langs = { "eng", "rus", "ger", "ita", "fre", "spa", "tur", "por", "jap", "kor", "chi1", "chi2", "viet", "hin", "arab", "heb", "thai", "pol", "cze", "lat", "dut", "nor", "dan", "finn", "swe", "ukr", "gre" };
 
-            // Clean up items that are no longer in our Trick List
             HashSet<string> currentTrickTags = new HashSet<string>(trickList.Select(t => "item_" + t.trickName));
             var itemsToRemove = root.Elements().Where(e => e.Name.LocalName.StartsWith("item_TRICK_") && !currentTrickTags.Contains(e.Name.LocalName)).ToList();
             
@@ -538,7 +523,6 @@ namespace Vectorier.ProjectManager
                 item.Remove();
             }
 
-            // Add or update current tricks
             foreach (TrickItem trick in trickList)
             {
                 if (string.IsNullOrEmpty(trick.trickName)) continue;
@@ -552,7 +536,6 @@ namespace Vectorier.ProjectManager
                     root.Add(itemNode);
                 }
 
-                // Apply all the standard localization attributes with the identical Display Name value
                 foreach (string lang in langs)
                 {
                     itemNode.SetAttributeValue(lang, trick.displayName);
@@ -560,13 +543,12 @@ namespace Vectorier.ProjectManager
             }
 
             doc.Save(relativePath);
-            AssetDatabase.ImportAsset(relativePath);
         }
 
         private void LoadTricksFromXml()
         {
             trickList.Clear();
-            string relativePath = $"Assets/Projects/{activeProjectName}/commons/Shop_payed.xml";
+            string relativePath = $"./Projects/{activeProjectName}/commons/Shop_payed.xml";
 
             if (!File.Exists(relativePath)) return;
 
@@ -580,32 +562,26 @@ namespace Vectorier.ProjectManager
             foreach (XElement node in trickGroup.Elements("Item"))
             {
                 TrickItem item = new TrickItem();
-                
+
                 string parsedPrice = (string)node.Attribute("Price") ?? "0";
                 item.price = ParsePrice(parsedPrice);
                 item.rawPriceInput = item.price.ToString();
-                
+
                 item.trickName = (string)node.Attribute("Name") ?? "";
                 string shopImageName = (string)node.Attribute("ShopImage") ?? "";
                 string trackImageName = (string)node.Attribute("TrackImage") ?? "";
 
-                // Link Images
+                // Link Images dynamically using System.IO
                 if (!string.IsNullOrEmpty(shopImageName))
                 {
-                    string[] imgGuids = AssetDatabase.FindAssets(shopImageName + " t:Texture2D", new[] { $"Assets/Projects/{activeProjectName}/icons/shop" });
-                    if (imgGuids.Length > 0)
-                    {
-                        item.shopImage = AssetDatabase.LoadAssetAtPath<Texture2D>(AssetDatabase.GUIDToAssetPath(imgGuids[0]));
-                    }
+                    Texture2D tex = LoadTextureFromFile($"./Projects/{activeProjectName}/icons/shop", shopImageName);
+                    if (tex != null) item.shopImage = tex;
                 }
 
                 if (!string.IsNullOrEmpty(trackImageName))
                 {
-                    string[] imgGuids = AssetDatabase.FindAssets(trackImageName + " t:Texture2D", new[] { $"Assets/Projects/{activeProjectName}/icons/tricks" });
-                    if (imgGuids.Length > 0)
-                    {
-                        item.trackImage = AssetDatabase.LoadAssetAtPath<Texture2D>(AssetDatabase.GUIDToAssetPath(imgGuids[0]));
-                    }
+                    Texture2D tex = LoadTextureFromFile($"./Projects/{activeProjectName}/icons/tricks", trackImageName);
+                    if (tex != null) item.trackImage = tex;
                 }
 
                 trickList.Add(item);
@@ -616,7 +592,7 @@ namespace Vectorier.ProjectManager
 
         private void LoadLocalizationFromXml()
         {
-            string relativePath = $"Assets/Projects/{activeProjectName}/localization/localization_all.xml";
+            string relativePath = $"./Projects/{activeProjectName}/localization/localization_all.xml";
             if (!File.Exists(relativePath)) return;
 
             XDocument doc = XDocument.Load(relativePath);
@@ -631,12 +607,61 @@ namespace Vectorier.ProjectManager
                 XElement itemNode = root.Element(tagName);
                 if (itemNode != null)
                 {
-                    // We just grab the 'eng' tag since they're all mirrored
                     XAttribute engAttr = itemNode.Attribute("eng"); 
                     if (engAttr != null)
                     {
                         trick.displayName = engAttr.Value;
                     }
+                }
+            }
+        }
+
+        private Texture2D LoadTextureFromFile(string directory, string fileNameWithoutExt)
+        {
+            if (!Directory.Exists(directory)) return null;
+
+            string[] files = Directory.GetFiles(directory, $"{fileNameWithoutExt}.*");
+            foreach (string file in files)
+            {
+                string ext = Path.GetExtension(file).ToLower();
+                if (ext == ".png" || ext == ".jpg" || ext == ".jpeg")
+                {
+                    Texture2D tex = new Texture2D(2, 2);
+                    tex.LoadImage(File.ReadAllBytes(file));
+                    tex.name = fileNameWithoutExt; // Reassign the name so XML saving retains it
+                    return tex;
+                }
+            }
+            return null;
+        }
+
+        private void RenameImageFile(string directory, string oldName, string newName)
+        {
+            if (string.IsNullOrEmpty(oldName) || !Directory.Exists(directory)) return;
+
+            string[] files = Directory.GetFiles(directory, $"{oldName}.*");
+            foreach (string file in files)
+            {
+                string ext = Path.GetExtension(file);
+                if (ext.ToLower() == ".png" || ext.ToLower() == ".jpg" || ext.ToLower() == ".jpeg")
+                {
+                    string newPath = Path.Combine(directory, $"{newName}{ext}");
+                    File.Move(file, newPath);
+                }
+            }
+        }
+
+        private void DeleteImageFiles(string directory, string fileNameWithoutExt)
+        {
+            if (string.IsNullOrEmpty(fileNameWithoutExt) || !Directory.Exists(directory)) return;
+
+            string[] files = Directory.GetFiles(directory, $"{fileNameWithoutExt}.*");
+            foreach (string file in files)
+            {
+                string ext = Path.GetExtension(file).ToLower();
+                if (ext == ".png" || ext == ".jpg" || ext == ".jpeg")
+                {
+                    File.Delete(file);
                 }
             }
         }

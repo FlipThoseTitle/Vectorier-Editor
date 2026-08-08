@@ -80,6 +80,38 @@ namespace Vectorier.EditorScript.Tools
             }
         }
 
+        public static string ExtractMiddleFrame(string pngPath, string plistPath, string outputFolder, string originalFileName)
+        {
+            try
+            {
+                var frames = ParseTexturePackerPlist(plistPath);
+                if (frames.Count == 0) return null;
+
+                var atlas = LoadPngAsTexture(pngPath);
+                if (atlas == null) return null;
+
+                // Getting the exact middle frame (e.g., 25 / 2 = 12)
+                int middleIndex = frames.Count / 2;
+                var middleFrame = frames[middleIndex];
+
+                var extracted = ExtractFrame(atlas, middleFrame);
+                if (extracted == null) return null;
+
+                if (!Directory.Exists(outputFolder))
+                    Directory.CreateDirectory(outputFolder);
+
+                string outPath = Path.Combine(outputFolder, originalFileName).Replace("\\", "/");
+                File.WriteAllBytes(outPath, extracted.EncodeToPNG());
+                
+                return outPath;
+            }
+            catch (Exception ex)
+            {
+                Debug.LogException(ex);
+                return null;
+            }
+        }
+
         // ================= PARSING ================= //
 
         private sealed class FrameInfo

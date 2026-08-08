@@ -251,7 +251,7 @@ namespace Vectorier.ProjectManager
         {
             if (filePaths.Length == 0) return;
 
-            string targetDir = $"Assets/Projects/{activeProjectName}/models";
+            string targetDir = $"./Projects/{activeProjectName}/models";
             if (!Directory.Exists(targetDir)) Directory.CreateDirectory(targetDir);
 
             int progress = 0;
@@ -267,8 +267,7 @@ namespace Vectorier.ProjectManager
             }
 
             EditorUtility.ClearProgressBar();
-            AssetDatabase.Refresh();
-
+            
             RefreshModelList();
         }
 
@@ -312,20 +311,12 @@ namespace Vectorier.ProjectManager
 
                 if (pathsToDelete.Count > 0)
                 {
-                    try
+                    foreach (string pathToDelete in pathsToDelete)
                     {
-                        // Suspend asset imports/updates for bulk optimization
-                        AssetDatabase.StartAssetEditing();
-
-                        foreach (string pathToDelete in pathsToDelete)
+                        if (File.Exists(pathToDelete))
                         {
-                            AssetDatabase.DeleteAsset(pathToDelete);
+                            File.Delete(pathToDelete);
                         }
-                    }
-                    finally
-                    {
-                        // Resume and process all deletions at once
-                        AssetDatabase.StopAssetEditing();
                     }
                 }
 
@@ -339,26 +330,18 @@ namespace Vectorier.ProjectManager
             // Define the protected models list
             HashSet<string> protectedModels = new HashSet<string> { "0", "1" };
 
-            try
+            foreach (string path in loadedModelPaths)
             {
-                // Suspend asset imports/updates for bulk optimization
-                AssetDatabase.StartAssetEditing();
-
-                foreach (string path in loadedModelPaths)
+                string fileName = Path.GetFileNameWithoutExtension(path);
+                
+                // Delete everything EXCEPT the protected models
+                if (!protectedModels.Contains(fileName))
                 {
-                    string fileName = Path.GetFileNameWithoutExtension(path);
-                    
-                    // Delete everything EXCEPT the protected models
-                    if (!protectedModels.Contains(fileName))
+                    if (File.Exists(path))
                     {
-                        AssetDatabase.DeleteAsset(path);
+                        File.Delete(path);
                     }
                 }
-            }
-            finally
-            {
-                // Resume and process all deletions at once
-                AssetDatabase.StopAssetEditing();
             }
 
             selectedIndices.Clear();
@@ -370,8 +353,9 @@ namespace Vectorier.ProjectManager
             loadedModelPaths.Clear();
 
             // Refresh Models List
-            string dataDir = $"Assets/Projects/{activeProjectName}/models";
-            if (AssetDatabase.IsValidFolder(dataDir))
+            string dataDir = $"./Projects/{activeProjectName}/models";
+            
+            if (Directory.Exists(dataDir))
             {
                 string[] rawFiles = Directory.GetFiles(dataDir, "*.xml", SearchOption.TopDirectoryOnly);
 

@@ -11,7 +11,7 @@ namespace Vectorier.ProjectManager
         private string activeProjectName = "";
         
         // Data for moves XML
-        private Object movesXmlAsset;
+        private string movesXmlPath = "";
 
         // Data for list display
         private List<string> loadedAnimationPaths = new List<string>();
@@ -46,7 +46,12 @@ namespace Vectorier.ProjectManager
             GUILayout.Space(5);
             
             // --- Moves Reference ---
-            movesXmlAsset = EditorGUILayout.ObjectField("Moves:", movesXmlAsset, typeof(Object), false);
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("Moves:", GUILayout.Width(50));
+            GUI.enabled = false;
+            GUILayout.TextField(string.IsNullOrEmpty(movesXmlPath) ? "None" : Path.GetFileName(movesXmlPath));
+            GUI.enabled = true;
+            GUILayout.EndHorizontal();
 
             GUILayout.Space(15);
 
@@ -211,18 +216,12 @@ namespace Vectorier.ProjectManager
         {
             string filePath = EditorUtility.OpenFilePanel("Select Moves XML", "", "xml");
             if (string.IsNullOrEmpty(filePath)) return;
-
-            string targetDir = $"Assets/Projects/{activeProjectName}/animations";
+            string targetDir = $"./Projects/{activeProjectName}/animations";
             if (!Directory.Exists(targetDir)) Directory.CreateDirectory(targetDir);
-
             string fileName = Path.GetFileName(filePath);
             string destFile = Path.Combine(targetDir, fileName).Replace("\\", "/");
-            
             File.Copy(filePath, destFile, true);
-            AssetDatabase.Refresh();
-
-            // Assign the newly imported XML to the Object Field
-            movesXmlAsset = AssetDatabase.LoadAssetAtPath<Object>(destFile);
+            movesXmlPath = destFile;
         }
 
         private void HandleDragAndDrop()
@@ -282,7 +281,7 @@ namespace Vectorier.ProjectManager
         {
             if (filePaths.Length == 0) return;
 
-            string targetDir = $"Assets/Projects/{activeProjectName}/animations/data";
+            string targetDir = $"./Projects/{activeProjectName}/animations/data";
             if (!Directory.Exists(targetDir)) Directory.CreateDirectory(targetDir);
 
             int progress = 0;
@@ -298,8 +297,7 @@ namespace Vectorier.ProjectManager
             }
 
             EditorUtility.ClearProgressBar();
-            AssetDatabase.Refresh();
-
+            
             RefreshAnimationList();
         }
 
@@ -316,20 +314,12 @@ namespace Vectorier.ProjectManager
                     }
                 }
 
-                try
+                foreach (string pathToDelete in pathsToDelete)
                 {
-                    // Suspend asset imports/updates for bulk optimization
-                    AssetDatabase.StartAssetEditing();
-
-                    foreach (string pathToDelete in pathsToDelete)
+                    if (File.Exists(pathToDelete))
                     {
-                        AssetDatabase.DeleteAsset(pathToDelete);
+                        File.Delete(pathToDelete);
                     }
-                }
-                finally
-                {
-                    // Resume and process all deletions at once
-                    AssetDatabase.StopAssetEditing();
                 }
 
                 selectedIndices.Clear();
@@ -341,20 +331,12 @@ namespace Vectorier.ProjectManager
         {
             if (EditorUtility.DisplayDialog("Clear All Animations", "Are you sure you want to delete all imported animations (.bin/.bytes) for this project?", "Yes, Delete All", "Cancel"))
             {
-                try
+                foreach (string path in loadedAnimationPaths)
                 {
-                    // Suspend asset imports/updates for bulk optimization
-                    AssetDatabase.StartAssetEditing();
-
-                    foreach (string path in loadedAnimationPaths)
+                    if (File.Exists(path))
                     {
-                        AssetDatabase.DeleteAsset(path);
+                        File.Delete(path);
                     }
-                }
-                finally
-                {
-                    // Resume and process all deletions at once
-                    AssetDatabase.StopAssetEditing();
                 }
 
                 selectedIndices.Clear();
@@ -365,25 +347,24 @@ namespace Vectorier.ProjectManager
         private void RefreshAnimationList()
         {
             loadedAnimationPaths.Clear();
+            movesXmlPath = "";
 
-            // Refresh Moves XML Field
-            string baseAnimDir = $"Assets/Projects/{activeProjectName}/animations";
-            if (movesXmlAsset == null && AssetDatabase.IsValidFolder(baseAnimDir))
+            string baseAnimDir = $"./Projects/{activeProjectName}/animations";
+            if (Directory.Exists(baseAnimDir))
             {
                 string[] xmlFiles = Directory.GetFiles(baseAnimDir, "*.xml", SearchOption.TopDirectoryOnly);
                 if (xmlFiles.Length > 0)
                 {
-                    movesXmlAsset = AssetDatabase.LoadAssetAtPath<Object>(xmlFiles[0].Replace("\\", "/"));
+                    movesXmlPath = xmlFiles[0].Replace("\\", "/");
                 }
             }
 
-            // Refresh Animations List
-            string dataDir = $"Assets/Projects/{activeProjectName}/animations/data";
-            if (AssetDatabase.IsValidFolder(dataDir))
+            string dataDir = $"./Projects/{activeProjectName}/animations/data";
+            if (Directory.Exists(dataDir))
             {
                 string[] rawFiles = Directory.GetFiles(dataDir, "*.*", SearchOption.TopDirectoryOnly)
                     .Where(file => file.EndsWith(".bin", System.StringComparison.OrdinalIgnoreCase) || 
-                                   file.EndsWith(".bytes", System.StringComparison.OrdinalIgnoreCase))
+                                file.EndsWith(".bytes", System.StringComparison.OrdinalIgnoreCase))
                     .ToArray();
 
                 foreach (string file in rawFiles)

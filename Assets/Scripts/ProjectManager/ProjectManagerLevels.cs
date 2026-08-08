@@ -28,9 +28,10 @@ namespace Vectorier.ProjectManager
         {
             public string internalName = "";
             public string displayName = "";
+            public string thumbnailPath = ""; // Track external thumbnail path
             public Texture2D thumbnail;
-            public TextAsset xmlAsset;
-            
+            public string xmlPath = ""; // Track external XML path
+
             public ModeData story = new ModeData();
             public ModeData hunter = new ModeData();
         }
@@ -41,12 +42,12 @@ namespace Vectorier.ProjectManager
             public int unlockPrice = 0;
             public string rawStarsInput = "0";
             public int starsRequired = 0;
-            
+
             public SubjectType subject = SubjectType.None;
             public string subjectName = "";
 
             public List<string> tricks = new List<string>();
-            
+
             public string starsTemplate = "";
             public string rewardTemplate = "";
         }
@@ -72,23 +73,23 @@ namespace Vectorier.ProjectManager
         private int locationOrder = 1;
         private string activeMode = "";
         private ViewState currentState = ViewState.ModeSelect;
-        
+
         private List<LevelItem> levelList = new List<LevelItem>();
         private List<string> availableTracks = new List<string>();
         private List<string> availableLocations = new List<string>();
         private List<string> availableTricksFromShop = new List<string>();
         private List<StarsTemplate> starsTemplates = new List<StarsTemplate>();
         private List<RewardTemplate> rewardTemplates = new List<RewardTemplate>();
-        
+
         private int selectedIndex = -1;
         private Vector2 scrollPosition;
         private Vector2 templateScrollPos;
 
-        private static readonly string[] LOCALIZATION_LANGS = 
-        { 
-            "eng", "rus", "ger", "ita", "fre", "spa", "tur", "por", "jap", "kor", 
-            "chi1", "chi2", "viet", "hin", "arab", "heb", "thai", "pol", "cze", 
-            "lat", "dut", "nor", "dan", "finn", "swe", "ukr", "gre" 
+        private static readonly string[] LOCALIZATION_LANGS =
+        {
+            "eng", "rus", "ger", "ita", "fre", "spa", "tur", "por", "jap", "kor",
+            "chi1", "chi2", "viet", "hin", "arab", "heb", "thai", "pol", "cze",
+            "lat", "dut", "nor", "dan", "finn", "swe", "ukr", "gre"
         };
 
         public static void ShowWindow(string projectName, string locationName, int locOrder)
@@ -145,31 +146,31 @@ namespace Vectorier.ProjectManager
             GUILayout.Label($"Select Mode for {activeLocationName}", EditorStyles.largeLabel);
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
-            
+
             GUILayout.Space(20);
 
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
-            
+
             GUILayout.BeginVertical();
             if (GUILayout.Button("Story", GUILayout.Width(200), GUILayout.Height(80)))
             {
                 SelectMode("STORY");
             }
-            
+
             GUILayout.Space(20);
-            
+
             if (GUILayout.Button("Bonus", GUILayout.Width(200), GUILayout.Height(80)))
             {
                 SelectMode("BONUS");
             }
             GUILayout.EndVertical();
-            
+
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
-            
+
             GUILayout.FlexibleSpace();
-            
+
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
             if (GUILayout.Button("Back to Locations", GUILayout.Width(200), GUILayout.Height(30)))
@@ -193,9 +194,9 @@ namespace Vectorier.ProjectManager
                 currentState = ViewState.ModeSelect;
                 GUIUtility.ExitGUI();
             }
-            
+
             GUILayout.Space(10);
-            
+
             string properModeName = activeMode == "STORY" ? "Story" : "Bonus";
             GUILayout.Label($"{activeLocationName} - {properModeName}", EditorStyles.largeLabel);
             GUILayout.FlexibleSpace();
@@ -203,23 +204,23 @@ namespace Vectorier.ProjectManager
             GUIStyle countStyle = new GUIStyle(EditorStyles.boldLabel) { alignment = TextAnchor.MiddleCenter };
             GUILayout.Label($"Total Levels - {levelList.Count}", countStyle, GUILayout.Height(25));
             GUILayout.Space(10);
-            
+
             if (GUILayout.Button("+", GUILayout.Width(30), GUILayout.Height(25))) AddLevel();
-            
+
             // Enabled only if a specific level is selected
             GUI.enabled = selectedIndex >= 0 && selectedIndex < levelList.Count;
             if (GUILayout.Button("-", GUILayout.Width(30), GUILayout.Height(25))) RemoveLevel();
-            
+
             // Enabled as long as there is at least one level to clear
             GUI.enabled = levelList.Count > 0;
             if (GUILayout.Button("C", GUILayout.Width(30), GUILayout.Height(25))) ClearAllLevels();
-            
+
             // Enabled only if a specific level is selected
             GUI.enabled = selectedIndex >= 0 && selectedIndex < levelList.Count;
             if (GUILayout.Button("^", GUILayout.Width(30), GUILayout.Height(25))) ReorderLevel(-1);
             if (GUILayout.Button("v", GUILayout.Width(30), GUILayout.Height(25))) ReorderLevel(1);
             GUI.enabled = true;
-            
+
             GUILayout.EndHorizontal();
 
             GUILayout.Space(10);
@@ -251,7 +252,7 @@ namespace Vectorier.ProjectManager
             if (isSelected) boxStyle.normal.background = MakeTex(2, 2, new Color(0.2f, 0.5f, 0.9f, 0.5f));
 
             GUILayout.BeginVertical(boxStyle);
-            
+
             if (GUILayout.Button(item.internalName, EditorStyles.toolbarButton))
             {
                 selectedIndex = index;
@@ -263,11 +264,11 @@ namespace Vectorier.ProjectManager
             // Thumbnail
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
-            
+
             float imgWidth = 512f;
             float imgHeight = 340f;
-            float availableWidth = position.width - 40; 
-            
+            float availableWidth = position.width - 40;
+
             if (availableWidth < imgWidth)
             {
                 float scale = availableWidth / imgWidth;
@@ -276,39 +277,35 @@ namespace Vectorier.ProjectManager
             }
 
             Rect imageRect = GUILayoutUtility.GetRect(imgWidth, imgHeight, GUILayout.Width(imgWidth), GUILayout.Height(imgHeight));
-            
-            // --- THUMBNAIL LOGIC ---
+
             if (item.thumbnail != null)
             {
-                // Draw actual image scaled to fit correctly
                 GUI.DrawTexture(imageRect, item.thumbnail, ScaleMode.ScaleToFit);
             }
             else
             {
-                // Draw white texture stretched to fill the entire expected bounds
                 GUI.DrawTexture(imageRect, EditorGUIUtility.whiteTexture, ScaleMode.StretchToFill);
 
                 GUIStyle centeredTextStyle = new GUIStyle(EditorStyles.label)
                 {
                     alignment = TextAnchor.MiddleCenter,
-                    normal = { textColor = Color.black } // Dark text so it shows up well on the white texture
+                    normal = { textColor = Color.black }
                 };
                 GUI.Label(imageRect, "Click Here to Change Thumbnail", centeredTextStyle);
             }
 
-            // Invisible button covering the entire image area
             if (GUI.Button(imageRect, new GUIContent("", "Click to assign thumbnail"), GUIStyle.none))
             {
                 SelectAndImportImage(item);
             }
-            
+
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
 
             GUILayout.Space(10);
 
-            GUILayout.Label("Level XML", EditorStyles.boldLabel);
-            item.xmlAsset = (TextAsset)EditorGUILayout.ObjectField("XML Asset", item.xmlAsset, typeof(TextAsset), false);
+            GUILayout.Label("Level XML Path", EditorStyles.boldLabel);
+            item.xmlPath = EditorGUILayout.TextField("XML Path", item.xmlPath);
 
             GUILayout.BeginHorizontal();
             if (GUILayout.Button("Browse"))
@@ -362,12 +359,12 @@ namespace Vectorier.ProjectManager
             if (EditorGUI.EndChangeCheck())
             {
                 data.starsRequired = ParseInt(data.rawStarsInput);
-                
+
                 if (data.subject == SubjectType.Track && data.starsRequired > 3)
                 {
                     data.starsRequired = 3;
                 }
-                
+
                 data.rawStarsInput = data.starsRequired.ToString();
                 SaveToXml();
             }
@@ -376,14 +373,14 @@ namespace Vectorier.ProjectManager
             {
                 EditorGUI.BeginChangeCheck();
                 data.subject = (SubjectType)EditorGUILayout.EnumPopup("Subject", data.subject);
-                if (EditorGUI.EndChangeCheck()) 
+                if (EditorGUI.EndChangeCheck())
                 {
                     if (data.subject == SubjectType.Track && data.starsRequired > 3)
                     {
                         data.starsRequired = 3;
                         data.rawStarsInput = data.starsRequired.ToString();
                     }
-                    
+
                     SaveToXml();
                 }
 
@@ -452,7 +449,7 @@ namespace Vectorier.ProjectManager
                 if (EditorGUI.EndChangeCheck()) SaveToXml();
                 GUILayout.EndHorizontal();
             }
-            
+
             if (GUILayout.Button("+ Add Trick", GUILayout.Width(100)))
             {
                 if (availableTricksFromShop != null && availableTricksFromShop.Count > 0)
@@ -472,13 +469,13 @@ namespace Vectorier.ProjectManager
             // Templates
             string[] starsNames = starsTemplates.Select(t => t.name).ToArray();
             string[] rewardNames = rewardTemplates.Select(t => t.name).ToArray();
-            
+
             int sIndex = Mathf.Max(0, System.Array.IndexOf(starsNames, data.starsTemplate));
             int rIndex = Mathf.Max(0, System.Array.IndexOf(rewardNames, data.rewardTemplate));
 
             GUILayout.BeginHorizontal();
             GUILayout.BeginVertical();
-            
+
             EditorGUI.BeginChangeCheck();
             if (starsNames.Length > 0)
             {
@@ -486,16 +483,16 @@ namespace Vectorier.ProjectManager
                 data.starsTemplate = starsNames[sIndex];
             }
             else EditorGUILayout.LabelField("Stars Template", "None Found");
-            
+
             if (rewardNames.Length > 0)
             {
                 rIndex = EditorGUILayout.Popup("Rewards Template", rIndex, rewardNames);
                 data.rewardTemplate = rewardNames[rIndex];
             }
             else EditorGUILayout.LabelField("Rewards Template", "None Found");
-            
+
             if (EditorGUI.EndChangeCheck()) SaveToXml();
-            
+
             GUILayout.EndVertical();
 
             if (GUILayout.Button("Edit\nTemplates", GUILayout.Width(80), GUILayout.Height(40)))
@@ -517,13 +514,13 @@ namespace Vectorier.ProjectManager
             }
             GUILayout.Label("Templates Editor", EditorStyles.largeLabel);
             GUILayout.EndHorizontal();
-            
+
             GUILayout.Space(10);
 
             templateScrollPos = GUILayout.BeginScrollView(templateScrollPos);
-            
+
             GUILayout.BeginHorizontal();
-            
+
             // Stars Templates
             GUILayout.BeginVertical(GUI.skin.box, GUILayout.Width(position.width / 2 - 15));
             GUILayout.Label("Stars Templates", EditorStyles.boldLabel);
@@ -545,7 +542,7 @@ namespace Vectorier.ProjectManager
             }
             if (GUILayout.Button("+ Add Stars Template")) starsTemplates.Add(new StarsTemplate());
             GUILayout.EndVertical();
-            
+
             // Rewards Templates
             GUILayout.BeginVertical(GUI.skin.box, GUILayout.Width(position.width / 2 - 15));
             GUILayout.Label("Rewards Templates", EditorStyles.boldLabel);
@@ -586,7 +583,7 @@ namespace Vectorier.ProjectManager
             LevelItem newItem = new LevelItem();
             levelList.Add(newItem);
             selectedIndex = levelList.Count - 1;
-            
+
             RefreshLevelNamesAndOrders();
         }
 
@@ -595,26 +592,24 @@ namespace Vectorier.ProjectManager
             if (selectedIndex < 0 || selectedIndex >= levelList.Count) return;
 
             LevelItem item = levelList[selectedIndex];
-            
-            if (item.thumbnail != null)
+
+            if (!string.IsNullOrEmpty(item.thumbnailPath) && File.Exists(item.thumbnailPath))
             {
-                string path = AssetDatabase.GetAssetPath(item.thumbnail);
-                if (!string.IsNullOrEmpty(path)) AssetDatabase.DeleteAsset(path);
+                File.Delete(item.thumbnailPath);
             }
 
-            if (item.xmlAsset != null)
+            if (!string.IsNullOrEmpty(item.xmlPath) && File.Exists(item.xmlPath))
             {
-                AssetDatabase.DeleteAsset(AssetDatabase.GetAssetPath(item.xmlAsset));
+                File.Delete(item.xmlPath);
             }
-            else 
+            else
             {
-                // Fallback incase it's not loaded into memory but exists in directory
-                string xmlPath = $"Assets/Projects/{activeProjectName}/xmlroot/levels/{item.internalName}.xml";
-                if (File.Exists(xmlPath)) AssetDatabase.DeleteAsset(xmlPath);
+                string fallbackXmlPath = $"./Projects/{activeProjectName}/xmlroot/levels/{item.internalName}.xml";
+                if (File.Exists(fallbackXmlPath)) File.Delete(fallbackXmlPath);
             }
 
             // Remove from localization
-            string locPath = $"Assets/Projects/{activeProjectName}/localization/localization_all.xml";
+            string locPath = $"./Projects/{activeProjectName}/localization/localization_all.xml";
             if (File.Exists(locPath))
             {
                 XDocument doc = XDocument.Load(locPath);
@@ -637,66 +632,52 @@ namespace Vectorier.ProjectManager
 
             string properModeName = activeMode == "STORY" ? "Story" : "Bonus";
             bool confirm = EditorUtility.DisplayDialog(
-                "Clear All Levels", 
-                $"Are you sure you want to delete ALL {levelList.Count} {properModeName} levels? This action cannot be undone.", 
-                "Yes, Clear All", 
+                "Clear All Levels",
+                $"Are you sure you want to delete ALL {levelList.Count} {properModeName} levels? This action cannot be undone.",
+                "Yes, Clear All",
                 "Cancel"
             );
 
             if (!confirm) return;
 
-            // Load the localization document once to avoid reading/writing for every single item
-            string locPath = $"Assets/Projects/{activeProjectName}/localization/localization_all.xml";
+            string locPath = $"./Projects/{activeProjectName}/localization/localization_all.xml";
             XDocument doc = null;
             if (File.Exists(locPath))
             {
                 doc = XDocument.Load(locPath);
             }
 
-            // Loop backwards when deleting to safely remove items without throwing off indexes
             for (int i = levelList.Count - 1; i >= 0; i--)
             {
                 LevelItem item = levelList[i];
-                
-                // Delete Thumbnail
-                if (item.thumbnail != null)
+
+                if (!string.IsNullOrEmpty(item.thumbnailPath) && File.Exists(item.thumbnailPath))
                 {
-                    string path = AssetDatabase.GetAssetPath(item.thumbnail);
-                    if (!string.IsNullOrEmpty(path)) AssetDatabase.DeleteAsset(path);
+                    File.Delete(item.thumbnailPath);
                 }
 
-                // Delete XML
-                if (item.xmlAsset != null)
+                if (!string.IsNullOrEmpty(item.xmlPath) && File.Exists(item.xmlPath))
                 {
-                    AssetDatabase.DeleteAsset(AssetDatabase.GetAssetPath(item.xmlAsset));
+                    File.Delete(item.xmlPath);
                 }
-                else 
+                else
                 {
-                    string xmlPath = $"Assets/Projects/{activeProjectName}/xmlroot/levels/{item.internalName}.xml";
-                    if (File.Exists(xmlPath)) AssetDatabase.DeleteAsset(xmlPath);
+                    string xmlPath = $"./Projects/{activeProjectName}/xmlroot/levels/{item.internalName}.xml";
+                    if (File.Exists(xmlPath)) File.Delete(xmlPath);
                 }
 
-                // Remove from Localization
                 if (doc != null)
                 {
                     XElement node = doc.Root?.Element($"item_{item.internalName}");
-                    if (node != null)
-                    {
-                        node.Remove();
-                    }
+                    if (node != null) node.Remove();
                 }
             }
 
-            // Save localization once all items are removed
-            if (doc != null)
-            {
-                doc.Save(locPath);
-            }
+            if (doc != null) doc.Save(locPath);
 
             levelList.Clear();
             selectedIndex = -1;
-            
-            // Update the main XML configuration file and exit GUI to prevent Layout mismatch errors
+
             SaveToXml();
             GUIUtility.ExitGUI();
         }
@@ -729,31 +710,45 @@ namespace Vectorier.ProjectManager
 
                 if (string.IsNullOrEmpty(item.internalName))
                 {
-                    // It's newly created
                     item.internalName = expectedInternalName;
                     item.displayName = expectedDisplayName;
                     xmlChanged = true;
                 }
                 else if (item.internalName != expectedInternalName)
                 {
-                    // It was reordered, rename everything
                     string oldName = item.internalName;
                     item.internalName = expectedInternalName;
-                    
-                    // Rename Image
-                    if (item.thumbnail != null)
+
+                    // Rename Image via System.IO
+                    if (!string.IsNullOrEmpty(item.thumbnailPath) && File.Exists(item.thumbnailPath))
                     {
-                        string path = AssetDatabase.GetAssetPath(item.thumbnail);
-                        AssetDatabase.RenameAsset(path, expectedInternalName);
+                        string dir = Path.GetDirectoryName(item.thumbnailPath);
+                        string ext = Path.GetExtension(item.thumbnailPath);
+                        string newPath = Path.Combine(dir, expectedInternalName + ext).Replace("\\", "/");
+                        if (item.thumbnailPath != newPath)
+                        {
+                            if (File.Exists(newPath)) File.Delete(newPath);
+                            File.Move(item.thumbnailPath, newPath);
+                            item.thumbnailPath = newPath;
+                        }
                     }
 
-                    string xmlPath = $"Assets/Projects/{activeProjectName}/xmlroot/levels/{oldName}.xml";
-                    if (File.Exists(xmlPath))
+                    // Rename XML via System.IO
+                    string oldXmlPath = $"./Projects/{activeProjectName}/xmlroot/levels/{oldName}.xml";
+                    string newXmlPath = $"./Projects/{activeProjectName}/xmlroot/levels/{expectedInternalName}.xml";
+                    if (File.Exists(oldXmlPath))
                     {
-                        AssetDatabase.RenameAsset(xmlPath, expectedInternalName);
+                        if (File.Exists(newXmlPath)) File.Delete(newXmlPath);
+                        File.Move(oldXmlPath, newXmlPath);
+                        item.xmlPath = newXmlPath;
                     }
-                    
-                    // Update Localization Key
+                    else if (!string.IsNullOrEmpty(item.xmlPath) && File.Exists(item.xmlPath))
+                    {
+                        if (File.Exists(newXmlPath)) File.Delete(newXmlPath);
+                        File.Move(item.xmlPath, newXmlPath);
+                        item.xmlPath = newXmlPath;
+                    }
+
                     RenameLocalizationKey(oldName, expectedInternalName);
                     xmlChanged = true;
                 }
@@ -769,31 +764,25 @@ namespace Vectorier.ProjectManager
         private void SelectAndImportImage(LevelItem item)
         {
             string sourcePath = EditorUtility.OpenFilePanelWithFilters("Select Level Image (512x340)", "", new string[] { "Image Files", "png,jpg,jpeg", "All files", "*" });
-            
+
             if (!string.IsNullOrEmpty(sourcePath))
             {
                 EnsureDirectories();
-                string targetDir = $"Assets/Projects/{activeProjectName}/icons/stories";
+                string targetDir = $"./Projects/{activeProjectName}/icons/stories";
                 string extension = Path.GetExtension(sourcePath).ToLower();
                 string targetPath = $"{targetDir}/{item.internalName}{extension}";
 
-                if (item.thumbnail != null)
+                if (!string.IsNullOrEmpty(item.thumbnailPath) && File.Exists(item.thumbnailPath))
                 {
-                    AssetDatabase.DeleteAsset(AssetDatabase.GetAssetPath(item.thumbnail));
+                    File.Delete(item.thumbnailPath);
                 }
 
                 File.Copy(sourcePath, targetPath, true);
-                AssetDatabase.ImportAsset(targetPath);
 
-                TextureImporter importer = AssetImporter.GetAtPath(targetPath) as TextureImporter;
-                if (importer != null)
-                {
-                    importer.textureType = TextureImporterType.Sprite;
-                    importer.spriteImportMode = SpriteImportMode.Single;
-                    importer.SaveAndReimport();
-                }
+                item.thumbnailPath = targetPath;
+                item.thumbnail = new Texture2D(2, 2);
+                item.thumbnail.LoadImage(File.ReadAllBytes(targetPath));
 
-                item.thumbnail = AssetDatabase.LoadAssetAtPath<Texture2D>(targetPath);
                 SaveToXml();
             }
         }
@@ -802,23 +791,17 @@ namespace Vectorier.ProjectManager
 
         private void EnsureDirectories()
         {
-            CreateFolderRecursive($"Assets/Projects/{activeProjectName}/icons/stories");
-            CreateFolderRecursive($"Assets/Projects/{activeProjectName}/commons");
-            CreateFolderRecursive($"Assets/Projects/{activeProjectName}/localization");
+            CreateFolderRecursive($"./Projects/{activeProjectName}/icons/stories");
+            CreateFolderRecursive($"./Projects/{activeProjectName}/commons");
+            CreateFolderRecursive($"./Projects/{activeProjectName}/localization");
+            CreateFolderRecursive($"./Projects/{activeProjectName}/xmlroot/levels");
         }
 
         private void CreateFolderRecursive(string path)
         {
-            string[] folders = path.Split('/');
-            string currentPath = folders[0];
-            for (int i = 1; i < folders.Length; i++)
+            if (!Directory.Exists(path))
             {
-                string nextPath = currentPath + "/" + folders[i];
-                if (!AssetDatabase.IsValidFolder(nextPath))
-                {
-                    AssetDatabase.CreateFolder(currentPath, folders[i]);
-                }
-                currentPath = nextPath;
+                Directory.CreateDirectory(path);
             }
         }
 
@@ -864,78 +847,70 @@ namespace Vectorier.ProjectManager
         }
 
         private void BrowseAndAssignXML(LevelItem item)
-        {
-            string sourcePath = EditorUtility.OpenFilePanel("Select Level XML", "", "xml");
-            if (!string.IsNullOrEmpty(sourcePath))
-            {
-                string targetDir = $"Assets/Projects/{activeProjectName}/xmlroot/levels";
-                CreateFolderRecursive(targetDir);
-                string targetPath = $"{targetDir}/{item.internalName}.xml";
-                
-                // Copy, Replace if it exists, and Import
-                File.Copy(sourcePath, targetPath, true);
-                AssetDatabase.ImportAsset(targetPath);
-                item.xmlAsset = AssetDatabase.LoadAssetAtPath<TextAsset>(targetPath);
-                
-                // Repaint to immediately show it in the pointer
-                Repaint();
-            }
-        }
+{
+    string sourcePath = EditorUtility.OpenFilePanel("Select Level XML", "", "xml");
+    if (!string.IsNullOrEmpty(sourcePath))
+    {
+        string targetDir = $"./Projects/{activeProjectName}/xmlroot/levels";
+        CreateFolderRecursive(targetDir);
+        string targetPath = $"{targetDir}/{item.internalName}.xml";
+        
+        File.Copy(sourcePath, targetPath, true);
+        item.xmlPath = targetPath;
+        
+        Repaint();
+    }
+}
 
         private void ExportSceneToXML(LevelItem item)
-        {
-            string targetDir = $"Assets/Projects/{activeProjectName}/xmlroot/levels";
-            CreateFolderRecursive(targetDir);
+{
+    string targetDir = $"./Projects/{activeProjectName}/xmlroot/levels";
+    CreateFolderRecursive(targetDir);
 
-            // Get or Create the ExportConfig 
-            GameObject configObj = GameObject.Find("[EDITORONLY]ExportConfigHolder");
-            if (configObj == null)
-            {
-                configObj = new GameObject("[EDITORONLY]ExportConfigHolder");
-                configObj.hideFlags = HideFlags.HideInHierarchy;
-            }
-            
-            if (!configObj.TryGetComponent(out Vectorier.Core.ExportConfig config))
-            {
-                config = configObj.AddComponent<Vectorier.Core.ExportConfig>();
-            }
+    GameObject configObj = GameObject.Find("[EDITORONLY]ExportConfigHolder");
+    if (configObj == null)
+    {
+        configObj = new GameObject("[EDITORONLY]ExportConfigHolder");
+        configObj.hideFlags = HideFlags.HideInHierarchy;
+    }
+    
+    if (!configObj.TryGetComponent(out Vectorier.Core.ExportConfig config))
+    {
+        config = configObj.AddComponent<Vectorier.Core.ExportConfig>();
+    }
 
-            // Force the necessary ExportConfig settings
-            config.exportType = Vectorier.Core.ExportConfig.ExportType.Level;
-            config.filePathDirectory = targetDir;
-            config.exportAsXML = true;
-            config.fileName = item.internalName;
+    config.exportType = Vectorier.Core.ExportConfig.ExportType.Level;
+    config.filePathDirectory = targetDir;
+    config.exportAsXML = true;
+    config.fileName = item.internalName;
 
-            EditorUtility.SetDirty(config);
+    EditorUtility.SetDirty(config);
 
-            // Grab the Export window and use Reflection to call the private BuildLevel method
-            Vectorier.Core.Export exportWindow = GetWindow<Vectorier.Core.Export>("Export");
-            var buildMethod = typeof(Vectorier.Core.Export).GetMethod("BuildLevel", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            var parallaxMethod = typeof(Vectorier.Core.Export).GetMethod("ExecuteWithParallaxDisabled", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            
-            if (buildMethod != null && parallaxMethod != null)
-            {
-                System.Action action = () => buildMethod.Invoke(exportWindow, null);
-                parallaxMethod.Invoke(exportWindow, new object[] { action });
-            }
-            else
-            {
-                Debug.LogError("[ProjectManager] Could not find Build methods in Export Window.");
-                return;
-            }
+    Vectorier.Core.Export exportWindow = GetWindow<Vectorier.Core.Export>("Export");
+    var buildMethod = typeof(Vectorier.Core.Export).GetMethod("BuildLevel", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+    var parallaxMethod = typeof(Vectorier.Core.Export).GetMethod("ExecuteWithParallaxDisabled", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+    
+    if (buildMethod != null && parallaxMethod != null)
+    {
+        System.Action action = () => buildMethod.Invoke(exportWindow, null);
+        parallaxMethod.Invoke(exportWindow, new object[] { action });
+    }
+    else
+    {
+        Debug.LogError("[ProjectManager] Could not find Build methods in Export Window.");
+        return;
+    }
 
-            // Assign to Pointer
-            string targetPath = $"{targetDir}/{item.internalName}.xml";
-            AssetDatabase.ImportAsset(targetPath);
-            item.xmlAsset = AssetDatabase.LoadAssetAtPath<TextAsset>(targetPath);
-            
-            Repaint();
-        }
+    string targetPath = $"{targetDir}/{item.internalName}.xml";
+    item.xmlPath = targetPath;
+    
+    Repaint();
+}
 
         private void SaveToXml()
         {
             EnsureDirectories();
-            string path = $"Assets/Projects/{activeProjectName}/commons/List_Payed.xml";
+            string path = $"./Projects/{activeProjectName}/commons/List_Payed.xml";
             
             XDocument doc;
             if (File.Exists(path)) doc = XDocument.Load(path);
@@ -949,7 +924,6 @@ namespace Vectorier.ProjectManager
                 root.AddFirst(locationsNode);
             }
 
-            // --- Base Location Setup ---
             XElement baseLocNode = locationsNode.Elements("Location").FirstOrDefault(x => (string)x.Attribute("Name") == activeLocationName);
             if (baseLocNode == null)
             {
@@ -971,12 +945,10 @@ namespace Vectorier.ProjectManager
                 baseGroupsNode.Add(baseModeGroup);
             }
 
-            // Preserve non-Track elements
             var baseNonTracks = baseModeGroup.Elements().Where(e => e.Name != "Track").ToList();
             baseModeGroup.RemoveNodes();
             baseModeGroup.Add(baseNonTracks);
 
-            // --- Hunter Location Setup ---
             string hunterLocationName = activeLocationName + "_HUNTER";
             XElement hunterLocNode = locationsNode.Elements("Location").FirstOrDefault(x => (string)x.Attribute("Name") == hunterLocationName);
             if (hunterLocNode == null)
@@ -999,12 +971,10 @@ namespace Vectorier.ProjectManager
                 hunterGroupsNode.Add(hunterModeGroup);
             }
             
-            // Preserve non-Track elements
             var hunterNonTracks = hunterModeGroup.Elements().Where(e => e.Name != "Track").ToList();
             hunterModeGroup.RemoveNodes();
             hunterModeGroup.Add(hunterNonTracks);
 
-            // Rebuild the tracks for both modes
             foreach (LevelItem item in levelList)
             {
                 baseModeGroup.Add(CreateTrackNode(item.internalName, item.story));
@@ -1013,22 +983,19 @@ namespace Vectorier.ProjectManager
             }
 
             doc.Save(path);
-            AssetDatabase.ImportAsset(path);
         }
 
         private void LoadFromXml()
         {
             levelList.Clear();
-            string path = $"Assets/Projects/{activeProjectName}/commons/List_Payed.xml";
+            string path = $"./Projects/{activeProjectName}/commons/List_Payed.xml";
             if (!File.Exists(path)) return;
 
             XDocument doc = XDocument.Load(path);
             
-            // --- Load Base Location Data ---
             XElement baseLocNode = doc.Root?.Element("Locations")?.Elements("Location").FirstOrDefault(x => (string)x.Attribute("Name") == activeLocationName);
             XElement baseModeGroup = baseLocNode?.Element("Groups")?.Elements("Group").FirstOrDefault(x => (string)x.Attribute("Name") == activeMode);
 
-            // Dictionary to easily map hunter tracks to the created items
             Dictionary<string, LevelItem> itemDict = new Dictionary<string, LevelItem>();
 
             if (baseModeGroup != null)
@@ -1041,19 +1008,35 @@ namespace Vectorier.ProjectManager
                     LevelItem item = new LevelItem { internalName = internalName };
                     PopulateModeData(track, item.story);
                     
-                    // Load Image 
-                    string[] imgGuids = AssetDatabase.FindAssets(item.internalName + " t:Texture2D", new[] { $"Assets/Projects/{activeProjectName}/icons/stories" });
-                    if (imgGuids.Length > 0)
-                        item.thumbnail = AssetDatabase.LoadAssetAtPath<Texture2D>(AssetDatabase.GUIDToAssetPath(imgGuids[0]));
+                    // Load Image via System.IO
+                    string storiesDir = $"./Projects/{activeProjectName}/icons/stories";
+                    if (Directory.Exists(storiesDir))
+                    {
+                        string[] possibleExts = { ".png", ".jpg", ".jpeg" };
+                        foreach (string ext in possibleExts)
+                        {
+                            string imgPath = Path.Combine(storiesDir, internalName + ext).Replace("\\", "/");
+                            if (File.Exists(imgPath))
+                            {
+                                item.thumbnailPath = imgPath;
+                                item.thumbnail = new Texture2D(2, 2);
+                                item.thumbnail.LoadImage(File.ReadAllBytes(imgPath));
+                                break;
+                            }
+                        }
+                    }
 
-                    item.xmlAsset = AssetDatabase.LoadAssetAtPath<TextAsset>($"Assets/Projects/{activeProjectName}/xmlroot/levels/{item.internalName}.xml");
+                    string xmlPath = $"./Projects/{activeProjectName}/xmlroot/levels/{internalName}.xml";
+                    if (File.Exists(xmlPath))
+                    {
+                        item.xmlPath = xmlPath;
+                    }
 
                     levelList.Add(item);
                     itemDict[internalName] = item;
                 }
             }
 
-            // --- Load Hunter Location Data ---
             string hunterLocationName = activeLocationName + "_HUNTER";
             XElement hunterLocNode = doc.Root?.Element("Locations")?.Elements("Location").FirstOrDefault(x => (string)x.Attribute("Name") == hunterLocationName);
             XElement hunterModeGroup = hunterLocNode?.Element("Groups")?.Elements("Group").FirstOrDefault(x => (string)x.Attribute("Name") == activeMode);
@@ -1065,7 +1048,6 @@ namespace Vectorier.ProjectManager
                     string hunterTrackName = (string)track.Attribute("Name") ?? "";
                     if (string.IsNullOrEmpty(hunterTrackName) || !hunterTrackName.EndsWith("_HUNTER")) continue;
 
-                    // Strip the "_HUNTER" suffix to map the track back to the parent item
                     string baseName = hunterTrackName.Substring(0, hunterTrackName.Length - 7);
                     
                     if (itemDict.TryGetValue(baseName, out LevelItem targetItem))
@@ -1075,13 +1057,13 @@ namespace Vectorier.ProjectManager
                 }
             }
 
-            LoadLocalization(); // Load localizations into displayName after parsing is done
+            LoadLocalization();
         }
 
         private void SaveTemplatesToXml()
         {
             EnsureDirectories();
-            string path = $"Assets/Projects/{activeProjectName}/commons/List_Payed.xml";
+            string path = $"./Projects/{activeProjectName}/commons/List_Payed.xml";
             
             XDocument doc;
             if (File.Exists(path)) doc = XDocument.Load(path);
@@ -1095,7 +1077,6 @@ namespace Vectorier.ProjectManager
                 root.Add(templatesNode);
             }
 
-            // Preserve nodes that are not "Stars" or "Reward"
             var otherTemplates = templatesNode.Elements().Where(e => e.Name != "Stars" && e.Name != "Reward").ToList();
             templatesNode.RemoveNodes();
             templatesNode.Add(otherTemplates);
@@ -1119,7 +1100,6 @@ namespace Vectorier.ProjectManager
             }
 
             doc.Save(path);
-            AssetDatabase.ImportAsset(path);
         }
 
         private void LoadTemplatesFromXml()
@@ -1127,7 +1107,7 @@ namespace Vectorier.ProjectManager
             starsTemplates.Clear();
             rewardTemplates.Clear();
 
-            string path = $"Assets/Projects/{activeProjectName}/commons/List_Payed.xml";
+            string path = $"./Projects/{activeProjectName}/commons/List_Payed.xml";
             if (!File.Exists(path)) return;
 
             XDocument doc = XDocument.Load(path);
@@ -1161,7 +1141,7 @@ namespace Vectorier.ProjectManager
         private void SaveLocalization()
         {
             EnsureDirectories();
-            string locPath = $"Assets/Projects/{activeProjectName}/localization/localization_all.xml";
+            string locPath = $"./Projects/{activeProjectName}/localization/localization_all.xml";
             XDocument doc;
             
             if (File.Exists(locPath)) doc = XDocument.Load(locPath);
@@ -1178,7 +1158,6 @@ namespace Vectorier.ProjectManager
                     doc.Root.Add(itemNode);
                 }
                 
-                // Assign all languages the same Display Name
                 foreach (string lang in LOCALIZATION_LANGS)
                 {
                     itemNode.SetAttributeValue(lang, item.displayName);
@@ -1186,12 +1165,11 @@ namespace Vectorier.ProjectManager
             }
 
             doc.Save(locPath);
-            AssetDatabase.ImportAsset(locPath);
         }
 
         private void LoadLocalization()
         {
-            string locPath = $"Assets/Projects/{activeProjectName}/localization/localization_all.xml";
+            string locPath = $"./Projects/{activeProjectName}/localization/localization_all.xml";
             if (!File.Exists(locPath)) return;
 
             XDocument doc = XDocument.Load(locPath);
@@ -1211,7 +1189,7 @@ namespace Vectorier.ProjectManager
             availableTracks.Clear();
             availableLocations.Clear();
 
-            string path = $"Assets/Projects/{activeProjectName}/commons/List_Payed.xml";
+            string path = $"./Projects/{activeProjectName}/commons/List_Payed.xml";
             if (!File.Exists(path)) return;
 
             XDocument doc = XDocument.Load(path);
@@ -1253,7 +1231,7 @@ namespace Vectorier.ProjectManager
         private void LoadAvailableTricks()
         {
             availableTricksFromShop.Clear();
-            string path = $"Assets/Projects/{activeProjectName}/commons/Shop_payed.xml";
+            string path = $"./Projects/{activeProjectName}/commons/Shop_payed.xml";
             
             if (!File.Exists(path))
             {
@@ -1265,7 +1243,6 @@ namespace Vectorier.ProjectManager
             {
                 XDocument doc = XDocument.Load(path);
                 
-                // Use Descendants to grab all <Item> nodes regardless of the XML root structure
                 foreach (XElement item in doc.Descendants("Item"))
                 {
                     string trickName = (string)item.Attribute("Name");
@@ -1283,7 +1260,7 @@ namespace Vectorier.ProjectManager
 
         private void RenameLocalizationKey(string oldName, string newName)
         {
-            string locPath = $"Assets/Projects/{activeProjectName}/localization/localization_all.xml";
+            string locPath = $"./Projects/{activeProjectName}/localization/localization_all.xml";
             if (!File.Exists(locPath)) return;
 
             XDocument doc = XDocument.Load(locPath);
@@ -1315,7 +1292,7 @@ namespace Vectorier.ProjectManager
                     string subjStr = (string)stars.Attribute("Subject");
                     if (!string.IsNullOrEmpty(subjStr) && System.Enum.TryParse(subjStr, out SubjectType pSubj))
                         data.subject = pSubj;
-                    
+
                     data.subjectName = (string)stars.Attribute("Name") ?? "";
                 }
                 XElement payment = conditions.Element("Payment");

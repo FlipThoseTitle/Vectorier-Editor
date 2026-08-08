@@ -225,7 +225,7 @@ namespace Vectorier.ProjectManager
         {
             if (filePaths.Length == 0) return;
 
-            string targetDir = $"Assets/Projects/{activeProjectName}/music";
+            string targetDir = $"./Projects/{activeProjectName}/music";
             if (!Directory.Exists(targetDir)) Directory.CreateDirectory(targetDir);
 
             int progress = 0;
@@ -241,8 +241,7 @@ namespace Vectorier.ProjectManager
             }
 
             EditorUtility.ClearProgressBar();
-            AssetDatabase.Refresh();
-
+            
             RefreshMusicList();
         }
 
@@ -280,20 +279,12 @@ namespace Vectorier.ProjectManager
 
                 if (pathsToDelete.Count > 0)
                 {
-                    try
+                    foreach (string pathToDelete in pathsToDelete)
                     {
-                        // Suspend asset imports/updates for bulk optimization
-                        AssetDatabase.StartAssetEditing();
-
-                        foreach (string pathToDelete in pathsToDelete)
+                        if (File.Exists(pathToDelete))
                         {
-                            AssetDatabase.DeleteAsset(pathToDelete);
+                            File.Delete(pathToDelete);
                         }
-                    }
-                    finally
-                    {
-                        // Resume and process all deletions at once
-                        AssetDatabase.StopAssetEditing();
                     }
                 }
 
@@ -304,24 +295,16 @@ namespace Vectorier.ProjectManager
 
         private void ClearAllMusic()
         {
-            try
+            foreach (string path in loadedMusicPaths)
             {
-                // Suspend asset imports/updates for bulk optimization
-                AssetDatabase.StartAssetEditing();
-
-                foreach (string path in loadedMusicPaths)
+                // Delete everything EXCEPT the "menu" music
+                if (Path.GetFileNameWithoutExtension(path) != "menu")
                 {
-                    // Delete everything EXCEPT the "menu" music
-                    if (Path.GetFileNameWithoutExtension(path) != "menu")
+                    if (File.Exists(path))
                     {
-                        AssetDatabase.DeleteAsset(path);
+                        File.Delete(path);
                     }
                 }
-            }
-            finally
-            {
-                // Resume and process all deletions at once
-                AssetDatabase.StopAssetEditing();
             }
 
             selectedIndices.Clear();
@@ -333,8 +316,8 @@ namespace Vectorier.ProjectManager
             loadedMusicPaths.Clear();
 
             // Refresh Music List
-            string dataDir = $"Assets/Projects/{activeProjectName}/music";
-            if (AssetDatabase.IsValidFolder(dataDir))
+            string dataDir = $"./Projects/{activeProjectName}/music";
+            if (Directory.Exists(dataDir))
             {
                 List<string> rawFiles = new List<string>();
                 rawFiles.AddRange(Directory.GetFiles(dataDir, "*.mp3", SearchOption.TopDirectoryOnly));

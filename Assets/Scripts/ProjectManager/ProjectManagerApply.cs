@@ -39,8 +39,9 @@ namespace Vectorier.ProjectManager
 
             if (!isConfirmed) return;
 
-            string projectPath = Path.Combine("Assets", "Projects", projectName);
+            // Get the project root directory
             string projectRoot = Directory.GetParent(Application.dataPath).FullName;
+            string projectPath = Path.Combine(projectRoot, "Projects", projectName);
             string streamingAssetsPath = Path.Combine(projectRoot, "Snail Runner", "Vector_Data", "StreamingAssets");
 
             if (!Directory.Exists(streamingAssetsPath))

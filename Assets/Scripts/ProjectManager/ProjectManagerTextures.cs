@@ -41,6 +41,7 @@ namespace Vectorier.ProjectManager
             window.activeProjectName = projectName;
             window.minSize = new Vector2(400, 500);
             window.Show();
+            window.SyncResourcesFolder();
             window.RefreshTextureList();
         }
 
@@ -290,9 +291,14 @@ namespace Vectorier.ProjectManager
         {
             if (filePaths.Length == 0) return;
 
-            string baseProjPath = $"Assets/Projects/{activeProjectName}";
+            // Updated base paths outside of Assets to avoid importing
+            string baseProjPath = $"Projects/{activeProjectName}";
             string texturesDir = $"{baseProjPath}/textures";
             string animTexturesDir = $"{baseProjPath}/animatedtextures";
+
+            // Unity imported resource paths
+            string resourceImagesDir = $"Assets/Resources/Images/{activeProjectName}";
+            string resourceSpritesDir = $"{resourceImagesDir}/Sprites";
 
             List<string> newlyImportedAssets = new List<string>();
 
@@ -305,20 +311,37 @@ namespace Vectorier.ProjectManager
                 bool hasPlist = File.Exists(plistPath);
 
                 string targetDir = hasPlist ? animTexturesDir : texturesDir;
-
                 if (!Directory.Exists(targetDir)) Directory.CreateDirectory(targetDir);
 
-                // Copy Texture
+                // Copy Original Texture (and Plist) to the raw root Projects folder
                 string fileName = Path.GetFileName(file);
                 string destFile = Path.Combine(targetDir, fileName).Replace("\\", "/");
                 File.Copy(file, destFile, true);
-                newlyImportedAssets.Add(destFile);
 
-                // Copy Plist if exists
                 if (hasPlist)
                 {
                     string plistDest = Path.Combine(targetDir, Path.GetFileName(plistPath)).Replace("\\", "/");
                     File.Copy(plistPath, plistDest, true);
+                }
+
+                if (hasPlist)
+                {
+                    if (!Directory.Exists(resourceSpritesDir)) Directory.CreateDirectory(resourceSpritesDir);
+                    
+                    // Run the PlistExtract logic to get only the middle frame
+                    string extractedPath = Vectorier.EditorScript.Tools.PlistExtract.ExtractMiddleFrame(file, plistPath, resourceSpritesDir, fileName);
+                    if (!string.IsNullOrEmpty(extractedPath))
+                    {
+                        newlyImportedAssets.Add(extractedPath);
+                    }
+                }
+                else
+                {
+                    if (!Directory.Exists(resourceImagesDir)) Directory.CreateDirectory(resourceImagesDir);
+                    
+                    string resourceDestFile = Path.Combine(resourceImagesDir, fileName).Replace("\\", "/");
+                    File.Copy(file, resourceDestFile, true);
+                    newlyImportedAssets.Add(resourceDestFile);
                 }
 
                 progress++;
@@ -327,7 +350,9 @@ namespace Vectorier.ProjectManager
             EditorUtility.ClearProgressBar();
             AssetDatabase.Refresh();
 
+            // Run importer settings (PPU 1, Single, TopLeft)
             ApplyImporterSettings(newlyImportedAssets);
+            
             RefreshTextureList();
         }
 
@@ -355,47 +380,54 @@ namespace Vectorier.ProjectManager
         {
             if (selectedIndices.Count > 0)
             {
-                List<string> pathsToDelete = new List<string>();
+                List<string> rawPathsToDelete = new List<string>();
                 int excludedCount = 0;
 
                 foreach (int index in selectedIndices)
                 {
                     if (index >= 0 && index < loadedTexturePaths.Count)
                     {
-                        string path = loadedTexturePaths[index];
+                        string rawPath = loadedTexturePaths[index];
                         
-                        if (IsFileExcluded(path))
+                        if (IsFileExcluded(rawPath))
                         {
                             excludedCount++;
                         }
                         else
                         {
-                            pathsToDelete.Add(path);
+                            rawPathsToDelete.Add(rawPath);
                         }
                     }
                 }
 
-                // If ONLY excluded files were selected, show the prompt and stop.
-                if (pathsToDelete.Count == 0 && excludedCount > 0)
+                if (rawPathsToDelete.Count == 0 && excludedCount > 0)
                 {
                     EditorUtility.DisplayDialog("Cannot Delete", excludedCount + " File isn't deletable!", "OK");
                     return;
                 }
 
-                // If we reach here, we have at least one deletable file.
-                // It will silently ignore the excluded ones (if any) and delete the valid ones.
                 try
                 {
                     AssetDatabase.StartAssetEditing();
 
-                    foreach (string pathToDelete in pathsToDelete)
+                    foreach (string rawPath in rawPathsToDelete)
                     {
-                        string plistPath = Path.ChangeExtension(pathToDelete, ".plist");
-                        
-                        AssetDatabase.DeleteAsset(pathToDelete);
-                        if (File.Exists(plistPath))
+                        string fileName = Path.GetFileName(rawPath);
+                        string plistPath = Path.ChangeExtension(rawPath, ".plist");
+                        bool hasPlist = File.Exists(plistPath);
+
+                        // Delete from the raw root folder outside of Assets
+                        if (File.Exists(rawPath)) File.Delete(rawPath);
+                        if (File.Exists(plistPath)) File.Delete(plistPath);
+
+                        // Delete from Unity's Assets/Resources/Images
+                        string resourcePath = hasPlist 
+                            ? $"Assets/Resources/Images/{activeProjectName}/Sprites/{fileName}"
+                            : $"Assets/Resources/Images/{activeProjectName}/{fileName}";
+                            
+                        if (File.Exists(resourcePath))
                         {
-                            AssetDatabase.DeleteAsset(plistPath);
+                            AssetDatabase.DeleteAsset(resourcePath);
                         }
                     }
                 }
@@ -404,6 +436,7 @@ namespace Vectorier.ProjectManager
                     AssetDatabase.StopAssetEditing();
                 }
 
+                CheckAndDeleteEmptyResourcesFolder();
                 selectedIndices.Clear();
                 RefreshTextureList();
             }
@@ -411,19 +444,17 @@ namespace Vectorier.ProjectManager
 
         private void ClearAllTextures()
         {
-            List<string> pathsToDelete = new List<string>();
+            List<string> rawPathsToDelete = new List<string>();
             
-            // Filter out excluded files first
             foreach (string path in loadedTexturePaths)
             {
                 if (!IsFileExcluded(path))
                 {
-                    pathsToDelete.Add(path);
+                    rawPathsToDelete.Add(path);
                 }
             }
 
-            // If there is nothing to delete (only excluded files exist), do nothing and don't prompt.
-            if (pathsToDelete.Count == 0) return;
+            if (rawPathsToDelete.Count == 0) return;
 
             if (EditorUtility.DisplayDialog("Clear All Textures", "Are you sure you want to delete all imported textures for this project? This cannot be undone.", "Delete All", "Cancel"))
             {
@@ -431,13 +462,22 @@ namespace Vectorier.ProjectManager
                 {
                     AssetDatabase.StartAssetEditing();
 
-                    foreach (string path in pathsToDelete)
+                    foreach (string rawPath in rawPathsToDelete)
                     {
-                        AssetDatabase.DeleteAsset(path);
-                        string plistPath = Path.ChangeExtension(path, ".plist");
-                        if (File.Exists(plistPath))
+                        string fileName = Path.GetFileName(rawPath);
+                        string plistPath = Path.ChangeExtension(rawPath, ".plist");
+                        bool hasPlist = File.Exists(plistPath);
+
+                        if (File.Exists(rawPath)) File.Delete(rawPath);
+                        if (File.Exists(plistPath)) File.Delete(plistPath);
+
+                        string resourcePath = hasPlist 
+                            ? $"Assets/Resources/Images/{activeProjectName}/Sprites/{fileName}"
+                            : $"Assets/Resources/Images/{activeProjectName}/{fileName}";
+
+                        if (File.Exists(resourcePath))
                         {
-                            AssetDatabase.DeleteAsset(plistPath);
+                            AssetDatabase.DeleteAsset(resourcePath);
                         }
                     }
                 }
@@ -446,6 +486,7 @@ namespace Vectorier.ProjectManager
                     AssetDatabase.StopAssetEditing();
                 }
 
+                CheckAndDeleteEmptyResourcesFolder();
                 selectedIndices.Clear();
                 RefreshTextureList();
             }
@@ -453,33 +494,199 @@ namespace Vectorier.ProjectManager
 
         private void RefreshTextureList()
         {
-            loadedTextures.Clear();
-            loadedTexturePaths.Clear();
-
-            string texturesDir = $"Assets/Projects/{activeProjectName}/textures";
-            string animTexturesDir = $"Assets/Projects/{activeProjectName}/animatedtextures";
-
-            List<string> searchDirs = new List<string>();
-            if (AssetDatabase.IsValidFolder(texturesDir)) searchDirs.Add(texturesDir);
-            if (AssetDatabase.IsValidFolder(animTexturesDir)) searchDirs.Add(animTexturesDir);
-
-            if (searchDirs.Count > 0)
+            // Clean up RAM manual textures to prevent editor memory leaks.
+            // WARNING: explicitly check and NOT destroy Unity Assets
+            foreach (var tex in loadedTextures)
             {
-                string[] guids = AssetDatabase.FindAssets("t:Texture2D", searchDirs.ToArray());
-
-                foreach (string guid in guids)
+                if (tex != null)
                 {
-                    string path = AssetDatabase.GUIDToAssetPath(guid);
-                    Texture2D tex = AssetDatabase.LoadAssetAtPath<Texture2D>(path);
-                    if (tex != null)
+                    // If it has no path, it's a RAM texture created via LoadImage. If it does, it's a Unity Asset.
+                    if (string.IsNullOrEmpty(AssetDatabase.GetAssetPath(tex)))
                     {
-                        loadedTextures.Add(tex);
-                        loadedTexturePaths.Add(path);
+                        DestroyImmediate(tex);
                     }
                 }
             }
 
+            loadedTextures.Clear();
+            loadedTexturePaths.Clear();
+
+            string texturesDir = $"Projects/{activeProjectName}/textures";
+            string animTexturesDir = $"Projects/{activeProjectName}/animatedtextures";
+            string resourceImagesDir = $"Assets/Resources/Images/{activeProjectName}";
+            string resourceSpritesDir = $"{resourceImagesDir}/Sprites";
+
+            List<string> searchDirs = new List<string>();
+            if (Directory.Exists(texturesDir)) searchDirs.Add(texturesDir);
+            if (Directory.Exists(animTexturesDir)) searchDirs.Add(animTexturesDir);
+
+            List<string> filesToProcess = new List<string>();
+            foreach (string dir in searchDirs)
+            {
+                filesToProcess.AddRange(Directory.GetFiles(dir, "*.*")
+                    .Where(f => f.EndsWith(".png", System.StringComparison.OrdinalIgnoreCase) || 
+                                f.EndsWith(".jpg", System.StringComparison.OrdinalIgnoreCase) ||
+                                f.EndsWith(".jpeg", System.StringComparison.OrdinalIgnoreCase)));
+            }
+
+            for (int i = 0; i < filesToProcess.Count; i++)
+            {
+                string file = filesToProcess[i];
+                string normalizedFile = file.Replace("\\", "/");
+                string fileName = Path.GetFileName(normalizedFile);
+                bool hasPlist = File.Exists(Path.ChangeExtension(normalizedFile, ".plist"));
+
+                // Predict where the Unity Asset version of this texture lives
+                string expectedResourcePath = hasPlist 
+                    ? $"{resourceSpritesDir}/{fileName}" 
+                    : $"{resourceImagesDir}/{fileName}";
+
+                // Try loading directly from AssetDatabase
+                Texture2D tex = AssetDatabase.LoadAssetAtPath<Texture2D>(expectedResourcePath);
+
+                if (tex != null)
+                {
+                    loadedTextures.Add(tex);
+                    loadedTexturePaths.Add(normalizedFile);
+                }
+                else
+                {
+                    // Fallback: Manual byte loading (slow, used if asset isn't imported yet)
+                    if (i % 10 == 0) // Only update UI occasionally to save performance
+                    {
+                        EditorUtility.DisplayProgressBar("Loading Manual Textures", $"Processing {fileName}", (float)i / filesToProcess.Count);
+                    }
+
+                    byte[] bytes = File.ReadAllBytes(file);
+                    Texture2D manualTex = new Texture2D(2, 2);
+                    if (ImageConversion.LoadImage(manualTex, bytes))
+                    {
+                        manualTex.name = Path.GetFileNameWithoutExtension(file);
+                        loadedTextures.Add(manualTex);
+                        loadedTexturePaths.Add(normalizedFile);
+                    }
+                    else
+                    {
+                        DestroyImmediate(manualTex);
+                    }
+                }
+            }
+
+            EditorUtility.ClearProgressBar();
             Repaint();
+        }
+
+        private void SyncResourcesFolder()
+        {
+            if (string.IsNullOrEmpty(activeProjectName)) return;
+
+            string baseProjPath = $"Projects/{activeProjectName}";
+            string texturesDir = $"{baseProjPath}/textures";
+            string animTexturesDir = $"{baseProjPath}/animatedtextures";
+            string resourceImagesDir = $"Assets/Resources/Images/{activeProjectName}";
+            string resourceSpritesDir = $"{resourceImagesDir}/Sprites";
+
+            bool folderExists = AssetDatabase.IsValidFolder(resourceImagesDir);
+            List<string> filesToImportToResources = new List<string>();
+
+            List<string> searchDirs = new List<string>();
+            if (Directory.Exists(texturesDir)) searchDirs.Add(texturesDir);
+            if (Directory.Exists(animTexturesDir)) searchDirs.Add(animTexturesDir);
+
+            // Check which files are missing from the resources folder
+            foreach (string dir in searchDirs)
+            {
+                string[] files = Directory.GetFiles(dir, "*.*")
+                    .Where(f => f.EndsWith(".png", System.StringComparison.OrdinalIgnoreCase) || 
+                                f.EndsWith(".jpg", System.StringComparison.OrdinalIgnoreCase) ||
+                                f.EndsWith(".jpeg", System.StringComparison.OrdinalIgnoreCase))
+                    .ToArray();
+
+                foreach (string file in files)
+                {
+                    string normalizedFile = file.Replace("\\", "/");
+                    
+                    // Ignore explicitly listed textures
+                    if (IsFileExcluded(normalizedFile)) continue;
+
+                    string fileName = Path.GetFileName(normalizedFile);
+                    bool hasPlist = File.Exists(Path.ChangeExtension(normalizedFile, ".plist"));
+
+                    string expectedResourcePath = hasPlist 
+                        ? $"{resourceSpritesDir}/{fileName}" 
+                        : $"{resourceImagesDir}/{fileName}";
+
+                    if (!File.Exists(expectedResourcePath))
+                    {
+                        filesToImportToResources.Add(normalizedFile);
+                    }
+                }
+            }
+
+            // Clean up the folder if it exists but contains nothing
+            if (folderExists)
+            {
+                CheckAndDeleteEmptyResourcesFolder();
+                // Update the state in case it was deleted
+                folderExists = AssetDatabase.IsValidFolder(resourceImagesDir);
+            }
+
+            // Proceed to import any missing files
+            if (filesToImportToResources.Count > 0)
+            {
+                List<string> newlyImportedAssets = new List<string>();
+                int progress = 0;
+
+                foreach (string file in filesToImportToResources)
+                {
+                    string fileName = Path.GetFileName(file);
+                    
+                    // Provides visual feedback
+                    EditorUtility.DisplayProgressBar("Syncing Missing Resources", $"Importing {fileName}", (float)progress / filesToImportToResources.Count);
+
+                    string plistPath = Path.ChangeExtension(file, ".plist");
+                    bool hasPlist = File.Exists(plistPath);
+
+                    if (hasPlist)
+                    {
+                        if (!Directory.Exists(resourceSpritesDir)) Directory.CreateDirectory(resourceSpritesDir);
+                        
+                        string extractedPath = Vectorier.EditorScript.Tools.PlistExtract.ExtractMiddleFrame(file, plistPath, resourceSpritesDir, fileName);
+                        if (!string.IsNullOrEmpty(extractedPath)) newlyImportedAssets.Add(extractedPath);
+                    }
+                    else
+                    {
+                        if (!Directory.Exists(resourceImagesDir)) Directory.CreateDirectory(resourceImagesDir);
+
+                        string resourceDestFile = Path.Combine(resourceImagesDir, fileName).Replace("\\", "/");
+                        File.Copy(file, resourceDestFile, true);
+                        newlyImportedAssets.Add(resourceDestFile);
+                    }
+                    progress++;
+                }
+
+                EditorUtility.ClearProgressBar();
+                AssetDatabase.Refresh();
+                ApplyImporterSettings(newlyImportedAssets);
+            }
+        }
+
+        private void CheckAndDeleteEmptyResourcesFolder()
+        {
+            string resourceImagesDir = $"Assets/Resources/Images/{activeProjectName}";
+            if (AssetDatabase.IsValidFolder(resourceImagesDir))
+            {
+                string[] existingResourceFiles = Directory.GetFiles(resourceImagesDir, "*.*", SearchOption.AllDirectories)
+                    .Where(f => f.EndsWith(".png", System.StringComparison.OrdinalIgnoreCase) || 
+                                f.EndsWith(".jpg", System.StringComparison.OrdinalIgnoreCase) || 
+                                f.EndsWith(".jpeg", System.StringComparison.OrdinalIgnoreCase))
+                    .ToArray();
+
+                if (existingResourceFiles.Length == 0)
+                {
+                    AssetDatabase.DeleteAsset(resourceImagesDir);
+                }
+            }
         }
 
         private bool IsFileExcluded(string path)

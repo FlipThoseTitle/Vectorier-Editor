@@ -12,11 +12,12 @@ namespace Vectorier.ProjectManager
     {
         private class GearItem
         {
-            public TextAsset modelXml;
+            public string modelXmlPath = ""; 
             public string gearName = "";
             public string displayName = "";
             public string rawPriceInput = "0";
             public int price = 0;
+            public string shopImagePath = ""; 
             public Texture2D shopImage;
         }
 
@@ -148,18 +149,13 @@ namespace Vectorier.ProjectManager
             {
                 foreach (GearItem item in gearList)
                 {
-                    // Delete Model XML
-                    if (item.modelXml != null)
+                    if (!string.IsNullOrEmpty(item.modelXmlPath) && File.Exists(item.modelXmlPath))
                     {
-                        string path = AssetDatabase.GetAssetPath(item.modelXml);
-                        if (!string.IsNullOrEmpty(path)) AssetDatabase.DeleteAsset(path);
+                        File.Delete(item.modelXmlPath);
                     }
-
-                    // Delete Shop Image
-                    if (item.shopImage != null)
+                    if (!string.IsNullOrEmpty(item.shopImagePath) && File.Exists(item.shopImagePath))
                     {
-                        string path = AssetDatabase.GetAssetPath(item.shopImage);
-                        if (!string.IsNullOrEmpty(path)) AssetDatabase.DeleteAsset(path);
+                        File.Delete(item.shopImagePath);
                     }
                 }
                 
@@ -192,13 +188,12 @@ namespace Vectorier.ProjectManager
             GUILayout.Space(5);
 
             // Model XML Pointer
-            EditorGUI.BeginChangeCheck();
-            TextAsset newXml = (TextAsset)EditorGUILayout.ObjectField("Model XML", item.modelXml, typeof(TextAsset), false);
-            if (EditorGUI.EndChangeCheck())
-            {
-                item.modelXml = newXml;
-                SaveToXml();
-            }
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("Model XML", GUILayout.Width(EditorGUIUtility.labelWidth - 5));
+            GUI.enabled = false;
+            GUILayout.TextField(string.IsNullOrEmpty(item.modelXmlPath) ? "None" : Path.GetFileName(item.modelXmlPath));
+            GUI.enabled = true;
+            GUILayout.EndHorizontal();
 
             // Gear Name
             EditorGUI.BeginChangeCheck();
@@ -244,7 +239,6 @@ namespace Vectorier.ProjectManager
             Texture displayTex = item.shopImage != null ? item.shopImage : EditorGUIUtility.whiteTexture;
             GUI.DrawTexture(imageRect, displayTex, ScaleMode.ScaleToFit);
             
-            // --- TEXT OVERLAY ---
             if (item.shopImage == null)
             {
                 GUIStyle centeredTextStyle = new GUIStyle(EditorStyles.label)
@@ -255,7 +249,6 @@ namespace Vectorier.ProjectManager
                 
                 GUI.Label(imageRect, "Click Here to Change Thumbnail", centeredTextStyle);
             }
-            // --------------------------
             
             if (GUI.Button(imageRect, new GUIContent("", "Click to assign shop image (.png, .jpg)"), GUIStyle.none))
             {
@@ -283,16 +276,15 @@ namespace Vectorier.ProjectManager
             {
                 string fileName = Path.GetFileNameWithoutExtension(xmlPath);
                 newItem.gearName = FormatGearName(fileName);
-                newItem.displayName = fileName; // Use the raw filename as the default display name
+                newItem.displayName = fileName;
 
                 EnsureDirectories();
-                string targetDir = $"Assets/Projects/{activeProjectName}/models";
+                string targetDir = $"./Projects/{activeProjectName}/models";
                 string targetPath = $"{targetDir}/{newItem.gearName}.xml";
                 
                 File.Copy(xmlPath, targetPath, true);
-                AssetDatabase.ImportAsset(targetPath);
                 
-                newItem.modelXml = AssetDatabase.LoadAssetAtPath<TextAsset>(targetPath);
+                newItem.modelXmlPath = targetPath;
             }
 
             gearList.Add(newItem);
@@ -306,18 +298,13 @@ namespace Vectorier.ProjectManager
 
             GearItem item = gearList[selectedIndex];
 
-            // Delete Model XML
-            if (item.modelXml != null)
+            if (!string.IsNullOrEmpty(item.modelXmlPath) && File.Exists(item.modelXmlPath))
             {
-                string path = AssetDatabase.GetAssetPath(item.modelXml);
-                if (!string.IsNullOrEmpty(path)) AssetDatabase.DeleteAsset(path);
+                File.Delete(item.modelXmlPath);
             }
-
-            // Delete Shop Image
-            if (item.shopImage != null)
+            if (!string.IsNullOrEmpty(item.shopImagePath) && File.Exists(item.shopImagePath))
             {
-                string path = AssetDatabase.GetAssetPath(item.shopImage);
-                if (!string.IsNullOrEmpty(path)) AssetDatabase.DeleteAsset(path);
+                File.Delete(item.shopImagePath);
             }
 
             gearList.RemoveAt(selectedIndex);
@@ -333,52 +320,55 @@ namespace Vectorier.ProjectManager
             if (!string.IsNullOrEmpty(sourcePath))
             {
                 EnsureDirectories();
-                string targetDir = $"Assets/Projects/{activeProjectName}/icons/shop";
+                string targetDir = $"./Projects/{activeProjectName}/icons/shop";
                 
-                // Construct file name using SHOP_ prefix
                 string newImageName = string.IsNullOrEmpty(item.gearName) ? "SHOP_NEW_ITEM" : $"SHOP_{item.gearName}";
                 string extension = Path.GetExtension(sourcePath).ToLower();
                 string targetPath = $"{targetDir}/{newImageName}{extension}";
 
-                // Delete old image if it exists
-                if (item.shopImage != null)
+                // Delete old image if it exists using File.Delete
+                if (!string.IsNullOrEmpty(item.shopImagePath) && File.Exists(item.shopImagePath))
                 {
-                    AssetDatabase.DeleteAsset(AssetDatabase.GetAssetPath(item.shopImage));
+                    File.Delete(item.shopImagePath);
                 }
 
                 File.Copy(sourcePath, targetPath, true);
-                AssetDatabase.ImportAsset(targetPath);
+                
+                // Manually load image into Texture2D for previewing
+                item.shopImagePath = targetPath;
+                item.shopImage = new Texture2D(2, 2);
+                item.shopImage.LoadImage(File.ReadAllBytes(targetPath));
 
-                // Configure as Sprite
-                TextureImporter importer = AssetImporter.GetAtPath(targetPath) as TextureImporter;
-                if (importer != null)
-                {
-                    importer.textureType = TextureImporterType.Sprite;
-                    importer.spriteImportMode = SpriteImportMode.Single;
-                    importer.SaveAndReimport();
-                }
-
-                item.shopImage = AssetDatabase.LoadAssetAtPath<Texture2D>(targetPath);
                 SaveToXml();
             }
         }
 
         private void RenameGearAssets(GearItem item, string newName)
         {
-            // Rename XML
-            if (item.modelXml != null)
+            if (!string.IsNullOrEmpty(item.modelXmlPath) && File.Exists(item.modelXmlPath))
             {
-                string path = AssetDatabase.GetAssetPath(item.modelXml);
-                string error = AssetDatabase.RenameAsset(path, newName);
-                if (!string.IsNullOrEmpty(error)) Debug.LogWarning($"Failed to rename Model XML: {error}");
+                string dir = Path.GetDirectoryName(item.modelXmlPath);
+                string ext = Path.GetExtension(item.modelXmlPath);
+                string newPath = Path.Combine(dir, newName + ext).Replace("\\", "/");
+                
+                if (item.modelXmlPath != newPath)
+                {
+                    File.Move(item.modelXmlPath, newPath);
+                    item.modelXmlPath = newPath;
+                }
             }
 
-            // Rename Image
-            if (item.shopImage != null)
+            if (!string.IsNullOrEmpty(item.shopImagePath) && File.Exists(item.shopImagePath))
             {
-                string path = AssetDatabase.GetAssetPath(item.shopImage);
-                string error = AssetDatabase.RenameAsset(path, $"SHOP_{newName}");
-                if (!string.IsNullOrEmpty(error)) Debug.LogWarning($"Failed to rename Shop Image: {error}");
+                string dir = Path.GetDirectoryName(item.shopImagePath);
+                string ext = Path.GetExtension(item.shopImagePath);
+                string newPath = Path.Combine(dir, $"SHOP_{newName}{ext}").Replace("\\", "/");
+                
+                if (item.shopImagePath != newPath)
+                {
+                    File.Move(item.shopImagePath, newPath);
+                    item.shopImagePath = newPath;
+                }
             }
         }
 
@@ -413,32 +403,24 @@ namespace Vectorier.ProjectManager
 
         private void EnsureDirectories()
         {
-            CreateFolderRecursive($"Assets/Projects/{activeProjectName}/models");
-            CreateFolderRecursive($"Assets/Projects/{activeProjectName}/icons/shop");
-            CreateFolderRecursive($"Assets/Projects/{activeProjectName}/commons");
-            CreateFolderRecursive($"Assets/Projects/{activeProjectName}/localization");
+            CreateFolderRecursive($"./Projects/{activeProjectName}/models");
+            CreateFolderRecursive($"./Projects/{activeProjectName}/icons/shop");
+            CreateFolderRecursive($"./Projects/{activeProjectName}/commons");
+            CreateFolderRecursive($"./Projects/{activeProjectName}/localization");
         }
 
         private void CreateFolderRecursive(string path)
         {
-            string[] folders = path.Split('/');
-            string currentPath = folders[0];
-
-            for (int i = 1; i < folders.Length; i++)
+            if (!Directory.Exists(path))
             {
-                string nextPath = currentPath + "/" + folders[i];
-                if (!AssetDatabase.IsValidFolder(nextPath))
-                {
-                    AssetDatabase.CreateFolder(currentPath, folders[i]);
-                }
-                currentPath = nextPath;
+                Directory.CreateDirectory(path);
             }
         }
 
         private void SaveToXml()
         {
             EnsureDirectories();
-            string relativePath = $"Assets/Projects/{activeProjectName}/commons/Shop_payed.xml";
+            string relativePath = $"./Projects/{activeProjectName}/commons/Shop_payed.xml";
             
             XDocument doc;
             if (File.Exists(relativePath))
@@ -464,13 +446,15 @@ namespace Vectorier.ProjectManager
                 root.Add(clothingGroup);
             }
 
-            // Clear current items in the CLOTHING group
             clothingGroup.RemoveNodes();
 
             // Rebuild items from list state
             foreach (GearItem item in gearList)
             {
-                string imgName = item.shopImage != null ? item.shopImage.name : (string.IsNullOrEmpty(item.gearName) ? "" : $"SHOP_{item.gearName}");
+                // Extract the raw file name
+                string imgName = !string.IsNullOrEmpty(item.shopImagePath) 
+                    ? Path.GetFileNameWithoutExtension(item.shopImagePath) 
+                    : (string.IsNullOrEmpty(item.gearName) ? "" : $"SHOP_{item.gearName}");
 
                 XElement itemNode = new XElement("Item",
                     new XAttribute("Price", item.price.ToString()),
@@ -481,15 +465,13 @@ namespace Vectorier.ProjectManager
             }
 
             doc.Save(relativePath);
-            AssetDatabase.ImportAsset(relativePath);
 
-            // --- Handle Localization Syncing ---
             SaveLocalizationToXml();
         }
 
         private void SaveLocalizationToXml()
         {
-            string relativePath = $"Assets/Projects/{activeProjectName}/localization/localization_all.xml";
+            string relativePath = $"./Projects/{activeProjectName}/localization/localization_all.xml";
             
             XDocument doc;
             if (File.Exists(relativePath))
@@ -510,7 +492,6 @@ namespace Vectorier.ProjectManager
 
             string[] langs = { "eng", "rus", "ger", "ita", "fre", "spa", "tur", "por", "jap", "kor", "chi1", "chi2", "viet", "hin", "arab", "heb", "thai", "pol", "cze", "lat", "dut", "nor", "dan", "finn", "swe", "ukr", "gre" };
 
-            // Clean up items that are no longer in our Gear List
             HashSet<string> currentGearTags = new HashSet<string>(gearList.Select(g => "item_" + g.gearName));
             var itemsToRemove = root.Elements().Where(e => e.Name.LocalName.StartsWith("item_GEAR_") && !currentGearTags.Contains(e.Name.LocalName)).ToList();
             
@@ -519,7 +500,6 @@ namespace Vectorier.ProjectManager
                 item.Remove();
             }
 
-            // Add or update current gears
             foreach (GearItem gear in gearList)
             {
                 if (string.IsNullOrEmpty(gear.gearName)) continue;
@@ -533,7 +513,6 @@ namespace Vectorier.ProjectManager
                     root.Add(itemNode);
                 }
 
-                // Apply all the standard localization attributes with the identical Display Name value
                 foreach (string lang in langs)
                 {
                     itemNode.SetAttributeValue(lang, gear.displayName);
@@ -541,13 +520,12 @@ namespace Vectorier.ProjectManager
             }
 
             doc.Save(relativePath);
-            AssetDatabase.ImportAsset(relativePath);
         }
 
         private void LoadGearsFromXml()
         {
             gearList.Clear();
-            string relativePath = $"Assets/Projects/{activeProjectName}/commons/Shop_payed.xml";
+            string relativePath = $"./Projects/{activeProjectName}/commons/Shop_payed.xml";
 
             if (!File.Exists(relativePath)) return;
 
@@ -569,35 +547,48 @@ namespace Vectorier.ProjectManager
                 item.gearName = (string)node.Attribute("Name") ?? "";
                 string shopImageName = (string)node.Attribute("ShopImage") ?? "";
 
-                // Attempt to link local assets based on standard naming
                 if (!string.IsNullOrEmpty(item.gearName))
                 {
-                    string[] xmlGuids = AssetDatabase.FindAssets(item.gearName + " t:TextAsset", new[] { $"Assets/Projects/{activeProjectName}/models" });
-                    if (xmlGuids.Length > 0)
+                    string modelsDir = $"./Projects/{activeProjectName}/models";
+                    if (Directory.Exists(modelsDir))
                     {
-                        item.modelXml = AssetDatabase.LoadAssetAtPath<TextAsset>(AssetDatabase.GUIDToAssetPath(xmlGuids[0]));
+                        string[] xmlFiles = Directory.GetFiles(modelsDir, $"{item.gearName}.xml", SearchOption.TopDirectoryOnly);
+                        if (xmlFiles.Length > 0)
+                        {
+                            item.modelXmlPath = xmlFiles[0].Replace("\\", "/");
+                        }
                     }
                 }
 
                 if (!string.IsNullOrEmpty(shopImageName))
                 {
-                    string[] imgGuids = AssetDatabase.FindAssets(shopImageName + " t:Texture2D", new[] { $"Assets/Projects/{activeProjectName}/icons/shop" });
-                    if (imgGuids.Length > 0)
+                    string shopDir = $"./Projects/{activeProjectName}/icons/shop";
+                    if (Directory.Exists(shopDir))
                     {
-                        item.shopImage = AssetDatabase.LoadAssetAtPath<Texture2D>(AssetDatabase.GUIDToAssetPath(imgGuids[0]));
+                        string[] possibleExts = { ".png", ".jpg", ".jpeg" };
+                        foreach (string ext in possibleExts)
+                        {
+                            string imgPath = Path.Combine(shopDir, shopImageName + ext).Replace("\\", "/");
+                            if (File.Exists(imgPath))
+                            {
+                                item.shopImagePath = imgPath;
+                                item.shopImage = new Texture2D(2, 2);
+                                item.shopImage.LoadImage(File.ReadAllBytes(imgPath));
+                                break;
+                            }
+                        }
                     }
                 }
 
                 gearList.Add(item);
             }
 
-            // --- Load corresponding display names ---
             LoadLocalizationFromXml();
         }
 
         private void LoadLocalizationFromXml()
         {
-            string relativePath = $"Assets/Projects/{activeProjectName}/localization/localization_all.xml";
+            string relativePath = $"./Projects/{activeProjectName}/localization/localization_all.xml";
             if (!File.Exists(relativePath)) return;
 
             XDocument doc = XDocument.Load(relativePath);
@@ -612,7 +603,6 @@ namespace Vectorier.ProjectManager
                 XElement itemNode = root.Element(tagName);
                 if (itemNode != null)
                 {
-                    // We just grab the 'eng' tag since they're all mirrored
                     XAttribute engAttr = itemNode.Attribute("eng"); 
                     if (engAttr != null)
                     {

@@ -31,6 +31,7 @@ namespace Vectorier.ProjectManager
         private class LocationItem
         {
             public string locationName = "";
+            public string thumbnailPath = ""; // Added to track file path
             public Texture2D thumbnail;
             
             // Holds the separate settings for each mode
@@ -366,23 +367,22 @@ namespace Vectorier.ProjectManager
             LocationItem item = locationList[selectedIndex];
 
             // Delete Location Image
-            if (item.thumbnail != null)
+            if (!string.IsNullOrEmpty(item.thumbnailPath) && File.Exists(item.thumbnailPath))
             {
-                string path = AssetDatabase.GetAssetPath(item.thumbnail);
-                if (!string.IsNullOrEmpty(path)) AssetDatabase.DeleteAsset(path);
+                File.Delete(item.thumbnailPath);
             }
 
             // Delete all related level folders and their contents (XMLs and Icons)
-            string levelsXmlFolder = $"Assets/Projects/{activeProjectName}/xmlroot/levels/{item.locationName}";
-            if (AssetDatabase.IsValidFolder(levelsXmlFolder))
+            string levelsXmlFolder = $"./Projects/{activeProjectName}/xmlroot/levels/{item.locationName}";
+            if (Directory.Exists(levelsXmlFolder))
             {
-                AssetDatabase.DeleteAsset(levelsXmlFolder);
+                Directory.Delete(levelsXmlFolder, true);
             }
 
-            string levelsIconsFolder = $"Assets/Projects/{activeProjectName}/icons/levels/{item.locationName}";
-            if (AssetDatabase.IsValidFolder(levelsIconsFolder))
+            string levelsIconsFolder = $"./Projects/{activeProjectName}/icons/levels/{item.locationName}";
+            if (Directory.Exists(levelsIconsFolder))
             {
-                AssetDatabase.DeleteAsset(levelsIconsFolder);
+                Directory.Delete(levelsIconsFolder, true);
             }
 
             // Remove the location from the local list
@@ -421,42 +421,42 @@ namespace Vectorier.ProjectManager
             {
                 EnsureDirectories();
                 
-                string targetDir = $"Assets/Projects/{activeProjectName}/icons/locations";
+                string targetDir = $"./Projects/{activeProjectName}/icons/locations";
                 string newImageName = item.locationName;
                 
                 string extension = Path.GetExtension(sourcePath).ToLower();
                 string targetPath = $"{targetDir}/{newImageName}{extension}";
 
                 // Delete old image if it exists
-                if (item.thumbnail != null)
+                if (!string.IsNullOrEmpty(item.thumbnailPath) && File.Exists(item.thumbnailPath))
                 {
-                    AssetDatabase.DeleteAsset(AssetDatabase.GetAssetPath(item.thumbnail));
+                    File.Delete(item.thumbnailPath);
                 }
 
                 File.Copy(sourcePath, targetPath, true);
-                AssetDatabase.ImportAsset(targetPath);
+                
+                // Manually load the image into a Texture2D to preview in Editor
+                item.thumbnailPath = targetPath;
+                item.thumbnail = new Texture2D(2, 2);
+                item.thumbnail.LoadImage(File.ReadAllBytes(targetPath));
 
-                // Configure as Sprite
-                TextureImporter importer = AssetImporter.GetAtPath(targetPath) as TextureImporter;
-                if (importer != null)
-                {
-                    importer.textureType = TextureImporterType.Sprite;
-                    importer.spriteImportMode = SpriteImportMode.Single;
-                    importer.SaveAndReimport();
-                }
-
-                item.thumbnail = AssetDatabase.LoadAssetAtPath<Texture2D>(targetPath);
                 SaveToXml();
             }
         }
 
         private void RenameLocationImage(LocationItem item, string newName)
         {
-            if (item.thumbnail != null)
+            if (!string.IsNullOrEmpty(item.thumbnailPath) && File.Exists(item.thumbnailPath))
             {
-                string path = AssetDatabase.GetAssetPath(item.thumbnail);
-                string error = AssetDatabase.RenameAsset(path, newName);
-                if (!string.IsNullOrEmpty(error)) Debug.LogWarning($"Failed to rename Location Image: {error}");
+                string dir = Path.GetDirectoryName(item.thumbnailPath);
+                string ext = Path.GetExtension(item.thumbnailPath);
+                string newPath = Path.Combine(dir, newName + ext).Replace("\\", "/");
+                
+                if (item.thumbnailPath != newPath)
+                {
+                    File.Move(item.thumbnailPath, newPath);
+                    item.thumbnailPath = newPath;
+                }
             }
         }
 
@@ -483,8 +483,8 @@ namespace Vectorier.ProjectManager
 
         private void EnsureDirectories()
         {
-            CreateFolderRecursive($"Assets/Projects/{activeProjectName}/icons/locations");
-            CreateFolderRecursive($"Assets/Projects/{activeProjectName}/commons");
+            CreateFolderRecursive($"./Projects/{activeProjectName}/icons/locations");
+            CreateFolderRecursive($"./Projects/{activeProjectName}/commons");
         }
 
         private XElement CreateLocationNode(string name, ModeData data)
@@ -528,24 +528,16 @@ namespace Vectorier.ProjectManager
 
         private void CreateFolderRecursive(string path)
         {
-            string[] folders = path.Split('/');
-            string currentPath = folders[0];
-
-            for (int i = 1; i < folders.Length; i++)
+            if (!Directory.Exists(path))
             {
-                string nextPath = currentPath + "/" + folders[i];
-                if (!AssetDatabase.IsValidFolder(nextPath))
-                {
-                    AssetDatabase.CreateFolder(currentPath, folders[i]);
-                }
-                currentPath = nextPath;
+                Directory.CreateDirectory(path);
             }
         }
 
         private void SaveToXml()
         {
             EnsureDirectories();
-            string relativePath = $"Assets/Projects/{activeProjectName}/commons/List_Payed.xml";
+            string relativePath = $"./Projects/{activeProjectName}/commons/List_Payed.xml";
             
             XDocument doc;
             if (File.Exists(relativePath)) doc = XDocument.Load(relativePath);
@@ -603,13 +595,12 @@ namespace Vectorier.ProjectManager
             }
 
             doc.Save(relativePath);
-            AssetDatabase.ImportAsset(relativePath);
         }
 
         private void LoadLocationsFromXml()
         {
             locationList.Clear();
-            string relativePath = $"Assets/Projects/{activeProjectName}/commons/List_Payed.xml";
+            string relativePath = $"./Projects/{activeProjectName}/commons/List_Payed.xml";
 
             if (!File.Exists(relativePath)) return;
 
@@ -636,10 +627,21 @@ namespace Vectorier.ProjectManager
                     orderedList.Add(item);
                     
                     // Link Image using the base name
-                    string[] imgGuids = AssetDatabase.FindAssets(baseName + " t:Texture2D", new[] { $"Assets/Projects/{activeProjectName}/icons/locations" });
-                    if (imgGuids.Length > 0)
+                    string locDir = $"./Projects/{activeProjectName}/icons/locations";
+                    if (Directory.Exists(locDir))
                     {
-                        item.thumbnail = AssetDatabase.LoadAssetAtPath<Texture2D>(AssetDatabase.GUIDToAssetPath(imgGuids[0]));
+                        string[] possibleExts = { ".png", ".jpg", ".jpeg" };
+                        foreach (string ext in possibleExts)
+                        {
+                            string imgPath = Path.Combine(locDir, baseName + ext).Replace("\\", "/");
+                            if (File.Exists(imgPath))
+                            {
+                                item.thumbnailPath = imgPath;
+                                item.thumbnail = new Texture2D(2, 2);
+                                item.thumbnail.LoadImage(File.ReadAllBytes(imgPath));
+                                break;
+                            }
+                        }
                     }
                 }
 
@@ -688,7 +690,7 @@ namespace Vectorier.ProjectManager
             availableTracks.Clear();
             availableLocations.Clear();
 
-            string path = $"Assets/Projects/{activeProjectName}/commons/List_Payed.xml";
+            string path = $"./Projects/{activeProjectName}/commons/List_Payed.xml";
             if (!File.Exists(path)) return;
 
             XDocument doc = XDocument.Load(path);

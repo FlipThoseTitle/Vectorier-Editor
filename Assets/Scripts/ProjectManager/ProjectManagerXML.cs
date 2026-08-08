@@ -248,8 +248,7 @@ namespace Vectorier.ProjectManager
         {
             if (filePaths.Length == 0) return;
 
-            // Updated target directory to /xml
-            string targetDir = $"Assets/Projects/{activeProjectName}/xmlroot";
+            string targetDir = $"./Projects/{activeProjectName}/xmlroot";
             if (!Directory.Exists(targetDir)) Directory.CreateDirectory(targetDir);
 
             int progress = 0;
@@ -265,8 +264,7 @@ namespace Vectorier.ProjectManager
             }
 
             EditorUtility.ClearProgressBar();
-            AssetDatabase.Refresh();
-
+            
             RefreshXMLList();
         }
 
@@ -305,20 +303,12 @@ namespace Vectorier.ProjectManager
                 // Proceed with deleting other selected files silently
                 if (pathsToDelete.Count > 0)
                 {
-                    try
+                    foreach (string pathToDelete in pathsToDelete)
                     {
-                        // Suspend asset imports/updates for bulk optimization
-                        AssetDatabase.StartAssetEditing();
-
-                        foreach (string pathToDelete in pathsToDelete)
+                        if (File.Exists(pathToDelete))
                         {
-                            AssetDatabase.DeleteAsset(pathToDelete);
+                            File.Delete(pathToDelete);
                         }
-                    }
-                    finally
-                    {
-                        // Resume and process all deletions at once
-                        AssetDatabase.StopAssetEditing();
                     }
                 }
 
@@ -329,24 +319,16 @@ namespace Vectorier.ProjectManager
 
         private void ClearAllXMLs()
         {
-            try
+            foreach (string path in loadedXMLPaths)
             {
-                // Suspend asset imports/updates for bulk optimization
-                AssetDatabase.StartAssetEditing();
-
-                foreach (string path in loadedXMLPaths)
+                // Delete everything EXCEPT TriggerTemplates
+                if (Path.GetFileNameWithoutExtension(path) != "TriggerTemplates")
                 {
-                    // Delete everything EXCEPT TriggerTemplates
-                    if (Path.GetFileNameWithoutExtension(path) != "TriggerTemplates")
+                    if (File.Exists(path))
                     {
-                        AssetDatabase.DeleteAsset(path);
+                        File.Delete(path);
                     }
                 }
-            }
-            finally
-            {
-                // Resume and process all deletions at once
-                AssetDatabase.StopAssetEditing();
             }
 
             selectedIndices.Clear();
@@ -358,8 +340,8 @@ namespace Vectorier.ProjectManager
             loadedXMLPaths.Clear();
 
             // Refresh XMLs List from the new directory
-            string dataDir = $"Assets/Projects/{activeProjectName}/xmlroot";
-            if (AssetDatabase.IsValidFolder(dataDir))
+            string dataDir = $"./Projects/{activeProjectName}/xmlroot";
+            if (Directory.Exists(dataDir))
             {
                 string[] rawFiles = Directory.GetFiles(dataDir, "*.xml", SearchOption.TopDirectoryOnly);
 

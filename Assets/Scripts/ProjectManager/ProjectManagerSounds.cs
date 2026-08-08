@@ -249,7 +249,7 @@ namespace Vectorier.ProjectManager
         {
             if (filePaths.Length == 0) return;
 
-            string targetDir = $"Assets/Projects/{activeProjectName}/sounds";
+            string targetDir = $"./Projects/{activeProjectName}/sounds";
             if (!Directory.Exists(targetDir)) Directory.CreateDirectory(targetDir);
 
             int progress = 0;
@@ -265,7 +265,6 @@ namespace Vectorier.ProjectManager
             }
 
             EditorUtility.ClearProgressBar();
-            AssetDatabase.Refresh();
 
             RefreshSoundList();
         }
@@ -317,20 +316,12 @@ namespace Vectorier.ProjectManager
 
                 if (pathsToDelete.Count > 0)
                 {
-                    try
+                    foreach (string pathToDelete in pathsToDelete)
                     {
-                        // Suspend asset imports/updates for bulk optimization
-                        AssetDatabase.StartAssetEditing();
-
-                        foreach (string pathToDelete in pathsToDelete)
+                        if (File.Exists(pathToDelete))
                         {
-                            AssetDatabase.DeleteAsset(pathToDelete);
+                            File.Delete(pathToDelete);
                         }
-                    }
-                    finally
-                    {
-                        // Resume and process all deletions at once
-                        AssetDatabase.StopAssetEditing();
                     }
                 }
 
@@ -351,26 +342,18 @@ namespace Vectorier.ProjectManager
                 "ui_click", "ui_window_options", "ui_window_profile", "ui_window_shop"
             };
 
-            try
+            foreach (string path in loadedSoundPaths)
             {
-                // Suspend asset imports/updates for bulk optimization
-                AssetDatabase.StartAssetEditing();
-
-                foreach (string path in loadedSoundPaths)
+                string fileName = Path.GetFileNameWithoutExtension(path);
+                
+                // Delete everything EXCEPT the protected sounds
+                if (!protectedSounds.Contains(fileName))
                 {
-                    string fileName = Path.GetFileNameWithoutExtension(path);
-                    
-                    // Delete everything EXCEPT the protected sounds
-                    if (!protectedSounds.Contains(fileName))
+                    if (File.Exists(path))
                     {
-                        AssetDatabase.DeleteAsset(path);
+                        File.Delete(path);
                     }
                 }
-            }
-            finally
-            {
-                // Resume and process all deletions at once
-                AssetDatabase.StopAssetEditing();
             }
 
             selectedIndices.Clear();
@@ -382,8 +365,8 @@ namespace Vectorier.ProjectManager
             loadedSoundPaths.Clear();
 
             // Refresh Sounds List
-            string dataDir = $"Assets/Projects/{activeProjectName}/sounds";
-            if (AssetDatabase.IsValidFolder(dataDir))
+            string dataDir = $"./Projects/{activeProjectName}/sounds";
+            if (Directory.Exists(dataDir))
             {
                 string[] rawFiles = Directory.GetFiles(dataDir, "*.wav", SearchOption.TopDirectoryOnly);
 

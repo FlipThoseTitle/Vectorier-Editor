@@ -48,7 +48,7 @@ namespace Vectorier.ProjectManager
             GUILayout.FlexibleSpace();
             
             GUIStyle labelStyle = new GUIStyle(EditorStyles.boldLabel) { alignment = TextAnchor.MiddleRight };
-            GUILayout.Label("Total Videos - " + loadedVideos.Count, labelStyle, GUILayout.Height(30));
+            GUILayout.Label("Total Videos - " + loadedVideoPaths.Count, labelStyle, GUILayout.Height(30));
             
             GUILayout.Space(5); // Adds a small gap before the buttons
 
@@ -58,7 +58,7 @@ namespace Vectorier.ProjectManager
                 DeleteSelectedVideos();
             }
             
-            GUI.enabled = loadedVideos.Count > 0;
+            GUI.enabled = loadedVideoPaths.Count > 0;
             if (GUILayout.Button("C", GUILayout.Width(30), GUILayout.Height(30)))
             {
                 ClearAllVideos();
@@ -84,7 +84,7 @@ namespace Vectorier.ProjectManager
 
         private void DrawVideoGrid()
         {
-            if (loadedVideos.Count == 0)
+            if (loadedVideoPaths.Count == 0)
             {
                 GUILayout.Label("No videos imported yet.\nClick 'Import' or Drag & Drop MP4 files here.", EditorStyles.centeredGreyMiniLabel);
                 return;
@@ -100,12 +100,12 @@ namespace Vectorier.ProjectManager
             int index = 0;
             GUILayout.BeginVertical();
             
-            while (index < loadedVideos.Count)
+            while (index < loadedVideoPaths.Count)
             {
                 GUILayout.BeginHorizontal();
                 for (int i = 0; i < columns; i++)
                 {
-                    if (index >= loadedVideos.Count) break;
+                    if (index >= loadedVideoPaths.Count) break;
 
                     DrawVideoItem(index, itemSize);
                     index++;
@@ -129,7 +129,8 @@ namespace Vectorier.ProjectManager
 
         private void DrawVideoItem(int index, float size)
         {
-            VideoClip clip = loadedVideos[index];
+            string path = loadedVideoPaths[index];
+            string fileName = Path.GetFileNameWithoutExtension(path);
             bool isSelected = selectedIndices.Contains(index);
 
             // Reserve space for the item
@@ -141,33 +142,14 @@ namespace Vectorier.ProjectManager
             else
                 EditorGUI.DrawRect(boxRect, new Color(0.2f, 0.2f, 0.2f, 0.5f)); // Dark grey
 
-            // Get thumbnail from the video clip
-            Texture2D tex = null;
-            if (clip != null)
-            {
-                // GetAssetPreview is async. If it's not ready, it returns null.
-                tex = AssetPreview.GetAssetPreview(clip);
-                
-                if (tex == null)
-                {
-                    // If it's still loading the preview in the background, force the window to repaint 
-                    // so it instantly pops in once ready. Fallback to a mini icon in the meantime.
-                    if (AssetPreview.IsLoadingAssetPreview(clip.GetInstanceID()))
-                    {
-                        Repaint(); 
-                    }
-                    tex = AssetPreview.GetMiniThumbnail(clip);
-                }
-            }
-
-            // Draw Video Thumbnail
-            Rect texRect = new Rect(boxRect.x + 5, boxRect.y + 5, boxRect.width - 10, boxRect.height - 30);
-            if (tex != null) GUI.DrawTexture(texRect, tex, ScaleMode.ScaleToFit);
-
-            // Draw Label
-            Rect labelRect = new Rect(boxRect.x + 5, boxRect.y + boxRect.height - 20, boxRect.width - 10, 20);
-            string labelName = clip != null ? clip.name : "Null";
-            GUI.Label(labelRect, labelName, EditorStyles.miniLabel);
+            // Draw Video Name (Centered since we can't load external thumbnails synchronously)
+            GUIStyle textStyle = new GUIStyle(EditorStyles.boldLabel) 
+            { 
+                alignment = TextAnchor.MiddleCenter, 
+                wordWrap = true 
+            };
+            Rect labelRect = new Rect(boxRect.x + 5, boxRect.y + 5, boxRect.width - 10, boxRect.height - 10);
+            GUI.Label(labelRect, fileName, textStyle);
 
             // --- Multi-Select Logic ---
             Event e = Event.current;
@@ -180,7 +162,7 @@ namespace Vectorier.ProjectManager
                 }
                 else if (e.shift && selectedIndices.Count > 0) // Shift Click
                 {
-                    int lastSelected = selectedIndices[selectedIndices.Count - 1];
+                    int lastSelected = selectedIndices.Last();
                     int start = Mathf.Min(lastSelected, index);
                     int end = Mathf.Max(lastSelected, index);
                     selectedIndices.Clear();
@@ -256,7 +238,7 @@ namespace Vectorier.ProjectManager
         {
             if (filePaths.Length == 0) return;
 
-            string targetDir = $"Assets/Projects/{activeProjectName}/videos";
+            string targetDir = $"./Projects/{activeProjectName}/videos";
 
             if (!Directory.Exists(targetDir)) Directory.CreateDirectory(targetDir);
 
@@ -274,7 +256,6 @@ namespace Vectorier.ProjectManager
             }
 
             EditorUtility.ClearProgressBar();
-            AssetDatabase.Refresh();
             
             RefreshVideoList();
         }
@@ -283,7 +264,6 @@ namespace Vectorier.ProjectManager
         {
             if (selectedIndices.Count > 0)
             {
-                // Gather paths first so indices don't shift as we delete them
                 List<string> pathsToDelete = new List<string>();
                 bool introSelected = false;
 
@@ -314,20 +294,12 @@ namespace Vectorier.ProjectManager
 
                 if (pathsToDelete.Count > 0)
                 {
-                    try
+                    foreach (string pathToDelete in pathsToDelete)
                     {
-                        // Suspend asset imports/updates
-                        AssetDatabase.StartAssetEditing();
-
-                        foreach (string pathToDelete in pathsToDelete)
+                        if (File.Exists(pathToDelete))
                         {
-                            AssetDatabase.DeleteAsset(pathToDelete);
+                            File.Delete(pathToDelete);
                         }
-                    }
-                    finally
-                    {
-                        // Resume and process all deletions at once
-                        AssetDatabase.StopAssetEditing();
                     }
                 }
 
@@ -338,24 +310,16 @@ namespace Vectorier.ProjectManager
 
         private void ClearAllVideos()
         {
-            try
+            foreach (string path in loadedVideoPaths)
             {
-                // Suspend asset imports/updates to vastly speed up bulk operations
-                AssetDatabase.StartAssetEditing();
-
-                foreach (string path in loadedVideoPaths)
+                // Delete everything EXCEPT the "intro" video
+                if (Path.GetFileNameWithoutExtension(path) != "intro")
                 {
-                    // Delete everything EXCEPT the "intro" video
-                    if (Path.GetFileNameWithoutExtension(path) != "intro")
+                    if (File.Exists(path))
                     {
-                        AssetDatabase.DeleteAsset(path);
+                        File.Delete(path);
                     }
                 }
-            }
-            finally
-            {
-                // Resume and process all deletions at once
-                AssetDatabase.StopAssetEditing();
             }
 
             selectedIndices.Clear();
@@ -364,24 +328,18 @@ namespace Vectorier.ProjectManager
 
         private void RefreshVideoList()
         {
-            loadedVideos.Clear();
             loadedVideoPaths.Clear();
 
-            string videosDir = $"Assets/Projects/{activeProjectName}/videos";
+            string videosDir = $"./Projects/{activeProjectName}/videos";
 
-            if (AssetDatabase.IsValidFolder(videosDir))
+            if (Directory.Exists(videosDir))
             {
-                string[] guids = AssetDatabase.FindAssets("t:VideoClip", new string[] { videosDir });
+                string[] files = Directory.GetFiles(videosDir, "*.mp4", SearchOption.TopDirectoryOnly);
 
-                foreach (string guid in guids)
+                foreach (string file in files)
                 {
-                    string path = AssetDatabase.GUIDToAssetPath(guid);
-                    VideoClip clip = AssetDatabase.LoadAssetAtPath<VideoClip>(path);
-                    if (clip != null)
-                    {
-                        loadedVideos.Add(clip);
-                        loadedVideoPaths.Add(path);
-                    }
+                    string path = file.Replace("\\", "/");
+                    loadedVideoPaths.Add(path);
                 }
             }
 
