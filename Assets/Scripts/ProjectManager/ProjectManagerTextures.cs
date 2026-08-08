@@ -534,6 +534,19 @@ namespace Vectorier.ProjectManager
                 string file = filesToProcess[i];
                 string normalizedFile = file.Replace("\\", "/");
                 string fileName = Path.GetFileName(normalizedFile);
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(normalizedFile);
+
+                // Hide excluded textures from the visual grid
+                if (IsFileExcluded(normalizedFile))
+                {
+                    if (fileNameWithoutExt != "parrot01" && 
+                        fileNameWithoutExt != "parrot02" && 
+                        fileNameWithoutExt != "parrot03")
+                    {
+                        continue; // Skip adding to the grid data
+                    }
+                }
+
                 bool hasPlist = File.Exists(Path.ChangeExtension(normalizedFile, ".plist"));
 
                 // Predict where the Unity Asset version of this texture lives
@@ -561,7 +574,7 @@ namespace Vectorier.ProjectManager
                     Texture2D manualTex = new Texture2D(2, 2);
                     if (ImageConversion.LoadImage(manualTex, bytes))
                     {
-                        manualTex.name = Path.GetFileNameWithoutExtension(file);
+                        manualTex.name = fileNameWithoutExt;
                         loadedTextures.Add(manualTex);
                         loadedTexturePaths.Add(normalizedFile);
                     }
