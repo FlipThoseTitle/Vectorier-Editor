@@ -68,6 +68,7 @@ Tutorial and Documentation is available on the [Vectorier Editor Documentation W
 This project was made possible through the collaboration and support of the following contributors. Each person has invested their time, knowledge, and effort to improve, refine, and expand this project. From identifying bugs and implementing new features, their involvement has been invaluable. The project stands as a result of shared effort and collective dedication.
 - DoritoTheChips
 - Supergoldapfel (sol)
+- somemelguy (Mel)
 - kubinka0505
 - sonamenil (Vision)
 - mirrorsedgegamer
