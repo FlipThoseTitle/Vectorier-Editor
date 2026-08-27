@@ -152,7 +152,7 @@ namespace Vectorier.Parallax
 
         // ================= PARALLAX ================= //
 
-        [MenuItem("Vectorier/Tools/Toggle Parallax", false, 35)]
+        [MenuItem("Vectorier/Tools/Toggle Parallax", false, 14)]
         private static void ToggleParallaxFromMenu()
         {
             if (!TryGetParallaxCamera(out var targetParallax)) return;

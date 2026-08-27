@@ -25,7 +25,7 @@ namespace Vectorier.ProjectManager
         // Track changes to prevent saving on every keystroke
         private bool isDescriptionDirty = false;
 
-        [MenuItem("Vectorier/Manage Project...")]
+        [MenuItem("Vectorier/Manage Project...", false, 58)]
         public static void ShowWindow()
         {
             ProjectManager window = GetWindow<ProjectManager>("Project Manager");

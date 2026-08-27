@@ -25,16 +25,16 @@ namespace Vectorier.EditorScript.Tools
 
         // ================= MENU =================
 
-        [MenuItem("Vectorier/Tools/Quick Actions/Build Surface/All Surface", false, 36)]
+        [MenuItem("Vectorier/Tools/Quick Actions/Build Surface/All Surface", false, 41)]
         private static void BuildAll() => Build(SurfaceMode.All);
 
-        [MenuItem("Vectorier/Tools/Quick Actions/Build Surface/Floor", false, 37)]
+        [MenuItem("Vectorier/Tools/Quick Actions/Build Surface/Floor", false, 42)]
         private static void BuildFloor() => Build(SurfaceMode.Floor);
 
-        [MenuItem("Vectorier/Tools/Quick Actions/Build Surface/Left Wall", false, 38)]
+        [MenuItem("Vectorier/Tools/Quick Actions/Build Surface/Left Wall", false, 43)]
         private static void BuildLeftWall() => Build(SurfaceMode.LeftWall);
 
-        [MenuItem("Vectorier/Tools/Quick Actions/Build Surface/Right Wall", false, 39)]
+        [MenuItem("Vectorier/Tools/Quick Actions/Build Surface/Right Wall", false, 44)]
         private static void BuildRightWall() => Build(SurfaceMode.RightWall);
 
         // ================= CORE =================

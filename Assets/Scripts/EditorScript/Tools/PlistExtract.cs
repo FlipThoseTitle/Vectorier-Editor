@@ -13,7 +13,7 @@ namespace Vectorier.EditorScript.Tools
     {
         private const string MenuPath = "Vectorier/Tools/Extract Animated Sprite";
 
-        [MenuItem(MenuPath, false, 35)]
+        [MenuItem(MenuPath, false, 30)]
         public static void ExtractAnimatedSprite()
         {
             // Select .plist

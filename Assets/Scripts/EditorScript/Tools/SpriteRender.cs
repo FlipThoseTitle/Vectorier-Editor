@@ -16,7 +16,7 @@ namespace Vectorier.EditorScript.Tools
         // Tile size used when output exceeds rendertexture limits
         private static int TileSize => Mathf.Min(4096, SystemInfo.maxTextureSize);
 
-        [MenuItem("Vectorier/Tools/Export Selected Sprites as PNG", false, 35)]
+        [MenuItem("Vectorier/Tools/Export Selected Sprites as PNG", false, 29)]
         public static void ExportSelected()
         {
             var selected = Selection.gameObjects;

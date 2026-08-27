@@ -26,7 +26,7 @@ namespace Vectorier.Core.Preferences
 
         // ================= MAIN ================= //
 
-        [MenuItem("Vectorier/Preferences...", false, 31)]
+        [MenuItem("Vectorier/Preferences...", false, 13)]
         private static void OpenWindow()
         {
             var window = GetWindow<Preference>("Preferences");

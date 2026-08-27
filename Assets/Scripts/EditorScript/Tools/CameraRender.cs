@@ -7,10 +7,10 @@ namespace Vectorier.EditorScript.Tools
 {
     public static class CameraRender
     {
-        [MenuItem("Vectorier/Tools/Render Camera as PNG/1920x1080", false, 38)]
+        [MenuItem("Vectorier/Tools/Render Camera as PNG/1920x1080", false, 46)]
         public static void Render1080p() => ProcessCameraExport(1920, 1080);
 
-        [MenuItem("Vectorier/Tools/Render Camera as PNG/512x340", false, 39)]
+        [MenuItem("Vectorier/Tools/Render Camera as PNG/512x340", false, 47)]
         public static void RenderSmall() => ProcessCameraExport(512, 340);
 
         private static void ProcessCameraExport(int width, int height)

@@ -29,7 +29,7 @@ namespace Vectorier.EditorScript.Tools
 
         // ================= MENU ================= //
 
-        [MenuItem("Vectorier/Tools/Polyline Tool", false, 35)]
+        [MenuItem("Vectorier/Tools/Polyline Tool", false, 28)]
         public static void OpenWindow()
         {
             GetWindow<PolylineTool>("Polyline Tool");
