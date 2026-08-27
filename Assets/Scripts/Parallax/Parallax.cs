@@ -155,30 +155,7 @@ namespace Vectorier.Parallax
         [MenuItem("Vectorier/Tools/Toggle Parallax", false, 35)]
         private static void ToggleParallaxFromMenu()
         {
-            var candidates = FindObjectsByType<Parallax>(FindObjectsSortMode.None);
-
-            if (candidates.Length == 0)
-            {
-                EditorUtility.DisplayDialog("Parallax", "There are no cameras with a Parallax component in the scene!", "OK");
-                return;
-            }
-
-            Parallax targetParallax = candidates[0];
-
-            if (candidates.Length > 1)
-            {
-                var selected = Selection.activeGameObject?.GetComponent<Parallax>();
-                if (selected != null && candidates.Contains(selected))
-                {
-                    targetParallax = selected;
-                }
-                else
-                {
-                    // Randomly select one
-                    int randomIndex = UnityEngine.Random.Range(0, candidates.Length);
-                    targetParallax = candidates[randomIndex];
-                }
-            }
+            if (!TryGetParallaxCamera(out var targetParallax)) return;
 
             targetParallax.ToggleParallax();
             
@@ -193,14 +170,84 @@ namespace Vectorier.Parallax
 
         public void ToggleParallax()
         {
-            if (_isActive) StopParallax();
-            else StartParallax();
+            // Always allow the instance that is currently active to stop itself,
+            // even if its tag was changed since it was started.
+            if (_isActive)
+            {
+                StopParallax();
+                return;
+            }
+
+            if (!TryGetParallaxCamera(out var targetParallax)) return;
+            targetParallax.StartParallax();
+        }
+
+        private static bool TryGetParallaxCamera(out Parallax targetParallax)
+        {
+            targetParallax = null;
+
+            var candidates = FindObjectsByType<Parallax>(FindObjectsSortMode.None);
+            var taggedCameraObjects = GameObject.FindGameObjectsWithTag("Camera");
+
+            // The tag is authoritative. A duplicate is ambiguous even when only
+            // one of the tagged objects currently has a Parallax component.
+            if (taggedCameraObjects.Length > 1)
+            {
+                EditorUtility.DisplayDialog(
+                    "Parallax",
+                    "There are multiple GameObjects tagged 'Camera' in the scene. " +
+                    "Tag exactly one camera before starting Parallax.",
+                    "OK");
+                Debug.LogError("Parallax could not start because multiple GameObjects are tagged 'Camera'.");
+                return false;
+            }
+
+            if (taggedCameraObjects.Length == 1)
+            {
+                targetParallax = taggedCameraObjects[0].GetComponent<Parallax>();
+                if (targetParallax != null) return true;
+            }
+
+            // Backwards-compatible fallback: when no Camera tag is present,
+            // component selection is valid only when it is unambiguous.
+            if (candidates.Length == 1)
+            {
+                targetParallax = candidates[0];
+                return true;
+            }
+
+            if (candidates.Length == 0)
+            {
+                EditorUtility.DisplayDialog(
+                    "Parallax",
+                    "There are no cameras with a Parallax component in the scene!",
+                    "OK");
+            }
+            else
+            {
+                EditorUtility.DisplayDialog(
+                    "Parallax",
+                    "Multiple Parallax components were found, but none is assigned to the 'Camera' tag. " +
+                    "Tag exactly one camera to choose the Parallax camera.",
+                    "OK");
+                Debug.LogError("Parallax could not start because multiple Parallax components exist without a unique 'Camera' tag.");
+            }
+
+            return false;
         }
 
         private void StartParallax()
         {
             var camera = GetComponent<Camera>();
             if (camera == null) return;
+
+            // Keep the scene in a single, well-defined parallax state if an
+            // inspector button or a script starts another instance directly.
+            foreach (var other in FindObjectsByType<Parallax>(FindObjectsSortMode.None))
+            {
+                if (other != this && other._isActive)
+                    other.StopParallax();
+            }
 
             _isActive = true;
             HideSelf();

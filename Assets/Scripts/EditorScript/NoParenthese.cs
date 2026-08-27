@@ -13,6 +13,10 @@ namespace Vectorier.EditorScript
 
         private static void OnHierarchyChanged()
         {
+            // Don't rename duplicate objects if the option is disabled
+            if (!ShouldRenameDuplicate())
+                return;
+
             // Cache selection to avoid multiple native calls
             GameObject[] selectedObjects = Selection.gameObjects;
             if (selectedObjects.Length == 0) return;
@@ -20,7 +24,7 @@ namespace Vectorier.EditorScript
             foreach (GameObject go in selectedObjects)
             {
                 string name = go.name;
-                
+
                 // Fast rejection: If it doesn't end with ')', skip immediately
                 if (!name.EndsWith(")")) continue;
 
@@ -42,7 +46,7 @@ namespace Vectorier.EditorScript
                 if (isDigitOnly)
                 {
                     string newName = name.Substring(0, lastSpaceOpenParen);
-                    
+
                     // Safety check to prevent infinite loops
                     if (go.name != newName)
                     {
@@ -51,6 +55,11 @@ namespace Vectorier.EditorScript
                     }
                 }
             }
+        }
+
+        private static bool ShouldRenameDuplicate()
+        {
+            return EditorPrefs.GetBool("Vectorier_RenameDuplicate", true);
         }
     }
 }
