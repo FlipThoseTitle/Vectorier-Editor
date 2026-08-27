@@ -13,7 +13,7 @@ namespace Vectorier.Model
         public const float SourceFps = 20f;
         public const float ZOffset = -300f;
         public const float TargetFps = 60f; // The interpolated playback frame rate
-public float ContinuousFrame { get; set; } // Tracks the floating-point time between frames
+        public float ContinuousFrame { get; set; } // Tracks the floating-point time between frames
 
         public static readonly Vector3 AnimZPushVector = new(0f, 0f, ZOffset);
 
@@ -145,7 +145,7 @@ public float ContinuousFrame { get; set; } // Tracks the floating-point time bet
         {
             Model = ModelData.LoadOrThrow(xmlPath);
             State.AllocateNodeBuffers(Model.NodeCount);
-            
+
             State.PreviewPose = new Vector3[Model.PreviewPose.Length];
             for (int i = 0; i < Model.PreviewPose.Length; i++)
             {
@@ -309,7 +309,7 @@ public float ContinuousFrame { get; set; } // Tracks the floating-point time bet
                 stayInPlacePivotNodeIndex < nodesA.Length)
             {
                 Vector3 startPivot = State.AnimationFrames[StartFrame][stayInPlacePivotNodeIndex];
-                
+
                 // Interpolate the pivot point to prevent snapping when staying in place
                 Vector3 currentPivotA = nodesA[stayInPlacePivotNodeIndex];
                 Vector3 currentPivotB = nodesB[stayInPlacePivotNodeIndex];
@@ -380,7 +380,7 @@ public float ContinuousFrame { get; set; } // Tracks the floating-point time bet
             return Path.GetFullPath(Path.Combine(projectRoot, path));
         }
 
-        public static string ResolveBinFullPathOrThrow( bool isCustomMode, string customBinPath, string binFolderPath, string binFileName)
+        public static string ResolveBinFullPathOrThrow(bool isCustomMode, string customBinPath, string binFolderPath, string binFileName)
         {
             string fullPath;
 
@@ -429,7 +429,7 @@ public float ContinuousFrame { get; set; } // Tracks the floating-point time bet
                     float x = reader.ReadSingle();
                     float y = reader.ReadSingle();
                     float z = reader.ReadSingle();
-                    
+
                     // Negate X coordinate if reverse mode is enabled
                     frame[nodeIndex] = new Vector3(Reverse ? -x : x, y, -z);
                 }

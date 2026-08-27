@@ -519,24 +519,46 @@ namespace Vectorier.Dynamic
 
             GUILayout.Label("Transform", GUILayout.Width(65));
 
-            int np = EditorGUILayout.Popup(dtPick, dtNames, GUILayout.Width(180));
-            if (np != dtPick)
+            Rect totalRect = EditorGUILayout.GetControlRect(false, EditorGUIUtility.singleLineHeight, GUILayout.Width(180));
+            Rect textRect = new Rect(totalRect.x, totalRect.y, totalRect.width - 20, totalRect.height);
+            Rect btnRect = new Rect(totalRect.x + totalRect.width - 20, totalRect.y, 20, totalRect.height);
+
+            GUI.SetNextControlName("TransformNameInput");
+            string renamed = EditorGUI.DelayedTextField(textRect, curDTName);
+
+            if (EditorGUI.DropdownButton(btnRect, GUIContent.none, FocusType.Passive, EditorStyles.popup))
             {
-                dtPick = np;
-                curDTName = (dtNames != null && dtNames.Length > 0) ? dtNames[dtPick] : "NewTransform";
-                LoadSelectedDTIntoTimeline();
+                GUI.FocusControl(null); // Unfocus text box when clicking dropdown
+                GenericMenu menu = new GenericMenu();
+                for (int i = 0; i < dtNames.Length; i++)
+                {
+                    int index = i;
+                    menu.AddItem(new GUIContent(dtNames[i]), dtPick == index, () =>
+                    {
+                        GUI.FocusControl(null); // Unfocus text box on item select
+                        dtPick = index;
+                        curDTName = dtNames[index];
+                        LoadSelectedDTIntoTimeline();
+                    });
+                }
+                menu.DropDown(totalRect);
+            }
+
+            if (renamed != curDTName && !string.IsNullOrEmpty(renamed))
+            {
+                GUI.FocusControl(null); // Unfocus after confirming text
+                RenameCurrentTransform(renamed);
             }
 
             if (GUILayout.Button("+", GUILayout.Width(24)))
             {
-                curDTName = "NewTransform";
-                dtPick = 0;
-                dtNames = new[] { "NewTransform" }.Concat(dtNames ?? System.Array.Empty<string>()).Distinct().ToArray();
-                ClearTimelineForNewTransform();
+                GUI.FocusControl(null);
+                AddNewTransformComponent();
             }
 
             if (GUILayout.Button("-", GUILayout.Width(24)))
             {
+                GUI.FocusControl(null);
                 RemoveSelectedTransformComponent();
                 RefreshDTList();
                 LoadSelectedDTIntoTimeline();
@@ -544,9 +566,60 @@ namespace Vectorier.Dynamic
 
             if (GUILayout.Button("Save", GUILayout.Width(60)))
             {
+                GUI.FocusControl(null);
                 SaveSelectedTransform();
                 RefreshDTList();
             }
+        }
+
+        void RenameCurrentTransform(string targetName)
+        {
+            if (!d) return;
+
+            string uniqueName = GetUniqueTransformName(targetName, curDTName);
+
+            var dts = d.gameObject.GetComponents<DynamicTransform>();
+            for (int i = 0; i < dts.Length; i++)
+            {
+                if (dts[i] && N(dts[i]) == curDTName)
+                {
+                    Undo.RecordObject(dts[i], "Rename Transform");
+                    dts[i].transformationName = uniqueName;
+                    EditorUtility.SetDirty(dts[i]);
+                    break;
+                }
+            }
+
+            Undo.RecordObject(d, "Rename Transform Timeline");
+            d.transformationName = uniqueName;
+            EditorUtility.SetDirty(d);
+
+            curDTName = uniqueName;
+            RefreshDTList();
+        }
+
+        string GetUniqueTransformName(string requestedName, string excludeCurrentName)
+        {
+            if (!d || !d.gameObject) return requestedName;
+
+            var existingNames = d.gameObject.GetComponents<DynamicTransform>()
+                .Where(dt => dt && N(dt) != excludeCurrentName)
+                .Select(dt => N(dt))
+                .ToHashSet();
+
+            if (!existingNames.Contains(requestedName))
+                return requestedName;
+
+            string candidate = $"{requestedName}_copy";
+            if (!existingNames.Contains(candidate))
+                return candidate;
+
+            int counter = 1;
+            while (existingNames.Contains($"{requestedName}_copy_{counter}"))
+            {
+                counter++;
+            }
+            return $"{requestedName}_copy_{counter}";
         }
 
         void ClearTimelineForNewTransform()
@@ -569,6 +642,7 @@ namespace Vectorier.Dynamic
 
         void LoadSelectedDTIntoTimeline()
         {
+            GUI.FocusControl(null); // Clear keyboard focus so text field refreshes visually
             if (!d) return;
 
             var go = d.gameObject;
@@ -607,6 +681,36 @@ namespace Vectorier.Dynamic
             // bake into named DT
             d.BakeToDynamicTransform(d.gameObject, name, clear: true, useCustomEase: customEase);
             curDTName = name;
+        }
+
+        void AddNewTransformComponent()
+        {
+            if (!d) return;
+
+            string uniqueName = GetUniqueTransformName("NewTransform", null);
+
+            var newDT = Undo.AddComponent<DynamicTransform>(d.gameObject);
+            newDT.transformationName = uniqueName;
+
+            Undo.RecordObject(d, "New Transform Timeline");
+            d.transformationName = uniqueName;
+            d.keys.Clear();
+
+            var k0 = d.Snapshot(0);
+            d.Upsert(k0.f, k0.lp, k0.ls, k0.z, k0.c, k0.support, true);
+            d.totalFrames = Mathf.Max(1, d.totalFrames);
+            f = 0;
+            selF.Clear();
+
+            d.BakeToDynamicTransform(newDT, clear: true, useCustomEase: customEase);
+
+            EditorUtility.SetDirty(newDT);
+            EditorUtility.SetDirty(d);
+
+            if (p) p.ApplyFrame(0);
+
+            curDTName = uniqueName;
+            RefreshDTList();
         }
 
         void RemoveSelectedTransformComponent()
