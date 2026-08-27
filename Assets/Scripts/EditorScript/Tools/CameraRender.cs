@@ -15,40 +15,54 @@ namespace Vectorier.EditorScript.Tools
 
         private static void ProcessCameraExport(int width, int height)
         {
-            // Find all gameObjects tagged Camera that also have a Camera component
+            // Find all GameObjects tagged "Camera"
             var cameraObjects = GameObject.FindGameObjectsWithTag("Camera");
-            var validCameras = cameraObjects .Select(go => go.GetComponent<Camera>()) .Where(cam => cam != null) .ToList();
 
+            // Filter out objects that don't have a Camera component
+            var validCameras = cameraObjects
+                .Select(go => go.GetComponent<Camera>())
+                .Where(cam => cam != null)
+                .ToList();
+
+            // No valid camera found
             if (validCameras.Count == 0)
             {
                 EditorUtility.DisplayDialog(
-                    "Camera Not Found", 
-                    "No GameObject tagged 'Camera' with a Camera component was found in the scene.", 
+                    "Camera Not Found",
+                    "No GameObject tagged 'Camera' with a Camera component was found in the scene.",
                     "OK"
                 );
                 return;
             }
 
+            // More than one valid camera found
             if (validCameras.Count > 1)
             {
                 EditorUtility.DisplayDialog(
-                    "Multiple Cameras Found", 
-                    $"Found {validCameras.Count} GameObjects tagged 'Camera'. Please ensure only one camera is tagged to avoid ambiguity.", 
+                    "Multiple Cameras Found",
+                    $"Found {validCameras.Count} GameObjects tagged 'Camera' with Camera components.\n\n" +
+                    "Please ensure only one GameObject is tagged 'Camera' before rendering.",
                     "OK"
                 );
                 return;
             }
 
+            // Exactly one valid camera
             Camera targetCamera = validCameras[0];
 
             // Prompt user for save location
             string defaultName = $"CameraRender_{width}x{height}.png";
-            string outPath = EditorUtility.SaveFilePanel("Save camera render", "", defaultName, "png");
-            
+            string outPath = EditorUtility.SaveFilePanel(
+                "Save camera render",
+                "",
+                defaultName,
+                "png"
+            );
+
             if (string.IsNullOrEmpty(outPath))
                 return;
 
-            // Render and Export
+            // Render and export
             ExportSingle(targetCamera, width, height, outPath);
         }
 
@@ -111,7 +125,7 @@ namespace Vectorier.EditorScript.Tools
                     renderTexture.Release();
                     UnityEngine.Object.DestroyImmediate(renderTexture);
                 }
-                
+
                 if (outputTexture != null)
                 {
                     UnityEngine.Object.DestroyImmediate(outputTexture);
