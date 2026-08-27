@@ -31,6 +31,7 @@ namespace Vectorier.Core
             public bool item = false;
             public bool icon = false;
             public string stocks = "";
+            public int lifeTime = 0;
         }
 
         public const string DefaultCommonModeModels =

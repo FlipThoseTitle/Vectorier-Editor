@@ -221,8 +221,8 @@ namespace Vectorier.EditorScript
             
             DrawSpawnDropdown(ref m.birthSpawn, "Spawn *", "The spawn point in the scene for this model.");
             
-            m.ai = EditorGUILayout.IntField(new GUIContent("AI Number *", "The number of the AI\nUsed to specify the AI Index for the Trigger.\nExample: Making it so that this trigger is only activated by AI number 2."), m.ai);
-            m.time = EditorGUILayout.FloatField(new GUIContent("Time Until Spawn *", "Delay in seconds before this model spawns."), m.time);
+            m.ai = Mathf.Max(0, EditorGUILayout.IntField(new GUIContent("AI Number *", "The number of the AI\nUsed to specify the AI Index for the Trigger.\nExample: Making it so that this trigger is only activated by AI number 2."), m.ai));
+            m.time = Mathf.Max(0, EditorGUILayout.FloatField(new GUIContent("Time Until Spawn *", "Delay in seconds before this model spawns."), m.time));
 
             EditorGUILayout.Space(4);
             EditorGUILayout.LabelField("Optional", EditorStyles.boldLabel);
@@ -254,6 +254,8 @@ namespace Vectorier.EditorScript
             DrawModelDropdownList(ref m.arrests, "Arrest Who?", "Models this model is allowed to arrest.", m.name, false, "Add Model");
             
             DrawStringList(ref m.stocks, "Stocks", "The models that will be attached to this model.\nUses the .xml file name\nExample: bike.xml is just 'bike' in the list.");
+
+            m.lifeTime = Mathf.Max(0, EditorGUILayout.IntField( new GUIContent( "LifeTime", "The amount of time this model will remain alive." ), m.lifeTime ));
 
             GUILayout.Space(5);
             GUILayout.EndVertical();
@@ -460,6 +462,7 @@ namespace Vectorier.EditorScript
                 Add("Arrests", m.arrests);
                 Add("Icon", "1", m.icon && m.type == 0);
                 Add("Stocks", m.stocks);
+                Add("LifeTime", m.lifeTime.ToString(), m.lifeTime != 0);
 
                 lines.Add("<Model " + string.Join(" ", attrs) + "/>");
             }
@@ -498,7 +501,8 @@ namespace Vectorier.EditorScript
                         murders = e.GetAttribute("Murders"),
                         arrests = e.GetAttribute("Arrests"),
                         icon = e.GetAttribute("Icon") == "1",
-                        stocks = e.GetAttribute("Stocks")
+                        stocks = e.GetAttribute("Stocks"),
+                        lifeTime = int.TryParse( e.GetAttribute("LifeTime"), out int lt ) ? lt : 0
                     });
                 }
             }
