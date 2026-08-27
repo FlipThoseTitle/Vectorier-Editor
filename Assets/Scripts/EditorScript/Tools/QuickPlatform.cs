@@ -8,7 +8,7 @@ namespace Vectorier.EditorScript.Tools
     {
         private const string PLATFORM_SPRITE_PATH = "Images/Editor/Collision/platform";
 
-        [MenuItem("Vectorier/Tools/Quick Actions/Build Platform from Sprite", false, 45)]
+        [MenuItem("Vectorier/Tools/Quick Actions/Build Platform from Sprite", false, 55)]
         private static void BuildPlatformFromSprite()
         {
             if (Selection.gameObjects.Length == 0)

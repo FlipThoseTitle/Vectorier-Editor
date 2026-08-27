@@ -43,7 +43,7 @@ namespace Vectorier.Dynamic
         static List<CK> clip = new();
         static int clipSpan = 0;
 
-        [MenuItem("Vectorier/Tools/Dynamic Editor", false, 16)] static void Open() { GetWindow<DynamicEditor>("Dynamic Editor"); }
+        [MenuItem("Vectorier/Tools/Dynamic Editor", false, 26)] static void Open() { GetWindow<DynamicEditor>("Dynamic Editor"); }
 
         void OnEnable()
         {

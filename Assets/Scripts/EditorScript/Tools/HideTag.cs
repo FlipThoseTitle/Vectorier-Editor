@@ -44,7 +44,7 @@ namespace Vectorier.EditorScript.Tools
         private Vector2 _scrollPosition;
         private bool _isApplyingVisibility = false;
 
-        [MenuItem(MenuPath, false, 17)]
+        [MenuItem(MenuPath, false, 27)]
         public static void ShowWindow()
         {
             HideTagWindow window = GetWindow<HideTagWindow>("Hide Tags");

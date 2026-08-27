@@ -299,7 +299,7 @@ namespace Vectorier.EditorScript.Tools
         
         // ================= WINDOW ================= //
 
-        [MenuItem("Vectorier/Tools/Move Visualizer", false, 15)]
+        [MenuItem("Vectorier/Tools/Move Visualizer", false, 25)]
         public static MoveVisualizer OpenWindow()
         {
             var window = GetWindow<MoveVisualizer>("Move Visualizer");
