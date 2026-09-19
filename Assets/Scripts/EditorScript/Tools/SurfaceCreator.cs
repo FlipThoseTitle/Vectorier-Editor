@@ -317,7 +317,7 @@ namespace Vectorier.EditorScript.Tools
         private const string WALL_R = "Images/Vector/Black/Block/Wall/v_Wall_R_01";
         private const string BLACK_FILL = "Images/Vector/Black/Block/v_black";
 
-        [MenuItem("Vectorier/Tools/Quick Actions/Build Surface/Custom Surface...", false, 40)]
+        [MenuItem("Vectorier/Tools/Quick Actions/Build Surface/Custom Surface...", false, 55)]
         public static void Open()
         {
             var window = GetWindow<SurfaceCreator>("Custom Surface");
