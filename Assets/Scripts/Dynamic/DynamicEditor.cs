@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
@@ -7,296 +8,230 @@ namespace Vectorier.Dynamic
 {
     public class DynamicEditor : EditorWindow
     {
-        DynamicTimelineData d; DynamicPreview p;
-        int f; float zoom = 1f;
-        float scrollF;
-        readonly HashSet<int> selF = new();
-        bool scrubbing, moving;
-        bool pendingMerge;
-        bool moveUndoPushed;
-        int dragStartFrame;
-        List<(int idx, int origF)> moveList = new();
-        static string N(DynamicTransform x) => (x && !string.IsNullOrEmpty(x.transformationName)) ? x.transformationName : "NewTransform";
-        Vector2 _multiListScroll;
-
-        bool onion; float onionA = 0.25f;
-        bool customEase;
-
-        string[] dtNames = new string[0];
-        int dtPick = 0;
-        string curDTName = "NewTransform";
-        GameObject[] boundGos;
-
-        string[] GetDTNames(GameObject go)
+        class Track
         {
-            if (!go) return System.Array.Empty<string>();
-            var dts = go.GetComponents<DynamicTransform>();
-            if (dts == null || dts.Length == 0) return System.Array.Empty<string>();
-            return dts.Select(x => string.IsNullOrEmpty(x.transformationName) ? "NewTransform" : x.transformationName).Distinct().ToArray();
+            public GameObject go;
+            public DynamicTimelineData d;
+            public DynamicPreview p;
+
+            public readonly HashSet<int> selF = new();
+
+            public bool scrubbing, moving, pendingMerge, moveUndoPushed;
+            public int dragStartFrame;
+            public readonly List<(int idx, int origF)> moveList = new();
+
+            public string[] dtNames = Array.Empty<string>();
+            public int dtPick;
+            public string curDTName = "NewTransform";
+            public bool expanded = true;
+
+            // pose before we touched anything, put back on unbind
+            public Vector3 oLP, oLS;
+            public Quaternion oLR;
+            public Color oC;
+            public bool oHasSR;
         }
 
-        // restore-on-close / selection change
-        GameObject boundGO;
-        Vector3 oLP, oLS; Quaternion oLR; Color oC; bool oHasSR;
+        readonly List<Track> tracks = new();
+        int active;
+
+        // shared across every track
+        int f;                  // master playhead, tracks clamp to their own end
+        float scrollF;
+        bool onion;
+        float onionA = 0.25f;
+        bool customEase;
+        float zoom = 1f;
+        Vector2 scroll;
+        float lastTimelineW = 400f;
+
+        // master clock, drives every track from one place so they can't drift apart
+        bool playing;
+        double lastT, carry;
+
+        bool pendingBind;
 
         struct CK { public int df; public Vector3 lp, ls; public float z; public Color c; public Vector2 support; }
-        struct MO { public Vector3 lp, ls; public Quaternion lr; public Color c; public bool hasSR; }
-        Dictionary<int, MO> mo = new();
-        static List<CK> clip = new();
+        static readonly List<CK> clip = new();
 
-        static readonly string[] kNoDT = { "-" };
-        GameObject pendingPickGo;
-        DynamicTimelineData pendingPickData;
-        string pendingPickName;
+        const float kTimelineH = 120f;
+        static string N(DynamicTransform x) => (x && !string.IsNullOrEmpty(x.transformationName)) ? x.transformationName : "NewTransform";
 
-        [MenuItem("Vectorier/Tools/Dynamic Editor", false, 26)] static void Open() { GetWindow<DynamicEditor>("Dynamic Editor"); }
+        [MenuItem("Vectorier/Tools/Dynamic Editor", false, 26)]
+        static void Open() { GetWindow<DynamicEditor>("Dynamic Editor"); }
 
         void OnEnable()
         {
             Selection.selectionChanged += OnSelectionChanged;
             SceneView.duringSceneGui += OnSceneGUI;
             Undo.undoRedoPerformed += OnUndoRedo;
-            Unbind();
+            tracks.Clear();
+            active = 0;
+            f = 0;
+            playing = false;
         }
 
         void OnDisable()
         {
-            Unbind();
+            UnbindAll();
             Selection.selectionChanged -= OnSelectionChanged;
             SceneView.duringSceneGui -= OnSceneGUI;
             Undo.undoRedoPerformed -= OnUndoRedo;
             ClearGhostCache();
         }
 
+        void Update()
+        {
+            if (pendingBind) { pendingBind = false; BindSelection(); Repaint(); }
+
+            PruneDeadTracks();
+            TickPlayback();
+        }
+
         void OnUndoRedo()
         {
-            selF.Clear();
-            moving = scrubbing = false;
-            pendingMerge = false;
-            moveList.Clear();
-
-            if (d)
+            for (int i = 0; i < tracks.Count; i++)
             {
-                d.Sort();
-                f = Mathf.Clamp(f, 0, d.totalFrames);
-                scrollF = Mathf.Clamp(scrollF, 0, Mathf.Max(0, d.totalFrames - 1));
-                if (p && d.keys.Count > 0) p.ApplyFrame(f);
+                var t = tracks[i];
+                if (!t.d) continue;
+
+                t.selF.Clear();
+                t.moving = t.scrubbing = false;
+                t.pendingMerge = false;
+                t.moveList.Clear();
+                t.d.Sort();
             }
 
+            SetFrame(f);
             Repaint();
             SceneView.RepaintAll();
         }
 
         void OnSelectionChanged()
         {
-            Unbind();
+            var go = Selection.activeGameObject;
+            if (go)
+            {
+                int i = IndexOf(go);
+                if (i >= 0) active = i;
+            }
             Repaint();
         }
 
-        void Unbind()
-        {
-            StopAllPlayback();
-            RestoreOriginalMulti();
-            RestoreOriginal();
-            boundGos = null;
-            d = null;
-            p = null;
-            selF.Clear();
-            moving = scrubbing = false;
-            pendingMerge = false;
-            moveList.Clear();
-        }
+        // ================= Binding ================= //
 
-        void CacheOriginalMulti(GameObject[] gos)
+        void BindSelection()
         {
-            mo.Clear();
-            if (gos == null) return;
+            var gos = FilterSceneObjects(Selection.gameObjects);
+            if (gos.Length == 0) { UnbindAll(); return; }
 
+            StopAll();
+
+            var old = new Dictionary<int, Track>();
+            for (int i = 0; i < tracks.Count; i++)
+                if (tracks[i].go) old[tracks[i].go.GetInstanceID()] = tracks[i];
+
+            var rebuilt = new List<Track>(gos.Length);
             for (int i = 0; i < gos.Length; i++)
             {
-                var g = gos[i];
-                if (!g) continue;
-
-                var t = g.transform;
-                var o = new MO { lp = t.localPosition, ls = t.localScale, lr = t.localRotation };
-
-                var sr = g.GetComponent<SpriteRenderer>();
-                o.hasSR = sr;
-                o.c = sr ? sr.color : Color.white;
-
-                mo[g.GetInstanceID()] = o;
+                int id = gos[i].GetInstanceID();
+                if (old.TryGetValue(id, out var keep)) { old.Remove(id); rebuilt.Add(keep); continue; }
+                rebuilt.Add(MakeTrack(gos[i]));
             }
+
+            // anything dropped from the selection goes back to its original pose
+            foreach (var kv in old) RestoreTrack(kv.Value);
+
+            tracks.Clear();
+            tracks.AddRange(rebuilt);
+
+            var act = Selection.activeGameObject;
+            active = act ? Mathf.Max(0, IndexOf(act)) : 0;
+            active = Mathf.Clamp(active, 0, Mathf.Max(0, tracks.Count - 1));
+
+            SetFrame(0);
         }
 
-        void RestoreOriginalMulti()
+        Track MakeTrack(GameObject go)
         {
-            if (mo == null || mo.Count == 0) return;
+            var t = new Track { go = go };
 
-            foreach (var kv in mo)
-            {
-                var g = EditorUtility.EntityIdToObject(kv.Key) as GameObject;
-                if (!g) continue;
+            t.d = GetOrAdd<DynamicTimelineData>(go);
+            t.p = GetOrAdd<DynamicPreview>(go);
+            t.p.data = t.d;
+            t.p.useCustomEase = customEase;
 
-                var o = kv.Value;
-                var t = g.transform;
-                t.localPosition = o.lp;
-                t.localScale = o.ls;
-                t.localRotation = o.lr;
+            // the window owns playback never let a preview run its own clock
+            if (t.p.IsPlaying) t.p.TogglePlay();
 
-                var sr = g.GetComponent<SpriteRenderer>();
-                if (o.hasSR && sr) sr.color = o.c;
-            }
+            CacheOriginal(t);
 
-            mo.Clear();
+            t.d.Sort();
+            RefreshDTList(t);
+            LoadSelectedDT(t);
+            return t;
+        }
+
+        void UnbindAll()
+        {
+            StopAll();
+            for (int i = 0; i < tracks.Count; i++) RestoreTrack(tracks[i]);
+            tracks.Clear();
+            active = 0;
             SceneView.RepaintAll();
         }
 
-        void Update()
+        void PruneDeadTracks()
         {
-            ApplyPendingPick();          // deferred scene mutation from the multi list
-            TickMultiScrub();
-            if (p && p.IsPlaying) Repaint();
-        }
+            bool changed = false;
+            for (int i = tracks.Count - 1; i >= 0; i--)
+                if (!tracks[i].go) { tracks.RemoveAt(i); changed = true; }
 
-        void StopAllPlayback()
-        {
-            if (p && p.IsPlaying) p.TogglePlay();
-
-            var gos = boundGos;
-            if (gos == null) return;
-
-            for (int i = 0; i < gos.Length; i++)
-            {
-                var g = gos[i];
-                if (!g) continue;
-
-                var pp = g.GetComponent<DynamicPreview>();
-                if (pp && pp.IsPlaying) pp.TogglePlay();
-            }
-        }
-
-        void TickMultiScrub()
-        {
-            var gos = boundGos;                       // no per-tick Selection.gameObjects allocation
-            if (gos == null || gos.Length <= 1) return;
-
-            int cf = -1;
-            bool anyPreview = false, anyPlaying = false;
-
-            for (int i = 0; i < gos.Length; i++)
-            {
-                var g = gos[i];
-                if (!g) continue;
-
-                var pp = g.GetComponent<DynamicPreview>();
-                if (!pp) continue;
-
-                anyPreview = true;
-                anyPlaying |= pp.IsPlaying;
-                cf = Mathf.Max(cf, pp.CurrentFrame);
-            }
-
-            if (!anyPreview || !anyPlaying || cf < 0) return;
-
-            if (cf != f)
-            {
-                f = cf;
-                Repaint();
-                SceneView.RepaintAll();
-            }
-        }
-
-        void EditorTick() { if (p && p.IsPlaying) Repaint(); }
-
-        void CacheOriginal()
-        {
-            if (!d) return;
-            boundGO = d.gameObject;
-            var t = d.transform;
-            oLP = t.localPosition;
-            oLS = t.localScale;
-            oLR = t.localRotation;
-            var sr = d.GetComponent<SpriteRenderer>();
-            oHasSR = sr;
-            oC = sr ? sr.color : Color.white;
-        }
-
-        void RestoreOriginal()
-        {
-            if (!boundGO) return;
-            var t = boundGO.transform;
-            t.localPosition = oLP;
-            t.localScale = oLS;
-            t.localRotation = oLR;
-            var sr = boundGO.GetComponent<SpriteRenderer>();
-            if (oHasSR && sr) sr.color = oC;
-            boundGO = null;
-        }
-
-        void Bind(GameObject[] gos)
-        {
-            gos = FilterSceneObjects(gos);
-            if (gos.Length == 0) { boundGos = null; Repaint(); return; }
-
-            boundGos = gos;
-            bool multi = gos.Length > 1;
-
-            var go = Selection.activeGameObject;
-            if (!go || EditorUtility.IsPersistent(go) || !go.scene.IsValid()) go = gos[0];
-
-            d = GetOrAdd<DynamicTimelineData>(go);
-            p = GetOrAdd<DynamicPreview>(go);
-            p.data = d;
-            p.useCustomEase = customEase;
-
-            selF.Clear();
-            moving = scrubbing = false;
-            pendingMerge = false;
-
-            if (!multi)
-            {
-                d.Sort();
-                f = Mathf.Clamp(f, 0, d.totalFrames);
-                scrollF = Mathf.Clamp(scrollF, 0, Mathf.Max(0, d.totalFrames - 1));
-                CacheOriginal();
-
-                RefreshDTList();              // this already resolves curDTName
-                LoadSelectedDTIntoTimeline();
-                Repaint();
-                return;
-            }
-
-            CacheOriginalMulti(gos);
-            boundGO = null;
-
-            int maxEnd = 1;
-            for (int i = 0; i < gos.Length; i++)
-            {
-                var g = gos[i];
-                if (!g) continue;
-
-                var dd = GetOrAdd<DynamicTimelineData>(g);
-                var pp = GetOrAdd<DynamicPreview>(g);
-                pp.data = dd;
-                pp.useCustomEase = customEase;
-
-                var names = GetDTNames(g);
-                int key = g.GetInstanceID();
-                int pick = Mathf.Clamp(SessionState.GetInt("DynEdPick_" + key, 0), 0, Mathf.Max(0, names.Length - 1));
-                SessionState.SetInt("DynEdPick_" + key, pick);
-
-                if (names.Length > 0) LoadGOTransformIntoTimeline(g, dd, names[pick]);
-                maxEnd = Mathf.Max(maxEnd, dd.totalFrames);
-            }
-
-            f = Mathf.Clamp(f, 0, maxEnd);
-            scrollF = Mathf.Clamp(scrollF, 0, Mathf.Max(0, maxEnd - 1));
+            if (!changed) return;
+            active = Mathf.Clamp(active, 0, Mathf.Max(0, tracks.Count - 1));
+            if (tracks.Count == 0) playing = false;
             Repaint();
         }
 
+        void CacheOriginal(Track t)
+        {
+            if (!t.go) return;
+
+            var tr = t.go.transform;
+            t.oLP = tr.localPosition;
+            t.oLS = tr.localScale;
+            t.oLR = tr.localRotation;
+
+            var sr = t.go.GetComponent<SpriteRenderer>();
+            t.oHasSR = sr;
+            t.oC = sr ? sr.color : Color.white;
+        }
+
+        void RestoreTrack(Track t)
+        {
+            if (t == null || !t.go) return;
+            if (t.p && t.p.IsPlaying) t.p.TogglePlay();
+
+            var tr = t.go.transform;
+            tr.localPosition = t.oLP;
+            tr.localScale = t.oLS;
+            tr.localRotation = t.oLR;
+
+            var sr = t.go.GetComponent<SpriteRenderer>();
+            if (t.oHasSR && sr) sr.color = t.oC;
+        }
+
+        int IndexOf(GameObject go)
+        {
+            for (int i = 0; i < tracks.Count; i++) if (tracks[i].go == go) return i;
+            return -1;
+        }
+
+        Track ActiveTrack() => (active >= 0 && active < tracks.Count) ? tracks[active] : null;
+
         static GameObject[] FilterSceneObjects(GameObject[] gos)
         {
-            if (gos == null) return System.Array.Empty<GameObject>();
+            if (gos == null) return Array.Empty<GameObject>();
 
             var list = new List<GameObject>(gos.Length);
             for (int i = 0; i < gos.Length; i++)
@@ -316,362 +251,490 @@ namespace Vectorier.Dynamic
             return (UnityEngine.Object)c ? c : Undo.AddComponent<T>(go);
         }
 
-        void LoadGOTransformIntoTimeline(GameObject go, DynamicTimelineData dd, string name)
+        bool SelectionMatchesTracks()
         {
-            if (!go || !dd) return;
-
-            Undo.RegisterCompleteObjectUndo(dd, "Load Transform");
-
-            var dts = go.GetComponents<DynamicTransform>();
-            DynamicTransform src = null;
-            for (int i = 0; i < dts.Length; i++)
-                if (dts[i] && N(dts[i]) == name) { src = dts[i]; break; }
-
-            if (!src)
-            {
-                dd.keys.Clear();
-                dd.transformationName = name;
-                var k0 = dd.Snapshot(0);
-                dd.Upsert(k0.f, k0.lp, k0.ls, k0.z, k0.c, k0.support, true);
-                dd.totalFrames = Mathf.Max(1, dd.totalFrames);
-                EditorUtility.SetDirty(dd);
-                return;
-            }
-
-            dd.LoadFromDynamicTransform(src, useCustomEase: customEase, clearExisting: true);
-            EditorUtility.SetDirty(dd);
+            var sel = FilterSceneObjects(Selection.gameObjects);
+            if (sel.Length != tracks.Count) return false;
+            for (int i = 0; i < sel.Length; i++) if (IndexOf(sel[i]) < 0) return false;
+            return true;
         }
 
-        int GetMultiMaxEnd(GameObject[] gos)
+        // ================= Frame & playback ================= //
+
+        // longest track decides how far the shared playhead can travel
+        int MaxEnd()
         {
             int m = 1;
-            for (int i = 0; i < gos.Length; i++)
-            {
-                var dd = gos[i] ? gos[i].GetComponent<DynamicTimelineData>() : null;
-                if (dd) m = Mathf.Max(m, dd.totalFrames);
-            }
+            for (int i = 0; i < tracks.Count; i++)
+                if (tracks[i].d) m = Mathf.Max(m, tracks[i].d.totalFrames);
             return m;
         }
 
-        bool AnyMultiPlaying(GameObject[] gos)
+        // a track that ends early just sits on its last frame
+        int TrackFrame(Track t) => t.d ? Mathf.Min(f, t.d.totalFrames) : 0;
+
+        int MasterFps()
         {
-            for (int i = 0; i < gos.Length; i++)
-            {
-                var pp = gos[i] ? gos[i].GetComponent<DynamicPreview>() : null;
-                if (pp && pp.IsPlaying) return true;
-            }
-            return false;
+            int fps = 0;
+            for (int i = 0; i < tracks.Count; i++)
+                if (tracks[i].d && tracks[i].d.fps > 0) fps = Mathf.Max(fps, tracks[i].d.fps);
+            return fps > 0 ? fps : 60;
         }
+
+        void SetFrame(int nf)
+        {
+            f = Mathf.Clamp(nf, 0, MaxEnd());
+            ApplyFrameToAll(null);
+            SceneView.RepaintAll();
+        }
+
+        void ApplyFrameToAll(Track noSortFor)
+        {
+            for (int i = 0; i < tracks.Count; i++)
+            {
+                var t = tracks[i];
+                if (!t.p || !t.d || t.d.keys.Count == 0) continue;
+
+                if (t == noSortFor) t.p.PreviewNoSort(TrackFrame(t));
+                else t.p.ApplyFrame(TrackFrame(t));
+            }
+        }
+
+        void TogglePlay()
+        {
+            if (tracks.Count == 0) return;
+
+            playing = !playing;
+            lastT = EditorApplication.timeSinceStartup;
+            carry = 0;
+
+            if (playing && f >= MaxEnd()) SetFrame(0);
+            Repaint();
+        }
+
+        void StopAll()
+        {
+            playing = false;
+            for (int i = 0; i < tracks.Count; i++)
+            {
+                var t = tracks[i];
+                if (t.p && t.p.IsPlaying) t.p.TogglePlay();   // safety, in case a preview was left running
+            }
+        }
+
+        void TickPlayback()
+        {
+            if (!playing) { lastT = EditorApplication.timeSinceStartup; return; }
+            if (tracks.Count == 0) { playing = false; return; }
+
+            double now = EditorApplication.timeSinceStartup;
+            double dt = now - lastT;
+            lastT = now;
+            if (dt <= 0) return;
+
+            carry += dt * MasterFps();
+            int adv = (int)carry;
+            if (adv <= 0) return;
+            carry -= adv;
+
+            int last = MaxEnd();
+            int nf = f + adv;
+
+            if (nf >= last) { f = last; playing = false; }
+            else f = nf;
+
+            ApplyFrameToAll(null);
+            Repaint();
+            SceneView.RepaintAll();
+        }
+
+        void Rewind()
+        {
+            StopAll();
+            SetFrame(0);
+        }
+
+        // ================= Window GUI ================= //
 
         void OnGUI()
         {
-            var gos = Selection.gameObjects;
+            DrawTopBar();
 
-            if (gos == null || gos.Length == 0)
-            {
-                EditorGUILayout.HelpBox("Select a GameObject.", MessageType.Info);
-                return;
-            }
+            if (tracks.Count == 0) { DrawBindPrompt(); return; }
 
-            if (boundGos == null)
-            {
-                GUILayout.Space(10);
-                EditorGUILayout.HelpBox($"You have selected {gos.Length} GameObject(s).\nClick below to edit them in Dynamic Editor.", MessageType.Info);
-                GUILayout.Space(5);
-                if (GUILayout.Button("Edit Selected GameObject(s)", GUILayout.Height(30)))
-                {
-                    Bind(gos);
-                }
-                return;
-            }
-
-            if (!Selection.activeGameObject || !d)
-            {
-                EditorGUILayout.HelpBox("Select a GameObject.", MessageType.Info);
-                return;
-            }
-
-            bool multi = gos.Length > 1;
-
+            DrawTransportBar();
             HandleHotkeys();
 
-            if (!multi && p && p.IsPlaying) f = Mathf.Clamp(p.CurrentFrame, 0, d.totalFrames);
+            if (!SelectionMatchesTracks()) DrawRebindStrip();
 
-            EditorGUILayout.BeginHorizontal();
+            scroll = EditorGUILayout.BeginScrollView(scroll);
+            for (int i = 0; i < tracks.Count; i++) DrawTrack(tracks[i], i);
+            GUILayout.Space(6);
+            EditorGUILayout.EndScrollView();
 
-            if (!multi) DrawTransformSelectorRow();
-            else
-            {
-                GUILayout.Label("Multi Preview", GUILayout.Width(90));
-                GUILayout.Label($"({gos.Length} objects)", GUILayout.Width(90));
-            }
+            DrawSharedScrollbar();
+        }
 
-            GUILayout.FlexibleSpace();
+        void DrawTopBar()
+        {
+            EditorGUILayout.BeginHorizontal(EditorStyles.toolbar);
 
-            bool newCustom = GUILayout.Toggle(customEase, "Custom Ease", GUILayout.Width(95));
+            bool newCustom = GUILayout.Toggle(customEase, "Custom Ease", EditorStyles.toolbarButton, GUILayout.Width(90));
             if (newCustom != customEase)
             {
                 customEase = newCustom;
-                if (p) p.useCustomEase = customEase;
-                if (multi)
-                    for (int i = 0; i < gos.Length; i++)
-                    {
-                        var pp = gos[i] ? gos[i].GetComponent<DynamicPreview>() : null;
-                        if (pp) pp.useCustomEase = customEase;
-                    }
+                for (int i = 0; i < tracks.Count; i++) if (tracks[i].p) tracks[i].p.useCustomEase = customEase;
                 SceneView.RepaintAll();
             }
 
-            bool newOnion = GUILayout.Toggle(onion, "Onion", GUILayout.Width(60));
-            float newOnionA = GUILayout.HorizontalSlider(onionA, 0.05f, 0.6f, GUILayout.Width(90));
+            bool newOnion = GUILayout.Toggle(onion, "Onion", EditorStyles.toolbarButton, GUILayout.Width(52));
+            GUILayout.Space(4);
+            float newOnionA = GUILayout.HorizontalSlider(onionA, 0.05f, 0.6f, GUILayout.Width(80));
             if (newOnion != onion || !Mathf.Approximately(newOnionA, onionA))
             {
                 onion = newOnion;
                 onionA = newOnionA;
                 SceneView.RepaintAll();
             }
-            zoom = GUILayout.HorizontalSlider(zoom, 0.25f, 6f, GUILayout.Width(160));
 
-            EditorGUILayout.EndHorizontal();
+            GUILayout.Space(10);
+            GUILayout.Label("Zoom", EditorStyles.miniLabel, GUILayout.Width(36));
+            zoom = GUILayout.HorizontalSlider(zoom, 0.25f, 6f, GUILayout.Width(120));
 
-            // Frame row 
-            int endFrames = multi ? GetMultiMaxEnd(gos) : d.totalFrames;
-
-            EditorGUILayout.BeginHorizontal();
-            if (GUILayout.Button("<<", GUILayout.Width(36))) SetF(f - 1);
-            if (GUILayout.Button("<", GUILayout.Width(28))) SetF(f - 5);
-            GUILayout.Label("Frame", GUILayout.Width(40));
-            int nf = EditorGUILayout.IntField(f, GUILayout.Width(70));
-            if (nf != f) SetF(nf);
-            GUILayout.Label("/" + endFrames, GUILayout.Width(70));
-            if (GUILayout.Button(">", GUILayout.Width(28))) SetF(f + 1);
-            if (GUILayout.Button(">>", GUILayout.Width(36))) SetF(f + 5);
             GUILayout.FlexibleSpace();
-            EditorGUILayout.EndHorizontal();
 
-            // Controls row
-            EditorGUILayout.BeginHorizontal();
-
-            if (!multi)
+            if (tracks.Count > 0)
             {
-                GUILayout.Label("End", GUILayout.Width(30));
-                int end = EditorGUILayout.IntField(d.totalFrames, GUILayout.Width(80));
-                if (end != d.totalFrames)
-                {
-                    Undo.RecordObject(d, "Change Timeline End");
-                    d.totalFrames = Mathf.Max(1, end);
-                    f = Mathf.Clamp(f, 0, d.totalFrames);
-                    scrollF = Mathf.Clamp(scrollF, 0, Mathf.Max(0, d.totalFrames - 1));
-                    EditorUtility.SetDirty(d);
-                }
-                GUILayout.FlexibleSpace();
-
-                if (GUILayout.Button("Clear", GUILayout.Width(60)))
-                {
-                    if (EditorUtility.DisplayDialog("Clear Timeline", "Clear all keyframes in this timeline?", "Yes", "No"))
-                    {
-                        Undo.RegisterCompleteObjectUndo(d, "Clear Timeline");
-                        d.keys.Clear();
-                        selF.Clear();
-                        f = 0;
-                        EditorUtility.SetDirty(d);
-                        if (p) p.ApplyFrame(0);
-                    }
-                }
-
-                if (GUILayout.Button("Add KF", GUILayout.Width(70)))
-                {
-                    Undo.RecordObject(d, "Add Keyframe");
-                    var k = d.Snapshot(f);
-                    d.Upsert(k.f, k.lp, k.ls, k.z, k.c, k.support, true);
-                    EditorUtility.SetDirty(d);
-                }
-
-                if (GUILayout.Button("Del KF", GUILayout.Width(70))) DeleteSelectedOrCurrent();
-
-                if (GUILayout.Button((p && p.IsPlaying) ? "Pause" : "Play", GUILayout.Width(60))) { if (p) p.TogglePlay(); }
-            }
-            else
-            {
-                GUILayout.Label("End", GUILayout.Width(30));
-                EditorGUILayout.IntField(endFrames, GUILayout.Width(80));
-                GUILayout.FlexibleSpace();
-
-                bool any = AnyMultiPlaying(gos);
-                if (GUILayout.Button(any ? "Pause" : "Play", GUILayout.Width(60))) TogglePlayAll();
+                GUILayout.Label($"{tracks.Count} object", EditorStyles.miniLabel, GUILayout.Width(80));
+                if (GUILayout.Button("Exit", EditorStyles.toolbarButton, GUILayout.Width(56))) UnbindAll();
             }
 
             EditorGUILayout.EndHorizontal();
-
-            var r = GUILayoutUtility.GetRect(position.width - 10, 140);
-
-            if (moving && Event.current.rawType == EventType.MouseUp) pendingMerge = true;
-
-            DrawTimeline(r, endFrames, multi);
-
-            if (pendingMerge) ApplyPendingMerge();
-
-            float pxPerFrame = FramesToPPF(zoom);
-            float visible = Mathf.Max(1, (r.width - 24) / pxPerFrame);
-            float maxScroll = Mathf.Max(0, endFrames - visible);
-            float newScroll = GUILayout.HorizontalScrollbar(scrollF, visible, 0, endFrames);
-            if (!Mathf.Approximately(newScroll, scrollF)) scrollF = Mathf.Clamp(newScroll, 0, maxScroll);
-
-            GUILayout.Space(6);
-
-            if (!multi && d.Has(f, out var idx))
-            {
-                var k = d.keys[idx];
-
-                if (!customEase)
-                {
-                    EditorGUILayout.BeginHorizontal();
-                    GUILayout.Label("Ease", GUILayout.Width(50));
-
-                    var newEase = (EasePreset)EditorGUILayout.EnumPopup(k.ease, GUILayout.Width(120));
-                    if (newEase != k.ease)
-                    {
-                        Undo.RecordObject(d, "Change Ease");
-                        k.ease = newEase;
-                        if (newEase != EasePreset.Custom) k.support = EasePresetUtil.ToSupport(newEase);
-                        d.keys[idx] = k; d.Sort(); EditorUtility.SetDirty(d);
-                        if (p) p.ApplyFrame(f);
-                    }
-                    EditorGUILayout.EndHorizontal();
-
-                    if (k.ease == EasePreset.Custom)
-                    {
-                        EditorGUILayout.BeginHorizontal();
-                        GUILayout.Label("Support", GUILayout.Width(50));
-                        var ns = EditorGUILayout.Vector2Field("", k.support, GUILayout.Width(220));
-                        if (ns != k.support)
-                        {
-                            Undo.RecordObject(d, "Edit Support");
-                            k.support = ns;
-                            d.keys[idx] = k; d.Sort(); EditorUtility.SetDirty(d);
-                            if (p) p.ApplyFrame(f);
-                        }
-                        EditorGUILayout.EndHorizontal();
-                    }
-                }
-                else
-                {
-                    EditorGUILayout.BeginHorizontal();
-                    GUILayout.Label("Support", GUILayout.Width(50));
-                    EditorGUILayout.LabelField($"({k.support.x:0.00}, {k.support.y:0.00})");
-                    EditorGUILayout.EndHorizontal();
-                }
-            }
-
-            if (multi)
-            {
-                float h = Mathf.Min(260f, position.height * 0.35f);
-
-                _multiListScroll = EditorGUILayout.BeginScrollView(_multiListScroll, GUILayout.Height(h));
-                DrawMultiPickList(gos);
-                EditorGUILayout.EndScrollView();
-            }
         }
 
-        void RefreshDTList()
+        // shared playhead lives here, every track reads from it
+        void DrawTransportBar()
         {
-            if (!d) { dtNames = new[] { "NewTransform" }; dtPick = 0; curDTName = "NewTransform"; return; }
+            int maxEnd = MaxEnd();
 
-            var dts = d.gameObject.GetComponents<DynamicTransform>();
+            EditorGUILayout.BeginHorizontal(EditorStyles.toolbar);
 
-            var names = new List<string>(dts.Length);
-            for (int i = 0; i < dts.Length; i++)
+            if (GUILayout.Button("<<", EditorStyles.toolbarButton, GUILayout.Width(30))) { StopAll(); SetFrame(f - 5); }
+            if (GUILayout.Button("<", EditorStyles.toolbarButton, GUILayout.Width(26))) { StopAll(); SetFrame(f - 1); }
+
+            GUILayout.Label("Frame", EditorStyles.miniLabel, GUILayout.Width(40));
+            int nf = EditorGUILayout.DelayedIntField(f, EditorStyles.toolbarTextField, GUILayout.Width(56));
+            if (nf != f) { StopAll(); SetFrame(nf); }
+            GUILayout.Label("/ " + maxEnd, EditorStyles.miniLabel, GUILayout.Width(56));
+
+            if (GUILayout.Button(">", EditorStyles.toolbarButton, GUILayout.Width(26))) { StopAll(); SetFrame(f + 1); }
+            if (GUILayout.Button(">>", EditorStyles.toolbarButton, GUILayout.Width(30))) { StopAll(); SetFrame(f + 5); }
+
+            GUILayout.FlexibleSpace();
+
+            if (GUILayout.Button(playing ? "Pause" : "Play", EditorStyles.toolbarButton, GUILayout.Width(52))) TogglePlay();
+            if (GUILayout.Button("Restart", EditorStyles.toolbarButton, GUILayout.Width(56))) Rewind();
+
+            EditorGUILayout.EndHorizontal();
+        }
+
+        void DrawSharedScrollbar()
+        {
+            int total = MaxEnd();
+            float ppf = FramesToPPF(zoom);
+            float visible = Mathf.Max(1f, (lastTimelineW - 24f) / ppf);
+            float maxScroll = Mathf.Max(0f, total - visible);
+
+            float ns = GUILayout.HorizontalScrollbar(scrollF, visible, 0f, total);
+            if (!Mathf.Approximately(ns, scrollF)) { scrollF = Mathf.Clamp(ns, 0f, maxScroll); Repaint(); }
+        }
+
+        void DrawBindPrompt()
+        {
+            var sel = FilterSceneObjects(Selection.gameObjects);
+
+            GUILayout.Space(10);
+            if (sel.Length == 0)
             {
-                if (!dts[i]) continue;
-                string n = N(dts[i]);
-                if (!names.Contains(n)) names.Add(n);
-            }
-
-            if (names.Count == 0)
-            {
-                if (string.IsNullOrEmpty(curDTName))
-                    curDTName = string.IsNullOrEmpty(d.transformationName) ? "NewTransform" : d.transformationName;
-
-                dtNames = new[] { curDTName };
-                dtPick = 0;
+                EditorGUILayout.HelpBox("Select one or more GameObjects in the scene.", MessageType.Info);
                 return;
             }
 
-            dtNames = names.ToArray();
-            int idx = System.Array.IndexOf(dtNames, curDTName);
-            dtPick = Mathf.Clamp(idx >= 0 ? idx : 0, 0, dtNames.Length - 1);
-            curDTName = dtNames[dtPick];
+            EditorGUILayout.HelpBox($"You have selected {sel.Length} GameObject.\nPress Edit Selected GameObject to start creating Dynamic.", MessageType.Info);
+            GUILayout.Space(5);
+            if (GUILayout.Button("Edit Selected GameObject", GUILayout.Height(30))) pendingBind = true;
         }
 
-        void DrawTransformSelectorRow()
+        void DrawRebindStrip()
         {
-            if (dtNames == null || dtNames.Length == 0) RefreshDTList();
+            var sel = FilterSceneObjects(Selection.gameObjects);
 
+            EditorGUILayout.BeginHorizontal(EditorStyles.helpBox);
+            GUILayout.Label($"Scene selection ({sel.Length}) doesn't match the bound tracks.", EditorStyles.miniLabel);
+            GUILayout.FlexibleSpace();
+            using (new EditorGUI.DisabledScope(sel.Length == 0))
+                if (GUILayout.Button("Add Selected", GUILayout.Width(110))) pendingBind = true;
+            EditorGUILayout.EndHorizontal();
+        }
+
+        void DrawTrack(Track t, int i)
+        {
+            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+
+            DrawTrackHeader(t, i);
+
+            if (!t.expanded || !t.d || !t.p)
+            {
+                if (t.expanded && (!t.d || !t.p))
+                    EditorGUILayout.HelpBox("Timeline components are missing on this object. Rebind the selection.", MessageType.Warning);
+
+                EditorGUILayout.EndVertical();
+                GUILayout.Space(2);
+                return;
+            }
+
+            DrawTransformRow(t, i);
+            DrawTrackControlRow(t, i);
+
+            var r = GUILayoutUtility.GetRect(1f, kTimelineH, GUILayout.ExpandWidth(true));
+            if (r.width > 1f) lastTimelineW = r.width;
+
+            if (t.moving && Event.current.rawType == EventType.MouseUp) t.pendingMerge = true;
+
+            DrawTimeline(t, i, r);
+
+            if (t.pendingMerge) ApplyPendingMerge(t);
+
+            DrawEaseRow(t);
+
+            EditorGUILayout.EndVertical();
+            GUILayout.Space(3);
+        }
+
+        void DrawTrackHeader(Track t, int i)
+        {
+            bool isActive = i == active;
+
+            var hr = EditorGUILayout.GetControlRect(false, 20f);
+            EditorGUI.DrawRect(hr, isActive ? new Color(0.25f, 0.47f, 0.78f, 0.35f) : new Color(0f, 0f, 0f, 0.16f));
+
+            // clicking anywhere on the bar makes this the track the scene handles follow
+            if (Event.current.type == EventType.MouseDown && hr.Contains(Event.current.mousePosition)) { active = i; Repaint(); }
+
+            var foldR = new Rect(hr.x + 3f, hr.y + 2f, 14f, hr.height - 4f);
+            t.expanded = EditorGUI.Foldout(foldR, t.expanded, GUIContent.none);
+
+            var iconR = new Rect(hr.x + 20f, hr.y + 2f, 16f, 16f);
+            GUI.Label(iconR, EditorGUIUtility.IconContent("GameObject Icon"));
+
+            var nameR = new Rect(hr.x + 38f, hr.y + 1f, Mathf.Max(60f, hr.width - 150f), hr.height - 2f);
+            GUI.Label(nameR, $"{i + 1}.  {t.go.name}", EditorStyles.boldLabel);
+
+            var pingR = new Rect(hr.xMax - 106f, hr.y + 2f, 48f, hr.height - 4f);
+            if (GUI.Button(pingR, "Ping", EditorStyles.miniButton)) EditorGUIUtility.PingObject(t.go);
+
+            var selR = new Rect(hr.xMax - 54f, hr.y + 2f, 52f, hr.height - 4f);
+            if (GUI.Button(selR, "Select", EditorStyles.miniButton)) { active = i; Selection.activeGameObject = t.go; }
+        }
+
+        void DrawTrackControlRow(Track t, int i)
+        {
+            int tf = TrackFrame(t);
+            bool clamped = f > t.d.totalFrames;
+
+            EditorGUILayout.BeginHorizontal();
+
+            GUILayout.Label("Frame", GUILayout.Width(42));
+            int nf = EditorGUILayout.DelayedIntField(tf, GUILayout.Width(56));
+            if (nf != tf) { active = i; StopAll(); SetFrame(nf); }
+
+            GUILayout.Space(8);
+            GUILayout.Label("End", GUILayout.Width(28));
+            int end = EditorGUILayout.IntField(t.d.totalFrames, GUILayout.Width(60));
+            if (end != t.d.totalFrames)
+            {
+                active = i;
+                Undo.RecordObject(t.d, "Change Timeline End");
+                t.d.totalFrames = Mathf.Max(1, end);
+                EditorUtility.SetDirty(t.d);
+                SetFrame(f);
+            }
+
+            GUILayout.FlexibleSpace();
+
+            if (GUILayout.Button("Clear", GUILayout.Width(56)))
+            {
+                active = i;
+                if (EditorUtility.DisplayDialog("Clear Timeline", $"Clear all keyframes on '{t.go.name}'?", "Yes", "No"))
+                {
+                    Undo.RegisterCompleteObjectUndo(t.d, "Clear Timeline");
+                    t.d.keys.Clear();
+                    t.selF.Clear();
+                    EditorUtility.SetDirty(t.d);
+                    SetFrame(f);
+                }
+            }
+
+            if (GUILayout.Button("Add KF", GUILayout.Width(62)))
+            {
+                active = i;
+                Undo.RecordObject(t.d, "Add Keyframe");
+                var k = t.d.Snapshot(TrackFrame(t));
+                t.d.Upsert(k.f, k.lp, k.ls, k.z, k.c, k.support, true);
+                EditorUtility.SetDirty(t.d);
+            }
+
+            if (GUILayout.Button("Del KF", GUILayout.Width(62))) { active = i; DeleteSelectedOrCurrent(t); }
+
+            EditorGUILayout.EndHorizontal();
+        }
+
+        void DrawEaseRow(Track t)
+        {
+            if (!t.d.Has(TrackFrame(t), out var idx)) return;
+
+            var k = t.d.keys[idx];
+
+            if (!customEase)
+            {
+                EditorGUILayout.BeginHorizontal();
+                GUILayout.Label("Ease", GUILayout.Width(50));
+
+                var newEase = (EasePreset)EditorGUILayout.EnumPopup(k.ease, GUILayout.Width(120));
+                if (newEase != k.ease)
+                {
+                    Undo.RecordObject(t.d, "Change Ease");
+                    k.ease = newEase;
+                    if (newEase != EasePreset.Custom) k.support = EasePresetUtil.ToSupport(newEase);
+                    t.d.keys[idx] = k; t.d.Sort(); EditorUtility.SetDirty(t.d);
+                    if (t.p) t.p.ApplyFrame(TrackFrame(t));
+                }
+                EditorGUILayout.EndHorizontal();
+
+                if (k.ease == EasePreset.Custom)
+                {
+                    EditorGUILayout.BeginHorizontal();
+                    GUILayout.Label("Support", GUILayout.Width(50));
+                    var ns = EditorGUILayout.Vector2Field("", k.support, GUILayout.Width(220));
+                    if (ns != k.support)
+                    {
+                        Undo.RecordObject(t.d, "Edit Support");
+                        k.support = ns;
+                        t.d.keys[idx] = k; t.d.Sort(); EditorUtility.SetDirty(t.d);
+                        if (t.p) t.p.ApplyFrame(TrackFrame(t));
+                    }
+                    EditorGUILayout.EndHorizontal();
+                }
+            }
+            else
+            {
+                EditorGUILayout.BeginHorizontal();
+                GUILayout.Label("Support", GUILayout.Width(50));
+                EditorGUILayout.LabelField($"({k.support.x:0.00}, {k.support.y:0.00})");
+                EditorGUILayout.EndHorizontal();
+            }
+        }
+
+        // ================= Transform selector ================= //
+
+        string[] GetDTNames(GameObject go)
+        {
+            if (!go) return Array.Empty<string>();
+            var dts = go.GetComponents<DynamicTransform>();
+            if (dts == null || dts.Length == 0) return Array.Empty<string>();
+            return dts.Select(x => string.IsNullOrEmpty(x.transformationName) ? "NewTransform" : x.transformationName).Distinct().ToArray();
+        }
+
+        void RefreshDTList(Track t)
+        {
+            if (!t.d) { t.dtNames = new[] { "NewTransform" }; t.dtPick = 0; t.curDTName = "NewTransform"; return; }
+
+            var names = GetDTNames(t.d.gameObject).ToList();
+
+            if (names.Count == 0)
+            {
+                if (string.IsNullOrEmpty(t.curDTName))
+                    t.curDTName = string.IsNullOrEmpty(t.d.transformationName) ? "NewTransform" : t.d.transformationName;
+
+                t.dtNames = new[] { t.curDTName };
+                t.dtPick = 0;
+                return;
+            }
+
+            t.dtNames = names.ToArray();
+            int idx = Array.IndexOf(t.dtNames, t.curDTName);
+            t.dtPick = Mathf.Clamp(idx >= 0 ? idx : 0, 0, t.dtNames.Length - 1);
+            t.curDTName = t.dtNames[t.dtPick];
+        }
+
+        void DrawTransformRow(Track t, int trackIndex)
+        {
+            if (t.dtNames == null || t.dtNames.Length == 0) RefreshDTList(t);
+
+            EditorGUILayout.BeginHorizontal();
             GUILayout.Label("Transform", GUILayout.Width(65));
 
             Rect totalRect = EditorGUILayout.GetControlRect(false, EditorGUIUtility.singleLineHeight, GUILayout.Width(180));
             Rect textRect = new Rect(totalRect.x, totalRect.y, totalRect.width - 20, totalRect.height);
             Rect btnRect = new Rect(totalRect.x + totalRect.width - 20, totalRect.y, 20, totalRect.height);
 
-            GUI.SetNextControlName("TransformNameInput");
-            string renamed = EditorGUI.DelayedTextField(textRect, curDTName);
+            string renamed = EditorGUI.DelayedTextField(textRect, t.curDTName);
 
             if (EditorGUI.DropdownButton(btnRect, GUIContent.none, FocusType.Passive, EditorStyles.popup))
             {
-                GUI.FocusControl(null); // Unfocus text box when clicking dropdown
-                GenericMenu menu = new GenericMenu();
-                for (int i = 0; i < dtNames.Length; i++)
+                GUI.FocusControl(null);
+                active = trackIndex;
+
+                var menu = new GenericMenu();
+                for (int i = 0; i < t.dtNames.Length; i++)
                 {
                     int index = i;
-                    menu.AddItem(new GUIContent(dtNames[i]), dtPick == index, () =>
+                    menu.AddItem(new GUIContent(t.dtNames[i]), t.dtPick == index, () =>
                     {
-                        GUI.FocusControl(null); // Unfocus text box on item select
-                        dtPick = index;
-                        curDTName = dtNames[index];
-                        LoadSelectedDTIntoTimeline();
+                        GUI.FocusControl(null);
+                        t.dtPick = index;
+                        t.curDTName = t.dtNames[index];
+                        LoadSelectedDT(t);
+                        Repaint();
                     });
                 }
                 menu.DropDown(totalRect);
             }
 
-            if (renamed != curDTName && !string.IsNullOrEmpty(renamed))
-            {
-                GUI.FocusControl(null); // Unfocus after confirming text
-                RenameCurrentTransform(renamed);
-            }
-
-            if (GUILayout.Button("+", GUILayout.Width(24)))
+            if (renamed != t.curDTName && !string.IsNullOrEmpty(renamed))
             {
                 GUI.FocusControl(null);
-                AddNewTransformComponent();
+                active = trackIndex;
+                RenameCurrentTransform(t, renamed);
             }
+
+            if (GUILayout.Button("+", GUILayout.Width(24))) { GUI.FocusControl(null); active = trackIndex; AddNewTransformComponent(t); }
 
             if (GUILayout.Button("-", GUILayout.Width(24)))
             {
                 GUI.FocusControl(null);
-                RemoveSelectedTransformComponent();
-                RefreshDTList();
-                LoadSelectedDTIntoTimeline();
+                active = trackIndex;
+                RemoveSelectedTransformComponent(t);
+                RefreshDTList(t);
+                LoadSelectedDT(t);
             }
 
-            if (GUILayout.Button("Save", GUILayout.Width(60)))
-            {
-                GUI.FocusControl(null);
-                SaveSelectedTransform();
-                RefreshDTList();
-            }
+            if (GUILayout.Button("Save", GUILayout.Width(56))) { GUI.FocusControl(null); active = trackIndex; SaveSelectedTransform(t); RefreshDTList(t); }
+
+            GUILayout.FlexibleSpace();
+            EditorGUILayout.EndHorizontal();
         }
 
-        void RenameCurrentTransform(string targetName)
+        void RenameCurrentTransform(Track t, string targetName)
         {
-            if (!d) return;
+            if (!t.d) return;
 
-            string uniqueName = GetUniqueTransformName(targetName, curDTName);
+            string uniqueName = GetUniqueTransformName(t, targetName, t.curDTName);
 
-            var dts = d.gameObject.GetComponents<DynamicTransform>();
+            var dts = t.d.gameObject.GetComponents<DynamicTransform>();
             for (int i = 0; i < dts.Length; i++)
             {
-                if (dts[i] && N(dts[i]) == curDTName)
+                if (dts[i] && N(dts[i]) == t.curDTName)
                 {
                     Undo.RecordObject(dts[i], "Rename Transform");
                     dts[i].transformationName = uniqueName;
@@ -680,95 +743,86 @@ namespace Vectorier.Dynamic
                 }
             }
 
-            Undo.RecordObject(d, "Rename Transform Timeline");
-            d.transformationName = uniqueName;
-            EditorUtility.SetDirty(d);
+            Undo.RecordObject(t.d, "Rename Transform Timeline");
+            t.d.transformationName = uniqueName;
+            EditorUtility.SetDirty(t.d);
 
-            curDTName = uniqueName;
-            RefreshDTList();
+            t.curDTName = uniqueName;
+            RefreshDTList(t);
         }
 
-        string GetUniqueTransformName(string requestedName, string excludeCurrentName)
+        string GetUniqueTransformName(Track t, string requestedName, string excludeCurrentName)
         {
-            if (!d || !d.gameObject) return requestedName;
+            if (!t.d || !t.d.gameObject) return requestedName;
 
-            var existingNames = d.gameObject.GetComponents<DynamicTransform>()
+            var existingNames = t.d.gameObject.GetComponents<DynamicTransform>()
                 .Where(dt => dt && N(dt) != excludeCurrentName)
                 .Select(dt => N(dt))
                 .ToHashSet();
 
-            if (!existingNames.Contains(requestedName))
-                return requestedName;
+            if (!existingNames.Contains(requestedName)) return requestedName;
 
             string candidate = $"{requestedName}_copy";
-            if (!existingNames.Contains(candidate))
-                return candidate;
+            if (!existingNames.Contains(candidate)) return candidate;
 
             int counter = 1;
-            while (existingNames.Contains($"{requestedName}_copy_{counter}"))
-            {
-                counter++;
-            }
+            while (existingNames.Contains($"{requestedName}_copy_{counter}")) counter++;
             return $"{requestedName}_copy_{counter}";
         }
 
-        void ClearTimelineForNewTransform()
+        void ClearTimelineForNewTransform(Track t)
         {
-            if (!d) return;
+            if (!t.d) return;
 
-            Undo.RegisterCompleteObjectUndo(d, "New Transform Timeline");
-            d.transformationName = "NewTransform";
-            d.keys.Clear();
+            Undo.RegisterCompleteObjectUndo(t.d, "New Transform Timeline");
+            t.d.transformationName = "NewTransform";
+            t.d.keys.Clear();
 
-            var k0 = d.Snapshot(0);
-            d.Upsert(k0.f, k0.lp, k0.ls, k0.z, k0.c, k0.support, true);
+            var k0 = t.d.Snapshot(0);
+            t.d.Upsert(k0.f, k0.lp, k0.ls, k0.z, k0.c, k0.support, true);
 
-            d.totalFrames = Mathf.Max(1, d.totalFrames);
-            f = 0;
-            selF.Clear();
-            EditorUtility.SetDirty(d);
-            if (p) p.ApplyFrame(0);
+            t.d.totalFrames = Mathf.Max(1, t.d.totalFrames);
+            t.selF.Clear();
+            EditorUtility.SetDirty(t.d);
+            if (t.p) t.p.ApplyFrame(TrackFrame(t));
         }
 
-        void LoadSelectedDTIntoTimeline()
+        void LoadSelectedDT(Track t)
         {
-            GUI.FocusControl(null); // Clear keyboard focus so text field refreshes visually
-            if (!d) return;
+            GUI.FocusControl(null);
+            if (!t.d) return;
 
-            var go = d.gameObject;
-            var dts = go.GetComponents<DynamicTransform>();
+            var dts = t.d.gameObject.GetComponents<DynamicTransform>();
 
             DynamicTransform src = null;
             for (int i = 0; i < dts.Length; i++)
-                if (dts[i] && N(dts[i]) == curDTName) { src = dts[i]; break; }
+                if (dts[i] && N(dts[i]) == t.curDTName) { src = dts[i]; break; }
 
             if (!src)
             {
-                ClearTimelineForNewTransform();
-                d.transformationName = curDTName;
+                ClearTimelineForNewTransform(t);
+                t.d.transformationName = t.curDTName;
                 return;
             }
 
-            Undo.RegisterCompleteObjectUndo(d, "Load Transform");
-            d.LoadFromDynamicTransform(src, useCustomEase: customEase, clearExisting: true);
+            Undo.RegisterCompleteObjectUndo(t.d, "Load Transform");
+            t.d.LoadFromDynamicTransform(src, useCustomEase: customEase, clearExisting: true);
 
-            f = Mathf.Clamp(f, 0, d.totalFrames);
-            scrollF = Mathf.Clamp(scrollF, 0, Mathf.Max(0, d.totalFrames - 1));
-            selF.Clear();
-            EditorUtility.SetDirty(d);
-            if (p) p.ApplyFrame(Mathf.Clamp(f, 0, d.totalFrames));
+            t.selF.Clear();
+            EditorUtility.SetDirty(t.d);
+            if (t.p) t.p.ApplyFrame(TrackFrame(t));
         }
 
-        void SaveSelectedTransform()
+        void SaveSelectedTransform(Track t)
         {
-            if (!d) return;
+            if (!t.d) return;
 
-            string name = string.IsNullOrEmpty(curDTName) ? "NewTransform" : curDTName;
+            string name = string.IsNullOrEmpty(t.curDTName) ? "NewTransform" : t.curDTName;
 
-            Undo.RecordObject(d, "Save Transform");
-            d.transformationName = name;
+            Undo.RecordObject(t.d, "Save Transform");
+            t.d.transformationName = name;
 
-            var dt = d.BakeToDynamicTransform(d.gameObject, name, clear: true, useCustomEase: customEase);
+            var dt = t.d.BakeToDynamicTransform(t.d.gameObject, name, clear: true, useCustomEase: customEase);
 
             if (dt)
             {
@@ -780,96 +834,400 @@ namespace Vectorier.Dynamic
             }
             else
             {
-                Debug.LogWarning($"[Dynamic Editor] Failed to bake transformation '{name}'.", d);
+                Debug.LogWarning($"[Dynamic Editor] Failed to bake transformation '{name}'.", t.d);
             }
 
-            EditorUtility.SetDirty(d);
-            curDTName = name;
+            EditorUtility.SetDirty(t.d);
+            t.curDTName = name;
         }
 
-        void AddNewTransformComponent()
+        void AddNewTransformComponent(Track t)
         {
-            if (!d) return;
+            if (!t.d) return;
 
-            string uniqueName = GetUniqueTransformName("NewTransform", null);
+            string uniqueName = GetUniqueTransformName(t, "NewTransform", null);
 
-            var newDT = Undo.AddComponent<DynamicTransform>(d.gameObject);
+            var newDT = Undo.AddComponent<DynamicTransform>(t.d.gameObject);
             newDT.transformationName = uniqueName;
 
-            Undo.RecordObject(d, "New Transform Timeline");
-            d.transformationName = uniqueName;
-            d.keys.Clear();
+            Undo.RecordObject(t.d, "New Transform Timeline");
+            t.d.transformationName = uniqueName;
+            t.d.keys.Clear();
 
-            var k0 = d.Snapshot(0);
-            d.Upsert(k0.f, k0.lp, k0.ls, k0.z, k0.c, k0.support, true);
-            d.totalFrames = Mathf.Max(1, d.totalFrames);
-            f = 0;
-            selF.Clear();
+            var k0 = t.d.Snapshot(0);
+            t.d.Upsert(k0.f, k0.lp, k0.ls, k0.z, k0.c, k0.support, true);
+            t.d.totalFrames = Mathf.Max(1, t.d.totalFrames);
+            t.selF.Clear();
 
-            d.BakeToDynamicTransform(newDT, clear: true, useCustomEase: customEase);
+            t.d.BakeToDynamicTransform(newDT, clear: true, useCustomEase: customEase);
 
             EditorUtility.SetDirty(newDT);
-            EditorUtility.SetDirty(d);
+            EditorUtility.SetDirty(t.d);
 
-            if (p) p.ApplyFrame(0);
+            if (t.p) t.p.ApplyFrame(TrackFrame(t));
 
-            curDTName = uniqueName;
-            RefreshDTList();
+            t.curDTName = uniqueName;
+            RefreshDTList(t);
         }
 
-        void RemoveSelectedTransformComponent()
+        void RemoveSelectedTransformComponent(Track t)
         {
-            if (!d) return;
+            if (!t.d) return;
 
-            var go = d.gameObject;
-            var dts = go.GetComponents<DynamicTransform>();
+            var dts = t.d.gameObject.GetComponents<DynamicTransform>();
             DynamicTransform target = null;
 
             for (int i = 0; i < dts.Length; i++)
-                if (dts[i] && N(dts[i]) == curDTName) { target = dts[i]; break; }
+                if (dts[i] && N(dts[i]) == t.curDTName) { target = dts[i]; break; }
 
             if (!target) return;
 
             Undo.DestroyObjectImmediate(target);
-            curDTName = "NewTransform";
+            t.curDTName = "NewTransform";
         }
 
-        // -- Onion Skin --
+        // ================= Timeline ================= //
+
+        static float FramesToPPF(float zoom) => Mathf.Max(2f, 10f * zoom);
+
+        // every track shares scroll, zoom and range so their playheads line up vertically
+        int MouseToFrame(float mouseX, float innerX, float ppf) => Mathf.Clamp(Mathf.RoundToInt(scrollF + (mouseX - innerX) / ppf), 0, MaxEnd());
+
+        void DrawTimeline(Track t, int trackIndex, Rect r)
+        {
+            int total = MaxEnd();
+            int trackEnd = Mathf.Max(1, t.d.totalFrames);
+
+            GUI.Box(r, GUIContent.none);
+
+            var inner = new Rect(r.x + 6f, r.y + 18f, r.width - 12f, r.height - 24f);
+            float ppf = FramesToPPF(zoom);
+            float visibleFrames = Mathf.Max(1f, inner.width / ppf);
+            scrollF = Mathf.Clamp(scrollF, 0f, Mathf.Max(0f, total - visibleFrames));
+
+            bool repaint = Event.current.type == EventType.Repaint;
+
+            // anything past this track's own end is dead space
+            if (repaint && trackEnd < scrollF + visibleFrames)
+            {
+                float dx = inner.x + (trackEnd - scrollF) * ppf;
+                if (dx < inner.xMax)
+                {
+                    float x0 = Mathf.Max(dx, inner.x);
+                    EditorGUI.DrawRect(new Rect(x0, inner.y, inner.xMax - x0, inner.height), new Color(0f, 0f, 0f, 0.35f));
+                }
+            }
+
+            if (repaint)
+            {
+                const int marks = 10;
+                Handles.color = new Color(1f, 1f, 1f, 0.15f);
+                for (int i = 0; i <= marks; i++)
+                {
+                    float tt = i / (float)marks;
+                    float x = inner.x + tt * inner.width;
+                    Handles.DrawLine(new Vector3(x, inner.y), new Vector3(x, inner.y + inner.height));
+                    int fr = Mathf.RoundToInt(Mathf.Lerp(scrollF, scrollF + visibleFrames, tt));
+                    GUI.Label(new Rect(x - 12f, r.y + 2f, 60f, 16f), fr.ToString(), EditorStyles.miniLabel);
+                }
+            }
+
+            int tf = TrackFrame(t);
+
+            if (t.d.keys != null)
+            {
+                float rowY = inner.y + inner.height * 0.5f;
+                for (int i = 0; i < t.d.keys.Count; i++)
+                {
+                    var k = t.d.keys[i];
+                    if (k.f < scrollF - 1f || k.f > scrollF + visibleFrames + 1f) continue;
+
+                    float x = inner.x + (k.f - scrollF) * ppf;
+                    var kr = new Rect(x - 5f, rowY - 8f, 10f, 16f);
+
+                    bool sel = t.selF.Contains(k.f);
+                    EditorGUI.DrawRect(kr, sel
+                        ? new Color(1f, 0.85f, 0.25f, 1f)
+                        : (k.f == tf ? new Color(1f, 0.4f, 0.4f, 1f) : new Color(0.8f, 0.8f, 0.8f, 1f)));
+
+                    HandleKFEvents(t, trackIndex, k.f, kr, inner, ppf);
+                    if (t.pendingMerge) break;   // keys list is about to be rebuilt, stop walking it
+                }
+            }
+
+            if (repaint)
+            {
+                // clamped to this track's end, so a short track parks its line on the last frame
+                float sx = inner.x + (tf - scrollF) * ppf;
+                Handles.color = (f > trackEnd) ? new Color(1f, 0.35f, 0.35f, 0.45f) : Color.red;
+                Handles.DrawLine(new Vector3(sx, inner.y), new Vector3(sx, inner.y + inner.height));
+            }
+
+            var e = Event.current;
+            if (e.type == EventType.MouseDown && e.button == 0 && inner.Contains(e.mousePosition) && !t.moving)
+            {
+                active = trackIndex;
+                StopAll();
+
+                t.scrubbing = true;
+                SetFrame(MouseToFrame(e.mousePosition.x, inner.x, ppf));
+                if (!e.control && !e.command && !e.shift) t.selF.Clear();
+                e.Use();
+            }
+            else if (e.type == EventType.MouseDrag && t.scrubbing && !t.moving)
+            {
+                SetFrame(MouseToFrame(e.mousePosition.x, inner.x, ppf));
+                e.Use();
+            }
+            else if (e.type == EventType.MouseUp && t.scrubbing)
+            {
+                t.scrubbing = false;
+                e.Use();
+            }
+        }
+
+        void HandleKFEvents(Track t, int trackIndex, int frame, Rect kr, Rect inner, float ppf)
+        {
+            if (!t.d) return;
+            var e = Event.current;
+
+            if (e.type == EventType.MouseDown && e.button == 0 && kr.Contains(e.mousePosition))
+            {
+                active = trackIndex;
+                StopAll();
+
+                bool additive = e.control || e.command;
+                if (additive) { if (!t.selF.Remove(frame)) t.selF.Add(frame); }
+                else if (e.shift) t.selF.Add(frame);
+                else if (!t.selF.Contains(frame)) { t.selF.Clear(); t.selF.Add(frame); }
+
+                t.moving = true;
+                t.scrubbing = false;
+                t.moveUndoPushed = false;
+                t.dragStartFrame = MouseToFrame(e.mousePosition.x, inner.x, ppf);
+                t.moveList.Clear();
+                t.moveList.AddRange(SelectedIndexList(t));
+                SetFrame(frame);
+                e.Use();
+                return;
+            }
+
+            if (e.type == EventType.MouseDrag && t.moving && t.moveList.Count > 0)
+            {
+                int cur = MouseToFrame(e.mousePosition.x, inner.x, ppf);
+                int delta = cur - t.dragStartFrame;
+
+                // don't spam the undo stack for a plain selection click
+                if (delta == 0 && !t.moveUndoPushed) { e.Use(); return; }
+                if (!t.moveUndoPushed) { Undo.RegisterCompleteObjectUndo(t.d, "Move Keyframes"); t.moveUndoPushed = true; }
+
+                t.selF.Clear();
+                for (int i = 0; i < t.moveList.Count; i++)
+                {
+                    var (id, of) = t.moveList[i];
+                    if (id < 0 || id >= t.d.keys.Count) continue;      // guard against an external re-sort
+
+                    var k = t.d.keys[id];
+                    k.f = Mathf.Clamp(of + delta, 0, t.d.totalFrames);   // keys never leave their own track's range
+                    t.d.keys[id] = k;
+                    t.selF.Add(k.f);
+                }
+
+                f = Mathf.Clamp(cur, 0, MaxEnd());
+                ApplyFrameToAll(t);
+                EditorUtility.SetDirty(t.d);
+                e.Use();
+                return;
+            }
+
+            if (e.type == EventType.MouseUp && t.moving)
+            {
+                t.pendingMerge = true;    // applied after the draw loop, never during it
+                e.Use();
+            }
+        }
+
+        void ApplyPendingMerge(Track t)
+        {
+            t.pendingMerge = false;
+            t.moving = false;
+            t.moveUndoPushed = false;
+
+            if (!t.d || t.moveList.Count == 0) { t.moveList.Clear(); return; }
+
+            var movedIdx = new HashSet<int>();
+            for (int i = 0; i < t.moveList.Count; i++) movedIdx.Add(t.moveList[i].idx);
+
+            var moved = new List<DynamicTimelineData.KF>(t.moveList.Count);
+            for (int i = 0; i < t.moveList.Count; i++)
+            {
+                int id = t.moveList[i].idx;
+                if (id >= 0 && id < t.d.keys.Count) moved.Add(t.d.keys[id]);
+            }
+
+            // merge by frame, a moved key wins over a stationary one on the same frame
+            var byFrame = new Dictionary<int, DynamicTimelineData.KF>(t.d.keys.Count);
+            for (int i = 0; i < t.d.keys.Count; i++)
+                if (!movedIdx.Contains(i)) byFrame[t.d.keys[i].f] = t.d.keys[i];
+            for (int i = 0; i < moved.Count; i++)
+                byFrame[moved[i].f] = moved[i];
+
+            t.d.keys.Clear();
+            foreach (var kv in byFrame.OrderBy(kv => kv.Key)) t.d.keys.Add(kv.Value);
+
+            t.selF.Clear();
+            for (int i = 0; i < moved.Count; i++) t.selF.Add(moved[i].f);
+
+            t.moveList.Clear();
+            t.d.Sort();
+            EditorUtility.SetDirty(t.d);
+            ApplyFrameToAll(null);
+            Repaint();
+        }
+
+        List<(int idx, int origF)> SelectedIndexList(Track t)
+        {
+            var list = new List<(int, int)>();
+            for (int i = 0; i < t.d.keys.Count; i++) if (t.selF.Contains(t.d.keys[i].f)) list.Add((i, t.d.keys[i].f));
+            return list;
+        }
+
+        // ================= Keyframe ops ================= //
+
+        void DeleteSelectedOrCurrent(Track t)
+        {
+            if (!t.d) return;
+
+            Undo.RegisterCompleteObjectUndo(t.d, "Delete Keyframe(s)");
+
+            if (t.selF.Count > 0)
+            {
+                for (int i = t.d.keys.Count - 1; i >= 0; i--)
+                    if (t.selF.Contains(t.d.keys[i].f)) t.d.keys.RemoveAt(i);
+                t.selF.Clear();
+            }
+            else t.d.DeleteAt(TrackFrame(t));
+
+            t.d.Sort();
+            EditorUtility.SetDirty(t.d);
+            if (t.p && t.d.keys.Count > 0) t.p.ApplyFrame(TrackFrame(t));   // was left on the deleted pose
+        }
+
+        void CopySelected(Track t)
+        {
+            if (!t.d) return;
+            t.d.Sort();
+
+            int tf = TrackFrame(t);
+            var frames = new List<int>();
+            if (t.selF.Count > 0) { foreach (var fr in t.selF) if (t.d.Has(fr, out _)) frames.Add(fr); }
+            else if (t.d.Has(tf, out _)) frames.Add(tf);
+
+            if (frames.Count == 0) return;
+            frames.Sort();
+
+            int baseF = frames[0];
+            clip.Clear();
+            for (int i = 0; i < frames.Count; i++)
+            {
+                t.d.Has(frames[i], out var idx);
+                var k = t.d.keys[idx];
+                clip.Add(new CK { df = frames[i] - baseF, lp = k.lp, ls = k.ls, z = k.z, c = k.c, support = k.support });
+            }
+        }
+
+        void PasteAtFrame(Track t, int dstF)
+        {
+            if (!t.d || clip.Count == 0) return;
+
+            Undo.RegisterCompleteObjectUndo(t.d, "Paste Keyframe(s)");
+
+            t.selF.Clear();
+            for (int i = 0; i < clip.Count; i++)
+            {
+                var ck = clip[i];
+                int fr = Mathf.Clamp(dstF + ck.df, 0, t.d.totalFrames);
+                t.d.Upsert(fr, ck.lp, ck.ls, ck.z, ck.c, ck.support, true);
+                t.selF.Add(fr);
+            }
+
+            t.d.Sort();
+            EditorUtility.SetDirty(t.d);
+            if (t.p) t.p.ApplyFrame(TrackFrame(t));
+        }
+
+        void HandleHotkeys()
+        {
+            var e = Event.current;
+            if (e == null || e.type != EventType.KeyDown) return;
+
+            // never steal keys from a focused text field (rename, frame/end IntFields)
+            if (EditorGUIUtility.editingTextField) return;
+
+            var t = ActiveTrack();
+            bool ctrl = e.control || e.command;
+
+            if (ctrl)
+            {
+                if (t != null && e.keyCode == KeyCode.C) { CopySelected(t); e.Use(); Repaint(); }
+                else if (t != null && e.keyCode == KeyCode.V) { PasteAtFrame(t, TrackFrame(t)); e.Use(); Repaint(); }
+                return;   // let Ctrl+S / Ctrl+Z pass through untouched
+            }
+
+            if (e.keyCode == KeyCode.Delete) { if (t != null) DeleteSelectedOrCurrent(t); e.Use(); Repaint(); return; }
+            if (e.keyCode == KeyCode.Space) { TogglePlay(); e.Use(); Repaint(); }
+        }
+
+        // ================= Onion Skin ================= //
 
         static readonly Dictionary<Sprite, Mesh> smesh = new();
         static Material smat;
 
         void OnSceneGUI(SceneView sv)
         {
-            if (!d || !p) return;
+            if (tracks.Count == 0) return;
 
             var e = Event.current;
-            if (p.useCustomEase != customEase) p.useCustomEase = customEase;
+            bool anyMotion = playing;
 
-            // DrawMeshNow
-            if (onion && e.type == EventType.Repaint && d.keys != null && d.keys.Count > 0)
+            for (int i = 0; i < tracks.Count; i++)
             {
-                d.Sort();
-                int prev = PrevKey(f), next = NextKey(f);
-                if (prev >= 0) DrawGhostAll(prev, onionA);
-                if (next >= 0) DrawGhostAll(next, onionA);
+                var t = tracks[i];
+                if (!t.d || !t.p) continue;
+
+                if (t.p.useCustomEase != customEase) t.p.useCustomEase = customEase;
+                anyMotion |= t.scrubbing || t.moving;
+
+                // ghosts are drawn for every bound object, not just the active one
+                if (onion && e.type == EventType.Repaint && t.d.keys != null && t.d.keys.Count > 0)
+                {
+                    t.d.Sort();
+                    int tf = TrackFrame(t);
+                    int prev = PrevKey(t.d, tf), next = NextKey(t.d, tf);
+                    if (prev >= 0) DrawGhostAll(t, prev, onionA);
+                    if (next >= 0) DrawGhostAll(t, next, onionA);
+                }
             }
 
-            if (customEase) DynamicHandle.DrawPrevNextBezierAndSupport(d, p, f, true);
+            // only the active track gets a support handle, otherwise they'd overlap
+            if (customEase)
+            {
+                var at = ActiveTrack();
+                if (at != null && at.d && at.p) DynamicHandle.DrawPrevNextBezierAndSupport(at.d, at.p, TrackFrame(at), true);
+            }
 
-            // only force redraws while something is actually moving
-            if (p.IsPlaying || scrubbing || moving) sv.Repaint();
+            if (anyMotion) sv.Repaint();
         }
 
-        int PrevKey(int fr) { int best = -1; for (int i = 0; i < d.keys.Count; i++) { int kf = d.keys[i].f; if (kf < fr && kf > best) best = kf; } return best; }
-        int NextKey(int fr) { int best = int.MaxValue; for (int i = 0; i < d.keys.Count; i++) { int kf = d.keys[i].f; if (kf > fr && kf < best) best = kf; } return best == int.MaxValue ? -1 : best; }
+        static int PrevKey(DynamicTimelineData d, int fr) { int best = -1; for (int i = 0; i < d.keys.Count; i++) { int kf = d.keys[i].f; if (kf < fr && kf > best) best = kf; } return best; }
+        static int NextKey(DynamicTimelineData d, int fr) { int best = int.MaxValue; for (int i = 0; i < d.keys.Count; i++) { int kf = d.keys[i].f; if (kf > fr && kf < best) best = kf; } return best == int.MaxValue ? -1 : best; }
 
-        void DrawGhostAll(int fr, float a)
+        void DrawGhostAll(Track t, int fr, float a)
         {
-            if (!d || !p) return;
+            if (!t.d || !t.p) return;
 
-            var root = d.transform;
-            p.Eval(fr, out var lp, out var ls, out var z, out var rootCol, assumeSorted: true);
+            var root = t.d.transform;
+            t.p.Eval(fr, out var lp, out var ls, out var z, out var rootCol, assumeSorted: true);
 
             var parentW = root.parent ? root.parent.localToWorldMatrix : Matrix4x4.identity;
             var evalRootW = parentW * Matrix4x4.TRS(lp, Quaternion.Euler(0f, 0f, z), ls);
@@ -882,7 +1240,7 @@ namespace Vectorier.Dynamic
                 smat = new Material(sh) { hideFlags = HideFlags.HideAndDontSave };
             }
 
-            var srs = d.GetComponentsInChildren<SpriteRenderer>(true);
+            var srs = t.d.GetComponentsInChildren<SpriteRenderer>(true);
             for (int i = 0; i < srs.Length; i++)
             {
                 var sr = srs[i];
@@ -931,368 +1289,6 @@ namespace Vectorier.Dynamic
 
             smesh[sp] = m;
             return m;
-        }
-
-        void HandleHotkeys()
-        {
-            var e = Event.current;
-            if (e == null || e.type != EventType.KeyDown) return;
-
-            // never steal keys from a focused text field (transform rename, frame/end IntFields)
-            if (EditorGUIUtility.editingTextField) return;
-
-            bool ctrl = e.control || e.command;
-
-            if (ctrl)
-            {
-                if (e.keyCode == KeyCode.C) { CopySelected(); e.Use(); Repaint(); }
-                else if (e.keyCode == KeyCode.V) { PasteAtFrame(f); e.Use(); Repaint(); }
-                return;   // let Ctrl+S / Ctrl+Z pass through untouched
-            }
-
-            if (e.keyCode == KeyCode.Delete) { DeleteSelectedOrCurrent(); e.Use(); Repaint(); return; }
-            if (e.keyCode == KeyCode.Space) { TogglePlayAll(); e.Use(); Repaint(); }
-        }
-
-        void TogglePlayAll()
-        {
-            var gos = boundGos ?? Selection.gameObjects;
-            bool multi = gos != null && gos.Length > 1;
-
-            if (!multi) { if (p) p.TogglePlay(); return; }
-
-            bool any = AnyMultiPlaying(gos);
-            for (int i = 0; i < gos.Length; i++)
-            {
-                var g = gos[i];
-                if (!g) continue;
-
-                var pp = g.GetComponent<DynamicPreview>();
-                if (!pp) continue;
-
-                if (!any)
-                {
-                    var dd = pp.data ? pp.data : g.GetComponent<DynamicTimelineData>();
-                    pp.ApplyFrame(Mathf.Clamp(f, 0, dd ? dd.totalFrames : 1));
-                }
-                if (pp.IsPlaying != !any) pp.TogglePlay();
-            }
-        }
-
-        void DeleteSelectedOrCurrent()
-        {
-            if (!d) return;
-
-            Undo.RegisterCompleteObjectUndo(d, "Delete Keyframe(s)");
-
-            if (selF.Count > 0)
-            {
-                for (int i = d.keys.Count - 1; i >= 0; i--)
-                    if (selF.Contains(d.keys[i].f)) d.keys.RemoveAt(i);
-                selF.Clear();
-            }
-            else d.DeleteAt(f);
-
-            d.Sort();
-            EditorUtility.SetDirty(d);
-            if (p && d.keys.Count > 0) p.ApplyFrame(Mathf.Clamp(f, 0, d.totalFrames));   // was left on the deleted pose
-        }
-
-        void CopySelected()
-        {
-            if (!d) return;
-            d.Sort();
-
-            var frames = new List<int>();
-            if (selF.Count > 0) { foreach (var fr in selF) if (d.Has(fr, out _)) frames.Add(fr); }
-            else if (d.Has(f, out _)) frames.Add(f);
-
-            if (frames.Count == 0) return;
-            frames.Sort();
-
-            int baseF = frames[0];
-            clip.Clear();
-            for (int i = 0; i < frames.Count; i++)
-            {
-                d.Has(frames[i], out var idx);
-                var k = d.keys[idx];
-                clip.Add(new CK { df = frames[i] - baseF, lp = k.lp, ls = k.ls, z = k.z, c = k.c, support = k.support });
-            }
-        }
-
-        void PasteAtFrame(int dstF)
-        {
-            if (!d || clip.Count == 0) return;
-
-            Undo.RegisterCompleteObjectUndo(d, "Paste Keyframe(s)");
-
-            selF.Clear();
-            for (int i = 0; i < clip.Count; i++)
-            {
-                var ck = clip[i];
-                int fr = Mathf.Clamp(dstF + ck.df, 0, d.totalFrames);
-                d.Upsert(fr, ck.lp, ck.ls, ck.z, ck.c, ck.support, true);
-                selF.Add(fr);                    // was a second full pass over clip
-            }
-
-            d.Sort();
-            EditorUtility.SetDirty(d);
-            if (p) p.ApplyFrame(Mathf.Clamp(dstF, 0, d.totalFrames));
-        }
-
-        static float FramesToPPF(float zoom) => Mathf.Max(2f, 10f * zoom);
-        void SetF(int nf)
-        {
-            var gos = Selection.gameObjects;
-            bool multi = gos != null && gos.Length > 1;
-
-            int endFrames = multi ? GetMultiMaxEnd(gos) : (d ? d.totalFrames : 1);
-            f = Mathf.Clamp(nf, 0, endFrames);
-
-            if (!multi) { if (p) p.ApplyFrame(f); return; }
-
-            for (int i = 0; i < gos.Length; i++)
-            {
-                var g = gos[i];
-                if (!g) continue;
-                var pp = g.GetComponent<DynamicPreview>();
-                if (!pp || !pp.data) continue;
-                pp.ApplyFrame(Mathf.Clamp(f, 0, pp.data.totalFrames));
-            }
-        }
-        int MouseToFrame(float mouseX, float innerX, float ppf, int maxFrame) => Mathf.Clamp(Mathf.RoundToInt(scrollF + (mouseX - innerX) / ppf), 0, Mathf.Max(0, maxFrame));
-
-        void DrawTimeline(Rect r, int total, bool multi)
-        {
-            GUI.Box(r, GUIContent.none);
-
-            var inner = new Rect(r.x + 6f, r.y + 18f, r.width - 12f, r.height - 24f);
-            float ppf = FramesToPPF(zoom);
-            float visibleFrames = Mathf.Max(1f, inner.width / ppf);
-            scrollF = Mathf.Clamp(scrollF, 0f, Mathf.Max(0f, total - visibleFrames));
-
-            bool repaint = Event.current.type == EventType.Repaint;
-
-            if (repaint)
-            {
-                const int marks = 10;
-                Handles.color = new Color(1f, 1f, 1f, 0.15f);
-                for (int i = 0; i <= marks; i++)
-                {
-                    float t = i / (float)marks;
-                    float x = inner.x + t * inner.width;
-                    Handles.DrawLine(new Vector3(x, inner.y), new Vector3(x, inner.y + inner.height));
-                    int fr = Mathf.RoundToInt(Mathf.Lerp(scrollF, scrollF + visibleFrames, t));
-                    GUI.Label(new Rect(x - 12f, r.y + 2f, 60f, 16f), fr.ToString(), EditorStyles.miniLabel);
-                }
-            }
-
-            if (!multi && d && d.keys != null)
-            {
-                float rowY = inner.y + inner.height * 0.5f;
-                for (int i = 0; i < d.keys.Count; i++)
-                {
-                    var k = d.keys[i];
-                    if (k.f < scrollF - 1f || k.f > scrollF + visibleFrames + 1f) continue;
-
-                    float x = inner.x + (k.f - scrollF) * ppf;
-                    var kr = new Rect(x - 5f, rowY - 8f, 10f, 16f);
-
-                    bool sel = selF.Contains(k.f);
-                    EditorGUI.DrawRect(kr, sel
-                        ? new Color(1f, 0.85f, 0.25f, 1f)
-                        : (k.f == f ? new Color(1f, 0.4f, 0.4f, 1f) : new Color(0.8f, 0.8f, 0.8f, 1f)));
-
-                    HandleKFEvents(i, k.f, kr, inner, ppf, total);
-                    if (pendingMerge) break;   // d.keys is about to be rebuilt — stop walking it
-                }
-            }
-
-            if (repaint)
-            {
-                float sx = inner.x + (f - scrollF) * ppf;
-                Handles.color = Color.red;
-                Handles.DrawLine(new Vector3(sx, inner.y), new Vector3(sx, inner.y + inner.height));
-            }
-
-            var e = Event.current;
-            if (e.type == EventType.MouseDown && e.button == 0 && inner.Contains(e.mousePosition) && !moving)
-            {
-                StopAllPlayback();
-
-                scrubbing = true;
-                SetF(MouseToFrame(e.mousePosition.x, inner.x, ppf, total));
-                if (!multi && !e.control && !e.command && !e.shift) selF.Clear();
-                e.Use();
-            }
-            else if (e.type == EventType.MouseDrag && scrubbing && !moving)
-            {
-                SetF(MouseToFrame(e.mousePosition.x, inner.x, ppf, total));
-                e.Use();
-            }
-            else if (e.type == EventType.MouseUp && scrubbing)
-            {
-                scrubbing = false;
-                e.Use();
-            }
-        }
-
-        void DrawMultiPickList(GameObject[] gos)
-        {
-            for (int i = 0; i < gos.Length; i++)
-            {
-                var g = gos[i];
-                if (!g) continue;
-
-                // components are guaranteed by Bind(); never AddComponent during OnGUI
-                var dd = g.GetComponent<DynamicTimelineData>();
-
-                var names = GetDTNames(g);
-                bool has = names.Length > 0 && dd;
-                int key = g.GetInstanceID();
-                int pick = Mathf.Clamp(SessionState.GetInt("DynEdPick_" + key, 0), 0, Mathf.Max(0, names.Length - 1));
-
-                EditorGUILayout.BeginHorizontal();
-                GUILayout.Label((i + 1).ToString(), GUILayout.Width(18));
-                GUILayout.Label(g.name, GUILayout.Width(170));
-
-                // identical control count on Layout and Repaint, whatever the data does
-                using (new EditorGUI.DisabledScope(!has))
-                {
-                    int np = EditorGUILayout.Popup(has ? pick : 0, has ? names : kNoDT, GUILayout.Width(200));
-                    if (has && np != pick)
-                    {
-                        SessionState.SetInt("DynEdPick_" + key, np);
-                        pendingPickGo = g;
-                        pendingPickData = dd;
-                        pendingPickName = names[np];
-                    }
-                }
-
-                GUILayout.Label(has ? string.Empty : "(no DynamicTransform)", EditorStyles.miniLabel, GUILayout.Width(150));
-                EditorGUILayout.EndHorizontal();
-            }
-        }
-
-        void ApplyPendingPick()
-        {
-            if (!pendingPickGo || !pendingPickData)
-            {
-                pendingPickGo = null; pendingPickData = null; pendingPickName = null;
-                return;
-            }
-
-            LoadGOTransformIntoTimeline(pendingPickGo, pendingPickData, pendingPickName);
-
-            var pp = pendingPickGo.GetComponent<DynamicPreview>();
-            if (pp) pp.ApplyFrame(Mathf.Clamp(f, 0, pendingPickData.totalFrames));
-
-            pendingPickGo = null; pendingPickData = null; pendingPickName = null;
-            Repaint();
-        }
-
-        void HandleKFEvents(int idx, int frame, Rect kr, Rect inner, float ppf, int maxFrame)
-        {
-            if (!d) return;
-            var e = Event.current;
-
-            if (e.type == EventType.MouseDown && e.button == 0 && kr.Contains(e.mousePosition))
-            {
-                StopAllPlayback();
-
-                bool additive = e.control || e.command;
-                if (additive) { if (!selF.Remove(frame)) selF.Add(frame); }
-                else if (e.shift) selF.Add(frame);
-                else if (!selF.Contains(frame)) { selF.Clear(); selF.Add(frame); }
-
-                moving = true;
-                scrubbing = false;
-                moveUndoPushed = false;
-                dragStartFrame = MouseToFrame(e.mousePosition.x, inner.x, ppf, maxFrame);
-                moveList = SelectedIndexList();
-                SetF(frame);
-                e.Use();
-                return;
-            }
-
-            if (e.type == EventType.MouseDrag && moving && moveList.Count > 0)
-            {
-                int cur = MouseToFrame(e.mousePosition.x, inner.x, ppf, maxFrame);
-                int delta = cur - dragStartFrame;
-
-                // don't spam the undo stack for a plain selection click
-                if (delta == 0 && !moveUndoPushed) { e.Use(); return; }
-                if (!moveUndoPushed) { Undo.RegisterCompleteObjectUndo(d, "Move Keyframes"); moveUndoPushed = true; }
-
-                selF.Clear();
-                for (int i = 0; i < moveList.Count; i++)
-                {
-                    var (id, of) = moveList[i];
-                    if (id < 0 || id >= d.keys.Count) continue;      // guard against an external re-sort
-
-                    var k = d.keys[id];
-                    k.f = Mathf.Clamp(of + delta, 0, d.totalFrames);
-                    d.keys[id] = k;
-                    selF.Add(k.f);
-                }
-
-                f = Mathf.Clamp(cur, 0, d.totalFrames);
-                if (p) p.PreviewNoSort(f);
-                EditorUtility.SetDirty(d);
-                e.Use();
-                return;
-            }
-
-            if (e.type == EventType.MouseUp && moving)
-            {
-                pendingMerge = true;    // applied after the draw loop, never during it
-                e.Use();
-            }
-        }
-
-        void ApplyPendingMerge()
-        {
-            pendingMerge = false;
-            moving = false;
-            moveUndoPushed = false;
-
-            if (!d || moveList.Count == 0) { moveList.Clear(); return; }
-
-            var movedIdx = new HashSet<int>();
-            for (int i = 0; i < moveList.Count; i++) movedIdx.Add(moveList[i].idx);
-
-            var moved = new List<DynamicTimelineData.KF>(moveList.Count);
-            for (int i = 0; i < moveList.Count; i++)
-            {
-                int id = moveList[i].idx;
-                if (id >= 0 && id < d.keys.Count) moved.Add(d.keys[id]);
-            }
-
-            // merge by frame; a moved key wins over a stationary one on the same frame
-            var byFrame = new Dictionary<int, DynamicTimelineData.KF>(d.keys.Count);
-            for (int i = 0; i < d.keys.Count; i++)
-                if (!movedIdx.Contains(i)) byFrame[d.keys[i].f] = d.keys[i];
-            for (int i = 0; i < moved.Count; i++)
-                byFrame[moved[i].f] = moved[i];
-
-            d.keys.Clear();
-            foreach (var kv in byFrame.OrderBy(kv => kv.Key)) d.keys.Add(kv.Value);
-
-            selF.Clear();
-            for (int i = 0; i < moved.Count; i++) selF.Add(moved[i].f);
-
-            moveList.Clear();
-            d.Sort();
-            EditorUtility.SetDirty(d);
-            if (p && d.keys.Count > 0) p.ApplyFrame(Mathf.Clamp(f, 0, d.totalFrames));
-            Repaint();
-        }
-
-        List<(int idx, int origF)> SelectedIndexList()
-        {
-            var list = new List<(int, int)>();
-            for (int i = 0; i < d.keys.Count; i++) if (selF.Contains(d.keys[i].f)) list.Add((i, d.keys[i].f));
-            return list;
         }
     }
 }
