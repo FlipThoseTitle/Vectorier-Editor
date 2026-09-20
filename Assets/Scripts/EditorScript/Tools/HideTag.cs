@@ -7,7 +7,7 @@ namespace Vectorier.EditorScript.Tools
 {
     public class HideTagWindow : EditorWindow
     {
-        private const string MenuPath = "Vectorier/Tools/Hide Tags";
+        private const string MenuPath = "Vectorier/Tools/⊘  Hide Tags";
         private const string EditorPrefsPrefix = "Vectorier.EditorScript.Tools.HideTag.";
 
         private static readonly string[] Tags =

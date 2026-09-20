@@ -57,7 +57,7 @@ namespace Vectorier.Dynamic
         const float kTimelineH = 120f;
         static string N(DynamicTransform x) => (x && !string.IsNullOrEmpty(x.transformationName)) ? x.transformationName : "NewTransform";
 
-        [MenuItem("Vectorier/Tools/Dynamic Editor", false, 26)]
+        [MenuItem("Vectorier/Tools/✣  Dynamic Editor", false, 26)]
         static void Open() { GetWindow<DynamicEditor>("Dynamic Editor"); }
 
         void OnEnable()
