@@ -1,8 +1,1864 @@
-<?xml version='1.0' encoding='UTF-8'?>
+<?xml version='1.0' encoding='utf-8'?>
 <Templates>
-  <!-- Повсеместно используемые элементы -->
+  <!-- Templates from trigger_templates.xml -->
   <Template Name="CommonLib" Library="1">
-    <Loop Name = "Sound">
+    <Loop Name="Sound">
+      <Using>
+        <Variable Name="Sound" DefaultValue="None" ComplexName="1" Type="Sound" />
+        <Variable Name="Volume" DefaultValue="1" ComplexName="1" Type="Sound" />
+      </Using>
+      <Actions>
+        <Sound Name="_Sound" Volume="_Volume" />
+      </Actions>
+    </Loop>
+    <Loop Name="Delay">
+      <Using>
+        <Variable Name="Delay" DefaultValue="0" ComplexName="1" Type="UInt" />
+      </Using>
+      <Actions>
+        <Wait Frames="_Delay" />
+      </Actions>
+    </Loop>
+    <Loop Name="RequiredAnimation">
+      <Using>
+        <Variable Name="ReqAnim" DefaultValue="?getModel[Player].animationName" ComplexName="1" Type="Animation" />
+      </Using>
+      <Events>
+        <ValueChange Value="?getModel[Player].animationName" />
+      </Events>
+      <Conditions>
+        <Equal Value1="_ReqAnim" Value2="?getModel[Player].animationName" />
+      </Conditions>
+    </Loop>
+    <Loop Name="ActiveDeath">
+      <Events>
+        <Collision />
+      </Events>
+    </Loop>
+  </Template>
+  <Template Name="FreqUsed" Library="1">
+    <Loop Name="OnShow">
+      <Events>
+        <OnShow />
+      </Events>
+    </Loop>
+    <Loop Name="OnHide">
+      <Events>
+        <OnHide />
+      </Events>
+    </Loop>
+    <Loop Name="PlayerPressedKey">
+      <Using>
+        <Variable Name="Key" DefaultValue="Up" Type="Key" />
+      </Using>
+      <Events>
+        <KeyPressed />
+      </Events>
+      <Conditions>
+        <Equal Value1="_$Key" Value2="_Key" />
+        <Equal Value1="?getModel[Player].AI" Value2="0" />
+      </Conditions>
+    </Loop>
+    <Loop Name="KeyPressed">
+      <Events>
+        <KeyPressed />
+      </Events>
+    </Loop>
+    <Loop Name="OnCollision">
+      <Events>
+        <Collision />
+      </Events>
+    </Loop>
+    <Loop Name="Enter">
+      <Events>
+        <Enter />
+      </Events>
+    </Loop>
+    <Loop Name="Exit">
+      <Events>
+        <Exit />
+      </Events>
+    </Loop>
+    <Loop Name="EnterOrExit">
+      <Events>
+        <Exit />
+        <Enter />
+      </Events>
+    </Loop>
+    <Loop Name="Timeout">
+      <Events>
+        <Timeout />
+      </Events>
+    </Loop>
+    <Loop Name="Activate">
+      <Events>
+        <Activate />
+      </Events>
+    </Loop>
+    <Loop Name="IsSetForPlayer">
+      <Conditions>
+        <Equal Value1="_$AI" Value2="0" />
+      </Conditions>
+    </Loop>
+    <Loop Name="TriggeredByPlayer">
+      <Conditions>
+        <Equal Value1="?getModel[Player].AI" Value2="0" />
+      </Conditions>
+    </Loop>
+    <Loop Name="TriggeredByAnyBot">
+      <Conditions>
+        <Equal Value1="?getModel[Player].AI" Value2="0" Not="1" />
+      </Conditions>
+    </Loop>
+    <Loop Name="DispatchEvent">
+      <Using>
+        <Variable Name="Activator" DefaultValue="" ComplexName="1" Type="String" />
+      </Using>
+      <Actions>
+        <Activate ActionID="_Activator" />
+      </Actions>
+    </Loop>
+    <Loop Name="SwitchOn">
+      <Actions>
+        <SetVariable Name="$Active" Value="1" />
+      </Actions>
+    </Loop>
+    <Loop Name="SwitchOff">
+      <Actions>
+        <SetVariable Name="$Active" Value="0" />
+      </Actions>
+    </Loop>
+    <Loop Name="CheckIfAlive">
+      <Conditions>
+        <Equal Value1="?getModel[Player].condition" Value2="Common" />
+      </Conditions>
+    </Loop>
+    <Loop Name="Death">
+      <Actions>
+        <SetVariable Name="?getCounter[ST_Default,DeathOnFloor]" Value="?getCounter[ST_Default,ST_Floor]" />
+        <EndGame Result="Death" Model="Player" Frames="60" />
+      </Actions>
+    </Loop>
+  </Template>
+  <Template Name="ItemUsage" Library="1">
+    <Loop Name="IfItemExists">
+      <Using>
+        <Variable Name="ItemResult" DefaultValue="" Type="String" ComplexName="1" />
+        <Variable Name="TargetItem" DefaultValue="" Type="String" ComplexName="1" />
+      </Using>
+      <Conditions>
+        <Select Object="_ItemResult" From="Equipped">
+          <Equal Value1="_ItemResult" Value2="_TargetItem" />
+        </Select>
+      </Conditions>
+    </Loop>
+    <Loop Name="IfItemDoesntExist">
+      <Using>
+        <Variable Name="ItemResult" DefaultValue="" Type="String" ComplexName="1" />
+        <Variable Name="TargetItem" DefaultValue="" Type="String" ComplexName="1" />
+      </Using>
+      <Conditions>
+        <Select Object="_ItemResult" From="Equipped" Not="1">
+          <Equal Value1="_ItemResult" Value2="_TargetItem" />
+        </Select>
+      </Conditions>
+    </Loop>
+    <Loop Name="UseItem">
+      <Using>
+        <Variable Name="TargetItem" DefaultValue="" Type="String" ComplexName="1" />
+      </Using>
+      <Actions>
+        <Use Object="_TargetItem" />
+      </Actions>
+    </Loop>
+  </Template>
+  <Template Name="CurrencyService" Library="1">
+    <Loop Name="StuntLauncher">
+      <Using>
+        <Variable Name="ReqAnim" DefaultValue="?getModel[Player].animationName" ComplexName="1" Type="Animation" />
+      </Using>
+      <Events>
+        <Exit />
+      </Events>
+      <Conditions>
+        <ConditionBlock Template="FreqUsed.CheckIfAlive" />
+        <ConditionBlock Template="CommonLib.RequiredAnimation" />
+      </Conditions>
+      <Actions>
+        <ActivatePassiveEffect ActionID="StuntDone" />
+        <Activate ActionID="AddCurrency" />
+      </Actions>
+    </Loop>
+    <Loop Name="CoinLauncher">
+      <Variable Name="PassiveActivateSignal" DefaultValue="None" />
+      <Events>
+        <Enter />
+      </Events>
+      <Conditions Template="FreqUsed.CheckIfAlive" />
+      <Actions>
+        <ActivatePassiveEffect ActionID="_PassiveActivateSignal" />
+        <Activate ActionID="AddCurrency" />
+      </Actions>
+    </Loop>
+    <Loop Name="PlaySound">
+      <Using>
+        <Variable Name="first_Sound" DefaultValue="None" ComplexName="1" Type="Sound" />
+        <Variable Name="first_Volume" DefaultValue="1" ComplexName="1" Type="Sound" />
+        <Variable Name="second_Sound" DefaultValue="None" ComplexName="1" Type="Sound" />
+        <Variable Name="second_Volume" DefaultValue="1" ComplexName="1" Type="Sound" />
+        <Variable Name="third_Sound" DefaultValue="None" ComplexName="1" Type="Sound" />
+        <Variable Name="third_Volume" DefaultValue="1" ComplexName="1" Type="Sound" />
+      </Using>
+      <Events Template="FreqUsed.Activate" />
+      <Conditions>
+        <Equal Value1="_$ActionID" Value2="AddCurrency" />
+      </Conditions>
+      <Actions>
+        <Choose Order="Random" Set="1">
+          <ActionBlock Template="CommonLib.Sound" Prefix="first_" />
+          <ActionBlock Template="CommonLib.Sound" Prefix="second_" />
+          <ActionBlock Template="CommonLib.Sound" Prefix="third_" />
+        </Choose>
+      </Actions>
+    </Loop>
+    <Loop Name="Kill">
+      <Events Template="FreqUsed.Enter" />
+      <Actions>
+        <Transform Name="ItemDisappear" />
+      </Actions>
+    </Loop>
+    <Loop Name="ShowStuntText">
+      <Using>
+        <Variable Name="StuntText" DefaultValue="None" Type="String" />
+        <Variable Name="FT_Stunts_Color" DefaultValue="None" Type="String" />
+        <Variable Name="TextColor" DefaultValue="#000000FF" Type="String" />
+        <Variable Name="StuntTextSize" DefaultValue="140" Type="Int" />
+      </Using>
+      <Events>
+        <Activate />
+      </Events>
+      <Conditions>
+        <Equal Value1="_$ActionID" Value2="PostAction" />
+      </Conditions>
+      <Actions>
+        <FloatingText Text="_StuntText" Color="_FT_Stunts_Color" IsItalic="1" Size="_StuntTextSize" Frames="120" Delay="30" OriginType="Screen" OffsetY="0.3" ShiftX="0.1" />
+      </Actions>
+    </Loop>
+    <Loop Name="ShowCurrencyIncome">
+      <Using>
+        <Variable Name="PointsTextDelay" DefaultValue="0" Type="UInt" />
+        <Variable Name="TextColor" DefaultValue="#000000FF" Type="String" />
+        <Variable Name="CashResult" DefaultValue="0" Type="Int" />
+        <Variable Name="TextSize" DefaultValue="110" Type="Int" />
+        <Variable Name="IconImage" DefaultValue="none" Type="String" />
+        <Variable Name="IconImageWidth" DefaultValue="100" Type="UInt" />
+        <Variable Name="IconImageHeight" DefaultValue="100" Type="UInt" />
+        <Variable Name="ShiftY" DefaultValue="-300" Type="UInt" />
+        <Variable Name="IconImageColor" DefaultValue="blue" />
+      </Using>
+      <Events>
+        <Activate />
+      </Events>
+      <Conditions>
+        <Equal Value1="_$ActionID" Value2="PostAction" />
+      </Conditions>
+      <Actions>
+        <Wait Frames="_PointsTextDelay" />
+        <FloatingText Text="_CashResult" Color="_TextColor" Size="_TextSize" Image="_IconImage" ImageAlign="Left" ImageColor="_IconImageColor" ImageWidth="_IconImageWidth" ImageHeight="_IconImageHeight" Frames="120" ShiftY="_ShiftY" />
+      </Actions>
+    </Loop>
+    <Loop Name="ShowCombinedText">
+      <Using>
+        <Variable Name="StuntText" DefaultValue="None" Type="String" />
+        <Variable Name="PointsTextDelay" DefaultValue="0" Type="UInt" />
+        <Variable Name="TextColor" DefaultValue="#000000FF" Type="String" />
+        <Variable Name="CashResult" DefaultValue="0" Type="Int" />
+        <Variable Name="TextSize" DefaultValue="110" Type="Int" />
+        <Variable Name="IconImage" DefaultValue="none" Type="String" />
+        <Variable Name="IconImageColor" DefaultValue="blue" />
+      </Using>
+      <Events>
+        <Activate />
+      </Events>
+      <Conditions>
+        <Equal Value1="_$ActionID" Value2="PostAction" />
+      </Conditions>
+      <Actions>
+        <Wait Frames="_PointsTextDelay" />
+        <SetVariable Name="CashResult" Value="_CashResult" />
+        <FloatingText Text="%1(nl)%2" Vars="_CashResult|_StuntText" Color="_TextColor" Size="_TextSize" Image="_IconImage" ImageAlign="Left" ImageWidth="113" ImageHeight="133" ImageColor="_IconImageColor" Frames="120" OriginType="Screen" OffsetY="0.2" ShiftY="-0.6" />
+      </Actions>
+    </Loop>
+  </Template>
+  <Template Name="Statistics" Library="1">
+    <Loop Name="WriteItemsCollected">
+      <Using>
+        <Variable Name="StatisticsCounter" DefaultValue="None" ComplexName="1" />
+      </Using>
+      <Conditions>
+        <Equal Value1="_StatisticsCounter" Value2="None" Not="1" />
+      </Conditions>
+      <Actions>
+        <AppendValue Name="?getCounter[ST_Statistics_Items_Collected, _StatisticsCounter]" Value="1" />
+      </Actions>
+    </Loop>
+  </Template>
+  <Template Name="GadgetCharges" Library="1">
+    <Init>
+      <Variable Name="#Gadget" Value="None" />
+      <Variable Name="GadgetActiveGroup" Value="GadgetMine" />
+    </Init>
+    <Loop Name="UseBonusCharge">
+      <Events Template="FreqUsed.Activate" />
+      <Conditions>
+        <Equal Value1="_Block" Value2="0" />
+        <Equal Value1="_$ActionID" Value2="TryToUseGadget" />
+        <Equal Value1="?getModel[Player].condition" Value2="Common" />
+        <Select Object="_#Gadget" From="_GadgetActiveGroup" Section="Equipped">
+          <GreaterEqual Value1="?getItemAsGroup[ST_GadgetBase, _#Gadget].ST_ChargesBonus" Value2="1" />
+        </Select>
+      </Conditions>
+      <Actions>
+        <AppendValue Name="?getItemAsGroup[ST_GadgetBase, _#Gadget].ST_ChargesBonus" Value="-1" />
+        <Sound Name="?getItemAsGroup[ST_GadgetBase, _#Gadget].Sound" />
+        <SetVariable Name="Block" Value="1" />
+        <Activate ActionID="ChargeUsed" />
+      </Actions>
+    </Loop>
+    <Loop Name="UseGadget">
+      <Events Template="FreqUsed.Activate" />
+      <Conditions>
+        <Equal Value1="_Block" Value2="0" />
+        <Equal Value1="_$ActionID" Value2="TryToUseGadget" />
+        <Equal Value1="?getModel[Player].condition" Value2="Common" />
+        <Select Object="_#Gadget" From="_GadgetActiveGroup" Section="Equipped">
+          <GreaterEqual Value1="?getItemAsGroup[ST_GadgetBase, _#Gadget].ST_ChargesCurrent" Value2="1" />
+          <Equal Value1="?getItemAsGroup[ST_GadgetBase, _#Gadget].ST_ChargesBonus" Value2="0" />
+        </Select>
+      </Conditions>
+      <Actions>
+        <ActivatePassiveEffect ActionID="?getItemAsGroup[ST_GadgetBase, _#Gadget].Name" />
+        <ActivatePassiveEffect ActionID="ChargeSpent" />
+        <AppendValue Name="?getItemAsGroup[ST_GadgetBase, _#Gadget].ST_ChargesCurrent" Value="-1" />
+        <Sound Name="?getItemAsGroup[ST_GadgetBase, _#Gadget].Sound" />
+        <AppendValue Name="?getCounter[AchievementsProgressByFloor, SpendChargesByFloor]" Value="1" />
+        <SetVariable Name="Block" Value="1" />
+        <Activate ActionID="ChargeUsed" />
+        <ActivatePassiveEffect ActionID="?getItemAsGroup[ST_GadgetBase, _#Gadget].Name" />
+      </Actions>
+    </Loop>
+    <Loop Name="FailedToUseGadget">
+      <Events Template="FreqUsed.Activate" />
+      <Conditions>
+        <Equal Value1="_Block" Value2="0" />
+        <Equal Value1="_$ActionID" Value2="TryToUseGadget" />
+        <Equal Value1="?getModel[Player].condition" Value2="Common" />
+        <Select Object="_#Gadget" From="_GadgetActiveGroup" Section="Equipped" Not="1">
+          <GreaterEqual Value1="?getItemAsGroup[ST_GadgetBase, _#Gadget].ST_ChargesCurrent" Value2="1" />
+        </Select>
+        <Select Object="_#Gadget" From="_GadgetActiveGroup" Section="Equipped" Not="1">
+          <GreaterEqual Value1="?getItemAsGroup[ST_GadgetBase, _#Gadget].ST_ChargesBonus" Value2="1" />
+        </Select>
+      </Conditions>
+      <Actions>
+        <Activate ActionID="FailedToUseGadget" />
+      </Actions>
+    </Loop>
+    <Loop Name="DummySubtitles">
+      <Events Template="FreqUsed.Activate" />
+      <Conditions>
+        <Equal Value1="_$ActionID" Value2="ChargeUsed" />
+        <Select Object="_#Gadget" From="_GadgetActiveGroup" Section="Equipped">
+          <Equal Value1="?getItemAsGroup[ST_GadgetBase, _#Gadget].ST_ChargesCurrent" Value2="0" />
+        </Select>
+      </Conditions>
+      <Actions>
+        <Activate ActionID="UseRechargeOrNot" />
+      </Actions>
+    </Loop>
+    <Loop Name="GadgetDischarged">
+      <Events Template="FreqUsed.Activate" />
+      <Conditions>
+        <Equal Value1="_$ActionID" Value2="UseRechargeOrNot" />
+        <Equal Value1="_GadgetIsRecharged" Value2="0" />
+        <Select Object="_#Gadget" From="_GadgetActiveGroup" Section="Equipped">
+          <Equal Value1="?getItemAsGroup[ST_GadgetBase, _#Gadget].ST_ChargesCurrent" Value2="0" />
+        </Select>
+      </Conditions>
+      <Actions>
+        <FloatingText Text="?_concat['^SoundAnnounce.%1.SoundText^', ?_getItemAsGroup[ST_MyGadgets, _#Gadget].ST_Slot]" Color="#FFFFFFFF" Size="100" Frames="94" Delay="30" OriginType="Subtitles" OffsetY="{0.1+?getCounter[GUI,SubtitlesNumber]*0.1}" ShiftY="0.1" />
+        <Sound Name="?concat['%1_discharged', ?_getItemAsGroup[ST_MyGadgets, _#Gadget].ST_Slot]" />
+        <AppendValue Name="?getCounter[GUI,SubtitlesNumber]" Value="1" />
+        <Wait Frames="60" />
+        <AppendValue Name="?getCounter[GUI,SubtitlesNumber]" Value="-1" />
+      </Actions>
+    </Loop>
+  </Template>
+  <Template Name="NoneType">
+    <Init>
+      <SetVariable Name="$AI" Value="-1" />
+      <SetVariable Name="$Active" Value="1" />
+      <SetVariable Name="$Node" Value="COM" />
+    </Init>
+    <Loop Name="Only">
+      <Events Template="FreqUsed.OnCollision" />
+      <Actions>
+        <SetVariable Name="$Active" Value="0" />
+      </Actions>
+    </Loop>
+  </Template>
+  <Template Name="CameraZoom">
+    <Init>
+      <SetVariable Name="$AI" Value="0" />
+      <SetVariable Name="$Active" Value="1" />
+      <SetVariable Name="$Node" Value="COM" />
+    </Init>
+    <Loop Name="Only">
+      <Using>
+        <Variable Name="Zoom" DefaultValue="1" Type="Zoom" />
+      </Using>
+      <Events Template="FreqUsed.Enter" />
+      <Actions>
+        <Camera Zoom="_Zoom" />
+      </Actions>
+    </Loop>
+  </Template>
+  <Template Name="CameraSmoothness">
+    <Init>
+      <SetVariable Name="$AI" Value="0" />
+      <SetVariable Name="$Active" Value="1" />
+      <SetVariable Name="$Node" Value="COM" />
+    </Init>
+    <Loop Name="Enter">
+      <Using>
+        <Variable Name="Smoothness" DefaultValue="100" Type="Int" />
+      </Using>
+      <Events Template="FreqUsed.Enter" />
+      <Actions>
+        <Camera Smoothness="_Smoothness" />
+      </Actions>
+    </Loop>
+    <Loop Name="Exit">
+      <Events Template="FreqUsed.Exit" />
+      <Actions>
+        <Camera Smoothness="2" />
+      </Actions>
+    </Loop>
+  </Template>
+  <Template Name="CameraFollow">
+    <Init>
+      <SetVariable Name="$AI" Value="0" />
+      <SetVariable Name="$Active" Value="1" />
+      <SetVariable Name="$Node" Value="COM" />
+    </Init>
+    <Loop Name="Only">
+      <Using>
+        <Variable Name="Follow" DefaultValue="Player" Type="Model" />
+      </Using>
+      <Events Template="FreqUsed.Enter" />
+      <Actions>
+        <Camera Follow="_Follow" />
+      </Actions>
+    </Loop>
+  </Template>
+  <Template Name="ForcedAnimation">
+    <Init>
+      <SetVariable Name="$AI" Value="-1" />
+      <SetVariable Name="$Active" Value="1" />
+      <SetVariable Name="$Node" Value="COM" />
+    </Init>
+    <Loop Name="Only">
+      <Using>
+        <Variable Name="AnimName" DefaultValue="RunForward" Type="Animation" />
+        <Variable Name="AnimFrame" DefaultValue="10" Type="UInt" />
+        <Variable Name="Reversed" DefaultValue="0" Type="UInt" />
+      </Using>
+      <Events Template="FreqUsed.Enter" />
+      <Actions>
+        <ForceAnimation Name="_AnimName" Model="Player" Frame="_AnimFrame" Reversed="_Reversed" />
+      </Actions>
+    </Loop>
+  </Template>
+  <Template Name="Death">
+    <Init>
+      <SetVariable Name="$AI" Value="-1" />
+      <SetVariable Name="$Active" Value="1" />
+      <SetVariable Name="$Node" Value="COM" />
+    </Init>
+    <Loop Name="KillBot">
+      <Events Template="FreqUsed.Enter" />
+      <Conditions Template="FreqUsed.TriggeredByAnyBot" />
+      <Actions>
+        <Kill Model="Player" />
+      </Actions>
+    </Loop>
+    <Loop Name="KillPlayer">
+      <Events Template="FreqUsed.Enter" />
+      <Conditions Template="FreqUsed.TriggeredByPlayer" />
+      <Actions>
+        <EndGame Result="Death" Model="Player" Frames="120" />
+      </Actions>
+    </Loop>
+  </Template>
+  <Template Name="ForcedVariableAnimation">
+    <Init>
+      <SetVariable Name="$AI" Value="-1" />
+      <SetVariable Name="$Active" Value="1" />
+      <SetVariable Name="$Node" Value="COM" />
+    </Init>
+    <Loop Name="TurnDelayed">
+      <Using>
+        <Variable Name="Mode" DefaultValue="0" Type="Bool" />
+        <Variable Name="ActivatorToCheck" DefaultValue="None" Type="String" />
+        <Variable Name="NewModel" DefaultValue="None" Type="String" />
+      </Using>
+      <Events Template="FreqUsed.Activate" />
+      <Conditions>
+        <Equal Value1="_ActivatorToCheck" Value2="_$ActionID" />
+        <Equal Value1="_Mode" Value2="0" />
+        <Equal Value1="_NewModel" Value2="None" />
+      </Conditions>
+      <Actions>
+        <SetVariable Name="Mode" Value="1" />
+      </Actions>
+    </Loop>
+    <Loop Name="TurnRegular">
+      <Using>
+        <Variable Name="Mode" DefaultValue="0" Type="Bool" />
+        <Variable Name="ActivatorToCheck" DefaultValue="None" Type="String" />
+        <Variable Name="NewModel" DefaultValue="None" Type="String" />
+      </Using>
+      <Events Template="FreqUsed.Activate" />
+      <Conditions>
+        <Equal Value1="_ActivatorToCheck" Value2="_$ActionID" />
+        <Equal Value1="_Mode" Value2="1" />
+      </Conditions>
+      <Actions>
+        <SetVariable Name="Mode" Value="0" />
+      </Actions>
+    </Loop>
+    <Loop Name="Regular">
+      <Using>
+        <Variable Name="AnimName" DefaultValue="RunForward" />
+        <Variable Name="AnimFrame" DefaultValue="10" />
+        <Variable Name="Reversed" DefaultValue="0" />
+        <Variable Name="Mode" DefaultValue="0" />
+        <Variable Name="NewModel" DefaultValue="None" />
+      </Using>
+      <Events Template="FreqUsed.Enter" />
+      <Conditions>
+        <Equal Value1="_Mode" Value2="0" Type="Bool" />
+      </Conditions>
+      <Actions>
+        <ForceAnimation Name="_AnimName" Model="Player" Frame="_AnimFrame" Reversed="_Reversed" />
+        <SetVariable Name="NewModel" Value="Player" />
+      </Actions>
+    </Loop>
+    <Loop Name="Delayed">
+      <Using>
+        <Variable Name="DelayedAnimName" DefaultValue="RunForward" Type="Animation" />
+        <Variable Name="DelayedAnimFrame" DefaultValue="10" Type="UInt" />
+        <Variable Name="DelayedReversed" DefaultValue="0" Type="Bool" />
+        <Variable Name="Mode" DefaultValue="0" Type="Bool" />
+      </Using>
+      <Events Template="FreqUsed.Enter" />
+      <Conditions>
+        <Equal Value1="_Mode" Value2="1" />
+      </Conditions>
+      <Actions>
+        <ForceAnimation Name="_DelayedAnimName" Model="Player" Frame="_DelayedAnimFrame" Reversed="_DelayedReversed" />
+      </Actions>
+    </Loop>
+    <Loop Name="TurnDelayedWithModel">
+      <Using>
+        <Variable Name="DelayedAnimName" DefaultValue="RunForward" Type="Animation" />
+        <Variable Name="DelayedAnimFrame" DefaultValue="10" Type="UInt" />
+        <Variable Name="DelayedReversed" DefaultValue="0" Type="Bool" />
+        <Variable Name="Mode" DefaultValue="0" Type="Bool" />
+        <Variable Name="ActivatorToCheck" DefaultValue="None" Type="String" />
+      </Using>
+      <Events Template="FreqUsed.Activate" />
+      <Conditions>
+        <Equal Value1="_ActivatorToCheck" Value2="_$ActionID" />
+        <Equal Value1="_Mode" Value2="0" />
+        <Equal Value1="_NewModel" Value2="None" Not="1" />
+      </Conditions>
+      <Actions>
+        <ForceAnimation Name="_DelayedAnimName" Model="_NewModel" Frame="_DelayedAnimFrame" Reversed="_DelayedReversed" />
+        <SetVariable Name="Mode" Value="1" />
+      </Actions>
+    </Loop>
+  </Template>
+  <Template Name="VariableDeath">
+    <Init>
+      <SetVariable Name="$AI" Value="-1" />
+      <SetVariable Name="$Active" Value="1" />
+      <SetVariable Name="$Node" Value="COM" />
+    </Init>
+    <Loop Name="TurnDelayed">
+      <Using>
+        <Variable Name="Mode" DefaultValue="0" Type="Bool" />
+        <Variable Name="ActivatorToCheck" DefaultValue="None" Type="String" />
+        <Variable Name="NewModel" DefaultValue="None" Type="String" />
+      </Using>
+      <Events Template="FreqUsed.Activate" />
+      <Conditions>
+        <Equal Value1="_ActivatorToCheck" Value2="_$ActionID" />
+        <Equal Value1="_Mode" Value2="0" />
+        <Equal Value1="_NewModel" Value2="None" />
+      </Conditions>
+      <Actions>
+        <SetVariable Name="Mode" Value="1" />
+      </Actions>
+    </Loop>
+    <Loop Name="TurnRegular">
+      <Using>
+        <Variable Name="Mode" DefaultValue="0" Type="Bool" />
+        <Variable Name="ActivatorToCheck" DefaultValue="None" Type="String" />
+        <Variable Name="NewModel" DefaultValue="None" Type="String" />
+      </Using>
+      <Events Template="FreqUsed.Activate" />
+      <Conditions>
+        <Equal Value1="_ActivatorToCheck" Value2="_$ActionID" />
+        <Equal Value1="_Mode" Value2="1" />
+      </Conditions>
+      <Actions>
+        <SetVariable Name="Mode" Value="0" />
+      </Actions>
+    </Loop>
+    <Loop Name="Regular">
+      <Using>
+        <Variable Name="AnimName" DefaultValue="RunForward" />
+        <Variable Name="AnimFrame" DefaultValue="10" />
+        <Variable Name="Reversed" DefaultValue="0" />
+        <Variable Name="Mode" DefaultValue="0" />
+        <Variable Name="NewModel" DefaultValue="None" />
+      </Using>
+      <Events Template="FreqUsed.Enter" />
+      <Conditions>
+        <Equal Value1="_Mode" Value2="0" Type="Bool" />
+      </Conditions>
+      <Actions>
+        <ForceAnimation Name="_AnimName" Model="Player" Frame="_AnimFrame" Reversed="_Reversed" />
+        <SetVariable Name="NewModel" Value="Player" />
+      </Actions>
+    </Loop>
+    <Loop Name="Delayed">
+      <Using>
+        <Variable Name="DelayedAnimName" DefaultValue="RunForward" Type="Animation" />
+        <Variable Name="DelayedAnimFrame" DefaultValue="10" Type="UInt" />
+        <Variable Name="DelayedReversed" DefaultValue="0" Type="Bool" />
+        <Variable Name="Mode" DefaultValue="0" Type="Bool" />
+      </Using>
+      <Events Template="FreqUsed.Enter" />
+      <Conditions>
+        <Equal Value1="_Mode" Value2="1" />
+      </Conditions>
+      <Actions>
+        <Kill Model="Player" />
+      </Actions>
+    </Loop>
+    <Loop Name="TurnDelayedWithModel">
+      <Using>
+        <Variable Name="DelayedAnimName" DefaultValue="RunForward" Type="Animation" />
+        <Variable Name="DelayedAnimFrame" DefaultValue="10" Type="UInt" />
+        <Variable Name="DelayedReversed" DefaultValue="0" Type="Bool" />
+        <Variable Name="Mode" DefaultValue="0" Type="Bool" />
+        <Variable Name="ActivatorToCheck" DefaultValue="None" Type="String" />
+      </Using>
+      <Events Template="FreqUsed.Activate" />
+      <Conditions>
+        <Equal Value1="_ActivatorToCheck" Value2="_$ActionID" />
+        <Equal Value1="_Mode" Value2="0" />
+        <Equal Value1="_NewModel" Value2="None" Not="1" />
+      </Conditions>
+      <Actions>
+        <Kill Model="_NewModel" />
+        <SetVariable Name="Mode" Value="1" />
+      </Actions>
+    </Loop>
+  </Template>
+  <Template Name="SaveCheck">
+    <Init>
+      <SetVariable Name="$AI" Value="-1" />
+      <SetVariable Name="$Active" Value="1" />
+      <SetVariable Name="$Node" Type="Node" Value="COM" />
+      <SetVariable Name="#Gadget" Value="None" />
+      <SetVariable Name="#PowerUp" Value="None" />
+      <SetVariable Name="SaveType" Value="AntiMine" />
+      <SetVariable Name="GadgetActiveGroup" Value="GadgetMine" />
+      <SetVariable Name="MessageGadget" Value="gadget_used" />
+      <SetVariable Name="MessageFail" Value="fail" />
+      <SetVariable Name="MessagePowerUp" Value="powerup_finded" />
+      <SetVariable Name="ActivateID" Value="save_check" />
+      <SetVariable Name="Block" Value="0" />
+      <SetVariable Name="WakeUpID" Value="wake_up" />
+      <SetVariable Name="sound" Value="subject_destroyed" />
+      <SetVariable Name="soundText" Value="^SoundAnnounce. SubjectDestroyed^" />
+      <SetVariable Name="TextSize" Value="154" />
+      <SetVariable Name="TextColor" Value="#41C5E2FF" />
+      <SetVariable Name="volumeLvl" Value="100" />
+      <SetVariable Name="#Currency" Value="None" />
+      <SetVariable Name="CurrencyType" Value="Points" />
+      <SetVariable Name="GadgetIsRecharged" Value="0" />
+      <SetVariable Name="ChargesToAppend" Value="0" />
+      <SetVariable Name="GadgetUsed" Value="0" />
+    </Init>
+    <Loop Name="TryToUseGadget">
+      <Events Template="FreqUsed.Activate" />
+      <Conditions>
+        <Equal Value1="_$ActionID" Value2="_ActivateID" />
+      </Conditions>
+      <Actions>
+        <Activate ActionID="TryToUseGadget" />
+      </Actions>
+    </Loop>
+    <Loop Template="GadgetCharges.UseBonusCharge" />
+    <Loop Template="GadgetCharges.UseGadget" />
+    <Loop Template="GadgetCharges.FailedToUseGadget" />
+    <Loop Name="WakeUp">
+      <Events Template="FreqUsed.Activate" />
+      <Conditions>
+        <Equal Value1="_$ActionID" Value2="_WakeUpID" />
+      </Conditions>
+      <Actions>
+        <SetVariable Name="Block" Value="0" />
+      </Actions>
+    </Loop>
+    <Loop Name="EndLaserTutorial">
+      <Events Template="FreqUsed.Activate" />
+      <Conditions>
+        <Operator Type="Or">
+          <Equal Value1="_$ActionID" Value2="_MessageFail" />
+          <Equal Value1="_$ActionID" Value2="_MessageGadget" />
+        </Operator>
+        <Equal Value1="?getCounter[ST_Tutorial,ST_TutorialLaserAndMine]" Value2="1" />
+      </Conditions>
+      <Actions>
+        <SetVariable Name="?getCounter[ST_Tutorial,ST_TutorialLaserAndMine]" Value="0" />
+      </Actions>
+    </Loop>
+    <Loop Name="DontTouchPrettyCheater">
+      <Events Template="FreqUsed.Activate" />
+      <Conditions>
+        <Equal Value1="_$ActionID" Value2="_ActivateID" />
+        <Equal Value1="?getCounter[Debug,ImmunityToTraps]" Value2="1" />
+      </Conditions>
+      <Actions>
+        <SetVariable Name="Block" Value="1" />
+        <Activate ActionID="_MessagePowerUp" />
+      </Actions>
+    </Loop>
+    <Loop Template="GadgetCharges.DummySubtitles" />
+    <Loop Template="GadgetCharges.GadgetDischarged" />
+    <Loop Name="Fail">
+      <Events Template="FreqUsed.Activate" />
+      <Conditions>
+        <Equal Value1="?getCounter[Debug,ImmunityToTraps]" Value2="1" Not="1" />
+        <Equal Value1="_$ActionID" Value2="FailedToUseGadget" />
+        <Equal Value1="?getModel[Player].condition" Value2="Common" />
+      </Conditions>
+      <Actions>
+        <SetVariable Name="Block" Value="1" />
+        <Activate ActionID="_MessageFail" />
+        <FloatingText Text="_soundText" Color="_TextColor" Size="_TextSize" Frames="80" Delay="30" OriginType="Subtitles" OffsetY="{0.1+?getCounter[GUI,SubtitlesNumber]*0.1}" />
+        <Sound Name="_sound" Volume="100" />
+        <AppendValue Name="?getCounter[GUI,SubtitlesNumber]" Value="1" />
+        <Wait Frames="60" />
+        <AppendValue Name="?getCounter[GUI,SubtitlesNumber]" Value="-1" />
+      </Actions>
+    </Loop>
+    <Loop Name="GadgetUsed">
+      <Events Template="FreqUsed.Activate" />
+      <Conditions>
+        <Equal Value1="_$ActionID" Value2="ChargeUsed" />
+      </Conditions>
+      <Actions>
+        <Activate ActionID="_MessageGadget" />
+      </Actions>
+    </Loop>
+  </Template>
+  <Template Name="LevelledDoor">
+    <Init>
+      <SetVariable Name="$Active" Type="Bool" Value="1" />
+      <SetVariable Name="$AI" Type="AI" Value="-1" />
+      <SetVariable Name="$Node" Value="NTop|NChest|NPivot|NKnuckles_1|NKnuckles_2|NToe_1|NToe_2" />
+      <SetVariable Name="#Gadget" Type="NoType" Value="None" />
+      <SetVariable Name="#Item" Type="NoType" Value="None" />
+      <SetVariable Name="DoorLevel" Value="1" />
+      <SetVariable Name="DoorColor" Value="Blue" />
+      <SetVariable Name="output" Value="" />
+      <SetVariable Name="TextSize" Value="154" />
+      <SetVariable Name="TextColor" Value="#41C5E2FF" />
+      <SetVariable Name="volumeLvl" Value="100" />
+      <SetVariable Name="#Currency" Value="None" />
+      <SetVariable Name="CurrencyType" Value="Points" />
+      <SetVariable Name="GadgetActiveGroup" Value="Lockpick" />
+      <SetVariable Name="GadgetIsRecharged" Value="0" />
+      <SetVariable Name="GadgetUsed" Value="0" />
+      <SetVariable Name="Block" Value="0" />
+    </Init>
+    <Loop Name="Enter">
+      <Events>
+        <EventBlock Template="FreqUsed.Enter" />
+      </Events>
+      <Conditions>
+        <Equal Value1="?getModel[Player].condition" Value2="Common" />
+      </Conditions>
+      <Actions>
+        <SetVariable Name="$Active" Value="0" />
+        <Activate ActionID="CheckForGadget" />
+      </Actions>
+    </Loop>
+    <Loop Name="DontStopPrettyCheater">
+      <Events>
+        <Activate />
+      </Events>
+      <Conditions>
+        <Equal Value1="?getCounter[Debug,HackedDoors]" Value2="1" />
+        <Equal Value1="_$ActionID" Value2="FailedToUseGadget" />
+        <Select Object="_#Item" From="Key" Section="Equipped" Not="1">
+          <Equal Value1="?getItemAsGroup[Key, _#Item].Level" Value2="_DoorColor" />
+          <Greater Value1="?getItemAsGroup[Countable, _#Item].Quantity" Value2="0" />
+        </Select>
+        <Select Object="_#Item" From="Key" Section="Equipped" Not="1">
+          <Equal Value1="?getItemAsGroup[Key, _#Item].Level" Value2="Master" />
+          <Greater Value1="?getItemAsGroup[Countable, _#Item].Quantity" Value2="0" />
+        </Select>
+      </Conditions>
+      <Actions>
+        <Activate ActionID="_output" AboveLevel="3" Dispatch="Upward" />
+        <Activate ActionID="HideLockOpen" />
+        <Activate ActionID="LockHack" />
+      </Actions>
+    </Loop>
+    <Loop Name="CheckGadgetLevel">
+      <Events>
+        <Activate />
+      </Events>
+      <Conditions>
+        <Equal Value1="_$ActionID" Value2="CheckForGadget" />
+        <Select Object="_#Gadget" From="_GadgetActiveGroup" Section="Equipped" Not="1">
+          <GreaterEqual Value1="?getItemAsGroup[_GadgetActiveGroup, _#Gadget].Level" Value2="_DoorLevel" />
+        </Select>
+      </Conditions>
+      <Actions>
+        <Activate ActionID="FailedToUseGadget" />
+      </Actions>
+    </Loop>
+    <Loop Name="UseGadgetEqualLevel">
+      <Events>
+        <Activate />
+      </Events>
+      <Conditions>
+        <Equal Value1="_$ActionID" Value2="CheckForGadget" />
+        <Select Object="_#Gadget" From="_GadgetActiveGroup" Section="Equipped">
+          <GreaterEqual Value1="?getItemAsGroup[_GadgetActiveGroup, _#Gadget].Level" Value2="_DoorLevel" />
+        </Select>
+      </Conditions>
+      <Actions>
+        <Activate ActionID="TryToUseGadget" />
+      </Actions>
+    </Loop>
+    <Loop Template="GadgetCharges.UseBonusCharge" />
+    <Loop Template="GadgetCharges.UseGadget" />
+    <Loop Template="GadgetCharges.FailedToUseGadget" />
+    <Loop Template="GadgetCharges.DummySubtitles" />
+    <Loop Template="GadgetCharges.GadgetDischarged" />
+    <Loop Name="HackLock">
+      <Events>
+        <Activate />
+      </Events>
+      <Conditions>
+        <Equal Value1="_$ActionID" Value2="ChargeUsed" />
+      </Conditions>
+      <Actions>
+        <Activate ActionID="_output" AboveLevel="3" Dispatch="Upward" />
+        <Activate ActionID="HideLockOpen" />
+        <Activate ActionID="LockHack" />
+        <AppendValue Name="?getCounter[MissionProgress,LocksHacked]" Value="1" />
+      </Actions>
+    </Loop>
+    <Loop Name="BruteforceProgressEight">
+      <Events>
+        <Activate />
+      </Events>
+      <Conditions>
+        <Equal Value1="_$ActionID" Value2="ChargeUsed" />
+        <Equal Value1="?getCounter[ST_Quests,Bruteforce1]" Value2="1" />
+        <GreaterEqual Value1="?getCounter[ST_Default,ST_Floor]" Value2="8" />
+        <Less Value1="?getCounter[ST_Statistics,Progress8Floor]" Value2="?getBalance[Quests,Bruteforce1,LocksCountOnFloor]" />
+      </Conditions>
+      <Actions>
+        <AppendValue Name="?getCounter[ST_Statistics,Progress8Floor]" Value="1" />
+        <ExecuteCall Message="BruteforceProgress" />
+      </Actions>
+    </Loop>
+    <Loop Name="BruteforceProgressTen">
+      <Events>
+        <Activate />
+      </Events>
+      <Conditions>
+        <Equal Value1="_$ActionID" Value2="LockOpen" />
+        <Equal Value1="?getCounter[ST_Quests,Bruteforce2]" Value2="1" />
+        <GreaterEqual Value1="?getCounter[ST_Default,ST_Floor]" Value2="10" />
+        <Less Value1="?getCounter[ST_Statistics,Progress10Floor]" Value2="?getBalance[Quests,Bruteforce,LocksCountOnFloor]" />
+      </Conditions>
+      <Actions>
+        <AppendValue Name="?getCounter[ST_Statistics,Progress10Floor]" Value="1" />
+        <ExecuteCall Message="BruteforceProgress" />
+      </Actions>
+    </Loop>
+    <Loop Name="BruteforceProgressTwelve">
+      <Events>
+        <Activate />
+      </Events>
+      <Conditions>
+        <Equal Value1="_$ActionID" Value2="LockHack" />
+        <Equal Value1="?getCounter[ST_Quests,Bruteforce3]" Value2="1" />
+        <GreaterEqual Value1="?getCounter[ST_Default,ST_Floor]" Value2="12" />
+        <Less Value1="?getCounter[ST_Statistics,Progress12Floor]" Value2="?getBalance[Quests,Bruteforce3,LocksCountOnFloor]" />
+      </Conditions>
+      <Actions>
+        <AppendValue Name="?getCounter[ST_Statistics,Progress12Floor]" Value="1" />
+        <ExecuteCall Message="BruteforceProgress" />
+      </Actions>
+    </Loop>
+    <Loop Name="FailedOpen">
+      <Events>
+        <Activate />
+      </Events>
+      <Conditions>
+        <Equal Value1="_$ActionID" Value2="FailedToUseGadget" />
+        <Select Object="_#Item" From="Key" Section="Equipped" Not="1">
+          <Equal Value1="?getItemAsGroup[Key, _#Item].Level" Value2="_DoorColor" />
+          <Greater Value1="?getItemAsGroup[Countable, _#Item].Quantity" Value2="0" />
+        </Select>
+        <Select Object="_#Item" From="Key" Section="Equipped" Not="1">
+          <Equal Value1="?getItemAsGroup[Key, _#Item].Level" Value2="Master" />
+          <Greater Value1="?getItemAsGroup[Countable, _#Item].Quantity" Value2="0" />
+        </Select>
+      </Conditions>
+      <Actions>
+        <Sound Name="lock_open_fail" />
+        <Activate ActionID="LockFail" />
+      </Actions>
+    </Loop>
+    <Loop Name="UseKeyEqualLevel">
+      <Events>
+        <Activate />
+      </Events>
+      <Conditions>
+        <Equal Value1="_$ActionID" Value2="FailedToUseGadget" />
+        <Select Object="_#Item" From="Key" Section="Equipped">
+          <Equal Value1="?getItemAsGroup[Key, _#Item].Level" Value2="_DoorColor" />
+          <Greater Value1="?getItemAsGroup[Countable, _#Item].Quantity" Value2="0" />
+        </Select>
+      </Conditions>
+      <Actions>
+        <Activate ActionID="_output" AboveLevel="3" Dispatch="Upward" />
+        <Activate ActionID="HideLockHack" />
+        <Activate ActionID="LockHack" />
+        <Activate ActionID="LockOpen" />
+        <AppendValue Name="?getItemAsGroup[Countable, _#Item].Quantity" Value="-1" />
+        <Sound Name="lock_opened_by_key" />
+      </Actions>
+    </Loop>
+    <Loop Name="QuestKeysIntro">
+      <Events>
+        <Activate />
+      </Events>
+      <Conditions>
+        <Equal Value1="_$ActionID" Value2="LockFail" />
+        <Greater Value1="?getCounter[ST_Quests, KeysIntro]" Value2="-1" />
+        <Less Value1="?getCounter[KeysIntro,KeysIntroLockPassed]" Value2="1" />
+      </Conditions>
+      <Actions>
+        <Sound Name="passage_blocked" Volume="1" DuckEffect="1" />
+        <FloatingText Text="^SoundAnnounce.Quests.KeysIntro.Passage^" Color="FF0000FF" Size="80" Frames="60" OriginType="Subtitles" ShiftY="0.3" />
+        <Wait Frames="100" />
+        <FloatingText Text="^SoundAnnounce.Quests.KeysIntro.Hacking^" Color="FF0000FF" Size="80" Frames="60" OriginType="Subtitles" ShiftY="0.3" />
+        <AppendValue Name="?getCounter[KeysIntro,KeysIntroLockPassed]" Value="1" />
+        <Statistics SignalMessage="?concat['first_lock_floor_%1_subject_%2', ?getCounter[ST_Default, ST_Floor], ?getCounter[ST_Statistics, ST_run_counter]]" />
+      </Actions>
+    </Loop>
+    <Loop Name="QuestKeysIntroComplete">
+      <Events>
+        <Activate />
+      </Events>
+      <Conditions>
+        <Equal Value1="_$ActionID" Value2="LockOpen" />
+        <Equal Value1="?getCounter[ST_Quests, KeysIntro]" Value2="1" />
+      </Conditions>
+      <Actions>
+        <AppendValue Name="?getCounter[KeysIntro,Progress]" Value="2" />
+        <AppendValue Name="?getCounter[KeysIntro,KeysIntroLockPassed]" Value="1" />
+        <ExecuteCall />
+      </Actions>
+    </Loop>
+  </Template>
+  <Template Name="GiveMeMyKey">
+    <Init>
+      <SetVariable Name="$AI" Value="0" />
+      <SetVariable Name="$Active" Value="1" />
+      <SetVariable Name="$Node" Value="NTop|NChest|NPivot|NKnuckles_1|NKnuckles_2|NToe_1|NToe_2" />
+      <SetVariable Name="#Key" Value="None" />
+      <SetVariable Name="#PowerUp" Value="None" />
+      <SetVariable Name="#Gadget" Value="None" />
+      <SetVariable Name="KeyLevel" Value="Blue" />
+      <SetVariable Name="KeyType" Value="AnyKey" />
+      <SetVariable Name="Sound" Value="key1" />
+      <SetVariable Name="Volume" Value="1" />
+      <SetVariable Name="StatisticsCounter" Value="None" />
+    </Init>
+    <Loop>
+      <Events>
+        <Enter />
+      </Events>
+      <Conditions>
+        <Equal Value1="_KeyLevel" Value2="Blue" />
+      </Conditions>
+      <Actions>
+        <Sound Name="_Sound" Volume="_Volume" DuckEffect="1" />
+        <ActivatePassiveEffect ActionID="KeyPickup" />
+        <Activate ActionID="GotKey" />
+      </Actions>
+    </Loop>
+    <Loop>
+      <Events>
+        <Enter />
+      </Events>
+      <Conditions>
+        <Equal Value1="_KeyLevel" Value2="Blue" Not="1" />
+      </Conditions>
+      <Actions>
+        <Sound Name="_Sound" Volume="_Volume" DuckEffect="1" />
+        <Activate ActionID="GotKey" />
+      </Actions>
+    </Loop>
+    <Loop Name="AddQuantity">
+      <Events>
+        <Activate />
+      </Events>
+      <Conditions>
+        <Equal Value1="_$ActionID" Value2="GotKey" />
+        <Select Object="_#Key" From="Key" Section="Equipped">
+          <Equal Value1="?getItemAsGroup[Key,_#Key].Level" Value2="_KeyLevel" />
+        </Select>
+      </Conditions>
+      <Actions>
+        <AppendValue Name="?getItemAsGroup[Countable,_#Key].Quantity" Value="{1*(1+?getCounter[PassiveEffects, KeyFactor])}" />
+        <Activate ActionID="AdditionalKey" />
+      </Actions>
+    </Loop>
+    <Loop Name="AddNewKey">
+      <Events>
+        <Activate />
+      </Events>
+      <Conditions>
+        <Equal Value1="_$ActionID" Value2="GotKey" />
+        <Select Object="_#Key" From="Key" Section="Equipped" Not="1">
+          <Equal Value1="?getItemAsGroup[Key,_#Key].Level" Value2="_KeyLevel" />
+        </Select>
+      </Conditions>
+      <Actions>
+        <AddItem Result="_#Key" Preset="_KeyType" />
+        <Sound Name="_Sound" Volume="_Volume" DuckEffect="1" />
+        <Activate ActionID="AdditionalKey" />
+      </Actions>
+    </Loop>
+    <Loop Name="WriteStatistics">
+      <Events Template="FreqUsed.Enter" />
+      <Conditions Template="Statistics.WriteItemsCollected" />
+      <Actions Template="Statistics.WriteItemsCollected" />
+    </Loop>
+    <Loop Name="TriggerOff">
+      <Events>
+        <Activate />
+      </Events>
+      <Conditions>
+        <Equal Value1="_$ActionID" Value2="AdditionalKey" />
+      </Conditions>
+      <Actions>
+        <SetVariable Name="$Active" Value="0" />
+      </Actions>
+    </Loop>
+    <Loop Name="Jump">
+      <Events Template="FreqUsed.Enter" />
+      <Conditions />
+      <Actions>
+        <Transform Name="ItemDisappear" />
+      </Actions>
+    </Loop>
+  </Template>
+  <Template Name="GiveMeMyBoosterpack">
+    <Init>
+      <SetVariable Name="$AI" Value="0" />
+      <SetVariable Name="$Active" Value="1" />
+      <SetVariable Name="$Node" Value="NTop|NChest|NPivot|NKnuckles_1|NKnuckles_2|NToe_1|NToe_2" />
+      <SetVariable Name="#Boosterpack" Value="None" />
+      <SetVariable Name="Sound" Value="key1" />
+      <SetVariable Name="Volume" Value="1" />
+      <SetVariable Name="StatisticsCounter" Value="None" />
+    </Init>
+    <Loop>
+      <Events>
+        <Enter />
+      </Events>
+      <Conditions />
+      <Actions>
+        <SetVariable Name="$Active" Value="0" />
+        <Activate ActionID="GotBoosterpack" />
+      </Actions>
+    </Loop>
+    <Loop Name="AddQuantity">
+      <Events>
+        <Activate />
+      </Events>
+      <Conditions>
+        <Equal Value1="_$ActionID" Value2="GotBoosterpack" />
+      </Conditions>
+      <Actions>
+        <AddItem Result="_#Boosterpack" Preset="BaseBoosterpack" />
+        <Sound Name="_Sound" Volume="_Volume" DuckEffect="1" />
+      </Actions>
+    </Loop>
+    <Loop Name="WriteStatistics">
+      <Events Template="FreqUsed.Enter" />
+      <Conditions Template="Statistics.WriteItemsCollected" />
+      <Actions Template="Statistics.WriteItemsCollected" />
+    </Loop>
+    <Loop Name="Jump">
+      <Using>
+        <Variable Name="Text" DefaultValue="^Run.Boosterpack.FloatingText^" Type="String" />
+        <Variable Name="TextColor" DefaultValue="#000000FF" Type="String" />
+        <Variable Name="TextSize" DefaultValue="110" Type="Int" />
+      </Using>
+      <Events Template="FreqUsed.Enter" />
+      <Conditions />
+      <Actions>
+        <FloatingText Text="_Text" Color="_TextColor" Size="_TextSize" Frames="120" Delay="30" OriginType="Screen" OffsetY="0.1" ShiftY="0.1" />
+        <Transform Name="ItemDisappear" />
+      </Actions>
+    </Loop>
+  </Template>
+  <Template Name="GiveMeMyMemoryUnit">
+    <Init>
+      <SetVariable Name="$AI" Value="0" />
+      <SetVariable Name="$Active" Value="1" />
+      <SetVariable Name="$Node" Value="NTop|NChest|NPivot|NKnuckles_1|NKnuckles_2|NToe_1|NToe_2" />
+      <SetVariable Name="#MemoryUnit" Value="None" />
+      <SetVariable Name="Sound" Value="key1" />
+      <SetVariable Name="Volume" Value="1" />
+      <SetVariable Name="StatisticsCounter" Value="None" />
+    </Init>
+    <Loop>
+      <Events>
+        <Enter />
+      </Events>
+      <Conditions />
+      <Actions>
+        <SetVariable Name="$Active" Value="0" />
+        <Activate ActionID="GotUnit" />
+      </Actions>
+    </Loop>
+    <Loop Name="AddQuantity">
+      <Events>
+        <Activate />
+      </Events>
+      <Conditions>
+        <Equal Value1="_$ActionID" Value2="GotUnit" />
+      </Conditions>
+      <Actions>
+        <SetVariable Name="?getString[Arg0]" Value="MemoryUnit" />
+        <AddItem Result="_#MemoryUnit" Preset="dcard" />
+        <Sound Name="_Sound" Volume="_Volume" DuckEffect="1" />
+      </Actions>
+    </Loop>
+    <Loop Name="AddQuantity">
+      <Events>
+        <Activate />
+      </Events>
+      <Conditions>
+        <Equal Value1="_$ActionID" Value2="GotUnit" />
+        <Equal Value1="?getCounter[ST_Quests,MaintenanceOperations]" Value2="1" />
+      </Conditions>
+      <Actions>
+        <AppendValue Name="?getCounter[MaintenanceOperations,MemoryUnitsCount]" Value="1" />
+        <ExecuteCall Message="MaintenanceOperations" />
+      </Actions>
+    </Loop>
+    <Loop Name="WriteStatistics">
+      <Events Template="FreqUsed.Enter" />
+      <Conditions Template="Statistics.WriteItemsCollected" />
+      <Actions Template="Statistics.WriteItemsCollected" />
+    </Loop>
+    <Loop Name="Jump">
+      <Using>
+        <Variable Name="Text" DefaultValue="^Run.MemoryUnit.FloatingText^" Type="String" />
+        <Variable Name="TextColor" DefaultValue="#000000FF" Type="String" />
+        <Variable Name="TextSize" DefaultValue="110" Type="Int" />
+      </Using>
+      <Events Template="FreqUsed.Enter" />
+      <Conditions />
+      <Actions>
+        <Transform Name="ItemDisappear" />
+      </Actions>
+    </Loop>
+  </Template>
+  <Template Name="GiveMeMyNote">
+    <Init>
+      <SetVariable Name="$AI" Value="0" />
+      <SetVariable Name="$Active" Value="1" />
+      <SetVariable Name="$Node" Value="NTop|NChest|NPivot|NKnuckles_1|NKnuckles_2|NToe_1|NToe_2" />
+      <SetVariable Name="#Note" Value="None" />
+      <SetVariable Name="Sound" Value="key1" />
+      <SetVariable Name="Volume" Value="1" />
+      <SetVariable Name="StatisticsCounter" Value="None" />
+    </Init>
+    <Loop>
+      <Events>
+        <Enter />
+      </Events>
+      <Conditions />
+      <Actions>
+        <SetVariable Name="$Active" Value="0" />
+        <Activate ActionID="GotNote" />
+      </Actions>
+    </Loop>
+    <Loop Name="AddQuantity">
+      <Events>
+        <Activate />
+      </Events>
+      <Conditions>
+        <Equal Value1="_$ActionID" Value2="GotNote" />
+      </Conditions>
+      <Actions>
+        <AddItem Result="_#Note" Preset="CreateNote" />
+        <Sound Name="_Sound" Volume="_Volume" DuckEffect="1" />
+      </Actions>
+    </Loop>
+    <Loop Name="WriteStatistics">
+      <Events Template="FreqUsed.Enter" />
+      <Conditions Template="Statistics.WriteItemsCollected" />
+      <Actions Template="Statistics.WriteItemsCollected" />
+    </Loop>
+    <Loop Name="Jump">
+      <Using>
+        <Variable Name="Text" DefaultValue="^Run.MemoryUnit.FloatingText^" Type="String" />
+        <Variable Name="TextColor" DefaultValue="#000000FF" Type="String" />
+        <Variable Name="TextSize" DefaultValue="110" Type="Int" />
+      </Using>
+      <Events Template="FreqUsed.Enter" />
+      <Conditions />
+      <Actions>
+        <Transform Name="ItemDisappear" />
+      </Actions>
+    </Loop>
+  </Template>
+  <Template Name="Control">
+    <Init>
+      <SetVariable Name="$AI" Value="0" />
+      <SetVariable Name="$Active" Value="1" />
+      <SetVariable Name="$Node" Value="COM" />
+    </Init>
+    <Loop Name="TurnOn">
+      <Events Template="FreqUsed.Enter" />
+      <Conditions>
+        <Equal Value1="?getModel[Player].isControlled" Value2="0" />
+      </Conditions>
+      <Actions>
+        <Control Switch="On" Model="Player" />
+      </Actions>
+    </Loop>
+    <Loop Name="TurnOff">
+      <Events Template="FreqUsed.Enter" />
+      <Conditions>
+        <Equal Value1="?getModel[Player].isControlled" Value2="1" />
+      </Conditions>
+      <Actions>
+        <Control Switch="Off" Model="Player" />
+      </Actions>
+    </Loop>
+  </Template>
+  <Template Name="TriggerLoss">
+    <Init>
+      <SetVariable Name="$AI" Value="-1" />
+      <SetVariable Name="$Active" Value="1" />
+      <SetVariable Name="$Node" Value="COM" />
+    </Init>
+    <Loop Name="PlayerPass">
+      <Using>
+        <Variable Name="Time" DefaultValue="0" Type="UInt" />
+        <Variable Name="Start" DefaultValue="" Type="Animation" />
+        <Variable Name="ReversedStart" DefaultValue="0" Type="Bool" />
+        <Variable Name="StartFrame" DefaultValue="" Type="UInt" />
+        <Variable Name="soundName" DefaultValue="subject_destroyed" Type="String" />
+        <Variable Name="soundText" DefaultValue="^SoundAnnounce. SubjectDestroyed^" Type="String" />
+        <Variable Name="TextSize" DefaultValue="110" Type="Int" />
+        <Variable Name="TextColor" DefaultValue="#000000FF" Type="String" />
+        <Variable Name="volumeLvl" DefaultValue="100" Type="UInt" />
+      </Using>
+      <Events Template="FreqUsed.Enter" />
+      <Conditions Template="FreqUsed.TriggeredByPlayer" />
+      <Actions>
+        <FloatingText Text="_soundText" Color="_TextColor" Size="_TextSize" Frames="94" Delay="30" OriginType="Subtitles" OffsetY="{0.1+?getCounter[GUI,SubtitlesNumber]*0.20}" />
+        <EndGame Result="Loss" Model="Player" Frames="_Time" />
+        <Sound Name="_soundName" Volume="_volumeLvl" />
+        <ForceAnimation Name="_Start" Model="Player" Frame="_StartFrame" Reversed="_ReversedStart" />
+        <SetVariable Name="?getCounter[GUI,SubtitlesNumber]" Value="{?getCounter[GUI,SubtitlesNumber]+1}" />
+        <Wait Frames="60" />
+        <SetVariable Name="?getCounter[GUI,SubtitlesNumber]" Value="{?getCounter[GUI,SubtitlesNumber]-1}" />
+      </Actions>
+    </Loop>
+  </Template>
+  <Template Name="ModelAnimation">
+    <Init>
+      <SetVariable Name="$AI" Value="0" />
+      <SetVariable Name="$Active" Value="1" />
+      <SetVariable Name="$Node" Value="COM" />
+    </Init>
+    <Loop Name="Only">
+      <Using>
+        <Variable Name="AnimName" DefaultValue="" Type="String" />
+        <Variable Name="AnimFrame" DefaultValue="" Type="String" />
+      </Using>
+      <Events Template="FreqUsed.OnCollision" />
+      <Actions>
+        <SetVariable Name="$Active" Value="0" />
+        <ModelExecute AnimName="_AnimName" AnimFrame="_AnimFrame" />
+      </Actions>
+    </Loop>
+  </Template>
+  <Template Name="hunter_control">
+    <Init>
+      <SetVariable Name="$AI" Type="AI" Value="1" />
+      <SetVariable Name="$Active" Type="Bool" Value="0" />
+      <SetVariable Name="$Node" Type="Node" Value="COM" />
+    </Init>
+    <Loop Name="turn_this_on" ToolTip="">
+      <Events>
+        <Activate />
+      </Events>
+      <Conditions>
+        <Equal Value1="_$ActionID" Value2="spawn" />
+      </Conditions>
+      <Actions>
+        <SetVariable Name="$Active" Value="1" />
+      </Actions>
+    </Loop>
+    <Loop Name="turn_this_off" ToolTip="">
+      <Events>
+        <Activate />
+      </Events>
+      <Conditions>
+        <Equal Value1="_$ActionID" Value2="despawn" />
+      </Conditions>
+      <Actions>
+        <SetVariable Name="$Active" Value="0" />
+      </Actions>
+    </Loop>
+    <Loop Name="hunter_controller" ToolTip="">
+      <Using>
+        <Variable Name="action" Type="String" DefaultValue="spottie_right" />
+      </Using>
+      <Events>
+        <Enter />
+      </Events>
+      <Conditions />
+      <Actions>
+        <Activate ActionID="_action" AboveLevel="1" Dispatch="Full" />
+      </Actions>
+    </Loop>
+  </Template>
+  <Template Name="hunter_spawn">
+    <Init>
+      <SetVariable Name="$AI" Type="AI" Value="0" />
+      <SetVariable Name="$Active" Type="Bool" Value="1" />
+      <SetVariable Name="$Node" Type="Node" Value="COM" />
+    </Init>
+    <Loop Name="spawner" ToolTip="">
+      <Events>
+        <Enter />
+      </Events>
+      <Actions>
+        <Activate ActionID="spawn" />
+        <SetVariable Name="$Active" Value="0" />
+      </Actions>
+      <Conditions />
+    </Loop>
+  </Template>
+  <Template Name="standard_door_opener">
+    <Init>
+      <SetVariable Name="$AI" Type="AI" Value="0" />
+      <SetVariable Name="$Active" Type="Bool" Value="1" />
+      <SetVariable Name="$Node" Type="Node" Value="COM" />
+      <SetVariable Name="output" Type="String" Value="open_door" />
+      <SetVariable Name="input" Type="String" Value="open_door" />
+    </Init>
+    <Loop Name="opener" ToolTip="">
+      <Events>
+        <Activate />
+      </Events>
+      <Conditions>
+        <Equal Value1="_$ActionID" Value2="_input" />
+      </Conditions>
+      <Actions>
+        <Activate ActionID="_output" />
+      </Actions>
+    </Loop>
+    <Loop Name="door_killer" ToolTip="">
+      <Events>
+        <Activate />
+      </Events>
+      <Conditions>
+        <Equal Value1="_$ActionID" Value2="KillTheDoor" />
+      </Conditions>
+      <Actions>
+        <Transform Name="DeleteDoor" />
+        <Transform Name="DeleteDoor1" />
+      </Actions>
+    </Loop>
+  </Template>
+  <Template Name="GiveMeMyCurrency">
+    <Init>
+      <SetVariable Name="$AI" Value="0" />
+      <SetVariable Name="$Active" Value="1" />
+      <SetVariable Name="$Node" Value="NTop|NChest|NPivot|NKnuckles_1|NKnuckles_2|NToe_1|NToe_2" />
+      <SetVariable Name="#Currency" Value="None" />
+      <SetVariable Name="CurrencyType" Value="None" />
+      <SetVariable Name="CashEV" Value="5" />
+      <SetVariable Name="Cash1" Value="{1.2 * _CashEV}" />
+      <SetVariable Name="Cash2" Value="{0.8 * _CashEV}" />
+      <SetVariable Name="CashResult" Value="0" />
+      <SetVariable Name="CashCounter" Value="?concat['Max%1', _CurrencyType]" />
+      <SetVariable Name="Adder" Value="0" />
+      <SetVariable Name="Multiplier" Value="1" />
+      <SetVariable Name="TextColor" Value="#41C5E2FF" />
+      <SetVariable Name="TextSize" Value="110" />
+      <SetVariable Name="PointsTextDelay" Value="0" />
+      <SetVariable Name="StatisticsCounter" Value="None" />
+    </Init>
+    <Loop Name="AddQuantityCommon">
+      <Events>
+        <Activate />
+      </Events>
+      <Conditions>
+        <Equal Value1="_$ActionID" Value2="AddCurrency" />
+        <Operator Type="Or">
+          <Equal Value1="_CurrencyType" Value2="Money" />
+          <Equal Value1="_CurrencyType" Value2="Points" />
+        </Operator>
+        <Select Object="_#Currency" From="Currency" Section="Stash">
+          <Equal Value1="?getItemAsGroup[Currency,_#Currency].Type" Value2="_CurrencyType" />
+        </Select>
+      </Conditions>
+      <Actions>
+        <SetVariable Name="CashResult" Value="?round[{(?RangeRandom[_Cash1, _Cash2]+_Adder) * (_Multiplier/100+1)}, 0]" />
+        <AppendValue Name="?getItemAsGroup[Countable,_#Currency].Quantity" Value="_CashResult" />
+        <AppendValue Name="?getCounter[MissionProgress, _CurrencyType]" Value="_CashResult" />
+        <SetVariable Name="?getCounter[MissionProgress, _CashCounter]" Value="?max[_CashResult, ?getCounter[MissionProgress, _CashCounter]]" />
+        <Activate ActionID="PostAction" />
+      </Actions>
+    </Loop>
+    <Loop Name="AddQuantityRaw">
+      <Events>
+        <Activate />
+      </Events>
+      <Conditions>
+        <Equal Value1="_$ActionID" Value2="AddCurrency" />
+        <Equal Value1="_CurrencyType" Value2="Money" Not="1" />
+        <Equal Value1="_CurrencyType" Value2="Points" Not="1" />
+        <Select Object="_#Currency" From="Currency" Section="Stash">
+          <Equal Value1="?getItemAsGroup[Currency,_#Currency].Type" Value2="_CurrencyType" />
+        </Select>
+      </Conditions>
+      <Actions>
+        <SetVariable Name="CashResult" Value="?round[?RangeRandom[_Cash1, _Cash2], 0]" />
+        <AppendValue Name="?getItemAsGroup[Countable,_#Currency].Quantity" Value="_CashResult" />
+        <Activate ActionID="PostAction" />
+      </Actions>
+    </Loop>
+    <Loop Name="WriteStatistics">
+      <Events>
+        <Activate />
+      </Events>
+      <Conditions>
+        <Equal Value1="_$ActionID" Value2="AddCurrency" />
+        <ConditionBlock Template="Statistics.WriteItemsCollected" />
+      </Conditions>
+      <Actions Template="Statistics.WriteItemsCollected" />
+    </Loop>
+    <Loop Name="CheckMoney2Achievement">
+      <Events>
+        <Activate />
+      </Events>
+      <Conditions>
+        <Equal Value1="_$ActionID" Value2="AddCurrency" />
+        <Equal Value1="_CurrencyType" Value2="Money" />
+      </Conditions>
+      <Actions>
+        <AppendValue Name="?getCounter[AchievementsProgressByRun,Money2ByRun]" Value="_CashResult" />
+      </Actions>
+    </Loop>
+    <Loop Name="CoinLoop">
+      <Events>
+        <Activate />
+      </Events>
+      <Conditions>
+        <Equal Value1="_$ActionID" Value2="AddCurrency" />
+        <Equal Value1="_StatisticsCounter" Value2="Coin" />
+      </Conditions>
+      <Actions>
+        <AppendValue Name="?getCounter[ST_Statistics_Per_Floor, CoinsCollected]" Value="1" />
+      </Actions>
+    </Loop>
+    <Loop Name="RedCoinLoop">
+      <Events>
+        <Activate />
+      </Events>
+      <Conditions>
+        <Equal Value1="_$ActionID" Value2="AddCurrency" />
+        <Equal Value1="_StatisticsCounter" Value2="SuperCoin" />
+      </Conditions>
+      <Actions>
+        <AppendValue Name="?getCounter[ST_Statistics_Per_Floor, RedCoinsCollected]" Value="1" />
+        <Activate ActionID="SwarmDisableRedCoin" />
+      </Actions>
+    </Loop>
+    <Loop Name="RedCoinSwarmDisable">
+      <Events>
+        <Activate />
+      </Events>
+      <Conditions>
+        <Equal Value1="_$ActionID" Value2="SwarmDisableRedCoin" />
+        <Equal Value1="?getCounter[Temp,IsSwarmActive]" Value2="1" />
+        <GreaterEqual Value1="?getCounter[PassiveBonusExchangers,SwarmRedCoinDestroyChance]" Value2="?RangeRandom[1,100]" />
+      </Conditions>
+      <Actions>
+        <ActivatePassiveEffect ActionID="SwarmRedCoinDestroy" />
+        <ActivateNearPlayer ActionID="SwarmOff" />
+      </Actions>
+    </Loop>
+    <Loop Name="TriggerOff">
+      <Events>
+        <Exit />
+      </Events>
+      <Actions>
+        <SetVariable Name="$Active" Value="0" />
+      </Actions>
+    </Loop>
+  </Template>
+  <Template Name="GiveMeMyCoupon">
+    <Init>
+      <SetVariable Name="$AI" Value="0" />
+      <SetVariable Name="$Active" Value="1" />
+      <SetVariable Name="$Node" Value="NTop|NChest|NPivot|NKnuckles_1|NKnuckles_2|NToe_1|NToe_2" />
+      <SetVariable Name="CouponType" Value="None" />
+      <SetVariable Name="#Currency" Value="None" />
+      <SetVariable Name="CashEV" Value="1" />
+      <SetVariable Name="Cash1" Value="{1 * _CashEV}" />
+      <SetVariable Name="Cash2" Value="{1 * _CashEV}" />
+      <SetVariable Name="CashResult" Value="0" />
+      <SetVariable Name="TextColor" Value="#41C5E2FF" />
+      <SetVariable Name="TextSize" Value="110" />
+      <SetVariable Name="PointsTextDelay" Value="0" />
+      <SetVariable Name="StatisticsCounter" Value="None" />
+    </Init>
+    <Loop Name="AddQuantity">
+      <Events>
+        <Activate />
+      </Events>
+      <Conditions>
+        <Equal Value1="_$ActionID" Value2="AddCurrency" />
+        <Select Object="_#Currency" From="CardsBoost" Section="Stash" />
+      </Conditions>
+      <Actions>
+        <SetVariable Name="CashResult" Value="?RangeRandom[_Cash1, _Cash2]" />
+        <AppendValue Name="?getItemAsGroup[_CouponType, _#Currency].Quantity" Value="_CashResult" />
+        <AppendValue Name="?getCounter[MissionProgress,ItemDrop]" Value="1" />
+        <Activate ActionID="PostAction" />
+      </Actions>
+    </Loop>
+    <Loop Name="WriteStatistics">
+      <Events>
+        <Activate />
+      </Events>
+      <Conditions>
+        <Equal Value1="_$ActionID" Value2="AddCurrency" />
+        <ConditionBlock Template="Statistics.WriteItemsCollected" />
+      </Conditions>
+      <Actions Template="Statistics.WriteItemsCollected" />
+    </Loop>
+    <Loop Name="TriggerOff">
+      <Events>
+        <Exit />
+      </Events>
+      <Actions>
+        <SetVariable Name="$Active" Value="0" />
+      </Actions>
+    </Loop>
+  </Template>
+  <Template Name="RechargeGadget">
+    <Init>
+      <SetVariable Name="$AI" Value="0" />
+      <SetVariable Name="$Active" Value="1" />
+      <SetVariable Name="$Node" Value="NTop|NChest|NPivot|NKnuckles_1|NKnuckles_2|NToe_1|NToe_2" />
+      <SetVariable Name="#Gadget1" Value="None" />
+      <SetVariable Name="#Gadget3" Value="None" />
+      <SetVariable Name="Power" Value="1" />
+      <SetVariable Name="Rate" Value="100" />
+      <SetVariable Name="Sound" Value="powerup1" />
+      <SetVariable Name="Volume" Value="1" />
+    </Init>
+    <Loop Name="Enter">
+      <Events Template="FreqUsed.Enter" />
+      <Conditions>
+        <Equal Value1="?getModel[Player].condition" Value2="Common" />
+      </Conditions>
+      <Actions>
+        <Activate ActionID="Recharge" />
+        <ActionBlock Template="CommonLib.Sound" />
+      </Actions>
+    </Loop>
+    <Loop Name="RechargeRandom">
+      <Events>
+        <Activate />
+      </Events>
+      <Conditions>
+        <Greater Value1="_Power" Value2="0" />
+        <Equal Value1="_$ActionID" Value2="Recharge" />
+        <Select Object="_#Gadget1" From="ST_MyGadgets" Section="Equipped">
+          <Equal Value1="?getItemAsGroup[ST_MyGadgets,_#Gadget1].ST_Slot" Value2="?ListRandom[Torso, Legs, Belt, Head, Hands]" />
+          <Less Value1="?getItemAsGroup[ST_GadgetBase,_#Gadget1].ST_ChargesCurrent" Value2="?getItemAsGroup[ST_GadgetBase,_#Gadget1].ST_ChargesTotal" />
+        </Select>
+      </Conditions>
+      <Actions>
+        <SetVariable Name="?getItemAsGroup[ST_GadgetBase,_#Gadget1].ST_ChargesCurrent" Value="{_Rate*?getItemAsGroup[ST_GadgetBase,_#Gadget1].ST_ChargesTotal/100}+?getItemAsGroup[ST_GadgetBase,_#Gadget1].ST_ChargesCurrent}" />
+        <AppendValue Name="Power" Value="-1" />
+        <Activate ActionID="NoMoreThanTotal" />
+      </Actions>
+    </Loop>
+    <Loop Name="NoMoreThanTotal">
+      <Events>
+        <Activate />
+      </Events>
+      <Conditions>
+        <Equal Value1="_$ActionID" Value2="NoMoreThanTotal" />
+        <Select Object="_#Gadget1" From="ST_MyGadgets" Section="Equipped">
+          <Greater Value1="?getItemAsGroup[ST_GadgetBase,_#Gadget1].ST_ChargesCurrent" Value2="?getItemAsGroup[ST_GadgetBase,_#Gadget1].ST_ChargesTotal" />
+        </Select>
+      </Conditions>
+      <Actions>
+        <SetVariable Name="?getItemAsGroup[ST_GadgetBase,_#Gadget1].ST_ChargesCurrent" Value="?getItemAsGroup[ST_GadgetBase,_#Gadget1].ST_ChargesTotal" />
+        <Activate ActionID="Recharge" />
+      </Actions>
+    </Loop>
+    <Loop Name="Repeat">
+      <Events>
+        <Activate />
+      </Events>
+      <Conditions>
+        <Greater Value1="_Power" Value2="0" />
+        <Equal Value1="_$ActionID" Value2="Recharge" />
+        <Select Object="_#Gadget3" From="ST_MyGadgets" Section="Equipped">
+          <Less Value1="?getItemAsGroup[ST_GadgetBase,_#Gadget3].ST_ChargesCurrent" Value2="?getItemAsGroup[ST_GadgetBase,_#Gadget3].ST_ChargesTotal" />
+        </Select>
+      </Conditions>
+      <Actions>
+        <Activate ActionID="Recharge" />
+      </Actions>
+    </Loop>
+    <Loop Name="Disappear">
+      <Events Template="FreqUsed.Enter" />
+      <Conditions />
+      <Actions>
+        <Transform Name="ItemDisappear" />
+      </Actions>
+    </Loop>
+  </Template>
+  <Template Name="GiveMeMyPower">
+    <Init>
+      <SetVariable Name="$AI" Value="0" />
+      <SetVariable Name="$Active" Value="1" />
+      <SetVariable Name="$Node" Value="NTop|NChest|NPivot|NKnuckles_1|NKnuckles_2|NToe_1|NToe_2" />
+      <SetVariable Name="#PowerUp" Value="None" />
+      <SetVariable Name="PowerUpGroup" Value="Group_Immunity" />
+      <SetVariable Name="PowerUpPreset" Value="Preset_PowerUpAntiTrap" />
+      <SetVariable Name="Sound" Value="powerup1" />
+      <SetVariable Name="Volume" Value="1" />
+    </Init>
+    <Loop Name="New">
+      <Events>
+        <Enter />
+      </Events>
+      <Conditions>
+        <Equal Value1="?getModel[Player].condition" Value2="Common" />
+        <Select Object="_#PowerUp" From="_PowerUpGroup" Section="Equipped" Not="1" />
+      </Conditions>
+      <Actions>
+        <SetVariable Name="$Active" Value="0" />
+        <AddItem Result="_#PowerUp" Preset="_PowerUpPreset" Section="Equipped" />
+        <ActionBlock Template="CommonLib.Sound" />
+        <Wait Frames="15" />
+        <Sound Name="powerup" Volume="100" />
+      </Actions>
+    </Loop>
+    <Loop Name="CountableNew">
+      <Events>
+        <Enter />
+      </Events>
+      <Conditions>
+        <Equal Value1="?getModel[Player].condition" Value2="Common" />
+        <Equal Value1="_PowerUpPreset" Value2="PowerUpAntiTrap" Not="1" />
+        <Select Object="_#PowerUp" From="_PowerUpGroup" Section="Equipped" />
+      </Conditions>
+      <Actions>
+        <SetVariable Name="$Active" Value="0" />
+        <AppendValue Name="?getItemAsGroup[Countable,_#PowerUp].Quantity" Value="1" />
+        <ActionBlock Template="CommonLib.Sound" />
+        <Wait Frames="15" />
+        <Sound Name="powerup" Volume="100" />
+      </Actions>
+    </Loop>
+    <Loop Name="AntiTrapAddAntiMine">
+      <Events>
+        <Enter />
+      </Events>
+      <Conditions>
+        <Equal Value1="?getModel[Player].condition" Value2="Common" />
+        <Equal Value1="_PowerUpPreset" Value2="PowerUpAntiTrap" />
+        <Select Object="_#PowerUp" From="_PowerUpGroup" Section="Equipped">
+          <Equal Value1="?getItemAsGroup[Group_Immunity,_#PowerUp].AntiMine" Value2="0" />
+        </Select>
+      </Conditions>
+      <Actions>
+        <SetVariable Name="$Active" Value="0" />
+        <SetVariable Name="?getItemAsGroup[Group_Immunity,_#PowerUp].AntiMine" Value="1" />
+        <SetVariable Name="?getItemAsGroup[ST_ItemMainData,_#PowerUp].ST_VisualItemName" Value="FullImmunity" />
+        <ActionBlock Template="CommonLib.Sound" />
+        <Wait Frames="15" />
+        <Sound Name="powerup" Volume="100" />
+      </Actions>
+    </Loop>
+    <Loop Name="AntiTrapAddAntiLasers">
+      <Events>
+        <Enter />
+      </Events>
+      <Conditions>
+        <Equal Value1="?getModel[Player].condition" Value2="Common" />
+        <Equal Value1="_PowerUpPreset" Value2="PowerUpAntiTrap" />
+        <Select Object="_#PowerUp" From="_PowerUpGroup" Section="Equipped">
+          <Equal Value1="?getItemAsGroup[Group_Immunity,_#PowerUp].AntiLaser" Value2="0" />
+        </Select>
+      </Conditions>
+      <Actions>
+        <SetVariable Name="$Active" Value="0" />
+        <SetVariable Name="?getItemAsGroup[Group_Immunity,_#PowerUp].AntiLaser" Value="1" />
+        <SetVariable Name="?getItemAsGroup[ST_ItemMainData,_#PowerUp].ST_VisualItemName" Value="FullImmunity" />
+        <ActionBlock Template="CommonLib.Sound" />
+        <Wait Frames="15" />
+        <Sound Name="powerup" Volume="100" />
+      </Actions>
+    </Loop>
+    <Loop Name="Disappear">
+      <Events Template="FreqUsed.Enter" />
+      <Conditions />
+      <Actions>
+        <Transform Name="ItemDisappear" />
+      </Actions>
+    </Loop>
+  </Template>
+  <Template Name="GiveMeMyTime">
+    <Init>
+      <SetVariable Name="FramesToAdd" Value="0" />
+      <SetVariable Name="$Active" Value="1" />
+      <SetVariable Name="OverFrames" Value="0" />
+      <SetVariable Name="IconImage" Value="ui/run/clock_icon.png" />
+      <SetVariable Name="IconImageWidth" Value="100" />
+      <SetVariable Name="IconImageHeight" Value="100" />
+      <SetVariable Name="IconImageColor" Value="blue" />
+      <SetVariable Name="FramesDecreaseCoeff" Value="0.5" />
+      <SetVariable Name="PaidCheckPointFlag" Value="0" />
+      <SetVariable Name="StatisticsCounter" Value="None" />
+    </Init>
+    <Loop Name="HardCheckpoint">
+      <Events Template="FreqUsed.Enter" />
+      <Conditions>
+        <Equal Value1="_PaidCheckPointFlag" Value2="1" />
+      </Conditions>
+      <Actions>
+        <AppendValue Name="?getCounter[ST_Generator, PaidFrames]" Value="{_FramesToAdd * (1 - ?getCounter[ST_Generator, PaidFrames] / 1000)}" />
+        <GlobalTimer Action="Increment" Frames="_FramesToAdd" />
+      </Actions>
+    </Loop>
+    <Loop Name="EasyCheckpoint">
+      <Events Template="FreqUsed.Enter" />
+      <Conditions>
+        <Equal Value1="_PaidCheckPointFlag" Value2="0" />
+      </Conditions>
+      <Actions>
+        <SetVariable Name="FramesToAdd" Value="?max[60, {_FramesDecreaseCoeff * _FramesToAdd}, {_FramesToAdd - (_OverFrames - ?getCounter[ST_Generator, PaidFrames]) * ?RangeRandom[400, 700] / 1000}]" />
+        <GlobalTimer Action="Increment" Frames="_FramesToAdd" />
+      </Actions>
+    </Loop>
+    <Loop Name="WriteStatistics">
+      <Events Template="FreqUsed.Enter" />
+      <Conditions Template="Statistics.WriteItemsCollected" />
+      <Actions Template="Statistics.WriteItemsCollected" />
+    </Loop>
+    <Loop Name="Disappear">
+      <Events Template="FreqUsed.Enter" />
+      <Conditions />
+      <Actions>
+        <SetVariable Name="$Active" Value="0" />
+        <Transform Name="ItemDisappear" />
+        <FloatingText Text="  " Image="common.clock_icon" ImageAlign="Left" ImageColor="_IconImageColor" ImageWidth="_IconImageWidth" ImageHeight="_IconImageHeight" Frames="10" OriginType="Timer" />
+      </Actions>
+    </Loop>
+  </Template>
+  <Template Name="Magnetizer">
+    <Loop Name="Magnetize">
+      <Events Template="FreqUsed.Enter" />
+      <Conditions>
+        <GreaterEqual Value1="?getCounter[PassiveEffects,MagnetizerRadius]" Value2="1" />
+      </Conditions>
+      <Actions>
+        <Transform Name="PullItem" />
+      </Actions>
+    </Loop>
+    <Loop Name="MagnetizeOnTeleportOnShow">
+      <Events>
+        <OnShow />
+      </Events>
+      <Conditions>
+        <GreaterEqual Value1="?getCounter[PassiveEffects,MagnetizerFrames]" Value2="1" />
+        <GreaterEqual Value1="?getCounter[PassiveEffects,JustTeleported]" Value2="1" />
+        <GreaterEqual Value1="?getModel[Player].localPositionX" Value2="0" />
+      </Conditions>
+      <Actions>
+        <Wait Frames="25" />
+        <Transform Name="PullItem" />
+      </Actions>
+    </Loop>
+    <Loop Name="MagnetizeOnTeleportOnScreenAlready">
+      <Events>
+        <ActivateNearPlayer />
+      </Events>
+      <Conditions>
+        <GreaterEqual Value1="?getCounter[PassiveEffects,MagnetizerFrames]" Value2="1" />
+        <Equal Value1="_$ActionID" Value2="Teleported" />
+        <LessEqual Value1="?getModel[Player].localPositionX" Value2="0" />
+      </Conditions>
+      <Actions>
+        <Wait Frames="20" />
+        <Transform Name="PullItem" />
+      </Actions>
+    </Loop>
+  </Template>
+  <!-- Templates from TriggerTemplates.xml -->
+  <Template Name="CommonLib" Library="1">
+    <Loop Name="Sound">
       <Using>
         <Variable Name="Sound" DefaultValue="None" ComplexName="1" Type="Sound" />
       </Using>
@@ -10,34 +1866,32 @@
         <Sound Name="_Sound" />
       </Actions>
     </Loop>
-    <Loop Name = "Delay">
+    <Loop Name="Delay">
       <Using>
-        <Variable Name="Delay" DefaultValue="0" ComplexName="1" Type="UInt"/>
-      </Using>    
+        <Variable Name="Delay" DefaultValue="0" ComplexName="1" Type="UInt" />
+      </Using>
       <Actions>
         <Wait Frames="_Delay" />
-      </Actions>    
+      </Actions>
     </Loop>
-    <Loop Name = "RequiredAnimation">
+    <Loop Name="RequiredAnimation">
       <Using>
-        <Variable Name="ReqAnim" DefaultValue="?getModel[_$Model].animationName" ComplexName="1" Type="Animation"/>
-      </Using>        
+        <Variable Name="ReqAnim" DefaultValue="?getModel[_$Model].animationName" ComplexName="1" Type="Animation" />
+      </Using>
       <Events>
-        <ValueChange Value="?getModel[Player].animationName"/>
-        <ValueChange Value="?getModel[Hunter].animationName"/>
-      </Events>   
+        <ValueChange Value="?getModel[Player].animationName" />
+        <ValueChange Value="?getModel[Hunter].animationName" />
+      </Events>
       <Conditions>
         <Equal Value1="_ReqAnim" Value2="?getModel[_$Model].animationName" />
-      </Conditions>   
+      </Conditions>
     </Loop>
-    <Loop Name = "ActiveDeath">
+    <Loop Name="ActiveDeath">
       <Events>
         <Collision />
       </Events>
     </Loop>
   </Template>
-
-  <!--Сокращения для часто используемых конструкций-->
   <Template Name="FreqUsed" Library="1">
     <Loop Name="OnShow">
       <Events>
@@ -134,64 +1988,48 @@
     </Loop>
     <Loop Name="DispatchEvent">
       <Using>
-        <Variable Name="Activator" DefaultValue="" ComplexName="1" Type="String"/>
+        <Variable Name="Activator" DefaultValue="" ComplexName="1" Type="String" />
       </Using>
       <Actions>
-        <Activate ActionID = "_Activator" />
+        <Activate ActionID="_Activator" />
       </Actions>
     </Loop>
     <Loop Name="SwitchOn">
       <Actions>
-        <SetVariable Name="$Active" Value="1"/>
+        <SetVariable Name="$Active" Value="1" />
       </Actions>
     </Loop>
     <Loop Name="SwitchOff">
       <Actions>
-        <SetVariable Name="$Active" Value="0"/>
+        <SetVariable Name="$Active" Value="0" />
       </Actions>
     </Loop>
   </Template>
-
-  <!--==========================-->
-  <!--==========================-->
-  <!--==========================-->
-  <!--==========================-->
-
-  <!-- Триггеры Type=None -->
-
   <Template Name="NoneType">
     <Init>
-      <SetVariable Name="$AI" Value="-1"/>
-      <SetVariable Name="$Active" Value="1"/>
-      <SetVariable Name="$Node" Value="COM"/>    
-    	<SetVariable Name="Flag1" Value="0"/>    
+      <SetVariable Name="$AI" Value="-1" />
+      <SetVariable Name="$Active" Value="1" />
+      <SetVariable Name="$Node" Value="COM" />
+      <SetVariable Name="Flag1" Value="0" />
     </Init>
     <Loop Name="Only">
-      <Events Template="FreqUsed.OnCollision"/>
+      <Events Template="FreqUsed.OnCollision" />
       <Actions>
         <SetVariable Name="$Active" Value="0" />
-        <Execute/>
+        <Execute />
       </Actions>
     </Loop>
   </Template>
-
-  <!--==========================-->
-  <!--==========================-->
-  <!--==========================-->
-  <!--==========================-->
-
-  <!-- Триггеры Type=1 с параметром follow и без него-->
-
   <Template Name="AI_noFollow">
     <Init>
       <SetVariable Name="$AI" Value="1" />
       <SetVariable Name="$Active" Value="1" />
       <SetVariable Name="$Node" Value="COM" />
-    	<SetVariable Name="Flag1" Value="0"/>
+      <SetVariable Name="Flag1" Value="0" />
     </Init>
     <Loop Name="Only">
       <Using>
-        <Variable Name="Key" DefaultValue="Up" Type="Key"/>
+        <Variable Name="Key" DefaultValue="Up" Type="Key" />
       </Using>
       <Events Template="FreqUsed.Enter" />
       <Actions>
@@ -199,13 +2037,12 @@
       </Actions>
     </Loop>
   </Template>
-
   <Template Name="AI_Follow">
     <Init>
       <SetVariable Name="$AI" Value="0" />
       <SetVariable Name="$Active" Value="1" />
       <SetVariable Name="$Node" Value="COM" />
-    	<SetVariable Name="Flag1" Value="0"/>
+      <SetVariable Name="Flag1" Value="0" />
     </Init>
     <Loop Name="SetLineVert">
       <Using>
@@ -243,7 +2080,7 @@
     </Loop>
     <Loop Name="SetLineFixed">
       <Using>
-        <Variable Name="FollowAI" DefaultValue="1" Type="AI"/>
+        <Variable Name="FollowAI" DefaultValue="1" Type="AI" />
       </Using>
       <Events Template="FreqUsed.KeyPressed" />
       <Conditions>
@@ -295,27 +2132,17 @@
         <Equal Value1="_LineType" Value2="NoLine" />
       </Conditions>
       <Actions>
-        <Press Key="_Key" Model="_$Model"/>
+        <Press Key="_Key" Model="_$Model" />
         <SetVariable Name="$AI" Value="0" />
       </Actions>
     </Loop>
   </Template>
-
-
-  <!--==========================-->
-  <!--==========================-->
-  <!--==========================-->
-  <!--==========================-->
-
-  <!--Триггеры Type=2 КАМЕРА-->
-
-
   <Template Name="CameraZoom">
     <Init>
       <SetVariable Name="$AI" Value="0" />
       <SetVariable Name="$Active" Value="1" />
       <SetVariable Name="$Node" Value="COM" />
-    	<SetVariable Name="Flag1" Value="0"/>
+      <SetVariable Name="Flag1" Value="0" />
     </Init>
     <Loop Name="Only">
       <Using>
@@ -327,14 +2154,12 @@
       </Actions>
     </Loop>
   </Template>
-
-
   <Template Name="CameraSmoothness">
     <Init>
       <SetVariable Name="$AI" Value="0" />
       <SetVariable Name="$Active" Value="1" />
       <SetVariable Name="$Node" Value="COM" />
-    	<SetVariable Name="Flag1" Value="0"/>
+      <SetVariable Name="Flag1" Value="0" />
     </Init>
     <Loop Name="Enter">
       <Using>
@@ -352,14 +2177,12 @@
       </Actions>
     </Loop>
   </Template>
-
-
   <Template Name="CameraFollow">
     <Init>
       <SetVariable Name="$AI" Value="0" />
       <SetVariable Name="$Active" Value="1" />
       <SetVariable Name="$Node" Value="COM" />
-    	<SetVariable Name="Flag1" Value="0"/>
+      <SetVariable Name="Flag1" Value="0" />
     </Init>
     <Loop Name="Only">
       <Using>
@@ -371,25 +2194,17 @@
       </Actions>
     </Loop>
   </Template>
-
-
-  <!--==========================-->
-  <!--==========================-->
-  <!--==========================-->
-  <!--====Type=13===============-->
-
-
   <Template Name="ForcedAnimation">
     <Init>
       <SetVariable Name="$AI" Value="-1" />
       <SetVariable Name="$Active" Value="1" />
-      <SetVariable Name="$Node" Value="COM" />    
-    	<SetVariable Name="Flag1" Value="0"/>    
+      <SetVariable Name="$Node" Value="COM" />
+      <SetVariable Name="Flag1" Value="0" />
     </Init>
     <Loop Name="Only">
       <Using>
         <Variable Name="AnimName" DefaultValue="RunForward" Type="Animation" />
-        <Variable Name="AnimFrame" DefaultValue="10"  Type="UInt" />
+        <Variable Name="AnimFrame" DefaultValue="10" Type="UInt" />
         <Variable Name="Reversed" DefaultValue="0" Type="UInt" />
       </Using>
       <Events Template="FreqUsed.Enter" />
@@ -398,13 +2213,12 @@
       </Actions>
     </Loop>
   </Template>
-
   <Template Name="Death">
     <Init>
       <SetVariable Name="$AI" Value="-1" />
       <SetVariable Name="$Active" Value="1" />
-      <SetVariable Name="$Node" Value="COM" />    
-    	<SetVariable Name="Flag1" Value="0"/>    
+      <SetVariable Name="$Node" Value="COM" />
+      <SetVariable Name="Flag1" Value="0" />
     </Init>
     <Loop Name="KillBot">
       <Events Template="FreqUsed.Enter" />
@@ -421,13 +2235,12 @@
       </Actions>
     </Loop>
   </Template>
-
   <Template Name="ForcedVariableAnimation">
     <Init>
       <SetVariable Name="$AI" Value="-1" />
       <SetVariable Name="$Active" Value="1" />
-      <SetVariable Name="$Node" Value="COM" />    
-    	<SetVariable Name="Flag1" Value="0"/>    
+      <SetVariable Name="$Node" Value="COM" />
+      <SetVariable Name="Flag1" Value="0" />
     </Init>
     <Loop Name="TurnDelayed">
       <Using>
@@ -466,7 +2279,7 @@
         <Variable Name="AnimFrame" DefaultValue="10" />
         <Variable Name="Reversed" DefaultValue="0" />
         <Variable Name="Mode" DefaultValue="0" />
-        <Variable Name="NewModel" DefaultValue="None"/>
+        <Variable Name="NewModel" DefaultValue="None" />
       </Using>
       <Events Template="FreqUsed.Enter" />
       <Conditions>
@@ -474,7 +2287,7 @@
       </Conditions>
       <Actions>
         <ForceAnimation Name="_AnimName" Model="_$Model" Frame="_AnimFrame" Reversed="_Reversed" />
-        <SetVariable Name="NewModel" Value="_$Model"/>
+        <SetVariable Name="NewModel" Value="_$Model" />
       </Actions>
     </Loop>
     <Loop Name="Delayed">
@@ -486,7 +2299,7 @@
       </Using>
       <Events Template="FreqUsed.Enter" />
       <Conditions>
-        <Equal Value1="_Mode" Value2="1"  />
+        <Equal Value1="_Mode" Value2="1" />
       </Conditions>
       <Actions>
         <ForceAnimation Name="_DelayedAnimName" Model="_$Model" Frame="_DelayedAnimFrame" Reversed="_DelayedReversed" />
@@ -500,25 +2313,24 @@
         <Variable Name="Mode" DefaultValue="0" Type="Bool" />
         <Variable Name="ActivatorToCheck" DefaultValue="None" Type="String" />
       </Using>
-      <Events Template="FreqUsed.Activate"/>
+      <Events Template="FreqUsed.Activate" />
       <Conditions>
         <Equal Value1="_ActivatorToCheck" Value2="_$ActionID" />
-        <Equal Value1="_Mode" Value2="0"/>
-        <Equal Value1="_NewModel" Value2="None" Not="1"/>
+        <Equal Value1="_Mode" Value2="0" />
+        <Equal Value1="_NewModel" Value2="None" Not="1" />
       </Conditions>
       <Actions>
-        <ForceAnimation Name="_DelayedAnimName" Model="_NewModel" Frame="_DelayedAnimFrame" Reversed="_DelayedReversed"/>
-        <SetVariable Name="Mode" Value="1"/>
+        <ForceAnimation Name="_DelayedAnimName" Model="_NewModel" Frame="_DelayedAnimFrame" Reversed="_DelayedReversed" />
+        <SetVariable Name="Mode" Value="1" />
       </Actions>
     </Loop>
   </Template>
-
   <Template Name="VariableDeath">
     <Init>
       <SetVariable Name="$AI" Value="-1" />
       <SetVariable Name="$Active" Value="1" />
-      <SetVariable Name="$Node" Value="COM" />    
-    	<SetVariable Name="Flag1" Value="0"/>    
+      <SetVariable Name="$Node" Value="COM" />
+      <SetVariable Name="Flag1" Value="0" />
     </Init>
     <Loop Name="TurnDelayed">
       <Using>
@@ -557,7 +2369,7 @@
         <Variable Name="AnimFrame" DefaultValue="10" />
         <Variable Name="Reversed" DefaultValue="0" />
         <Variable Name="Mode" DefaultValue="0" />
-        <Variable Name="NewModel" DefaultValue="None"/>
+        <Variable Name="NewModel" DefaultValue="None" />
       </Using>
       <Events Template="FreqUsed.Enter" />
       <Conditions>
@@ -565,7 +2377,7 @@
       </Conditions>
       <Actions>
         <ForceAnimation Name="_AnimName" Model="_$Model" Frame="_AnimFrame" Reversed="_Reversed" />
-        <SetVariable Name="NewModel" Value="_$Model"/>
+        <SetVariable Name="NewModel" Value="_$Model" />
       </Actions>
     </Loop>
     <Loop Name="Delayed">
@@ -577,7 +2389,7 @@
       </Using>
       <Events Template="FreqUsed.Enter" />
       <Conditions>
-        <Equal Value1="_Mode" Value2="1"  />
+        <Equal Value1="_Mode" Value2="1" />
       </Conditions>
       <Actions>
         <Kill Model="_$Model" />
@@ -591,32 +2403,24 @@
         <Variable Name="Mode" DefaultValue="0" Type="Bool" />
         <Variable Name="ActivatorToCheck" DefaultValue="None" Type="String" />
       </Using>
-      <Events Template="FreqUsed.Activate"/>
+      <Events Template="FreqUsed.Activate" />
       <Conditions>
         <Equal Value1="_ActivatorToCheck" Value2="_$ActionID" />
-        <Equal Value1="_Mode" Value2="0"/>
-        <Equal Value1="_NewModel" Value2="None" Not="1"/>
+        <Equal Value1="_Mode" Value2="0" />
+        <Equal Value1="_NewModel" Value2="None" Not="1" />
       </Conditions>
       <Actions>
         <Kill Model="_NewModel" />
-        <SetVariable Name="Mode" Value="1"/>
+        <SetVariable Name="Mode" Value="1" />
       </Actions>
     </Loop>
   </Template>
-
-
-
-  <!--==========================-->
-  <!--==========================-->
-  <!--==========================-->
-  <!--==========================-->
-
   <Template Name="Control">
     <Init>
       <SetVariable Name="$AI" Value="0" />
       <SetVariable Name="$Active" Value="1" />
       <SetVariable Name="$Node" Value="COM" />
-    	<SetVariable Name="Flag1" Value="0"/>
+      <SetVariable Name="Flag1" Value="0" />
     </Init>
     <Loop Name="TurnOn">
       <Events Template="FreqUsed.Enter" />
@@ -637,20 +2441,12 @@
       </Actions>
     </Loop>
   </Template>
-
-  <!--==========================-->
-  <!--==========================-->
-  <!--==========================-->
-  <!--==========================-->
-  <!--Триггеры type=5-->
-
-
   <Template Name="TriggerLoss">
     <Init>
       <SetVariable Name="$AI" Value="-1" />
       <SetVariable Name="$Active" Value="1" />
       <SetVariable Name="$Node" Value="COM" />
-    	<SetVariable Name="Flag1" Value="0"/>
+      <SetVariable Name="Flag1" Value="0" />
     </Init>
     <Loop Name="PlayerPass">
       <Using>
@@ -665,7 +2461,7 @@
         <EndGame Result="Loss" Model="_$Model" Frames="_Time" />
         <ForceAnimation Name="_Start" Model="_$Model" Frame="_StartFrame" Reversed="_ReversedStart" />
       </Actions>
-    </Loop>  
+    </Loop>
     <Loop Name="HunterPass">
       <Using>
         <Variable Name="End" DefaultValue="" Type="Animation" />
@@ -674,20 +2470,19 @@
       </Using>
       <Events Template="FreqUsed.Enter" />
       <Conditions>
-        <Equal Value1="?getModel[_$Model].AI" Value2="0" Not="1"/>
+        <Equal Value1="?getModel[_$Model].AI" Value2="0" Not="1" />
       </Conditions>
       <Actions>
         <ForceAnimation Name="_End" Model="_$Model" Frame="_EndFrame" Reversed="_ReversedEnd" />
       </Actions>
     </Loop>
   </Template>
-
   <Template Name="TriggerVictory">
     <Init>
       <SetVariable Name="$AI" Value="-1" />
       <SetVariable Name="$Active" Value="1" />
       <SetVariable Name="$Node" Value="COM" />
-    	<SetVariable Name="Flag1" Value="0"/>
+      <SetVariable Name="Flag1" Value="0" />
     </Init>
     <Loop Name="PlayerPass">
       <Using>
@@ -705,23 +2500,15 @@
         <ForceAnimation Name="_Start" Model="Hunter" Frame="_StartFrame" Reversed="_ReversedStart" />
         <SetVariable Name="$AI" Value="1" />
       </Actions>
-    </Loop>  
+    </Loop>
     <Loop Template="TriggerLoss.HunterPass" Name="HunterPass" />
   </Template>
-
-  <!--==========================-->
-  <!--==========================-->
-  <!--==========================-->
-  <!--==========================-->
-
-  <!-- Триггеры Type=10-->
-
   <Template Name="ModelAnimation">
     <Init>
       <SetVariable Name="$AI" Value="0" />
       <SetVariable Name="$Active" Value="1" />
-      <SetVariable Name="$Node" Value="COM" />    
-    	<SetVariable Name="Flag1" Value="0"/>    
+      <SetVariable Name="$Node" Value="COM" />
+      <SetVariable Name="Flag1" Value="0" />
     </Init>
     <Loop Name="Only">
       <Using>
@@ -735,19 +2522,12 @@
       </Actions>
     </Loop>
   </Template>
-  <!--==========================-->
-  <!--==========================-->
-  <!--==========================-->
-  <!--==========================-->
-
-  <!-- Триггеры Type=11-->
-
   <Template Name="Respawn">
     <Init>
       <SetVariable Name="$AI" Value="0" />
       <SetVariable Name="$Active" Value="1" />
-      <SetVariable Name="$Node" Value="COM" />    
-			<SetVariable Name="Flag1" Value="0" />    
+      <SetVariable Name="$Node" Value="COM" />
+      <SetVariable Name="Flag1" Value="0" />
     </Init>
     <Loop Name="Player">
       <Using>
@@ -764,55 +2544,54 @@
       <Events Template="FreqUsed.Timeout" />
       <Conditions Template="FreqUsed.IsSetForHunter" />
       <Actions>
-        <AppendValue Name="Flag1" Value="1"/>
-				<Activate ActionID="SpawnHim"/>
+        <AppendValue Name="Flag1" Value="1" />
+        <Activate ActionID="SpawnHim" />
       </Actions>
     </Loop>
-		<Loop Name="OnHide">
-			<Events>
-				<OnHide/>
-			</Events>
+    <Loop Name="OnHide">
+      <Events>
+        <OnHide />
+      </Events>
       <Conditions Template="FreqUsed.IsSetForHunter" />
-			<Actions>
-        <AppendValue Name="Flag1" Value="1"/>
-				<Activate ActionID="SpawnHim"/>
-			</Actions>
-		</Loop>
-		<Loop Name="Spawn">
+      <Actions>
+        <AppendValue Name="Flag1" Value="1" />
+        <Activate ActionID="SpawnHim" />
+      </Actions>
+    </Loop>
+    <Loop Name="Spawn">
       <Using>
         <Variable Name="Spawn" DefaultValue="Respawn" />
         <Variable Name="SpawnModel" DefaultValue="Hunter" Type="Model" />
       </Using>
-			<Events>
-				<Activate/>
-			</Events>
-			<Conditions>
-				<Equal Value1="_$ActionID" Value2="SpawnHim"/>
-				<Equal Value1="_$AI" Value2="1" />
-				<Equal Value1="_Flag1" Value2="2"/>
-			</Conditions>
+      <Events>
+        <Activate />
+      </Events>
+      <Conditions>
+        <Equal Value1="_$ActionID" Value2="SpawnHim" />
+        <Equal Value1="_$AI" Value2="1" />
+        <Equal Value1="_Flag1" Value2="2" />
+      </Conditions>
       <Actions>
         <Spawn Model="_SpawnModel" Spawn="_Spawn" />
         <SetVariable Name="$AI" Value="0" />
       </Actions>
-		</Loop>
+    </Loop>
     <Loop Name="Bot">
       <Events Template="FreqUsed.Enter" />
       <Conditions Template="FreqUsed.TriggeredByHunter" />
       <Actions>
         <SetVariable Name="$AI" Value="0" />
-				<SetVariable Name="Flag1" Value="0" />
-				<SetVariable Name="$Active" Value="0"/>
+        <SetVariable Name="Flag1" Value="0" />
+        <SetVariable Name="$Active" Value="0" />
       </Actions>
     </Loop>
   </Template>
-	
   <Template Name="Respawn_OnScreen">
     <Init>
       <SetVariable Name="$AI" Value="0" />
       <SetVariable Name="$Active" Value="1" />
-      <SetVariable Name="$Node" Value="COM" />    
-			<SetVariable Name="Flag1" Value="0" />    
+      <SetVariable Name="$Node" Value="COM" />
+      <SetVariable Name="Flag1" Value="0" />
     </Init>
     <Loop Name="Player">
       <Using>
@@ -842,23 +2621,17 @@
       <Conditions Template="FreqUsed.TriggeredByHunter" />
       <Actions>
         <SetVariable Name="$AI" Value="0" />
-				<SetVariable Name="Flag1" Value="0" />
-				<SetVariable Name="$Active" Value="0"/>
+        <SetVariable Name="Flag1" Value="0" />
+        <SetVariable Name="$Active" Value="0" />
       </Actions>
     </Loop>
   </Template>
-  <!--==========================-->
-  <!--==========================-->
-  <!--==========================-->
-
-  <!-- Триггеры Type=11-->
-
   <Template Name="RespawnHelper">
     <Init>
       <SetVariable Name="$AI" Value="-1" />
       <SetVariable Name="$Active" Value="1" />
-      <SetVariable Name="$Node" Value="COM" />   
-    	<SetVariable Name="Flag1" Value="0"/>   
+      <SetVariable Name="$Node" Value="COM" />
+      <SetVariable Name="Flag1" Value="0" />
     </Init>
     <Loop Name="Helper">
       <Using>
@@ -870,7 +2643,7 @@
           <Equal Value1="?getModel[_$Model].AI" Value2="2" />
           <Equal Value1="?getModel[_$Model].AI" Value2="5" />
         </Operator>
-				<Equal Value1="Flag1" Value2="0"/>
+        <Equal Value1="Flag1" Value2="0" />
       </Conditions>
       <Actions>
         <SetVariable Name="$AI" Value="0" />
@@ -885,8 +2658,8 @@
       <Conditions Template="FreqUsed.IsSetForPlayer" />
       <Actions>
         <EndGame Result="Loss" Model="Player" Frames="_Time" />
-				<Control Switch="Off" Model="Player"/>
-				<MessageOnScreen Text="track_far_txt" Color="#FFFFFFFF" Frames="120" AppearStyle="Fade" DisappearStyle="Fade"/>
+        <Control Switch="Off" Model="Player" />
+        <MessageOnScreen Text="track_far_txt" Color="#FFFFFFFF" Frames="120" AppearStyle="Fade" DisappearStyle="Fade" />
       </Actions>
     </Loop>
     <Loop Name="Player">
@@ -899,21 +2672,20 @@
     <Loop Name="PlayerisFirst">
       <Events Template="FreqUsed.Enter" />
       <Conditions>
-				<Equal Value1="_$AI" Value2="-1"/>
-				<Equal Value1="?getModel[_$Model].AI" Value2="0"/>
-			</Conditions>
+        <Equal Value1="_$AI" Value2="-1" />
+        <Equal Value1="?getModel[_$Model].AI" Value2="0" />
+      </Conditions>
       <Actions>
-				<SetVariable Name="Flag1" Value="1" />
+        <SetVariable Name="Flag1" Value="1" />
       </Actions>
     </Loop>
   </Template>
-
   <Template Name="RespawnHunterMode">
     <Init>
       <SetVariable Name="$AI" Value="-1" />
       <SetVariable Name="$Active" Value="1" />
-      <SetVariable Name="$Node" Value="COM" />   
-    	<SetVariable Name="Flag1" Value="0"/>   
+      <SetVariable Name="$Node" Value="COM" />
+      <SetVariable Name="Flag1" Value="0" />
     </Init>
     <Loop Name="Helper">
       <Using>
@@ -934,43 +2706,43 @@
     <Loop Name="HunterIsFirst">
       <Events Template="FreqUsed.Enter" />
       <Conditions>
-				<Equal Value1="_$AI" Value2="-1" />
-				<Equal Value1="?getModel[_$Model].AI" Value2="0" />
+        <Equal Value1="_$AI" Value2="-1" />
+        <Equal Value1="?getModel[_$Model].AI" Value2="0" />
       </Conditions>
       <Actions>
         <SetVariable Name="$Active" Value="0" />
-				<Control Switch="Off" Model="Hunter"/>
-				<Activate ActionID="Hunterwasfirst"/>
+        <Control Switch="Off" Model="Hunter" />
+        <Activate ActionID="Hunterwasfirst" />
       </Actions>
     </Loop>
     <Loop Name="HunterCanArrest">
       <Events>
-				<Activate/>
-			</Events>
+        <Activate />
+      </Events>
       <Conditions>
-				<Equal Value1="_$ActionID" Value2="Hunterwasfirst" />
-				<Operator Type="Or">
-					<Equal Value1="?getModel[Hunter].animationName" Value2="RunForward" />
-					<Equal Value1="?getModel[Hunter].animationName" Value2="RunFast" />
-				</Operator>
+        <Equal Value1="_$ActionID" Value2="Hunterwasfirst" />
+        <Operator Type="Or">
+          <Equal Value1="?getModel[Hunter].animationName" Value2="RunForward" />
+          <Equal Value1="?getModel[Hunter].animationName" Value2="RunFast" />
+        </Operator>
       </Conditions>
       <Actions>
-				<ForceAnimation Name="Arrest" Frame="21" Model="Hunter"/>
-				<EndGame Result="Win" Model="Hunter" Frames="30"/>
+        <ForceAnimation Name="Arrest" Frame="21" Model="Hunter" />
+        <EndGame Result="Win" Model="Hunter" Frames="30" />
       </Actions>
     </Loop>
     <Loop Name="HunterCannotArrest">
       <Events>
-				<Activate/>
-			</Events>
+        <Activate />
+      </Events>
       <Conditions>
-				<Equal Value1="_$ActionID" Value2="Hunterwasfirst" />
-				<Equal Value1="?getModel[Hunter].animationName" Value2="RunForward" Not="1" />
-				<Equal Value1="?getModel[Hunter].animationName" Value2="RunFast" Not="1" />
+        <Equal Value1="_$ActionID" Value2="Hunterwasfirst" />
+        <Equal Value1="?getModel[Hunter].animationName" Value2="RunForward" Not="1" />
+        <Equal Value1="?getModel[Hunter].animationName" Value2="RunFast" Not="1" />
       </Conditions>
       <Actions>
-				<Wait Frames="2"/>
-				<Activate ActionID="Hunterwasfirst"/>
+        <Wait Frames="2" />
+        <Activate ActionID="Hunterwasfirst" />
       </Actions>
     </Loop>
     <Loop Name="Timeout">
@@ -981,8 +2753,8 @@
       <Conditions Template="FreqUsed.IsSetForPlayer" />
       <Actions>
         <EndGame Result="Loss" Model="Hunter" Frames="_Time" />
-				<Control Switch="Off" Model="Hunter"/>
-				<MessageOnScreen Text="track_far_txt" Color="#FFFFFFFF" Frames="120" AppearStyle="Fade" DisappearStyle="Fade"/>
+        <Control Switch="Off" Model="Hunter" />
+        <MessageOnScreen Text="track_far_txt" Color="#FFFFFFFF" Frames="120" AppearStyle="Fade" DisappearStyle="Fade" />
       </Actions>
     </Loop>
     <Loop Name="Player">
@@ -990,17 +2762,11 @@
       <Conditions Template="FreqUsed.IsSetForPlayer" />
       <Actions>
         <SetVariable Name="$AI" Value="-1" />
-				<SetVariable Name="$Active" Value="0" />
+        <SetVariable Name="$Active" Value="0" />
       </Actions>
     </Loop>
   </Template>
-  <!--==========================-->
-  <!--==========================-->
-  <!--==========================-->
-
-  <!-- Триггеры Type=11-->
-
-  <Template Name="ItemUsage" Library="1" >
+  <Template Name="ItemUsage" Library="1">
     <Loop Name="IfItemExists">
       <Using>
         <Variable Name="ItemResult" DefaultValue="" Type="String" ComplexName="1" />
@@ -1028,78 +2794,76 @@
         <Variable Name="TargetItem" DefaultValue="" Type="String" ComplexName="1" />
       </Using>
       <Actions>
-        <Use Object="_TargetItem"/>
+        <Use Object="_TargetItem" />
       </Actions>
     </Loop>
   </Template>
-	
-	<Template Name="ArrestHunterMode">
-		<Loop Name="HunterEntered">
-			<Events>
-				<Enter/>
-			</Events>
-			<Conditions>
-				<Equal Value1="?getModel[_$Model].AI" Value2="0"/>
-				<Operator Type="Or">
-					<Operator Type="And">
-						<Equal Value1="?getModel[Hunter].direction" Value2="1"/>
-						<Greater Value1="?getModel[Hunter].getNode[COM].localPositionX" Value2="?getModel[Player].getNode[COM].localPositionX"/>
-					</Operator>
-					<Operator Type="And">
-						<Equal Value1="?getModel[Hunter].direction" Value2="-1"/>
-						<Greater Value1="?getModel[Hunter].getNode[COM].worldPositionX" Value2="?getModel[Player].getNode[COM].worldPositionX" Not="1"/>
-					</Operator>
-				</Operator>
-			</Conditions>
-			<Actions>
-				<Control Switch="Off" Model="_$Model" />
-				<Activate ActionID="youwin"/>
-			</Actions>
-		</Loop>
-		<Loop Name="HunterGetControl">
-			<Events>
-				<Enter/>
-			</Events>
-				<Operator Type="Or">
-					<Operator Type="And">
-						<Equal Value1="?getModel[Hunter].direction" Value2="1"/>
-						<Greater Value1="?getModel[Hunter].getNode[COM].localPositionX" Value2="?getModel[Player].getNode[COM].localPositionX" Not="1"/>
-					</Operator>
-					<Operator Type="And">
-						<Equal Value1="?getModel[Hunter].direction" Value2="-1"/>
-						<Greater Value1="?getModel[Hunter].getNode[COM].worldPositionX" Value2="?getModel[Player].getNode[COM].worldPositionX"/>
-					</Operator>
-				</Operator>
-			<Actions>
-				<Control Switch="Off" Model="_$Model" />
-			</Actions>
-		</Loop>
-		<Loop Name="HunterWin">
-			<Events>
-				<Activate/>
-			</Events>
-			<Conditions>
-				<Equal Value1="_$ActionID" Value2="youwin"/>
-				<Equal Value1="?getModel[Hunter].animationName" Value2="RunForward"/>
-			</Conditions>
-			<Actions>
-				<ForceAnimation Name="Arrest" Frame="21" Model="Hunter"/>
-				<EndGame Result="Win" Model="Hunter" Frames="30"/>
-			</Actions>
-		</Loop>
-		<Loop Name="HunterWin2">
-			<Events>
-				<Activate />
-			</Events>
-			<Conditions>
-				<Equal Value1="_$ActionID" Value2="youwin"/>
-				<Equal Value1="?getModel[Hunter].animationName" Value2="RunForward" Not="1"/>
-			</Conditions>
-			<Actions>
-				<Wait Frames="5"/>
-				<Activate ActionID="youwin"/>
-			</Actions>
-		</Loop>
-	</Template>
-
+  <Template Name="ArrestHunterMode">
+    <Loop Name="HunterEntered">
+      <Events>
+        <Enter />
+      </Events>
+      <Conditions>
+        <Equal Value1="?getModel[_$Model].AI" Value2="0" />
+        <Operator Type="Or">
+          <Operator Type="And">
+            <Equal Value1="?getModel[Hunter].direction" Value2="1" />
+            <Greater Value1="?getModel[Hunter].getNode[COM].localPositionX" Value2="?getModel[Player].getNode[COM].localPositionX" />
+          </Operator>
+          <Operator Type="And">
+            <Equal Value1="?getModel[Hunter].direction" Value2="-1" />
+            <Greater Value1="?getModel[Hunter].getNode[COM].worldPositionX" Value2="?getModel[Player].getNode[COM].worldPositionX" Not="1" />
+          </Operator>
+        </Operator>
+      </Conditions>
+      <Actions>
+        <Control Switch="Off" Model="_$Model" />
+        <Activate ActionID="youwin" />
+      </Actions>
+    </Loop>
+    <Loop Name="HunterGetControl">
+      <Events>
+        <Enter />
+      </Events>
+      <Operator Type="Or">
+        <Operator Type="And">
+          <Equal Value1="?getModel[Hunter].direction" Value2="1" />
+          <Greater Value1="?getModel[Hunter].getNode[COM].localPositionX" Value2="?getModel[Player].getNode[COM].localPositionX" Not="1" />
+        </Operator>
+        <Operator Type="And">
+          <Equal Value1="?getModel[Hunter].direction" Value2="-1" />
+          <Greater Value1="?getModel[Hunter].getNode[COM].worldPositionX" Value2="?getModel[Player].getNode[COM].worldPositionX" />
+        </Operator>
+      </Operator>
+      <Actions>
+        <Control Switch="Off" Model="_$Model" />
+      </Actions>
+    </Loop>
+    <Loop Name="HunterWin">
+      <Events>
+        <Activate />
+      </Events>
+      <Conditions>
+        <Equal Value1="_$ActionID" Value2="youwin" />
+        <Equal Value1="?getModel[Hunter].animationName" Value2="RunForward" />
+      </Conditions>
+      <Actions>
+        <ForceAnimation Name="Arrest" Frame="21" Model="Hunter" />
+        <EndGame Result="Win" Model="Hunter" Frames="30" />
+      </Actions>
+    </Loop>
+    <Loop Name="HunterWin2">
+      <Events>
+        <Activate />
+      </Events>
+      <Conditions>
+        <Equal Value1="_$ActionID" Value2="youwin" />
+        <Equal Value1="?getModel[Hunter].animationName" Value2="RunForward" Not="1" />
+      </Conditions>
+      <Actions>
+        <Wait Frames="5" />
+        <Activate ActionID="youwin" />
+      </Actions>
+    </Loop>
+  </Template>
 </Templates>

@@ -5956,7 +5956,7 @@
             <Template Name="ModelAnimation"/>
           </Content>
         </Trigger>
-        <Model X="-1055" Y="-1033" Type="1" ClassName="cs_techpark_cs01_main_glider_girl"/>
+        <Model X="-1055" Y="-1033" Type="1" ClassName="cs_techpark_cs01_main_glider"/>
         <Platform X="-1250" Y="-1100" Width="10" Height="10"/>
         <Trigger Name="TriggerCSTechnoCS01Glider" X="-1410" Y="515" Width="500" Height="1000">
           <Content>

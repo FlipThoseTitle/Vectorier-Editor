@@ -4,7 +4,7 @@
     <dict>
         <key>frames</key>
         <dict>
-            <key>credits_1.png</key>
+            <key>items.credits_1.png</key>
             <dict>
                 <key>frame</key>
                 <string>{{320,170},{76,80}}</string>
@@ -17,7 +17,7 @@
                 <key>sourceSize</key>
                 <string>{100,100}</string>
             </dict>
-            <key>credits_10.png</key>
+            <key>items.credits_10.png</key>
             <dict>
                 <key>frame</key>
                 <string>{{84,258},{48,86}}</string>
@@ -30,7 +30,7 @@
                 <key>sourceSize</key>
                 <string>{100,100}</string>
             </dict>
-            <key>credits_11.png</key>
+            <key>items.credits_11.png</key>
             <dict>
                 <key>frame</key>
                 <string>{{248,340},{40,80}}</string>
@@ -43,7 +43,7 @@
                 <key>sourceSize</key>
                 <string>{100,100}</string>
             </dict>
-            <key>credits_12.png</key>
+            <key>items.credits_12.png</key>
             <dict>
                 <key>frame</key>
                 <string>{{406,420},{28,82}}</string>
@@ -56,7 +56,7 @@
                 <key>sourceSize</key>
                 <string>{100,100}</string>
             </dict>
-            <key>credits_13.png</key>
+            <key>items.credits_13.png</key>
             <dict>
                 <key>frame</key>
                 <string>{{180,88},{28,82}}</string>
@@ -69,7 +69,7 @@
                 <key>sourceSize</key>
                 <string>{100,100}</string>
             </dict>
-            <key>credits_14.png</key>
+            <key>items.credits_14.png</key>
             <dict>
                 <key>frame</key>
                 <string>{{450,338},{36,82}}</string>
@@ -82,7 +82,7 @@
                 <key>sourceSize</key>
                 <string>{100,100}</string>
             </dict>
-            <key>credits_15.png</key>
+            <key>items.credits_15.png</key>
             <dict>
                 <key>frame</key>
                 <string>{{240,256},{40,82}}</string>
@@ -95,7 +95,7 @@
                 <key>sourceSize</key>
                 <string>{100,100}</string>
             </dict>
-            <key>credits_16.png</key>
+            <key>items.credits_16.png</key>
             <dict>
                 <key>frame</key>
                 <string>{{304,418},{48,80}}</string>
@@ -108,7 +108,7 @@
                 <key>sourceSize</key>
                 <string>{100,100}</string>
             </dict>
-            <key>credits_17.png</key>
+            <key>items.credits_17.png</key>
             <dict>
                 <key>frame</key>
                 <string>{{352,336},{56,74}}</string>
@@ -121,7 +121,7 @@
                 <key>sourceSize</key>
                 <string>{100,100}</string>
             </dict>
-            <key>credits_18.png</key>
+            <key>items.credits_18.png</key>
             <dict>
                 <key>frame</key>
                 <string>{{442,172},{62,80}}</string>
@@ -134,7 +134,7 @@
                 <key>sourceSize</key>
                 <string>{100,100}</string>
             </dict>
-            <key>credits_19.png</key>
+            <key>items.credits_19.png</key>
             <dict>
                 <key>frame</key>
                 <string>{{196,422},{68,82}}</string>
@@ -147,7 +147,7 @@
                 <key>sourceSize</key>
                 <string>{100,100}</string>
             </dict>
-            <key>credits_2.png</key>
+            <key>items.credits_2.png</key>
             <dict>
                 <key>frame</key>
                 <string>{{242,170},{76,80}}</string>
@@ -160,7 +160,7 @@
                 <key>sourceSize</key>
                 <string>{100,100}</string>
             </dict>
-            <key>credits_20.png</key>
+            <key>items.credits_20.png</key>
             <dict>
                 <key>frame</key>
                 <string>{{210,86},{78,82}}</string>
@@ -173,7 +173,7 @@
                 <key>sourceSize</key>
                 <string>{100,100}</string>
             </dict>
-            <key>credits_21.png</key>
+            <key>items.credits_21.png</key>
             <dict>
                 <key>frame</key>
                 <string>{{2,342},{80,82}}</string>
@@ -186,7 +186,7 @@
                 <key>sourceSize</key>
                 <string>{100,100}</string>
             </dict>
-            <key>credits_22.png</key>
+            <key>items.credits_22.png</key>
             <dict>
                 <key>frame</key>
                 <string>{{182,2},{84,82}}</string>
@@ -199,7 +199,7 @@
                 <key>sourceSize</key>
                 <string>{100,100}</string>
             </dict>
-            <key>credits_23.png</key>
+            <key>items.credits_23.png</key>
             <dict>
                 <key>frame</key>
                 <string>{{2,176},{88,80}}</string>
@@ -212,7 +212,7 @@
                 <key>sourceSize</key>
                 <string>{100,100}</string>
             </dict>
-            <key>credits_24.png</key>
+            <key>items.credits_24.png</key>
             <dict>
                 <key>frame</key>
                 <string>{{92,2},{88,84}}</string>
@@ -225,7 +225,7 @@
                 <key>sourceSize</key>
                 <string>{100,100}</string>
             </dict>
-            <key>credits_25.png</key>
+            <key>items.credits_25.png</key>
             <dict>
                 <key>frame</key>
                 <string>{{2,2},{88,86}}</string>
@@ -238,7 +238,7 @@
                 <key>sourceSize</key>
                 <string>{100,100}</string>
             </dict>
-            <key>credits_26.png</key>
+            <key>items.credits_26.png</key>
             <dict>
                 <key>frame</key>
                 <string>{{2,90},{88,84}}</string>
@@ -251,7 +251,7 @@
                 <key>sourceSize</key>
                 <string>{100,100}</string>
             </dict>
-            <key>credits_27.png</key>
+            <key>items.credits_27.png</key>
             <dict>
                 <key>frame</key>
                 <string>{{92,88},{86,82}}</string>
@@ -264,7 +264,7 @@
                 <key>sourceSize</key>
                 <string>{100,100}</string>
             </dict>
-            <key>credits_28.png</key>
+            <key>items.credits_28.png</key>
             <dict>
                 <key>frame</key>
                 <string>{{268,2},{80,82}}</string>
@@ -277,7 +277,7 @@
                 <key>sourceSize</key>
                 <string>{100,100}</string>
             </dict>
-            <key>credits_29.png</key>
+            <key>items.credits_29.png</key>
             <dict>
                 <key>frame</key>
                 <string>{{356,252},{72,82}}</string>
@@ -290,7 +290,7 @@
                 <key>sourceSize</key>
                 <string>{100,100}</string>
             </dict>
-            <key>credits_3.png</key>
+            <key>items.credits_3.png</key>
             <dict>
                 <key>frame</key>
                 <string>{{166,344},{76,80}}</string>
@@ -303,7 +303,7 @@
                 <key>sourceSize</key>
                 <string>{100,100}</string>
             </dict>
-            <key>credits_30.png</key>
+            <key>items.credits_30.png</key>
             <dict>
                 <key>frame</key>
                 <string>{{290,336},{60,80}}</string>
@@ -316,7 +316,7 @@
                 <key>sourceSize</key>
                 <string>{100,100}</string>
             </dict>
-            <key>credits_31.png</key>
+            <key>items.credits_31.png</key>
             <dict>
                 <key>frame</key>
                 <string>{{354,412},{50,80}}</string>
@@ -329,7 +329,7 @@
                 <key>sourceSize</key>
                 <string>{100,100}</string>
             </dict>
-            <key>credits_32.png</key>
+            <key>items.credits_32.png</key>
             <dict>
                 <key>frame</key>
                 <string>{{398,170},{42,80}}</string>
@@ -342,7 +342,7 @@
                 <key>sourceSize</key>
                 <string>{100,100}</string>
             </dict>
-            <key>credits_33.png</key>
+            <key>items.credits_33.png</key>
             <dict>
                 <key>frame</key>
                 <string>{{410,338},{38,80}}</string>
@@ -355,7 +355,7 @@
                 <key>sourceSize</key>
                 <string>{100,100}</string>
             </dict>
-            <key>credits_34.png</key>
+            <key>items.credits_34.png</key>
             <dict>
                 <key>frame</key>
                 <string>{{266,422},{36,82}}</string>
@@ -368,7 +368,7 @@
                 <key>sourceSize</key>
                 <string>{100,100}</string>
             </dict>
-            <key>credits_35.png</key>
+            <key>items.credits_35.png</key>
             <dict>
                 <key>frame</key>
                 <string>{{174,172},{28,82}}</string>
@@ -381,7 +381,7 @@
                 <key>sourceSize</key>
                 <string>{100,100}</string>
             </dict>
-            <key>credits_36.png</key>
+            <key>items.credits_36.png</key>
             <dict>
                 <key>frame</key>
                 <string>{{436,422},{26,82}}</string>
@@ -394,7 +394,7 @@
                 <key>sourceSize</key>
                 <string>{100,100}</string>
             </dict>
-            <key>credits_37.png</key>
+            <key>items.credits_37.png</key>
             <dict>
                 <key>frame</key>
                 <string>{{204,172},{36,82}}</string>
@@ -407,7 +407,7 @@
                 <key>sourceSize</key>
                 <string>{100,100}</string>
             </dict>
-            <key>credits_38.png</key>
+            <key>items.credits_38.png</key>
             <dict>
                 <key>frame</key>
                 <string>{{134,256},{46,86}}</string>
@@ -420,7 +420,7 @@
                 <key>sourceSize</key>
                 <string>{100,100}</string>
             </dict>
-            <key>credits_39.png</key>
+            <key>items.credits_39.png</key>
             <dict>
                 <key>frame</key>
                 <string>{{182,256},{56,86}}</string>
@@ -433,7 +433,7 @@
                 <key>sourceSize</key>
                 <string>{100,100}</string>
             </dict>
-            <key>credits_4.png</key>
+            <key>items.credits_4.png</key>
             <dict>
                 <key>frame</key>
                 <string>{{92,172},{80,82}}</string>
@@ -446,7 +446,7 @@
                 <key>sourceSize</key>
                 <string>{100,100}</string>
             </dict>
-            <key>credits_40.png</key>
+            <key>items.credits_40.png</key>
             <dict>
                 <key>frame</key>
                 <string>{{446,86},{64,84}}</string>
@@ -459,7 +459,7 @@
                 <key>sourceSize</key>
                 <string>{100,100}</string>
             </dict>
-            <key>credits_41.png</key>
+            <key>items.credits_41.png</key>
             <dict>
                 <key>frame</key>
                 <string>{{2,426},{66,84}}</string>
@@ -472,7 +472,7 @@
                 <key>sourceSize</key>
                 <string>{100,100}</string>
             </dict>
-            <key>credits_42.png</key>
+            <key>items.credits_42.png</key>
             <dict>
                 <key>frame</key>
                 <string>{{430,254},{70,82}}</string>
@@ -485,7 +485,7 @@
                 <key>sourceSize</key>
                 <string>{100,100}</string>
             </dict>
-            <key>credits_43.png</key>
+            <key>items.credits_43.png</key>
             <dict>
                 <key>frame</key>
                 <string>{{368,86},{76,82}}</string>
@@ -498,7 +498,7 @@
                 <key>sourceSize</key>
                 <string>{100,100}</string>
             </dict>
-            <key>credits_44.png</key>
+            <key>items.credits_44.png</key>
             <dict>
                 <key>frame</key>
                 <string>{{430,2},{78,82}}</string>
@@ -511,7 +511,7 @@
                 <key>sourceSize</key>
                 <string>{100,100}</string>
             </dict>
-            <key>credits_45.png</key>
+            <key>items.credits_45.png</key>
             <dict>
                 <key>frame</key>
                 <string>{{350,2},{78,82}}</string>
@@ -524,7 +524,7 @@
                 <key>sourceSize</key>
                 <string>{100,100}</string>
             </dict>
-            <key>credits_46.png</key>
+            <key>items.credits_46.png</key>
             <dict>
                 <key>frame</key>
                 <string>{{84,346},{76,80}}</string>
@@ -537,7 +537,7 @@
                 <key>sourceSize</key>
                 <string>{100,100}</string>
             </dict>
-            <key>credits_5.png</key>
+            <key>items.credits_5.png</key>
             <dict>
                 <key>frame</key>
                 <string>{{2,258},{80,82}}</string>
@@ -550,7 +550,7 @@
                 <key>sourceSize</key>
                 <string>{100,100}</string>
             </dict>
-            <key>credits_6.png</key>
+            <key>items.credits_6.png</key>
             <dict>
                 <key>frame</key>
                 <string>{{290,86},{76,82}}</string>
@@ -563,7 +563,7 @@
                 <key>sourceSize</key>
                 <string>{100,100}</string>
             </dict>
-            <key>credits_7.png</key>
+            <key>items.credits_7.png</key>
             <dict>
                 <key>frame</key>
                 <string>{{282,252},{72,82}}</string>
@@ -576,7 +576,7 @@
                 <key>sourceSize</key>
                 <string>{100,100}</string>
             </dict>
-            <key>credits_8.png</key>
+            <key>items.credits_8.png</key>
             <dict>
                 <key>frame</key>
                 <string>{{70,426},{64,84}}</string>
@@ -589,7 +589,7 @@
                 <key>sourceSize</key>
                 <string>{100,100}</string>
             </dict>
-            <key>credits_9.png</key>
+            <key>items.credits_9.png</key>
             <dict>
                 <key>frame</key>
                 <string>{{136,424},{58,86}}</string>
@@ -608,13 +608,13 @@
             <key>format</key>
             <integer>2</integer>
             <key>realTextureFileName</key>
-            <string>credits.png</string>
+            <string>items.credits.png</string>
             <key>size</key>
             <string>{512,512}</string>
             <key>smartupdate</key>
             <string>$TexturePacker:SmartUpdate:b1c860c888b14721dbb1322b3c6b7aa0$</string>
             <key>textureFileName</key>
-            <string>credits.png</string>
+            <string>items.credits.png</string>
         </dict>
     </dict>
 </plist>
