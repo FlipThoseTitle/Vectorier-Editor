@@ -62,8 +62,6 @@ Tutorial and Documentation is available on the [Vectorier Editor Documentation W
 
 <img width="576" height="324" alt="Vectorier-Wiki" src="https://github.com/user-attachments/assets/872f0159-9ff9-4a6c-95c4-ff3b423d7892" />
 
-
-
 # Contributions
 This project was made possible through the collaboration and support of the following contributors. Each person has invested their time, knowledge, and effort to improve, refine, and expand this project. From identifying bugs and implementing new features, their involvement has been invaluable. The project stands as a result of shared effort and collective dedication.
 - DoritoTheChips
@@ -78,4 +76,4 @@ This project was made possible through the collaboration and support of the foll
 - zayden1325682 (Zayden)
 
 # Disclaimer
-This project is an independent, fan-made level editor for the game Vector developed and published by Nekki. This project is not affiliated with, endorsed by, sponsored by, or approved by Nekki. Vector and all related assets, trademarks, and intellectual property belong to their respective owners. This software is provided for educational and personal use only. This source code is released as is and will continue to be maintained by non-paid contributors in their free time. This project is built using Unity. Unity is a trademark of Unity Technologies. Use of this project is subject to Unity’s own terms and licensing. This repository does not grant any rights to the Unity engine. For full license terms, see the [LICENSE](https://github.com/FlipThoseTitle/Vectorier-Editor/blob/main/LICENSE) file.
+This project is an independent, fan-made level editor for the game Vector developed and published by Nekki Limited. This project is not affiliated with, endorsed by, sponsored by, or approved by Nekki. Vector and all related assets, trademarks, and intellectual property belong to Nekki or their respective owners. Any Nekki assets included in this project are provided solely for modding and compatibility purposes, their inclusion does not grant any license or right to them, and they are not covered by this project's license. Nekki's License Agreement restricts copying, distributing, modifying, or creating derivative works from its games without written agreement, and you are solely responsible for complying with it. If you are a rights holder and would like any content removed, please open an issue. This software as is for educational and personal use only, and is maintained by non-paid contributors in their free time. This project is built using Unity, a trademark of Unity Technologies. This repository does not grant any rights to the Unity engine. For full license terms, see the [LICENSE](LICENSE) file.
