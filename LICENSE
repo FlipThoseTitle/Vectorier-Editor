@@ -1,6 +1,6 @@
-Modified MIT License (Non-commercial use)
+Modified MIT License (Non-Commercial Use)
 
-Copyright (c) 2026 Ratchanon Chandachai
+Copyright (c) 2024-2026 Ratchanon Chandachai
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to use,
@@ -8,13 +8,51 @@ copy, modify, and distribute the Software, subject to the following conditions:
 
 1. The Software may be used for non-commercial purposes only.
 
-2. Commercial use of the Software is strictly prohibited. Commercial use includes,
-but is not limited to Selling the Software or derivatives thereof, Sublicensing
-the Software, Monetizing the Software through fees, subscriptions, advertising,
-or in-app purchases, Integrating the Software into a commercial product or service
+2. Commercial use of the Software is strictly prohibited. Commercial use means
+making or seeking profit from the Software, from derivatives of it, or from
+anything made with, based on, or for use with it, including but not limited to:
+   (a) Selling the Software or derivatives thereof, including forks, modified
+       versions, new or improved code, new assets, custom levels, custom game
+       mechanics, or any other work made with or based on the Software;
+   (b) Locking any of the above behind a paywall, membership, subscription, or
+       any other payment requirement;
+   (c) Sublicensing the Software;
+   (d) Monetizing the Software through fees, subscriptions, advertising,
+       sponsorship, or in-app purchases;
+   (e) Stating or advertising that donations, tips, or other voluntary payments
+       are accepted, or providing a donation, sponsorship, or crowdfunding page
+       or link, in connection with the Software or anything listed above,
+       including in a release, its description, its page, or its files;
+   (f) Integrating the Software into a commercial product or service.
 
-3. The above copyright notice and this permission notice shall be included in all
+3. Videos, streams, and similar media that show or discuss the Software or
+anything made with it are not restricted by condition 2, including their
+monetization on any platform. The creator of such media is solely responsible
+for it, including for any action taken by Nekki or by the platform. This
+exception does not cover distributing the Software, derivatives of it, or
+modified files themselves.
+
+4. For the purposes of this license, the Software means only the original source
+code, assets, and documentation created by the copyright holder and contributors.
+It does not include, and this license grants no rights in:
+   (a) Any content owned by Nekki Limited or its affiliates ("Nekki"), including
+       game assets, models, textures, animations, audio, level data, names, logos,
+       and trademarks, and anything extracted, converted, or derived from them.
+       Such content remains the property of Nekki, and its use is governed by
+       Nekki's terms and applicable law; or
+   (b) Any third-party software or assets, including the Unity engine and any
+       Unity packages, which remain subject to their own terms.
+
+5. Anything outside the scope of these conditions, including how the Software and
+anything made with it is used, modified, shared, or monetized, is the sole
+responsibility of the person doing it. The copyright holder and maintainers have
+no responsibility for it.
+
+6. The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
+
+7. Any violation of these conditions automatically terminates the permission
+granted above.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
