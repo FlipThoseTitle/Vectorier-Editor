@@ -7,6 +7,7 @@ using System.Xml.Linq;
 using System.Collections.Generic;
 using Vectorier.Model;
 using Vectorier.Component;
+using Vectorier.ProjectManager;
 
 namespace Vectorier.EditorScript.Tools
 {
@@ -43,11 +44,12 @@ namespace Vectorier.EditorScript.Tools
         // ================= CONSTANTS ================= //
 
         const string MOVEMENT_BASE_PATH = "Assets/Editor/Tools/MoveVisualizer/Movement";
-        const string TRICKS_BASE_PATH = "Assets/Editor/Tools/MoveVisualizer/Tricks";
-        const string DEFAULT_MODEL_XML_PATH = "Assets/Editor/Tools/MoveVisualizer/runner.xml";
-        const string DEFAULT_MOVES_XML_PATH = "Assets/Editor/Tools/MoveVisualizer/moves.xml";
-        const string DEFAULT_BINS_FOLDER_PATH = "Assets/Editor/Tools/MoveVisualizer/Tricks";
+        const string MODEL_XML_PATH = "Assets/Editor/Tools/MoveVisualizer/runner.xml";
         const string BLACK_MAT_PATH = "Assets/Editor/Material/Black.mat";
+
+        // Paths relative to the active project folder (./Projects/{ActiveProject.Name}/)
+        const string MOVES_XML_RELATIVE_PATH = "animations/moves.xml";
+        const string BINS_RELATIVE_FOLDER = "animations/data";
 
         static readonly Dictionary<MovementType, string> MovementBins = new()
         {
@@ -88,7 +90,6 @@ namespace Vectorier.EditorScript.Tools
         bool placementEnabled;
         bool platformSnapHeld;
 
-        string modelXmlPath = DEFAULT_MODEL_XML_PATH;
         bool renderModel = true;
         bool renderBlack = true;
         bool stayInPlace;
@@ -96,8 +97,6 @@ namespace Vectorier.EditorScript.Tools
         bool isPlaced = false;
         Vector3 lastPlacedWorldPosition;
 
-        string movesXmlPath = DEFAULT_MOVES_XML_PATH;
-        string binsFolderPath = DEFAULT_BINS_FOLDER_PATH;
         AreaComponent selectedAreaComponent;
 
         // ================= RUNTIME DATA ================= //
@@ -111,12 +110,7 @@ namespace Vectorier.EditorScript.Tools
 
         TrickMovePreviewData ResolveTrickMovePreviewData(AreaComponent areaComponent)
         {
-            string resolvedMovesXmlPath = ResolveMovesXmlPath();
-
-            if (string.IsNullOrWhiteSpace(resolvedMovesXmlPath) || !File.Exists(resolvedMovesXmlPath))
-                throw new FileNotFoundException($"moves.xml not found: {resolvedMovesXmlPath}");
-
-            XDocument document = XDocument.Load(resolvedMovesXmlPath);
+            XDocument document = XDocument.Load(ResolveMovesXmlPath());
             XElement root = document.Root ?? throw new Exception("moves.xml has no root element.");
 
             XElement trickGroup = root
@@ -170,12 +164,7 @@ namespace Vectorier.EditorScript.Tools
             if (!string.IsNullOrWhiteSpace(firstFrameText))
                 int.TryParse(firstFrameText, out firstFrame);
 
-            string binFullPath = ModelAnimation.ResolveFullPath(
-                Path.Combine(ResolveBinsFolderPath(), fileName)
-            );
-
-            if (!File.Exists(binFullPath))
-                throw new FileNotFoundException($"Animation bin not found: {binFullPath}");
+            string binFullPath = ResolveProjectBinPath(fileName);
 
             return new TrickMovePreviewData
             {
@@ -266,22 +255,27 @@ namespace Vectorier.EditorScript.Tools
             );
         }
 
-        string ResolveMovesXmlPath()
+        // ./Projects/{active}/animations/moves.xml (falls back to the Vector project if missing)
+        static string ResolveMovesXmlPath()
         {
-            string path = string.IsNullOrWhiteSpace(movesXmlPath)
-                ? DEFAULT_MOVES_XML_PATH
-                : movesXmlPath;
+            string path = ActiveProject.ResolveFile(MOVES_XML_RELATIVE_PATH);
 
-            return ModelAnimation.ResolveFullPath(path);
+            if (path == null)
+                throw new FileNotFoundException($"moves.xml not found: {ActiveProject.GetPath(MOVES_XML_RELATIVE_PATH)}");
+
+            return Path.GetFullPath(path);
         }
 
-        string ResolveBinsFolderPath()
+        // ./Projects/{active}/animations/data/{fileName} (falls back to the Vector project if missing)
+        static string ResolveProjectBinPath(string fileName)
         {
-            string path = string.IsNullOrWhiteSpace(binsFolderPath)
-                ? DEFAULT_BINS_FOLDER_PATH
-                : binsFolderPath;
+            string relativePath = $"{BINS_RELATIVE_FOLDER}/{fileName}";
+            string path = ActiveProject.ResolveFile(relativePath);
 
-            return ModelAnimation.ResolveFullPath(path);
+            if (path == null)
+                throw new FileNotFoundException($"Animation bin not found: {ActiveProject.GetPath(relativePath)}");
+
+            return Path.GetFullPath(path);
         }
 
         public static List<Vector3> GetDetectorSnapPoints()
@@ -403,28 +397,23 @@ namespace Vectorier.EditorScript.Tools
             string pivotNode = "NPivot";
             string fileName = "";
 
-            // Handle specific overrides
+            // Handle specific overrides (these still come from the Editor Movement folder)
             if (animationName.Equals("JumpOff", StringComparison.OrdinalIgnoreCase))
             {
                 fileName = "jump_off_fly.bin";
-                binFullPath = ModelAnimation.ResolveFullPath("Assets/Editor/Tools/MoveVisualizer/Movement/jump_off_fly.bin");
+                binFullPath = ModelAnimation.ResolveFullPath($"{MOVEMENT_BASE_PATH}/jump_off_fly.bin");
                 startFrame = 0;
             }
             else if (animationName.Equals("Run", StringComparison.OrdinalIgnoreCase))
             {
                 fileName = "run.bin";
-                binFullPath = ModelAnimation.ResolveFullPath("Assets/Editor/Tools/MoveVisualizer/Movement/run.bin");
+                binFullPath = ModelAnimation.ResolveFullPath($"{MOVEMENT_BASE_PATH}/run.bin");
                 startFrame = 0;
             }
             else
             {
-                // General Case: Read from moves.xml
-                string resolvedMovesXmlPath = ResolveMovesXmlPath();
-
-                if (string.IsNullOrWhiteSpace(resolvedMovesXmlPath) || !File.Exists(resolvedMovesXmlPath))
-                    throw new FileNotFoundException($"moves.xml not found: {resolvedMovesXmlPath}");
-
-                XDocument document = XDocument.Load(resolvedMovesXmlPath);
+                // General Case: Read from the active project's moves.xml
+                XDocument document = XDocument.Load(ResolveMovesXmlPath());
                 XElement root = document.Root ?? throw new Exception("moves.xml has no root element.");
 
                 XElement moveElement = root
@@ -445,8 +434,8 @@ namespace Vectorier.EditorScript.Tools
                 if (!string.IsNullOrWhiteSpace(attrPivot))
                     pivotNode = attrPivot;
 
-                // Load from specific animations/data folder
-                binFullPath = ModelAnimation.ResolveFullPath(Path.Combine("Assets/Projects/Vector/animations/data/", fileName));
+                // Load from the active project's animations/data folder
+                binFullPath = ResolveProjectBinPath(fileName);
             }
 
             if (!File.Exists(binFullPath))
@@ -483,6 +472,10 @@ namespace Vectorier.EditorScript.Tools
 
             SceneView.duringSceneGui += OnSceneGUI;
             EditorApplication.update += UpdatePlayback;
+            ActiveProject.Changed += OnActiveProjectChanged;
+
+            // Re-scan tricks in case the files changed while the window was closed
+            discoveredTrickBins = null;
 
             animation ??= new ModelAnimation();
             modelRenderer ??= new ModelRenderer(BLACK_MAT_PATH);
@@ -497,6 +490,7 @@ namespace Vectorier.EditorScript.Tools
 
             SceneView.duringSceneGui -= OnSceneGUI;
             EditorApplication.update -= UpdatePlayback;
+            ActiveProject.Changed -= OnActiveProjectChanged;
 
             ResetAll();
 
@@ -509,6 +503,13 @@ namespace Vectorier.EditorScript.Tools
 
         void OnInspectorUpdate() => Repaint();
 
+        void OnActiveProjectChanged(string _)
+        {
+            // Trick list comes from the active project, so rebuild it on switch
+            discoveredTrickBins = null;
+            Repaint();
+        }
+
         // ================= UI ================= //
 
         void OnGUI()
@@ -519,12 +520,6 @@ namespace Vectorier.EditorScript.Tools
                                         selectedAreaComponent.Type == AreaComponent.AreaType.Trick;
 
             mainScrollPosition = EditorGUILayout.BeginScrollView(mainScrollPosition);
-
-            GUILayout.Space(5);
-            EditorGUILayout.LabelField("XML Path", EditorStyles.boldLabel);
-            modelXmlPath = EditorGUILayout.TextField("Model XML", modelXmlPath);
-            movesXmlPath = EditorGUILayout.TextField("Moves XML", movesXmlPath);
-            binsFolderPath = EditorGUILayout.TextField("Bins Folder", binsFolderPath);
 
             GUILayout.Space(5);
             EditorGUILayout.LabelField("Settings", EditorStyles.boldLabel);
@@ -756,14 +751,21 @@ namespace Vectorier.EditorScript.Tools
 
         void DrawTrickSelectionUI()
         {
-            binFolderPath = TRICKS_BASE_PATH;
+            // The actual folder is resolved per file in PlaceAt (active project or Vector fallback)
+            binFolderPath = null;
 
             if (discoveredTrickBins == null)
-                DiscoverTricks(binFolderPath);
+                DiscoverTricks();
 
             if (discoveredTrickBins == null || discoveredTrickBins.Count == 0)
             {
-                EditorGUILayout.HelpBox("No trick .bin files found in the Tricks folder.", MessageType.Warning);
+                EditorGUILayout.HelpBox(
+                    $"No trick .bin files found. Tricks are read from the TrickGroup in moves.xml and loaded from '{BINS_RELATIVE_FOLDER}'.",
+                    MessageType.Warning);
+
+                if (GUILayout.Button("Refresh"))
+                    discoveredTrickBins = null;
+
                 return;
             }
 
@@ -962,6 +964,11 @@ namespace Vectorier.EditorScript.Tools
             modelRenderer?.Destroy();
 
             string xmlPath = ResolveXmlPath();
+
+            // Trick bins live in the active project's animations/data folder
+            if (currentPlacementMode == PlacementMode.Tricks && !string.IsNullOrEmpty(binFileName))
+                binFolderPath = Path.GetDirectoryName(ResolveProjectBinPath(binFileName));
+
             string binPath = ModelAnimation.ResolveBinFullPathOrThrow(
                 currentPlacementMode == PlacementMode.Custom,
                 customBinPath,
@@ -1022,24 +1029,59 @@ namespace Vectorier.EditorScript.Tools
                 animation.Reverse = reverse;
         }
 
-        string ResolveXmlPath()
+        static string ResolveXmlPath()
         {
-            string p = string.IsNullOrWhiteSpace(modelXmlPath) ? DEFAULT_MODEL_XML_PATH : modelXmlPath;
-            return ModelAnimation.ResolveFullPath(p);
+            return ModelAnimation.ResolveFullPath(MODEL_XML_PATH);
         }
 
         // ================= TRICKS ================= //
 
-        static void DiscoverTricks(string folderPath)
+        // animations/data holds every move's bin, so the trick list comes from the
+        // TrickGroup in moves.xml, mapped to each move's FileName.
+        static void DiscoverTricks()
         {
             discoveredTrickBins = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
-            if (!Directory.Exists(folderPath))
+            XElement root;
+
+            try
+            {
+                root = XDocument.Load(ResolveMovesXmlPath()).Root;
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"Could not read tricks from moves.xml: {e.Message}");
+                return;
+            }
+
+            XElement trickGroup = root?
+                .Element("ReactionGroups")?
+                .Elements("ReactionGroup")
+                .FirstOrDefault(group =>
+                    string.Equals((string)group.Attribute("Name"), "TrickGroup", StringComparison.OrdinalIgnoreCase));
+
+            XElement moves = root?.Element("Moves");
+
+            if (trickGroup == null || moves == null)
                 return;
 
-            foreach (string filePath in Directory.GetFiles(folderPath, "*.bin"))
+            foreach (XElement reaction in trickGroup.Elements())
             {
-                string fileName = Path.GetFileName(filePath);
+                string moveName = reaction.Name.LocalName;
+
+                XElement moveElement = moves
+                    .Elements()
+                    .FirstOrDefault(element =>
+                        string.Equals(element.Name.LocalName, moveName, StringComparison.OrdinalIgnoreCase));
+
+                string fileName = (string)moveElement?.Attribute("FileName");
+
+                if (string.IsNullOrWhiteSpace(fileName))
+                    continue;
+
+                // Skip tricks whose bin doesn't exist in the active project or Vector
+                if (ActiveProject.ResolveFile($"{BINS_RELATIVE_FOLDER}/{fileName}") == null)
+                    continue;
 
                 string identifier =
                     fileName.Equals("360_wall_hop.bin", StringComparison.OrdinalIgnoreCase)
@@ -1074,8 +1116,14 @@ namespace Vectorier.EditorScript.Tools
 
     class TrickSelectionWindow : EditorWindow
     {
+        // Relative to the active project folder (./Projects/{ActiveProject.Name}/)
+        const string TRICK_ICONS_RELATIVE_FOLDER = "icons/tricks";
+
         Action<string> onSelected;
         Dictionary<string, string> availableTricks;
+
+        // Images live outside Assets/, so they are loaded from disk and cached here
+        readonly Dictionary<string, Texture2D> imageCache = new(StringComparer.OrdinalIgnoreCase);
 
         static readonly Vector2 WINDOW_SIZE = new(400, 300);
         Vector2 scrollPosition;
@@ -1088,6 +1136,17 @@ namespace Vectorier.EditorScript.Tools
             window.titleContent = new GUIContent("Select Trick");
             window.minSize = WINDOW_SIZE;
             window.ShowUtility();
+        }
+
+        void OnDestroy()
+        {
+            foreach (Texture2D texture in imageCache.Values)
+            {
+                if (texture != null)
+                    DestroyImmediate(texture);
+            }
+
+            imageCache.Clear();
         }
 
         void OnGUI()
@@ -1104,8 +1163,7 @@ namespace Vectorier.EditorScript.Tools
                 string displayName = FormatTrickName(binFile);
 
                 string imageName = "TRACK_TRICK_" + Path.GetFileNameWithoutExtension(binFile).Replace("_", string.Empty).ToUpperInvariant();
-                string imagePath = Path.Combine("Assets/Editor/Tools/MoveVisualizer/Image", imageName + ".png");
-                Texture2D previewTexture = AssetDatabase.LoadAssetAtPath<Texture2D>(imagePath);
+                Texture2D previewTexture = LoadTrickImage(imageName);
 
                 using (new GUILayout.HorizontalScope(GUILayout.Height(64)))
                 {
@@ -1125,6 +1183,40 @@ namespace Vectorier.EditorScript.Tools
             }
 
             EditorGUILayout.EndScrollView();
+        }
+
+        // ./Projects/{active}/icons/tricks/{imageName}.png (falls back to the Vector project if missing)
+        Texture2D LoadTrickImage(string imageName)
+        {
+            if (imageCache.TryGetValue(imageName, out Texture2D cached))
+                return cached;
+
+            Texture2D texture = null;
+            string path = ActiveProject.ResolveFile($"{TRICK_ICONS_RELATIVE_FOLDER}/{imageName}.png");
+
+            if (path != null)
+            {
+                try
+                {
+                    texture = new Texture2D(2, 2) { hideFlags = HideFlags.HideAndDontSave };
+
+                    if (!texture.LoadImage(File.ReadAllBytes(path)))
+                    {
+                        DestroyImmediate(texture);
+                        texture = null;
+                    }
+                }
+                catch (Exception e)
+                {
+                    Debug.LogWarning($"Failed to load trick image '{path}': {e.Message}");
+                    if (texture != null) DestroyImmediate(texture);
+                    texture = null;
+                }
+            }
+
+            // Cache misses too, so missing images aren't re-checked every repaint
+            imageCache[imageName] = texture;
+            return texture;
         }
 
         static string FormatTrickName(string binFileName)
