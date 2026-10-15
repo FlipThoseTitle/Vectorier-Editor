@@ -1,9 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Xml;
 using UnityEditor;
 using UnityEngine;
 using Vectorier.Component;
 using Vectorier.Core;
+using Vectorier.ProjectManager;
 using Section = Vectorier.Trigger.TriggerTemplateLibrary.Section;
 using LoopInfo = Vectorier.Trigger.TriggerTemplateLibrary.LoopInfo;
 using UsingVar = Vectorier.Trigger.TriggerTemplateLibrary.UsingVar;
@@ -19,6 +22,9 @@ namespace Vectorier.Trigger
         const float XmlH = 170f;
         const float VarNameW = 78f;
         const float VarTypeW = 78f;
+
+        // pick menus longer than this get split into A/B/C submenus
+        const int MenuGroupThreshold = 30;
 
         TriggerComponent target;
         TriggerData data = TriggerData.CreateDefault();
@@ -93,8 +99,10 @@ namespace Vectorier.Trigger
             Selection.selectionChanged += OnSelectionChanged;
             EditorApplication.hierarchyChanged += OnHierarchyChanged;
             EditorApplication.projectChanged += OnProjectChanged;
+            ActiveProject.Changed += OnActiveProjectChanged;
             multiSelected = Selection.gameObjects.Length > 1;
             TriggerTemplateLibrary.Reload();
+            ValueSources.InvalidateProject();
             RefreshPresets();
             Bind(FindSelected(), true);
         }
@@ -104,11 +112,16 @@ namespace Vectorier.Trigger
             Selection.selectionChanged -= OnSelectionChanged;
             EditorApplication.hierarchyChanged -= OnHierarchyChanged;
             EditorApplication.projectChanged -= OnProjectChanged;
+            ActiveProject.Changed -= OnActiveProjectChanged;
         }
 
         void OnHierarchyChanged() { ValueSources.InvalidateAll(); Repaint(); }
-        void OnFocus() { ValueSources.InvalidateModels(); }
+
+        // ./Projects is outside Assets, so projectChanged won't see edits there. re-read on focus instead
+        void OnFocus() { ValueSources.InvalidateModels(); ValueSources.InvalidateProject(); }
+
         void OnProjectChanged() { ValueSources.InvalidateModels(); Repaint(); }
+        void OnActiveProjectChanged(string _) { ValueSources.InvalidateProject(); Repaint(); }
 
         static TriggerComponent FindSelected()
         {
@@ -396,7 +409,9 @@ namespace Vectorier.Trigger
             showXml = GUILayout.Toggle(showXml, new GUIContent("XML", "Preview the XML this will produce"),
                 EditorStyles.toolbarButton, GUILayout.Width(40));
 
-            if (GUILayout.Button(new GUIContent("Reload Templates", "Re-read TriggerTemplates.xml, the model list and the scene's spawn points"),
+            if (GUILayout.Button(new GUIContent("Reload Templates",
+                        "Re-read TriggerTemplates.xml, the model list, the scene's spawn points, " +
+                        "and the active project's animations and sounds"),
                     EditorStyles.toolbarButton, GUILayout.Width(110)))
             {
                 TriggerTemplateLibrary.Reload();
@@ -822,7 +837,7 @@ namespace Vectorier.Trigger
                     if (nn != v.name) { RenameVariable(v.name, nn); Touch(); }
 
                     VType t = v.type;      // cached, the popup below can change it
-                    string nv = DrawLiteral(t, v.value, null, ref v.uiCustom, null);
+                    string nv = DrawLiteral(t, v.value, null, ref v.uiCustom, picked => v.value = picked);
                     if (nv != v.value) { v.value = nv; Touch(); }
 
                     int ct = Array.IndexOf(VTypes.VariableTypes, t);
@@ -1939,7 +1954,24 @@ namespace Vectorier.Trigger
                         return nc != c ? "#" + ColorUtility.ToHtmlStringRGBA(nc) : val;
                     }
 
-                default:   // String, Animation, Sound
+                // free text so unlisted names still work, with a picker filled from the active project
+                case VType.Animation:
+                case VType.Sound:
+                    {
+                        string s = EditorGUILayout.TextField(val);
+                        if (setLater != null)
+                        {
+                            bool anim = t == VType.Animation;
+                            ProjectPickMenu(
+                                anim ? ValueSources.Animations : ValueSources.Sounds,
+                                s, setLater,
+                                anim ? $"No moves found in {ActiveProject.Name}'s moves.xml"
+                                     : $"No sounds found in {ActiveProject.Name}'s sounds folder");
+                        }
+                        return s;
+                    }
+
+                default:   // String
                     {
                         string s = EditorGUILayout.TextField(val);
                         if (pd != null && pd.choices != null && pd.choices.Length > 0 && setLater != null)
@@ -2056,6 +2088,46 @@ namespace Vectorier.Trigger
             menu.DropDown(dr);
         }
 
+        // like PickMenu, but long lists are split into A, B, C... submenus,
+        // and an empty list shows why instead of an empty menu
+        void ProjectPickMenu(IList<string> items, string current, Action<string> apply, string emptyText)
+        {
+            if (!PickButton(out var dr)) return;
+
+            var menu = new GenericMenu();
+
+            if (items.Count == 0)
+            {
+                menu.AddDisabledItem(new GUIContent(emptyText));
+                menu.DropDown(dr);
+                return;
+            }
+
+            bool group = items.Count > MenuGroupThreshold;
+
+            for (int i = 0; i < items.Count; i++)
+            {
+                string it = items[i];
+
+                // "/" in a name would create a submenu, swap it for a lookalike
+                string label = it.Replace('/', '∕');
+                if (group)
+                {
+                    char first = char.ToUpperInvariant(it[0]);
+                    label = (char.IsLetter(first) ? first.ToString() : "#") + "/" + label;
+                }
+
+                menu.AddItem(new GUIContent(label), current != null && current == it,
+                    () =>
+                    {
+                        apply(it);
+                        Touch();
+                        ClearFocus();
+                    });
+            }
+            menu.DropDown(dr);
+        }
+
         static bool PickButton(out Rect dr)
         {
             dr = GUILayoutUtility.GetRect(18f, 18f, GUILayout.Width(18));
@@ -2117,12 +2189,17 @@ namespace Vectorier.Trigger
 
     static class ValueSources
     {
+        // relative to ./Projects/{ActiveProject.Name}/
+        const string MovesXmlRelativePath = "animations/moves.xml";
+        const string SoundsRelativeFolder = "sounds";
+
         static readonly string[] NoModels = { VTypes.NoModel };
-        static List<string> spawns, models;
+        static List<string> spawns, models, animations, sounds;
 
         public static void InvalidateSpawns() { spawns = null; }
         public static void InvalidateModels() { models = null; }
-        public static void InvalidateAll() { spawns = null; models = null; }
+        public static void InvalidateProject() { animations = null; sounds = null; }
+        public static void InvalidateAll() { spawns = null; models = null; animations = null; sounds = null; }
 
         // FindObjectsOfTypeAll also returns prefabs and hidden objects, hence the filtering
         public static List<string> Spawns
@@ -2173,6 +2250,81 @@ namespace Vectorier.Trigger
         public static IList<string> ModelChoices
         {
             get { return Models.Count > 0 ? (IList<string>)Models : NoModels; }
+        }
+
+        // tag name of every element under <root><Moves> in the active project's moves.xml
+        // (falls back to the Vector project if the active one has no moves.xml)
+        public static List<string> Animations
+        {
+            get
+            {
+                if (animations != null) return animations;
+
+                animations = new List<string>();
+                string path = ActiveProject.ResolveFile(MovesXmlRelativePath);
+                if (path == null) return animations;
+
+                try
+                {
+                    var doc = new XmlDocument();
+                    doc.Load(path);
+
+                    var moves = doc.DocumentElement?.SelectSingleNode("Moves") as XmlElement;
+                    if (moves != null)
+                    {
+                        var seen = new HashSet<string>(StringComparer.Ordinal);
+                        foreach (XmlNode n in moves.ChildNodes)
+                        {
+                            var e = n as XmlElement;
+                            if (e != null && seen.Add(e.LocalName)) animations.Add(e.LocalName);
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    Debug.LogWarning($"[Trigger Editor] Couldn't read moves from '{path}': {e.Message}");
+                }
+
+                animations.Sort(StringComparer.OrdinalIgnoreCase);
+                return animations;
+            }
+        }
+
+        // file names (no extension) in the active project's sounds folder, subfolders included
+        // (falls back to the Vector project if the active one has no sounds folder)
+        public static List<string> Sounds
+        {
+            get
+            {
+                if (sounds != null) return sounds;
+
+                sounds = new List<string>();
+                string dir = ActiveProject.ResolveDirectory(SoundsRelativeFolder);
+                if (dir == null) return sounds;
+
+                try
+                {
+                    var set = new SortedSet<string>(StringComparer.OrdinalIgnoreCase);
+                    foreach (string file in Directory.GetFiles(dir, "*", SearchOption.AllDirectories))
+                    {
+                        string fileName = Path.GetFileName(file);
+
+                        // skip .gitkeep, .DS_Store and Unity .meta files
+                        if (fileName.StartsWith(".") ||
+                            fileName.EndsWith(".meta", StringComparison.OrdinalIgnoreCase)) continue;
+
+                        string name = Path.GetFileNameWithoutExtension(file);
+                        if (!string.IsNullOrEmpty(name)) set.Add(name);
+                    }
+                    sounds.AddRange(set);
+                }
+                catch (Exception e)
+                {
+                    Debug.LogWarning($"[Trigger Editor] Couldn't read sounds from '{dir}': {e.Message}");
+                }
+
+                return sounds;
+            }
         }
     }
 
