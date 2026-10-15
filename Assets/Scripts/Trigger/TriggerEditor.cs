@@ -71,7 +71,7 @@ namespace Vectorier.Trigger
         static readonly ParamDef SelObjectDef = new ParamDef("Object", "Put each into");
         static readonly ParamDef SelFromDef = new ParamDef("From", "List", VType.String, "Equipped");
 
-        [MenuItem("Vectorier/Tools/Trigger Editor", false, 27)]
+        [MenuItem("Vectorier/Tools/⚑  Trigger Editor", false, 27)]
         public static void Open()
         {
             var w = GetWindow<TriggerEditor>("Trigger Editor");
