@@ -82,19 +82,18 @@ namespace Vectorier.EditorScript.Tools
 
         public static string ExtractMiddleFrame(string pngPath, string plistPath, string outputFolder, string originalFileName)
         {
+            Texture2D atlas = null;
+            Texture2D extracted = null;
             try
             {
                 var frames = ParseTexturePackerPlist(plistPath);
                 if (frames.Count == 0) return null;
 
-                var atlas = LoadPngAsTexture(pngPath);
+                atlas = LoadPngAsTexture(pngPath);
                 if (atlas == null) return null;
 
                 // Getting the exact middle frame (e.g., 25 / 2 = 12)
-                int middleIndex = frames.Count / 2;
-                var middleFrame = frames[middleIndex];
-
-                var extracted = ExtractFrame(atlas, middleFrame);
+                extracted = ExtractFrame(atlas, frames[frames.Count / 2]);
                 if (extracted == null) return null;
 
                 if (!Directory.Exists(outputFolder))
@@ -102,13 +101,17 @@ namespace Vectorier.EditorScript.Tools
 
                 string outPath = Path.Combine(outputFolder, originalFileName).Replace("\\", "/");
                 File.WriteAllBytes(outPath, extracted.EncodeToPNG());
-                
                 return outPath;
             }
             catch (Exception ex)
             {
                 Debug.LogException(ex);
                 return null;
+            }
+            finally
+            {
+                if (extracted != null) UnityEngine.Object.DestroyImmediate(extracted);
+                if (atlas != null) UnityEngine.Object.DestroyImmediate(atlas);
             }
         }
 
@@ -303,7 +306,10 @@ namespace Vectorier.EditorScript.Tools
             byte[] bytes = File.ReadAllBytes(pngPath);
             var tex = new Texture2D(2, 2, TextureFormat.RGBA32, false);
             if (!ImageConversion.LoadImage(tex, bytes))
+            {
+                UnityEngine.Object.DestroyImmediate(tex);
                 return null;
+            }
 
             tex.Apply(false, false);
             return tex;
@@ -330,7 +336,7 @@ namespace Vectorier.EditorScript.Tools
 
             if (!frame.Rotated)
             {
-                if (packW != trimmedW || packH != trimmedH) {}
+                if (packW != trimmedW || packH != trimmedH) { }
                 trimmedPixels = packed;
             }
             else

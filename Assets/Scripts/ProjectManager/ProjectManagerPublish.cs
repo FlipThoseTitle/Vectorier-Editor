@@ -14,7 +14,7 @@ namespace Vectorier.ProjectManager
         private string publishLocation = "";
 
         private bool fastBuild = true;
-        
+
         // Dropdown options
         private readonly string[] gameVersions = new string[] { "Steam", "Unity", "Steam and Unity" };
         private int selectedVersionIndex = 0;
@@ -72,8 +72,8 @@ namespace Vectorier.ProjectManager
                     return;
                 }
 
-                if (EditorUtility.DisplayDialog("Confirm Publish", 
-                    $"Are you sure you want to publish '{activeProjectName}' to the selected location?", 
+                if (EditorUtility.DisplayDialog("Confirm Publish",
+                    $"Are you sure you want to publish '{activeProjectName}' to the selected location?",
                     "Publish", "Cancel"))
                 {
                     string publishBaseFolder = Path.Combine(publishLocation, activeProjectName);
@@ -88,25 +88,25 @@ namespace Vectorier.ProjectManager
 
                     if (Directory.Exists(publishBaseFolder))
                     {
-                        EditorUtility.DisplayDialog("Error", 
-                            $"A folder named '{activeProjectName}' already exists at the target location.\n\nPlease choose a different location or delete the existing folder before publishing.", 
+                        EditorUtility.DisplayDialog("Error",
+                            $"A folder named '{activeProjectName}' already exists at the target location.\n\nPlease choose a different location or delete the existing folder before publishing.",
                             "OK");
                         return;
                     }
 
-                    if (selectedVersionIndex == 0) 
+                    if (selectedVersionIndex == 0)
                     {
                         PublishForSteam();
                         ProcessBaseFiles(sourcePath, publishBaseFolder);
                         EditorUtility.DisplayDialog("Success", $"Successfully published '{activeProjectName}' for Steam!", "OK");
                     }
-                    else if (selectedVersionIndex == 1) 
+                    else if (selectedVersionIndex == 1)
                     {
                         PublishForUnity();
                         ProcessBaseFiles(sourcePath, publishBaseFolder);
                         EditorUtility.DisplayDialog("Success", $"Successfully published '{activeProjectName}' for Unity!", "OK");
                     }
-                    else if (selectedVersionIndex == 2) 
+                    else if (selectedVersionIndex == 2)
                     {
                         PublishForUnity();
                         PublishForSteam();
@@ -118,7 +118,7 @@ namespace Vectorier.ProjectManager
         }
 
         // Publishing Logic
-        
+
         private void PublishForUnity()
         {
             try
@@ -152,6 +152,7 @@ namespace Vectorier.ProjectManager
                     string destinationPath = "";
 
                     if (relativePath.Equals("description.txt", StringComparison.OrdinalIgnoreCase) ||
+                        relativePath.Equals("author.txt", StringComparison.OrdinalIgnoreCase) ||
                         (relativePath.StartsWith("thumbnail.", StringComparison.OrdinalIgnoreCase) && !relativePath.Contains("/")))
                     {
                         continue;
@@ -267,7 +268,7 @@ namespace Vectorier.ProjectManager
                 MoveFolderContents(Path.Combine(dzipDir, "level"), levelBackupDir);
 
                 CopyFolderContents(Path.Combine(sourcePath, "models"), Path.Combine(dzipDir, "level"));
-                
+
                 string xmlrootDir = Path.Combine(sourcePath, "xmlroot");
                 if (Directory.Exists(xmlrootDir))
                 {
@@ -312,6 +313,7 @@ namespace Vectorier.ProjectManager
                     continue;
 
                 if (fileName.Equals("description.txt", StringComparison.OrdinalIgnoreCase) ||
+                    fileName.Equals("author.txt", StringComparison.OrdinalIgnoreCase) ||
                     fileName.StartsWith("thumbnail.", StringComparison.OrdinalIgnoreCase))
                 {
                     File.Copy(file, Path.Combine(publishBaseFolder, fileName), true);
@@ -323,7 +325,7 @@ namespace Vectorier.ProjectManager
             {
                 File.Copy(readmeSource, Path.Combine(publishBaseFolder, "README.txt"), true);
             }
-}
+        }
 
         private void CopyFolderContents(string sourceDir, string targetDir)
         {
@@ -431,7 +433,7 @@ namespace Vectorier.ProjectManager
                 if (!string.IsNullOrEmpty(picked))
                 {
                     directoryPath = picked;
-                    
+
                     // Unselect the text field to force the UI to visually update
                     GUI.FocusControl(null);
                 }

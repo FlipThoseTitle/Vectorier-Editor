@@ -10,6 +10,10 @@ namespace Vectorier.EditorScript.Tools
         private const string MenuPath = "Vectorier/Tools/⊘  Hide Tags";
         private const string EditorPrefsPrefix = "Vectorier.EditorScript.Tools.HideTag.";
 
+        // Platforms carry their generated textures as children, those should stay visible
+        // when only the collision boxes get hidden
+        private const string PlatformTag = "Platform";
+
         private static readonly string[] Tags =
         {
             "Object",
@@ -160,8 +164,7 @@ namespace Vectorier.EditorScript.Tools
                 foreach (GameObject go in matchingObjects)
                 {
                     if (go == null) continue;
-                    if (makeVisible) SceneVisibilityManager.instance.Show(go, true);
-                    else SceneVisibilityManager.instance.Hide(go, true);
+                    SetObjectVisible(go, makeVisible);
                 }
             }
 
@@ -181,8 +184,7 @@ namespace Vectorier.EditorScript.Tools
                 foreach (GameObject go in matchingObjects)
                 {
                     if (go == null) continue;
-                    if (makeVisible) SceneVisibilityManager.instance.Show(go, true);
-                    else SceneVisibilityManager.instance.Hide(go, true);
+                    SetObjectVisible(go, makeVisible);
                 }
             }
 
@@ -212,15 +214,7 @@ namespace Vectorier.EditorScript.Tools
             foreach (GameObject gameObject in matchingObjects)
             {
                 if (gameObject == null) continue;
-
-                if (makeVisible)
-                {
-                    SceneVisibilityManager.instance.Show(gameObject, true);
-                }
-                else
-                {
-                    SceneVisibilityManager.instance.Hide(gameObject, true);
-                }
+                SetObjectVisible(gameObject, makeVisible);
             }
 
             EditorApplication.RepaintHierarchyWindow();
@@ -238,21 +232,25 @@ namespace Vectorier.EditorScript.Tools
             foreach (GameObject gameObject in matchingObjects)
             {
                 if (gameObject == null) continue;
-
-                if (makeVisible)
-                {
-                    SceneVisibilityManager.instance.Show(gameObject, true);
-                }
-                else
-                {
-                    SceneVisibilityManager.instance.Hide(gameObject, true);
-                }
+                SetObjectVisible(gameObject, makeVisible);
             }
 
             EditorApplication.RepaintHierarchyWindow();
             SceneView.RepaintAll();
 
             _isApplyingVisibility = false;
+        }
+
+        // Everything goes through here so the platform rule applies to tags and layers alike.
+        // Platforms only toggle themselves, never the Floor / walls / v_black underneath them
+        private static void SetObjectVisible(GameObject gameObject, bool makeVisible)
+        {
+            bool includeDescendants = !gameObject.CompareTag(PlatformTag);
+
+            if (makeVisible)
+                SceneVisibilityManager.instance.Show(gameObject, includeDescendants);
+            else
+                SceneVisibilityManager.instance.Hide(gameObject, includeDescendants);
         }
 
         private void OnHierarchyChanged()

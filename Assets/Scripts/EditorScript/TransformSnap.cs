@@ -7,10 +7,10 @@ namespace Vectorier.EditorScript
     [InitializeOnLoad]
     public static class TransformSnap
     {
-        private const KeyCode VSnapKey = KeyCode.V; 
-        private const KeyCode CSnapKey = KeyCode.C; 
+        private const KeyCode VSnapKey = KeyCode.V;
+        private const KeyCode CSnapKey = KeyCode.C;
         private const float VertexSnapRadius = 50f;
-        private const float BoundsSearchThreshold = 200f; 
+        private const float BoundsSearchThreshold = 200f;
 
         private enum SnapMode { None, Normal, Platform }
         private static SnapMode currentMode = SnapMode.None;
@@ -50,22 +50,22 @@ namespace Vectorier.EditorScript
             if (e.type == EventType.KeyDown && e.keyCode == KeyCode.A)
             {
                 isAHeld = true;
-                
+
                 // Transition into scale snap if A is pressed after V/C
                 if (currentMode != SnapMode.None && !isScaleSnapMode)
                 {
-                    if (targetTransforms != null && targetTransforms.Length == 1 && primaryTransform != null && primaryTransform.childCount == 0)
+                    if (CanScaleSnap())
                     {
                         isScaleSnapMode = true;
                         InitializeScaleSnapState(activeSourceVertex);
                     }
                 }
             }
-            
+
             if (e.type == EventType.KeyUp && e.keyCode == KeyCode.A)
             {
                 isAHeld = false;
-                
+
                 // Exit scale snap if A is released, retaining normal snap behavior
                 if (isScaleSnapMode)
                 {
@@ -93,7 +93,10 @@ namespace Vectorier.EditorScript
 
             if (e.type == EventType.KeyDown && currentMode == SnapMode.None)
             {
-                if (e.keyCode == VSnapKey || e.keyCode == CSnapKey)
+                // MoveVisualizer uses C for its own platform snap during placement
+                bool cOwnedByPlacement = e.keyCode == CSnapKey && Tools.MoveVisualizer.IsPlacementActive;
+
+                if ((e.keyCode == VSnapKey || e.keyCode == CSnapKey) && !cOwnedByPlacement)
                 {
                     Transform[] roots = GetTopLevelSelection();
                     if (roots.Length > 0)
@@ -111,11 +114,11 @@ namespace Vectorier.EditorScript
                             primaryTransform = closest.rootTransform;
                             activeSourceVertex = closest.position;
                             isDragging = false;
-                            
+
                             isScaleSnapMode = false;
-                            
+
                             // Validate Scale Snap Conditions
-                            if (isAHeld && targetTransforms.Length == 1 && primaryTransform.childCount == 0)
+                            if (isAHeld && CanScaleSnap())
                             {
                                 isScaleSnapMode = true;
                                 InitializeScaleSnapState(activeSourceVertex);
@@ -152,10 +155,9 @@ namespace Vectorier.EditorScript
                 // Keep activeSourceVertex synced accurately based on the mode
                 if (isScaleSnapMode && isDragging && activeCornerIndex != -1)
                 {
-                    SpriteRenderer sr = primaryTransform.GetComponent<SpriteRenderer>();
-                    if (sr != null)
+                    if (TryGetScaleCorners(primaryTransform, out Vector3[] scaleCorners))
                     {
-                        activeSourceVertex = GetSpriteCorners(sr)[activeCornerIndex];
+                        activeSourceVertex = scaleCorners[activeCornerIndex];
                     }
                 }
                 else if (primaryTransform != null && targetTransforms != null)
@@ -172,13 +174,18 @@ namespace Vectorier.EditorScript
 
                 if (!isDragging && !isSnapping && targetTransforms != null)
                 {
-                    List<SourceVertex> vertices = GatherSourceVertices(targetTransforms, onlyPlatforms);
+                    // While scaling, only the object's own outer corners count. A child's corner (like a platform's
+                    // floor tile) isn't something you can scale from
+                    List<SourceVertex> vertices = isScaleSnapMode
+                        ? GatherScaleVertices(targetTransforms[0])
+                        : GatherSourceVertices(targetTransforms, onlyPlatforms);
+
                     if (TryGetClosestSourceVertex(vertices, mouseWorldPos, out SourceVertex closest))
                     {
                         activeSourceVertex = closest.position;
                         primaryTransform = closest.rootTransform;
                         UpdateGrabOffsets();
-                        
+
                         // Re-initialize state if user shifts focus to a different corner before clicking
                         if (isScaleSnapMode)
                         {
@@ -192,13 +199,13 @@ namespace Vectorier.EditorScript
                     GUIUtility.hotControl = GUIUtility.GetControlID(FocusType.Passive);
                     isDragging = true;
                     Undo.RecordObjects(targetTransforms, isScaleSnapMode ? "Scale Snap" : (currentMode == SnapMode.Platform ? "Platform Snap" : "Sprite Snap"));
-                    
+
                     if (isScaleSnapMode && activeCornerIndex != -1)
                     {
                         // Calculate intent to lock into a single axis
                         Vector3 originalGrabbedCorner = grabFixedCorner + grabOrigDelta;
                         Vector3 intentDelta = mouseWorldPos - originalGrabbedCorner;
-                        
+
                         float scaleX = 1f;
                         float scaleY = 1f;
 
@@ -217,7 +224,7 @@ namespace Vectorier.EditorScript
                         }
 
                         primaryTransform.localScale = new Vector3(originalScale.x * scaleX, originalScale.y * scaleY, originalScale.z);
-                        
+
                         Vector3 newPos = grabFixedCorner + new Vector3(grabOrigPosDelta.x * scaleX, grabOrigPosDelta.y * scaleY, grabOrigPosDelta.z);
                         newPos.z = originalPosition.z;
                         primaryTransform.position = newPos;
@@ -244,13 +251,13 @@ namespace Vectorier.EditorScript
 
         private static void InitializeScaleSnapState(Vector3 sourceVertex)
         {
-            SpriteRenderer sr = primaryTransform.GetComponent<SpriteRenderer>();
-            if (sr != null)
+            activeCornerIndex = -1;
+
+            if (TryGetScaleCorners(primaryTransform, out Vector3[] corners))
             {
                 originalScale = primaryTransform.localScale;
                 originalPosition = primaryTransform.position;
-                
-                Vector3[] corners = GetSpriteCorners(sr);
+
                 float minDist = float.MaxValue;
                 for (int i = 0; i < 4; i++)
                 {
@@ -261,13 +268,100 @@ namespace Vectorier.EditorScript
                         activeCornerIndex = i;
                     }
                 }
-                
+
                 // 0(BL) opp is 3(TR), 1(BR) opp is 2(TL), 2(TL) opp is 1(BR), 3(TR) opp is 0(BL)
                 int oppositeIndex = 3 - activeCornerIndex;
                 grabFixedCorner = corners[oppositeIndex];
                 grabOrigDelta = corners[activeCornerIndex] - grabFixedCorner;
                 grabOrigPosDelta = originalPosition - grabFixedCorner;
+
+                // The grabbed point might've been a child's corner from before A was pressed, jump to the real outer corner
+                activeSourceVertex = corners[activeCornerIndex];
             }
+        }
+
+        // Scale snap needs one object with something to measure. Children are fine now
+        private static bool CanScaleSnap()
+        {
+            return targetTransforms != null
+                && targetTransforms.Length == 1
+                && primaryTransform != null
+                && TryGetScaleCorners(primaryTransform, out _);
+        }
+
+        private static List<SourceVertex> GatherScaleVertices(Transform root)
+        {
+            List<SourceVertex> list = new List<SourceVertex>();
+            if (root != null && TryGetScaleCorners(root, out Vector3[] corners))
+            {
+                foreach (var c in corners)
+                {
+                    list.Add(new SourceVertex { position = c, rootTransform = root });
+                }
+            }
+            return list;
+        }
+
+        // Corners used for scaling, in BL, BR, TL, TR order (same as GetSpriteCorners).
+        // If the object has its own sprite, that's the box (platform -> platform box, its texture children don't matter).
+        // If it doesn't (empty parent / group), use the combined box of everything under it instead.
+        // Either way the box is measured in the object's own local space, so it scales exactly with localScale.
+        private static bool TryGetScaleCorners(Transform t, out Vector3[] corners)
+        {
+            corners = null;
+            if (t == null) return false;
+
+            if (t.TryGetComponent(out SpriteRenderer own) && own.sprite != null && own.enabled)
+            {
+                corners = GetSpriteCorners(own);
+                return true;
+            }
+
+            bool found = false;
+            Bounds local = default;
+
+            foreach (var r in t.GetComponentsInChildren<SpriteRenderer>(false))
+            {
+                if (r.sprite == null || !r.enabled) continue;
+
+                Bounds lb = r.localBounds;
+                Vector3[] points =
+                {
+                    new Vector3(lb.min.x, lb.min.y, 0f),
+                    new Vector3(lb.max.x, lb.min.y, 0f),
+                    new Vector3(lb.min.x, lb.max.y, 0f),
+                    new Vector3(lb.max.x, lb.max.y, 0f)
+                };
+
+                foreach (var p in points)
+                {
+                    // child local -> world -> root local
+                    Vector3 inRoot = t.InverseTransformPoint(r.transform.TransformPoint(p));
+                    if (!found)
+                    {
+                        local = new Bounds(inRoot, Vector3.zero);
+                        found = true;
+                    }
+                    else
+                    {
+                        local.Encapsulate(inRoot);
+                    }
+                }
+            }
+
+            if (!found) return false;
+
+            Vector3 min = local.min;
+            Vector3 max = local.max;
+
+            corners = new Vector3[]
+            {
+                t.TransformPoint(new Vector3(min.x, min.y, 0)),
+                t.TransformPoint(new Vector3(max.x, min.y, 0)),
+                t.TransformPoint(new Vector3(min.x, max.y, 0)),
+                t.TransformPoint(new Vector3(max.x, max.y, 0))
+            };
+            return true;
         }
 
         private static void UpdateGrabOffsets()
@@ -373,10 +467,10 @@ namespace Vectorier.EditorScript
         private static Vector3 CalculateSpriteSnapPosition(Transform[] rootTransforms, bool onlyPlatforms, Vector3 mousePos, out bool isSnapping)
         {
             SpriteRenderer[] allSprites = Object.FindObjectsByType<SpriteRenderer>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
-            
+
             Vector3 bestCorner = Vector3.zero;
             float closestCornerDist = float.MaxValue;
-            
+
             Vector3 bestEdgePoint = Vector3.zero;
             float closestEdgeDist = float.MaxValue;
             SpriteRenderer targetEdgeSprite = null;
@@ -453,7 +547,7 @@ namespace Vectorier.EditorScript
                 isSnapping = true;
                 Handles.color = Color.yellow;
                 Handles.DrawLine(activeSourceVertex, bestCorner, 2f);
-                
+
                 DrawVertexVisualizer(bestCorner, Color.yellow, false);
                 return bestCorner;
             }
@@ -462,7 +556,7 @@ namespace Vectorier.EditorScript
             {
                 Handles.color = Color.cyan;
                 Handles.DrawLine(activeSourceVertex, bestEdgePoint, 2f);
-                
+
                 Handles.DrawSolidDisc(bestEdgePoint, Vector3.forward, HandleUtility.GetHandleSize(bestEdgePoint) * 0.05f);
                 return bestEdgePoint;
             }
@@ -475,7 +569,7 @@ namespace Vectorier.EditorScript
             Color originalColor = Handles.color;
             Handles.color = color;
 
-            float size = HandleUtility.GetHandleSize(position) * 0.08f; 
+            float size = HandleUtility.GetHandleSize(position) * 0.08f;
 
             Vector3[] rectVerts = new Vector3[]
             {
@@ -524,6 +618,67 @@ namespace Vectorier.EditorScript
             dotP = Mathf.Clamp(dotP, 0f, magnitudeMax);
 
             return (Vector2)lineStart + heading * dotP;
+        }
+
+        // Finds a snap point on Platform-tagged sprites near 'point'. Corners first, then edges.
+        public static bool TryGetPlatformSnapPoint(Vector3 point, out Vector3 snapped, out bool isCorner)
+        {
+            snapped = point;
+            isCorner = false;
+
+            SpriteRenderer[] allSprites = Object.FindObjectsByType<SpriteRenderer>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+
+            Vector3 bestCorner = default, bestEdge = default;
+            float bestCornerDist = float.MaxValue, bestEdgeDist = float.MaxValue;
+            float maxSqrDist = BoundsSearchThreshold * BoundsSearchThreshold;
+
+            foreach (var sprite in allSprites)
+            {
+                if (sprite.sprite == null || !sprite.enabled) continue;
+                if (!IsValidObject(sprite.gameObject)) continue;
+                if (!sprite.CompareTag("Platform")) continue;
+
+                // Compare on the sprite's own Z so the bounds check is purely 2D
+                Vector3 flat = new Vector3(point.x, point.y, sprite.bounds.center.z);
+                if (sprite.bounds.SqrDistance(flat) > maxSqrDist) continue;
+
+                Vector3[] c = GetSpriteCorners(sprite);
+
+                foreach (var corner in c)
+                {
+                    float d = Vector2.Distance(point, corner);
+                    if (d < bestCornerDist) { bestCornerDist = d; bestCorner = corner; }
+                }
+
+                Vector3[] edges =
+                {
+            GetClosestPointOnSegment(c[0], c[1], point),
+            GetClosestPointOnSegment(c[1], c[3], point),
+            GetClosestPointOnSegment(c[3], c[2], point),
+            GetClosestPointOnSegment(c[2], c[0], point)
+        };
+
+                foreach (var pt in edges)
+                {
+                    float d = Vector2.Distance(point, pt);
+                    if (d < bestEdgeDist) { bestEdgeDist = d; bestEdge = pt; }
+                }
+            }
+
+            if (bestCornerDist <= VertexSnapRadius)
+            {
+                snapped = bestCorner;
+                isCorner = true;
+                return true;
+            }
+
+            if (bestEdgeDist <= BoundsSearchThreshold)
+            {
+                snapped = bestEdge;
+                return true;
+            }
+
+            return false;
         }
     }
 }

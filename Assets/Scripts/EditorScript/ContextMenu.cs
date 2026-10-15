@@ -2,6 +2,7 @@ using UnityEditor;
 using UnityEngine;
 using Vectorier.Component;
 using Vectorier.Element;
+using Vectorier.EditorScript.Tools;
 
 namespace Vectorier.EditorScript
 {
@@ -12,7 +13,7 @@ namespace Vectorier.EditorScript
 
         private static void CreateAndSelect(System.Func<Transform, GameObject> factory, string undoName)
         {
-            Transform parent = Selection.activeTransform;
+            Transform parent = GetSafeParent(Selection.activeTransform);
             GameObject go = factory(parent);
             if (go == null) return;
 
@@ -30,13 +31,22 @@ namespace Vectorier.EditorScript
                 finalPos.x = worldCenter.x;
                 finalPos.y = worldCenter.y;
 
-                if (parent != null)
-                    go.transform.localPosition = parent.InverseTransformPoint(finalPos);
-                else
-                    go.transform.position = finalPos;
+                // world position works whether it's parented or not
+                go.transform.position = finalPos;
             }
 
             Selection.activeGameObject = go;
+        }
+
+        // Anything created inside a generated platform would get wiped on its next rebuild,
+        // so bump it up next to the platform instead
+        private static Transform GetSafeParent(Transform selected)
+        {
+            if (selected == null)
+                return null;
+
+            PlatformComponent host = selected.GetComponentInParent<PlatformComponent>(true);
+            return host != null ? host.transform.parent : selected;
         }
 
         private static bool IsValid() => !EditorApplication.isPlayingOrWillChangePlaymode;
@@ -88,26 +98,51 @@ namespace Vectorier.EditorScript
         private static bool AddArea_Validate() => IsValid();
 
         // -------- PLATFORM & TRAPEZOID -------- //
-        [MenuItem(MenuRoot + "Platform", false, PriorityRoot + 80)]
-        private static void AddPlatform()
-            => CreateAndSelect(PlatformElement.Create, "Vectorier Add Platform");
+        [MenuItem(MenuRoot + "Platform/Rough", false, PriorityRoot + 80)]
+        private static void AddPlatformRough()
+            => CreateAndSelect(p => CreatePlatform(PlatformComponent.SurfaceType.Rough, p), "Vectorier Add Rough Platform");
 
-        [MenuItem(MenuRoot + "Platform", true)]
-        private static bool AddPlatform_Validate() => IsValid();
+        [MenuItem(MenuRoot + "Platform/Rough", true)]
+        private static bool AddPlatformRough_Validate() => IsValid();
 
-        [MenuItem(MenuRoot + "Trapezoid/Type1", false, PriorityRoot + 81)]
+        [MenuItem(MenuRoot + "Platform/Smooth", false, PriorityRoot + 81)]
+        private static void AddPlatformSmooth()
+            => CreateAndSelect(p => CreatePlatform(PlatformComponent.SurfaceType.Smooth, p), "Vectorier Add Smooth Platform");
+
+        [MenuItem(MenuRoot + "Platform/Smooth", true)]
+        private static bool AddPlatformSmooth_Validate() => IsValid();
+
+        [MenuItem(MenuRoot + "Platform/Block", false, PriorityRoot + 82)]
+        private static void AddPlatformBlock()
+            => CreateAndSelect(p => CreatePlatform(PlatformComponent.SurfaceType.Block, p), "Vectorier Add Block Platform");
+
+        [MenuItem(MenuRoot + "Platform/Block", true)]
+        private static bool AddPlatformBlock_Validate() => IsValid();
+
+        [MenuItem(MenuRoot + "Trapezoid/Type1", false, PriorityRoot + 83)]
         private static void AddTrapezoidType1()
             => CreateAndSelect(p => TrapezoidElement.Create(TrapezoidComponent.TrapezoidType.Type1, p), "Vectorier Add Trapezoid Type 1");
 
         [MenuItem(MenuRoot + "Trapezoid/Type1", true)]
         private static bool AddTrapezoidType1_Validate() => IsValid();
 
-        [MenuItem(MenuRoot + "Trapezoid/Type2", false, PriorityRoot + 82)]
+        [MenuItem(MenuRoot + "Trapezoid/Type2", false, PriorityRoot + 84)]
         private static void AddTrapezoidType2()
             => CreateAndSelect(p => TrapezoidElement.Create(TrapezoidComponent.TrapezoidType.Type2, p), "Vectorier Add Trapezoid Type 2");
 
         [MenuItem(MenuRoot + "Trapezoid/Type2", true)]
         private static bool AddTrapezoidType2_Validate() => IsValid();
+
+        private static GameObject CreatePlatform(PlatformComponent.SurfaceType type, Transform parent)
+        {
+            GameObject platformObject = PlatformElement.Create(parent, type);
+
+            // Build right away so it shows up textured. Children move with the platform,
+            // so CreateAndSelect repositioning it afterwards is fine
+            PlatformSurfaceBuilder.Build(platformObject.GetComponent<PlatformComponent>(), recordUndo: false);
+
+            return platformObject;
+        }
 
         // -------- COMMENT -------- //
         [MenuItem(MenuRoot + "Comment", false, PriorityRoot + 100)]

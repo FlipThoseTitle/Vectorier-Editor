@@ -50,15 +50,13 @@ namespace Vectorier.Element
 
         public static void GetPositionScene(GameObject gameObject, out float x, out float y)
         {
-            Vector3 accumulated = Vector3.zero;
-            Transform current = gameObject.transform;
+            Transform self = gameObject.transform;
+            Vector3 accumulated = self.localPosition;
+            Transform current = self.parent;
 
-            while (current != null)
+            while (current != null && !current.CompareTag("Object"))
             {
-                if (current != gameObject.transform && current.CompareTag("Object"))
-                    break;
-
-                accumulated += current.localPosition;
+                accumulated = current.localPosition + current.localRotation * Vector3.Scale(current.localScale, accumulated);
                 current = current.parent;
             }
 

@@ -13,26 +13,36 @@ namespace Vectorier.ProjectManager
         // Exclusion list for normal textures that should not be deleted
         private readonly HashSet<string> excludedNormalTextures = new HashSet<string>
         {
-            "bonus_num", "circle", "GStick_arrow", "GStick_circle", 
+            "bonus_num", "circle", "GStick_arrow", "GStick_circle",
             "parrot01", "parrot02", "parrot03", "v_back", "tap", "rect"
         };
 
         private readonly HashSet<string> excludedAnimatedTextures = new HashSet<string>
         {
-            "antibot", "bonus_v4", "bonus_v4_off", "credits", "glass_1", "credits_off", 
-            "lightning_expl_v2", "lightning_hands", "lightning_paraliz_v2", "paper_v1", 
-            "reverse_indicator_left", "reverse_indicator_right", "run_indicator", "stopsign", 
+            "antibot", "bonus_v4", "bonus_v4_off", "credits", "glass_1", "credits_off",
+            "lightning_expl_v2", "lightning_hands", "lightning_paraliz_v2", "paper_v1",
+            "reverse_indicator_left", "reverse_indicator_right", "run_indicator", "stopsign",
             "trick_active_up", "trick_idle_up", "bird_v0", "bird_v2", "bird_v3"
         };
-        
+
+        // Grid layout
+        private const float ItemSize = 100f;
+        private const float ItemSpacing = 10f;
+
         // Data for grid display
         private List<Texture2D> loadedTextures = new List<Texture2D>();
         private List<string> loadedTexturePaths = new List<string>();
         private string searchQuery = "";
-        
+
         // Supports Multi-Selection
         private List<int> selectedIndices = new List<int>();
         private Vector2 scrollPosition;
+
+        // Path helpers
+        private string RawTexturesDir => $"Projects/{activeProjectName}/textures";
+        private string RawAnimTexturesDir => $"Projects/{activeProjectName}/animatedtextures";
+        private string ResourceImagesDir => $"Assets/Resources/Images/{activeProjectName}";
+        private string ResourceSpritesDir => $"{ResourceImagesDir}/Sprites";
 
         // Opens this window and accepts the project name
         public static void ShowWindow(string projectName)
@@ -67,25 +77,25 @@ namespace Vectorier.ProjectManager
 
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
-            
+
             GUIStyle totalLabelStyle = new GUIStyle(EditorStyles.boldLabel) { alignment = TextAnchor.MiddleRight };
             GUILayout.Label("Total Textures - " + loadedTextures.Count, totalLabelStyle, GUILayout.Height(30));
-            
-            GUILayout.Space(10); 
-            
+
+            GUILayout.Space(10);
+
             GUI.enabled = selectedIndices.Count > 0;
             if (GUILayout.Button("-", GUILayout.Width(30), GUILayout.Height(30)))
             {
                 DeleteSelectedTexture();
             }
-            
+
             GUI.enabled = loadedTextures.Count > 0;
             if (GUILayout.Button("C", GUILayout.Width(30), GUILayout.Height(30)))
             {
                 ClearAllTextures();
             }
             GUI.enabled = true;
-            
+
             GUILayout.EndHorizontal();
 
             GUILayout.Space(5);
@@ -101,6 +111,10 @@ namespace Vectorier.ProjectManager
                 ProjectManagerSelection.ShowWindow(activeProjectName);
             }
         }
+
+        // ------------------------------------------------------------------
+        // Grid (virtualized: only rows inside the visible scroll area are drawn)
+        // ------------------------------------------------------------------
 
         private void DrawTextureGrid()
         {
@@ -125,56 +139,61 @@ namespace Vectorier.ProjectManager
                 return;
             }
 
-            scrollPosition = GUILayout.BeginScrollView(scrollPosition);
+            // Reserve the remaining window space for the scroll view
+            Rect viewRect = GUILayoutUtility.GetRect(0, 0, GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true));
 
-            float windowWidth = EditorGUIUtility.currentViewWidth - 20; 
-            float itemSize = 100f;
-            int columns = Mathf.FloorToInt(windowWidth / (itemSize + 10f));
-            if (columns < 1) columns = 1;
+            float availableWidth = position.width - 20f; // leave room for the vertical scrollbar
+            int columns = Mathf.Max(1, Mathf.FloorToInt(availableWidth / (ItemSize + ItemSpacing)));
+            int rows = Mathf.CeilToInt(visibleIndices.Count / (float)columns);
+            float rowHeight = ItemSize + ItemSpacing;
 
-            int index = 0;
-            GUILayout.BeginVertical();
-            
-            while (index < visibleIndices.Count)
+            Rect contentRect = new Rect(0, 0, availableWidth, rows * rowHeight);
+            scrollPosition = GUI.BeginScrollView(viewRect, scrollPosition, contentRect);
+
+            int firstRow = Mathf.Max(0, Mathf.FloorToInt(scrollPosition.y / rowHeight));
+            int lastRow = Mathf.Min(rows - 1, Mathf.FloorToInt((scrollPosition.y + viewRect.height) / rowHeight));
+
+            for (int row = firstRow; row <= lastRow; row++)
             {
-                GUILayout.BeginHorizontal();
-                for (int i = 0; i < columns; i++)
+                for (int col = 0; col < columns; col++)
                 {
-                    if (index >= visibleIndices.Count) break;
+                    int i = row * columns + col;
+                    if (i >= visibleIndices.Count) break;
 
-                    DrawTextureItem(visibleIndices[index], itemSize);
-                    index++;
+                    Rect itemRect = new Rect(5f + col * (ItemSize + ItemSpacing), row * rowHeight, ItemSize, ItemSize);
+                    DrawTextureItem(visibleIndices[i], itemRect);
                 }
-                GUILayout.EndHorizontal();
-                GUILayout.Space(5);
             }
-            
-            GUILayout.EndVertical();
-            GUILayout.EndScrollView();
 
-            Rect scrollRect = GUILayoutUtility.GetLastRect();
-            if (Event.current.type == EventType.MouseDown && Event.current.button == 0 && scrollRect.Contains(Event.current.mousePosition))
+            // Clicking empty space inside the grid clears the selection.
+            // Item clicks have already called Use(), so they won't reach this.
+            Event e = Event.current;
+            Rect visibleArea = new Rect(scrollPosition.x, scrollPosition.y, viewRect.width, viewRect.height);
+            if (e.type == EventType.MouseDown && e.button == 0 && visibleArea.Contains(e.mousePosition))
             {
                 selectedIndices.Clear();
                 GUI.FocusControl(null);
+                e.Use();
                 Repaint();
             }
+
+            GUI.EndScrollView();
         }
 
-        private void DrawTextureItem(int index, float size)
+        private void DrawTextureItem(int index, Rect boxRect)
         {
             Texture2D tex = loadedTextures[index];
             bool isSelected = selectedIndices.Contains(index);
 
-            Rect boxRect = GUILayoutUtility.GetRect(size, size);
-            
-            if (isSelected)
-                EditorGUI.DrawRect(boxRect, new Color(0.2f, 0.5f, 0.9f, 0.7f));
-            else
-                EditorGUI.DrawRect(boxRect, new Color(0.2f, 0.2f, 0.2f, 0.5f));
+            if (Event.current.type == EventType.Repaint)
+            {
+                EditorGUI.DrawRect(boxRect, isSelected
+                    ? new Color(0.2f, 0.5f, 0.9f, 0.7f)
+                    : new Color(0.2f, 0.2f, 0.2f, 0.5f));
 
-            Rect texRect = new Rect(boxRect.x + 5, boxRect.y + 5, boxRect.width - 10, boxRect.height - 30);
-            if (tex != null) GUI.DrawTexture(texRect, tex, ScaleMode.ScaleToFit);
+                Rect texRect = new Rect(boxRect.x + 5, boxRect.y + 5, boxRect.width - 10, boxRect.height - 30);
+                if (tex != null) GUI.DrawTexture(texRect, tex, ScaleMode.ScaleToFit);
+            }
 
             Rect labelRect = new Rect(boxRect.x + 5, boxRect.y + boxRect.height - 20, boxRect.width - 10, 20);
             string labelName = tex != null ? tex.name : "Null";
@@ -185,7 +204,7 @@ namespace Vectorier.ProjectManager
             if (e.type == EventType.MouseDrag && e.button == 0 && boxRect.Contains(e.mousePosition))
             {
                 DragAndDrop.PrepareStartDrag();
-                
+
                 List<Object> draggedObjects = new List<Object>();
                 if (isSelected)
                 {
@@ -224,11 +243,15 @@ namespace Vectorier.ProjectManager
                     selectedIndices.Clear();
                     selectedIndices.Add(index);
                 }
-                
+
                 e.Use();
                 GUI.FocusControl(null);
             }
         }
+
+        // ------------------------------------------------------------------
+        // Importing
+        // ------------------------------------------------------------------
 
         private void HandleDragAndDrop()
         {
@@ -243,7 +266,7 @@ namespace Vectorier.ProjectManager
                     if (evt.type == EventType.DragPerform)
                     {
                         DragAndDrop.AcceptDrag();
-                        
+
                         List<string> filesToProcess = new List<string>();
 
                         // Parse dropped items (can be a mix of folders and files)
@@ -251,19 +274,11 @@ namespace Vectorier.ProjectManager
                         {
                             if (Directory.Exists(path))
                             {
-                                // Handle folders
-                                filesToProcess.AddRange(Directory.GetFiles(path, "*.*", SearchOption.AllDirectories)
-                                    .Where(file => file.EndsWith(".png", System.StringComparison.OrdinalIgnoreCase) || 
-                                                   file.EndsWith(".jpg", System.StringComparison.OrdinalIgnoreCase) ||
-                                                   file.EndsWith(".jpeg", System.StringComparison.OrdinalIgnoreCase)));
+                                filesToProcess.AddRange(Directory.GetFiles(path, "*.*", SearchOption.AllDirectories).Where(IsImageFile));
                             }
-                            else if (File.Exists(path))
+                            else if (File.Exists(path) && IsImageFile(path))
                             {
-                                string ext = Path.GetExtension(path).ToLower();
-                                if (ext == ".png" || ext == ".jpg" || ext == ".jpeg")
-                                {
-                                    filesToProcess.Add(path);
-                                }
+                                filesToProcess.Add(path);
                             }
                         }
 
@@ -277,11 +292,11 @@ namespace Vectorier.ProjectManager
         {
             // Open a file panel specifically for png and jpg files
             string sourcePath = EditorUtility.OpenFilePanelWithFilters(
-                "Select Texture to Import", 
-                "", 
+                "Select Texture to Import",
+                "",
                 new string[] { "Image Files", "png,jpg,jpeg", "All files", "*" }
             );
-            
+
             if (string.IsNullOrEmpty(sourcePath)) return;
 
             ProcessFiles(new string[] { sourcePath });
@@ -291,292 +306,242 @@ namespace Vectorier.ProjectManager
         {
             if (filePaths.Length == 0) return;
 
-            // Updated base paths outside of Assets to avoid importing
-            string baseProjPath = $"Projects/{activeProjectName}";
-            string texturesDir = $"{baseProjPath}/textures";
-            string animTexturesDir = $"{baseProjPath}/animatedtextures";
+            List<string> rawCopies = new List<string>();
 
-            // Unity imported resource paths
-            string resourceImagesDir = $"Assets/Resources/Images/{activeProjectName}";
-            string resourceSpritesDir = $"{resourceImagesDir}/Sprites";
-
-            List<string> newlyImportedAssets = new List<string>();
-
-            int progress = 0;
-            foreach (string file in filePaths)
+            try
             {
-                EditorUtility.DisplayProgressBar("Importing Textures", $"Processing {Path.GetFileName(file)}", (float)progress / filePaths.Length);
-
-                string plistPath = Path.ChangeExtension(file, ".plist");
-                bool hasPlist = File.Exists(plistPath);
-
-                string targetDir = hasPlist ? animTexturesDir : texturesDir;
-                if (!Directory.Exists(targetDir)) Directory.CreateDirectory(targetDir);
-
-                // Copy Original Texture (and Plist) to the raw root Projects folder
-                string fileName = Path.GetFileName(file);
-                string destFile = Path.Combine(targetDir, fileName).Replace("\\", "/");
-                File.Copy(file, destFile, true);
-
-                if (hasPlist)
+                for (int i = 0; i < filePaths.Length; i++)
                 {
-                    string plistDest = Path.Combine(targetDir, Path.GetFileName(plistPath)).Replace("\\", "/");
-                    File.Copy(plistPath, plistDest, true);
-                }
+                    string file = filePaths[i];
+                    if (i % 10 == 0)
+                        EditorUtility.DisplayProgressBar("Importing Textures", $"Copying {Path.GetFileName(file)}", (float)i / filePaths.Length);
 
-                if (hasPlist)
-                {
-                    if (!Directory.Exists(resourceSpritesDir)) Directory.CreateDirectory(resourceSpritesDir);
-                    
-                    // Run the PlistExtract logic to get only the middle frame
-                    string extractedPath = Vectorier.EditorScript.Tools.PlistExtract.ExtractMiddleFrame(file, plistPath, resourceSpritesDir, fileName);
-                    if (!string.IsNullOrEmpty(extractedPath))
+                    string plistPath = Path.ChangeExtension(file, ".plist");
+                    bool hasPlist = File.Exists(plistPath);
+
+                    string targetDir = hasPlist ? RawAnimTexturesDir : RawTexturesDir;
+                    if (!Directory.Exists(targetDir)) Directory.CreateDirectory(targetDir);
+
+                    // Copy original texture (and plist) to the raw Projects folder outside Assets
+                    string destFile = Path.Combine(targetDir, Path.GetFileName(file)).Replace("\\", "/");
+                    File.Copy(file, destFile, true);
+
+                    if (hasPlist)
                     {
-                        newlyImportedAssets.Add(extractedPath);
+                        string plistDest = Path.Combine(targetDir, Path.GetFileName(plistPath)).Replace("\\", "/");
+                        File.Copy(plistPath, plistDest, true);
                     }
-                }
-                else
-                {
-                    if (!Directory.Exists(resourceImagesDir)) Directory.CreateDirectory(resourceImagesDir);
-                    
-                    string resourceDestFile = Path.Combine(resourceImagesDir, fileName).Replace("\\", "/");
-                    File.Copy(file, resourceDestFile, true);
-                    newlyImportedAssets.Add(resourceDestFile);
-                }
 
-                progress++;
+                    rawCopies.Add(destFile);
+                }
+            }
+            finally
+            {
+                EditorUtility.ClearProgressBar();
             }
 
-            EditorUtility.ClearProgressBar();
-            AssetDatabase.Refresh();
-
-            // Run importer settings (PPU 1, Single, TopLeft)
-            ApplyImporterSettings(newlyImportedAssets);
-            
+            ImportIntoResources(rawCopies, "Importing Textures");
             RefreshTextureList();
         }
 
-        private void ApplyImporterSettings(List<string> assetPaths)
+        // Copies raw project textures into Assets/Resources and imports them all in ONE batch.
+        // Importer settings are applied by ProjectTextureImportPostprocessor during that single import,
+        // so there is no second SaveAndReimport pass. With Parallel Import enabled in Project Settings,
+        // the batched Refresh() is spread across worker processes.
+        private void ImportIntoResources(IList<string> rawFiles, string progressTitle)
         {
-            foreach (string path in assetPaths)
-            {
-                TextureImporter importer = AssetImporter.GetAtPath(path) as TextureImporter;
-                if (importer != null)
-                {
-                    importer.textureType = TextureImporterType.Sprite;
-                    importer.spriteImportMode = SpriteImportMode.Single;
-                    importer.spritePixelsPerUnit = 1;
+            if (rawFiles.Count == 0) return;
 
-                    TextureImporterSettings settings = new TextureImporterSettings();
-                    importer.ReadTextureSettings(settings);
-                    settings.spriteAlignment = (int)SpriteAlignment.TopLeft;
-                    importer.SetTextureSettings(settings);
-                    importer.SaveAndReimport();
+            try
+            {
+                for (int i = 0; i < rawFiles.Count; i++)
+                {
+                    string file = rawFiles[i];
+                    string fileName = Path.GetFileName(file);
+
+                    if (i % 10 == 0)
+                        EditorUtility.DisplayProgressBar(progressTitle, $"Preparing {fileName}", (float)i / rawFiles.Count);
+
+                    string plistPath = Path.ChangeExtension(file, ".plist");
+
+                    if (File.Exists(plistPath))
+                    {
+                        if (!Directory.Exists(ResourceSpritesDir)) Directory.CreateDirectory(ResourceSpritesDir);
+
+                        // Extract only the middle frame of the animated texture
+                        Vectorier.EditorScript.Tools.PlistExtract.ExtractMiddleFrame(file, plistPath, ResourceSpritesDir, fileName);
+                    }
+                    else
+                    {
+                        if (!Directory.Exists(ResourceImagesDir)) Directory.CreateDirectory(ResourceImagesDir);
+
+                        string resourceDestFile = Path.Combine(ResourceImagesDir, fileName).Replace("\\", "/");
+                        File.Copy(file, resourceDestFile, true);
+                    }
                 }
             }
+            finally
+            {
+                EditorUtility.ClearProgressBar();
+            }
+
+            // Single batched import for everything copied above
+            AssetDatabase.Refresh();
         }
+
+        // ------------------------------------------------------------------
+        // Deleting
+        // ------------------------------------------------------------------
 
         private void DeleteSelectedTexture()
         {
-            if (selectedIndices.Count > 0)
+            if (selectedIndices.Count == 0) return;
+
+            List<string> rawPathsToDelete = new List<string>();
+            int excludedCount = 0;
+
+            foreach (int index in selectedIndices)
             {
-                List<string> rawPathsToDelete = new List<string>();
-                int excludedCount = 0;
-
-                foreach (int index in selectedIndices)
+                if (index >= 0 && index < loadedTexturePaths.Count)
                 {
-                    if (index >= 0 && index < loadedTexturePaths.Count)
-                    {
-                        string rawPath = loadedTexturePaths[index];
-                        
-                        if (IsFileExcluded(rawPath))
-                        {
-                            excludedCount++;
-                        }
-                        else
-                        {
-                            rawPathsToDelete.Add(rawPath);
-                        }
-                    }
+                    string rawPath = loadedTexturePaths[index];
+
+                    if (IsFileExcluded(rawPath)) excludedCount++;
+                    else rawPathsToDelete.Add(rawPath);
                 }
-
-                if (rawPathsToDelete.Count == 0 && excludedCount > 0)
-                {
-                    EditorUtility.DisplayDialog("Cannot Delete", excludedCount + " File isn't deletable!", "OK");
-                    return;
-                }
-
-                try
-                {
-                    AssetDatabase.StartAssetEditing();
-
-                    foreach (string rawPath in rawPathsToDelete)
-                    {
-                        string fileName = Path.GetFileName(rawPath);
-                        string plistPath = Path.ChangeExtension(rawPath, ".plist");
-                        bool hasPlist = File.Exists(plistPath);
-
-                        // Delete from the raw root folder outside of Assets
-                        if (File.Exists(rawPath)) File.Delete(rawPath);
-                        if (File.Exists(plistPath)) File.Delete(plistPath);
-
-                        // Delete from Unity's Assets/Resources/Images
-                        string resourcePath = hasPlist 
-                            ? $"Assets/Resources/Images/{activeProjectName}/Sprites/{fileName}"
-                            : $"Assets/Resources/Images/{activeProjectName}/{fileName}";
-                            
-                        if (File.Exists(resourcePath))
-                        {
-                            AssetDatabase.DeleteAsset(resourcePath);
-                        }
-                    }
-                }
-                finally
-                {
-                    AssetDatabase.StopAssetEditing();
-                }
-
-                CheckAndDeleteEmptyResourcesFolder();
-                selectedIndices.Clear();
-                RefreshTextureList();
             }
+
+            if (rawPathsToDelete.Count == 0 && excludedCount > 0)
+            {
+                EditorUtility.DisplayDialog("Cannot Delete", excludedCount + " File isn't deletable!", "OK");
+                return;
+            }
+
+            DeleteRawAndResourceFiles(rawPathsToDelete);
         }
 
         private void ClearAllTextures()
         {
-            List<string> rawPathsToDelete = new List<string>();
-            
-            foreach (string path in loadedTexturePaths)
-            {
-                if (!IsFileExcluded(path))
-                {
-                    rawPathsToDelete.Add(path);
-                }
-            }
-
+            List<string> rawPathsToDelete = loadedTexturePaths.Where(p => !IsFileExcluded(p)).ToList();
             if (rawPathsToDelete.Count == 0) return;
 
             if (EditorUtility.DisplayDialog("Clear All Textures", "Are you sure you want to delete all imported textures for this project? This cannot be undone.", "Delete All", "Cancel"))
             {
-                try
+                DeleteRawAndResourceFiles(rawPathsToDelete);
+            }
+        }
+
+        private void DeleteRawAndResourceFiles(List<string> rawPathsToDelete)
+        {
+            try
+            {
+                AssetDatabase.StartAssetEditing();
+
+                foreach (string rawPath in rawPathsToDelete)
                 {
-                    AssetDatabase.StartAssetEditing();
+                    string fileName = Path.GetFileName(rawPath);
+                    string plistPath = Path.ChangeExtension(rawPath, ".plist");
+                    bool hasPlist = File.Exists(plistPath);
 
-                    foreach (string rawPath in rawPathsToDelete)
+                    // Delete from the raw root folder outside of Assets
+                    if (File.Exists(rawPath)) File.Delete(rawPath);
+                    if (hasPlist) File.Delete(plistPath);
+
+                    // Delete from Unity's Assets/Resources/Images
+                    string resourcePath = hasPlist
+                        ? $"{ResourceSpritesDir}/{fileName}"
+                        : $"{ResourceImagesDir}/{fileName}";
+
+                    if (File.Exists(resourcePath))
                     {
-                        string fileName = Path.GetFileName(rawPath);
-                        string plistPath = Path.ChangeExtension(rawPath, ".plist");
-                        bool hasPlist = File.Exists(plistPath);
-
-                        if (File.Exists(rawPath)) File.Delete(rawPath);
-                        if (File.Exists(plistPath)) File.Delete(plistPath);
-
-                        string resourcePath = hasPlist 
-                            ? $"Assets/Resources/Images/{activeProjectName}/Sprites/{fileName}"
-                            : $"Assets/Resources/Images/{activeProjectName}/{fileName}";
-
-                        if (File.Exists(resourcePath))
-                        {
-                            AssetDatabase.DeleteAsset(resourcePath);
-                        }
+                        AssetDatabase.DeleteAsset(resourcePath);
                     }
                 }
-                finally
-                {
-                    AssetDatabase.StopAssetEditing();
-                }
-
-                CheckAndDeleteEmptyResourcesFolder();
-                selectedIndices.Clear();
-                RefreshTextureList();
             }
+            finally
+            {
+                AssetDatabase.StopAssetEditing();
+            }
+
+            CheckAndDeleteEmptyResourcesFolder();
+            selectedIndices.Clear();
+            RefreshTextureList();
+        }
+
+        // ------------------------------------------------------------------
+        // Loading / syncing
+        // ------------------------------------------------------------------
+
+        private List<string> GetRawImageFiles()
+        {
+            List<string> files = new List<string>();
+            if (Directory.Exists(RawTexturesDir)) files.AddRange(Directory.GetFiles(RawTexturesDir, "*.*").Where(IsImageFile));
+            if (Directory.Exists(RawAnimTexturesDir)) files.AddRange(Directory.GetFiles(RawAnimTexturesDir, "*.*").Where(IsImageFile));
+            return files.Select(f => f.Replace("\\", "/")).ToList();
+        }
+
+        private string GetExpectedResourcePath(string rawFile)
+        {
+            string fileName = Path.GetFileName(rawFile);
+            bool hasPlist = File.Exists(Path.ChangeExtension(rawFile, ".plist"));
+            return hasPlist ? $"{ResourceSpritesDir}/{fileName}" : $"{ResourceImagesDir}/{fileName}";
         }
 
         private void RefreshTextureList()
         {
-            // Clean up RAM manual textures to prevent editor memory leaks.
-            // WARNING: explicitly check and NOT destroy Unity Assets
+            // Clean up RAM-only textures (created via LoadImage) to prevent editor memory leaks.
+            // Never destroy actual Unity assets.
             foreach (var tex in loadedTextures)
             {
-                if (tex != null)
+                if (tex != null && string.IsNullOrEmpty(AssetDatabase.GetAssetPath(tex)))
                 {
-                    // If it has no path, it's a RAM texture created via LoadImage. If it does, it's a Unity Asset.
-                    if (string.IsNullOrEmpty(AssetDatabase.GetAssetPath(tex)))
-                    {
-                        DestroyImmediate(tex);
-                    }
+                    DestroyImmediate(tex);
                 }
             }
 
             loadedTextures.Clear();
             loadedTexturePaths.Clear();
 
-            string texturesDir = $"Projects/{activeProjectName}/textures";
-            string animTexturesDir = $"Projects/{activeProjectName}/animatedtextures";
-            string resourceImagesDir = $"Assets/Resources/Images/{activeProjectName}";
-            string resourceSpritesDir = $"{resourceImagesDir}/Sprites";
+            List<string> filesToProcess = GetRawImageFiles();
 
-            List<string> searchDirs = new List<string>();
-            if (Directory.Exists(texturesDir)) searchDirs.Add(texturesDir);
-            if (Directory.Exists(animTexturesDir)) searchDirs.Add(animTexturesDir);
-
-            List<string> filesToProcess = new List<string>();
-            foreach (string dir in searchDirs)
+            try
             {
-                filesToProcess.AddRange(Directory.GetFiles(dir, "*.*")
-                    .Where(f => f.EndsWith(".png", System.StringComparison.OrdinalIgnoreCase) || 
-                                f.EndsWith(".jpg", System.StringComparison.OrdinalIgnoreCase) ||
-                                f.EndsWith(".jpeg", System.StringComparison.OrdinalIgnoreCase)));
-            }
-
-            for (int i = 0; i < filesToProcess.Count; i++)
-            {
-                string file = filesToProcess[i];
-                string normalizedFile = file.Replace("\\", "/");
-                string fileName = Path.GetFileName(normalizedFile);
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(normalizedFile);
-
-                // Hide excluded textures from the visual grid
-                if (IsFileExcluded(normalizedFile))
+                for (int i = 0; i < filesToProcess.Count; i++)
                 {
-                    if (fileNameWithoutExt != "parrot01" && 
-                        fileNameWithoutExt != "parrot02" && 
+                    string file = filesToProcess[i];
+                    string fileNameWithoutExt = Path.GetFileNameWithoutExtension(file);
+
+                    // Hide excluded textures from the grid (parrots are excluded from deletion but still shown)
+                    if (IsFileExcluded(file) &&
+                        fileNameWithoutExt != "parrot01" &&
+                        fileNameWithoutExt != "parrot02" &&
                         fileNameWithoutExt != "parrot03")
                     {
-                        continue; // Skip adding to the grid data
+                        continue;
                     }
-                }
 
-                bool hasPlist = File.Exists(Path.ChangeExtension(normalizedFile, ".plist"));
-
-                // Predict where the Unity Asset version of this texture lives
-                string expectedResourcePath = hasPlist 
-                    ? $"{resourceSpritesDir}/{fileName}" 
-                    : $"{resourceImagesDir}/{fileName}";
-
-                // Try loading directly from AssetDatabase
-                Texture2D tex = AssetDatabase.LoadAssetAtPath<Texture2D>(expectedResourcePath);
-
-                if (tex != null)
-                {
-                    loadedTextures.Add(tex);
-                    loadedTexturePaths.Add(normalizedFile);
-                }
-                else
-                {
-                    // Fallback: Manual byte loading (slow, used if asset isn't imported yet)
-                    if (i % 10 == 0) // Only update UI occasionally to save performance
+                    // Fast path: already imported Unity asset
+                    Texture2D tex = AssetDatabase.LoadAssetAtPath<Texture2D>(GetExpectedResourcePath(file));
+                    if (tex != null)
                     {
-                        EditorUtility.DisplayProgressBar("Loading Manual Textures", $"Processing {fileName}", (float)i / filesToProcess.Count);
+                        loadedTextures.Add(tex);
+                        loadedTexturePaths.Add(file);
+                        continue;
                     }
 
-                    byte[] bytes = File.ReadAllBytes(file);
+                    // Fallback: manual byte loading (only for files that aren't imported, e.g. the parrots)
+                    if (i % 10 == 0)
+                    {
+                        EditorUtility.DisplayProgressBar("Loading Textures", $"Processing {Path.GetFileName(file)}", (float)i / filesToProcess.Count);
+                    }
+
                     Texture2D manualTex = new Texture2D(2, 2);
-                    if (ImageConversion.LoadImage(manualTex, bytes))
+                    if (ImageConversion.LoadImage(manualTex, File.ReadAllBytes(file)))
                     {
                         manualTex.name = fileNameWithoutExt;
+                        manualTex.hideFlags = HideFlags.HideAndDontSave;
                         loadedTextures.Add(manualTex);
-                        loadedTexturePaths.Add(normalizedFile);
+                        loadedTexturePaths.Add(file);
                     }
                     else
                     {
@@ -584,8 +549,11 @@ namespace Vectorier.ProjectManager
                     }
                 }
             }
+            finally
+            {
+                EditorUtility.ClearProgressBar();
+            }
 
-            EditorUtility.ClearProgressBar();
             Repaint();
         }
 
@@ -593,128 +561,91 @@ namespace Vectorier.ProjectManager
         {
             if (string.IsNullOrEmpty(activeProjectName)) return;
 
-            string baseProjPath = $"Projects/{activeProjectName}";
-            string texturesDir = $"{baseProjPath}/textures";
-            string animTexturesDir = $"{baseProjPath}/animatedtextures";
-            string resourceImagesDir = $"Assets/Resources/Images/{activeProjectName}";
-            string resourceSpritesDir = $"{resourceImagesDir}/Sprites";
-
-            bool folderExists = AssetDatabase.IsValidFolder(resourceImagesDir);
-            List<string> filesToImportToResources = new List<string>();
-
-            List<string> searchDirs = new List<string>();
-            if (Directory.Exists(texturesDir)) searchDirs.Add(texturesDir);
-            if (Directory.Exists(animTexturesDir)) searchDirs.Add(animTexturesDir);
-
-            // Check which files are missing from the resources folder
-            foreach (string dir in searchDirs)
-            {
-                string[] files = Directory.GetFiles(dir, "*.*")
-                    .Where(f => f.EndsWith(".png", System.StringComparison.OrdinalIgnoreCase) || 
-                                f.EndsWith(".jpg", System.StringComparison.OrdinalIgnoreCase) ||
-                                f.EndsWith(".jpeg", System.StringComparison.OrdinalIgnoreCase))
-                    .ToArray();
-
-                foreach (string file in files)
-                {
-                    string normalizedFile = file.Replace("\\", "/");
-                    
-                    // Ignore explicitly listed textures
-                    if (IsFileExcluded(normalizedFile)) continue;
-
-                    string fileName = Path.GetFileName(normalizedFile);
-                    bool hasPlist = File.Exists(Path.ChangeExtension(normalizedFile, ".plist"));
-
-                    string expectedResourcePath = hasPlist 
-                        ? $"{resourceSpritesDir}/{fileName}" 
-                        : $"{resourceImagesDir}/{fileName}";
-
-                    if (!File.Exists(expectedResourcePath))
-                    {
-                        filesToImportToResources.Add(normalizedFile);
-                    }
-                }
-            }
+            // Find raw files that are missing from the Resources folder
+            List<string> missing = GetRawImageFiles()
+                .Where(f => !IsFileExcluded(f) && !File.Exists(GetExpectedResourcePath(f)))
+                .ToList();
 
             // Clean up the folder if it exists but contains nothing
-            if (folderExists)
-            {
-                CheckAndDeleteEmptyResourcesFolder();
-                // Update the state in case it was deleted
-                folderExists = AssetDatabase.IsValidFolder(resourceImagesDir);
-            }
+            CheckAndDeleteEmptyResourcesFolder();
 
-            // Proceed to import any missing files
-            if (filesToImportToResources.Count > 0)
-            {
-                List<string> newlyImportedAssets = new List<string>();
-                int progress = 0;
-
-                foreach (string file in filesToImportToResources)
-                {
-                    string fileName = Path.GetFileName(file);
-                    
-                    // Provides visual feedback
-                    EditorUtility.DisplayProgressBar("Syncing Missing Resources", $"Importing {fileName}", (float)progress / filesToImportToResources.Count);
-
-                    string plistPath = Path.ChangeExtension(file, ".plist");
-                    bool hasPlist = File.Exists(plistPath);
-
-                    if (hasPlist)
-                    {
-                        if (!Directory.Exists(resourceSpritesDir)) Directory.CreateDirectory(resourceSpritesDir);
-                        
-                        string extractedPath = Vectorier.EditorScript.Tools.PlistExtract.ExtractMiddleFrame(file, plistPath, resourceSpritesDir, fileName);
-                        if (!string.IsNullOrEmpty(extractedPath)) newlyImportedAssets.Add(extractedPath);
-                    }
-                    else
-                    {
-                        if (!Directory.Exists(resourceImagesDir)) Directory.CreateDirectory(resourceImagesDir);
-
-                        string resourceDestFile = Path.Combine(resourceImagesDir, fileName).Replace("\\", "/");
-                        File.Copy(file, resourceDestFile, true);
-                        newlyImportedAssets.Add(resourceDestFile);
-                    }
-                    progress++;
-                }
-
-                EditorUtility.ClearProgressBar();
-                AssetDatabase.Refresh();
-                ApplyImporterSettings(newlyImportedAssets);
-            }
+            // Copy everything missing, then import it all in one batch
+            ImportIntoResources(missing, "Syncing Missing Resources");
         }
 
         private void CheckAndDeleteEmptyResourcesFolder()
         {
-            string resourceImagesDir = $"Assets/Resources/Images/{activeProjectName}";
-            if (AssetDatabase.IsValidFolder(resourceImagesDir))
-            {
-                string[] existingResourceFiles = Directory.GetFiles(resourceImagesDir, "*.*", SearchOption.AllDirectories)
-                    .Where(f => f.EndsWith(".png", System.StringComparison.OrdinalIgnoreCase) || 
-                                f.EndsWith(".jpg", System.StringComparison.OrdinalIgnoreCase) || 
-                                f.EndsWith(".jpeg", System.StringComparison.OrdinalIgnoreCase))
-                    .ToArray();
+            if (!AssetDatabase.IsValidFolder(ResourceImagesDir)) return;
 
-                if (existingResourceFiles.Length == 0)
-                {
-                    AssetDatabase.DeleteAsset(resourceImagesDir);
-                }
+            bool hasImages = Directory.EnumerateFiles(ResourceImagesDir, "*.*", SearchOption.AllDirectories).Any(IsImageFile);
+            if (!hasImages)
+            {
+                AssetDatabase.DeleteAsset(ResourceImagesDir);
             }
+        }
+
+        // ------------------------------------------------------------------
+        // Helpers
+        // ------------------------------------------------------------------
+
+        private static bool IsImageFile(string path)
+        {
+            return path.EndsWith(".png", System.StringComparison.OrdinalIgnoreCase) ||
+                   path.EndsWith(".jpg", System.StringComparison.OrdinalIgnoreCase) ||
+                   path.EndsWith(".jpeg", System.StringComparison.OrdinalIgnoreCase);
         }
 
         private bool IsFileExcluded(string path)
         {
             string fileName = Path.GetFileNameWithoutExtension(path);
-            // Get the name of the folder immediately containing the file (textures or animatedtextures)
+            // Name of the folder immediately containing the file (textures or animatedtextures)
             string directoryName = Path.GetFileName(Path.GetDirectoryName(path));
 
             if (directoryName == "textures" && excludedNormalTextures.Contains(fileName))
                 return true;
-            
+
             if (directoryName == "animatedtextures" && excludedAnimatedTextures.Contains(fileName))
                 return true;
 
             return false;
+        }
+    }
+
+    // Applies Vectorier's sprite settings DURING the first import of any texture placed in
+    // Assets/Resources/Images. This replaces the old "Refresh, then SaveAndReimport every asset"
+    // pattern, so each texture is imported exactly once.
+    public class ProjectTextureImportPostprocessor : AssetPostprocessor
+    {
+        private const string ResourceImagesRoot = "Assets/Resources/Images/";
+
+        // Bump this if you change the settings below and want Unity to reimport affected textures.
+        public override uint GetVersion() => 1;
+
+        private void OnPreprocessTexture()
+        {
+            if (!assetPath.StartsWith(ResourceImagesRoot, System.StringComparison.Ordinal)) return;
+
+            TextureImporter importer = (TextureImporter)assetImporter;
+
+            // Only configure brand-new files (no .meta yet), so manual Inspector changes are kept.
+            if (!importer.importSettingsMissing) return;
+
+            importer.textureType = TextureImporterType.Sprite;
+            importer.spriteImportMode = SpriteImportMode.Single;
+            importer.spritePixelsPerUnit = 1;
+            importer.mipmapEnabled = false;
+
+            // Optional: compression is the most expensive part of a texture import.
+            // Uncompressed imports much faster but uses ~4x more memory / Library space.
+            // The game export uses the raw files in Projects/, so this only affects the editor preview.
+            // importer.textureCompression = TextureImporterCompression.Uncompressed;
+
+            TextureImporterSettings settings = new TextureImporterSettings();
+            importer.ReadTextureSettings(settings);
+            settings.spriteAlignment = (int)SpriteAlignment.TopLeft;
+            settings.spriteMeshType = SpriteMeshType.FullRect;          // skip tight-mesh outline generation
+            settings.spriteGenerateFallbackPhysicsShape = false;        // skip physics shape generation
+            importer.SetTextureSettings(settings);
         }
     }
 }

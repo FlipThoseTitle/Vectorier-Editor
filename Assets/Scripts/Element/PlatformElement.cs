@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Xml;
 using Vectorier.XML;
+using Vectorier.Component;
 
 namespace Vectorier.Element
 {
@@ -81,6 +82,21 @@ namespace Vectorier.Element
             platformObject.tag = "Platform";
             spriteRenderer.sortingLayerName = "OnTop";
             spriteRenderer.sortingOrder = 0;
+
+            return platformObject;
+        }
+
+        public static GameObject Create(Transform parent, PlatformComponent.SurfaceType surfaceType)
+        {
+            GameObject platformObject = Create(parent);
+
+            // Default 1x1 is smaller than the corner sprites, so the textures overlap and look broken. 3 gives them room
+            platformObject.transform.localScale = new Vector3(3f, 3f, 1f);
+
+            // Just the settings here. The textures get built on the editor side (PlatformSurfaceBuilder),
+            // this file has to stay runtime-safe
+            PlatformComponent platformComponent = platformObject.AddComponent<PlatformComponent>();
+            platformComponent.Type = surfaceType;
 
             return platformObject;
         }

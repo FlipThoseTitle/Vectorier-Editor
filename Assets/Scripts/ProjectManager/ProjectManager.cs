@@ -28,6 +28,7 @@ namespace Vectorier.ProjectManager
         // Selected Project Data
         private Texture2D thumbnailTexture;
         private string currentProjectName = "";
+        private string currentAuthor = "";
         private string currentDescription = "";
 
         // Track changes to prevent saving on every keystroke
@@ -108,6 +109,10 @@ namespace Vectorier.ProjectManager
                     break; // Stop looking once we find a valid thumbnail
                 }
             }
+
+            // Load Author
+            string authorPath = $"{ProjectsFolderPath}/{projectName}/author.txt";
+            currentAuthor = File.Exists(authorPath) ? File.ReadAllText(authorPath).Trim() : "";
 
             // Load Description
             string descPath = $"{ProjectsFolderPath}/{projectName}/description.txt";
@@ -277,6 +282,19 @@ namespace Vectorier.ProjectManager
             {
                 RenameProject();
             }
+            GUILayout.Space(10);
+
+            // --- Author ---
+            GUILayout.Label("Author", EditorStyles.boldLabel);
+
+            EditorGUI.BeginChangeCheck();
+            string newAuthor = EditorGUILayout.DelayedTextField(currentAuthor);
+            if (EditorGUI.EndChangeCheck())
+            {
+                currentAuthor = newAuthor.Trim();
+                File.WriteAllText($"{ProjectsFolderPath}/{selectedProject}/author.txt", currentAuthor);
+            }
+
             GUILayout.Space(10);
 
             // --- Description ---

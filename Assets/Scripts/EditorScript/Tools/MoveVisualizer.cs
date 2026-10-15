@@ -12,6 +12,8 @@ namespace Vectorier.EditorScript.Tools
 {
     public class MoveVisualizer : EditorWindow
     {
+        Vector2 mainScrollPosition;
+
         // ================= ENUMS ================= //
 
         enum PlacementMode { Movement, Tricks, Custom }
@@ -67,8 +69,11 @@ namespace Vectorier.EditorScript.Tools
             { MovementType.FlyCollision, "fly_collision.bin" }
         };
 
+        static readonly string[] PivotNodePresets = { "NPivot", "DetectorH", "DetectorV" };
+
         // ================= UI STATE ================= //
         public static MoveVisualizer Instance { get; private set; }
+        public static bool IsPlacementActive => Instance != null && Instance.placementEnabled;
 
         string pivotNodeName = "NPivot";
 
@@ -81,6 +86,7 @@ namespace Vectorier.EditorScript.Tools
         string customBinPath;
 
         bool placementEnabled;
+        bool platformSnapHeld;
 
         string modelXmlPath = DEFAULT_MODEL_XML_PATH;
         bool renderModel = true;
@@ -172,7 +178,7 @@ namespace Vectorier.EditorScript.Tools
                 throw new FileNotFoundException($"Animation bin not found: {binFullPath}");
 
             return new TrickMovePreviewData
-            {   
+            {
                 FirstFrame = firstFrame,
                 FileName = fileName,
                 PivotNode = pivotNode,
@@ -250,7 +256,7 @@ namespace Vectorier.EditorScript.Tools
             float targetPivotX = reverse
                 ? bounds.min.x - finalXOffset - comToPivotX
                 : bounds.max.x + finalXOffset - comToPivotX;
-                
+
             float targetPivotY = bounds.min.y;
 
             return new Vector3(
@@ -281,22 +287,22 @@ namespace Vectorier.EditorScript.Tools
         public static List<Vector3> GetDetectorSnapPoints()
         {
             List<Vector3> points = new List<Vector3>();
-            
+
             // Check if the window is open, an animation is placed, and Render Edges is enabled
             if (Instance == null || !Instance.isPlaced || Instance.modelDebug == null || !Instance.modelDebug.RenderEdges || Instance.animation == null)
                 return points;
 
             Vector3? detH = Instance.animation.GetAnimationNodeWorldPosition("DetectorH");
-            if (detH.HasValue) 
+            if (detH.HasValue)
                 points.Add(detH.Value);
-                
+
             Vector3? detV = Instance.animation.GetAnimationNodeWorldPosition("DetectorV");
-            if (detV.HasValue) 
+            if (detV.HasValue)
                 points.Add(detV.Value);
 
             return points;
         }
-        
+
         // ================= WINDOW ================= //
 
         [MenuItem("Vectorier/Tools/▶  Move Visualizer", false, 25)]
@@ -340,8 +346,8 @@ namespace Vectorier.EditorScript.Tools
 
                 placementEnabled = false;
 
-                placementHostTransform = spawnComponent.transform.parent != null 
-                    ? spawnComponent.transform.parent 
+                placementHostTransform = spawnComponent.transform.parent != null
+                    ? spawnComponent.transform.parent
                     : spawnComponent.transform;
 
                 animation.StartFrame = previewData.FirstFrame;
@@ -389,7 +395,7 @@ namespace Vectorier.EditorScript.Tools
             string[] parts = spawnComponent.Animation.Split('|');
             string animationName = parts[0];
             int startFrame = 0;
-            
+
             if (parts.Length > 1)
                 int.TryParse(parts[1], out startFrame);
 
@@ -414,7 +420,7 @@ namespace Vectorier.EditorScript.Tools
             {
                 // General Case: Read from moves.xml
                 string resolvedMovesXmlPath = ResolveMovesXmlPath();
-                
+
                 if (string.IsNullOrWhiteSpace(resolvedMovesXmlPath) || !File.Exists(resolvedMovesXmlPath))
                     throw new FileNotFoundException($"moves.xml not found: {resolvedMovesXmlPath}");
 
@@ -431,7 +437,7 @@ namespace Vectorier.EditorScript.Tools
                     throw new Exception($"Could not find <Moves><{animationName} ... /> in moves.xml.");
 
                 fileName = (string)moveElement.Attribute("FileName");
-                
+
                 if (string.IsNullOrWhiteSpace(fileName))
                     throw new Exception($"Move '{animationName}' does not have a FileName attribute.");
 
@@ -474,7 +480,7 @@ namespace Vectorier.EditorScript.Tools
         void OnEnable()
         {
             Instance = this;
-            
+
             SceneView.duringSceneGui += OnSceneGUI;
             EditorApplication.update += UpdatePlayback;
 
@@ -488,7 +494,7 @@ namespace Vectorier.EditorScript.Tools
         void OnDisable()
         {
             if (Instance == this) Instance = null;
-            
+
             SceneView.duringSceneGui -= OnSceneGUI;
             EditorApplication.update -= UpdatePlayback;
 
@@ -511,6 +517,8 @@ namespace Vectorier.EditorScript.Tools
 
             bool hasSelectedTrickArea = selectedAreaComponent != null &&
                                         selectedAreaComponent.Type == AreaComponent.AreaType.Trick;
+
+            mainScrollPosition = EditorGUILayout.BeginScrollView(mainScrollPosition);
 
             GUILayout.Space(5);
             EditorGUILayout.LabelField("XML Path", EditorStyles.boldLabel);
@@ -566,7 +574,7 @@ namespace Vectorier.EditorScript.Tools
 
                 DrawPlacementModeUI();
 
-                pivotNodeName = EditorGUILayout.TextField("Pivot Node", pivotNodeName);
+                DrawPivotNodeField();
                 stayInPlace = EditorGUILayout.Toggle("Stay In Place", stayInPlace);
             }
             else
@@ -593,6 +601,13 @@ namespace Vectorier.EditorScript.Tools
                 else
                 {
                     placementEnabled = !placementEnabled;
+                    platformSnapHeld = false;
+
+                    if (!placementEnabled)
+                    {
+                        animation.ClearPreview();
+                        SceneView.RepaintAll();
+                    }
                 }
             }
 
@@ -667,6 +682,8 @@ namespace Vectorier.EditorScript.Tools
 
             GUI.enabled = true;
 
+            EditorGUILayout.EndScrollView();
+
             if (!renderModel && modelRenderer != null && modelRenderer.RootObject != null)
             {
                 modelDebug?.Destroy();
@@ -705,6 +722,35 @@ namespace Vectorier.EditorScript.Tools
                 case PlacementMode.Tricks:
                     DrawTrickSelectionUI();
                     break;
+            }
+        }
+
+        void DrawPivotNodeField()
+        {
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                EditorGUILayout.PrefixLabel("Pivot Node");
+
+                Rect dropdownRect = GUILayoutUtility.GetRect(20, 18, GUILayout.Width(20));
+                if (EditorGUI.DropdownButton(dropdownRect, GUIContent.none, FocusType.Passive))
+                {
+                    GenericMenu menu = new GenericMenu();
+
+                    foreach (string preset in PivotNodePresets)
+                    {
+                        string value = preset;
+                        menu.AddItem(new GUIContent(value), pivotNodeName == value, () =>
+                        {
+                            pivotNodeName = value;
+                            GUI.FocusControl(null); // drop text field focus so the new value shows
+                            Repaint();
+                        });
+                    }
+
+                    menu.DropDown(dropdownRect);
+                }
+
+                pivotNodeName = EditorGUILayout.TextField(pivotNodeName);
             }
         }
 
@@ -761,8 +807,8 @@ namespace Vectorier.EditorScript.Tools
                 {
                     GameObject childObj = comp.gameObject;
 
-                    if (childObj != selectedObject && 
-                        childObj.name == selectedObject.name && 
+                    if (childObj != selectedObject &&
+                        childObj.name == selectedObject.name &&
                         childObj.CompareTag("Area"))
                     {
                         selectedAreaComponent = comp;
@@ -799,8 +845,8 @@ namespace Vectorier.EditorScript.Tools
 
                 placementEnabled = false;
 
-                placementHostTransform = areaComponent.transform.parent != null 
-                    ? areaComponent.transform.parent 
+                placementHostTransform = areaComponent.transform.parent != null
+                    ? areaComponent.transform.parent
                     : areaComponent.transform;
 
                 animation.StartFrame = previewData.FirstFrame;
@@ -853,18 +899,45 @@ namespace Vectorier.EditorScript.Tools
 
         void HandlePlacementInput()
         {
+            Event e = Event.current;
+
+            // Hold C to stick the pivot to platforms
+            if (e.type == EventType.KeyDown && e.keyCode == KeyCode.C)
+            {
+                platformSnapHeld = true;
+                e.Use();
+            }
+            else if (e.type == EventType.KeyUp && e.keyCode == KeyCode.C)
+            {
+                platformSnapHeld = false;
+                e.Use();
+            }
+
             animation.EnsureModelLoadedForPreview(ResolveXmlPath());
 
             Transform parentTransform = GetPreviewParentTransform();
             Vector3 cursorWorldPosition = GetCursorWorldPositionOnZPlane();
+            Vector3 targetPosition = cursorWorldPosition;
 
-            animation.UpdatePreview(cursorWorldPosition, parentTransform, pivotNodeName);
-
-            if (Event.current.type == EventType.MouseDown && Event.current.button == 0)
+            if (platformSnapHeld &&
+                TransformSnap.TryGetPlatformSnapPoint(cursorWorldPosition, out Vector3 snapped, out bool isCorner))
             {
-                PlaceAt(cursorWorldPosition);
+                targetPosition = new Vector3(snapped.x, snapped.y, cursorWorldPosition.z);
+
+                Color prev = Handles.color;
+                Handles.color = isCorner ? Color.yellow : Color.cyan;
+                Handles.DrawLine(cursorWorldPosition, targetPosition, 2f);
+                Handles.DrawSolidDisc(targetPosition, Vector3.forward, HandleUtility.GetHandleSize(targetPosition) * 0.06f);
+                Handles.color = prev;
+            }
+
+            animation.UpdatePreview(targetPosition, parentTransform, pivotNodeName);
+
+            if (e.type == EventType.MouseDown && e.button == 0)
+            {
+                PlaceAt(targetPosition);
                 animation.ClearPreview();
-                Event.current.Use();
+                e.Use();
             }
 
             SceneView.RepaintAll();
@@ -985,7 +1058,7 @@ namespace Vectorier.EditorScript.Tools
         public string PivotNode;
         public string BinFullPath;
         public Vector3 WorldPosition;
-        
+
     }
 
     sealed class SpawnMovePreviewData
