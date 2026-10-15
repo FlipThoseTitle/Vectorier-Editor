@@ -100,7 +100,7 @@ namespace Vectorier.Parallax
             EditorSceneManager.sceneSaved -= OnSceneSaved;
         }
 
-        // Never save parallaxed positions, stop before the save, start again after.
+        // Never save parallaxed positions: stop before the save, start again after.
         private void OnSceneSaving(Scene scene, string path)
         {
             if (_isActive)
@@ -238,52 +238,66 @@ namespace Vectorier.Parallax
         {
             targetParallax = null;
 
-            var candidates = FindObjectsByType<Parallax>(FindObjectsSortMode.None);
-            var taggedCameraObjects = GameObject.FindGameObjectsWithTag("Camera");
-
-            // The Camera tag decides. Two tagged objects is ambiguous, even if only one has Parallax.
-            if (taggedCameraObjects.Length > 1)
+            // The Camera tag decides. Older scenes may not tag it, so fall back to Parallax components.
+            var cameras = GameObject.FindGameObjectsWithTag("Camera");
+            if (cameras.Length == 0)
             {
-                EditorUtility.DisplayDialog(
-                    "Parallax",
-                    "There are multiple GameObjects tagged 'Camera' in the scene. " +
-                    "Tag exactly one camera before starting Parallax.",
-                    "OK");
-                Debug.LogError("Parallax could not start because multiple GameObjects are tagged 'Camera'.");
-                return false;
+                cameras = FindObjectsByType<Parallax>(FindObjectsSortMode.None)
+                    .Select(p => p.gameObject)
+                    .ToArray();
             }
 
-            if (taggedCameraObjects.Length == 1)
-            {
-                targetParallax = taggedCameraObjects[0].GetComponent<Parallax>();
-                if (targetParallax != null) return true;
-            }
-
-            // Older scenes may not tag the camera. Fine, as long as there's only one Parallax.
-            if (candidates.Length == 1)
-            {
-                targetParallax = candidates[0];
-                return true;
-            }
-
-            if (candidates.Length == 0)
+            if (cameras.Length == 0)
             {
                 EditorUtility.DisplayDialog(
                     "Parallax",
                     "There are no cameras with a Parallax component in the scene!",
                     "OK");
+                return false;
             }
-            else
+
+            GameObject chosen = null;
+            if (cameras.Length == 1)
+                chosen = cameras[0];
+            else if (cameras.Length == 2)
+                chosen = PickCommonModeCamera(cameras[0], cameras[1]);
+
+            if (chosen == null)
             {
                 EditorUtility.DisplayDialog(
                     "Parallax",
-                    "Multiple Parallax components were found, but none is assigned to the 'Camera' tag. " +
-                    "Tag exactly one camera to choose the Parallax camera.",
+                    "Parallax couldn't decide which camera to use.\n\n" +
+                    "A level can have either one camera, or two cameras that both have a Selection Component: " +
+                    "one set to CommonMode and one set to HunterMode.",
                     "OK");
-                Debug.LogError("Parallax could not start because multiple Parallax components exist without a unique 'Camera' tag.");
+                Debug.LogError($"Parallax could not start: found {cameras.Length} cameras, " +
+                               "expected one camera or a CommonMode + HunterMode pair.");
+                return false;
             }
 
-            return false;
+            targetParallax = chosen.GetComponent<Parallax>();
+            if (targetParallax == null)
+            {
+                EditorUtility.DisplayDialog(
+                    "Parallax",
+                    $"The camera '{chosen.name}' has no Parallax component.",
+                    "OK");
+                return false;
+            }
+
+            return true;
+        }
+
+        // Two cameras are only valid as one per mode. Parallax previews the CommonMode one.
+        private static GameObject PickCommonModeCamera(GameObject a, GameObject b)
+        {
+            var selectionA = a.GetComponent<Vectorier.Component.SelectionComponent>();
+            var selectionB = b.GetComponent<Vectorier.Component.SelectionComponent>();
+
+            if (selectionA == null || selectionB == null || selectionA.Variant == selectionB.Variant)
+                return null;
+
+            return selectionA.Variant == Vectorier.Component.SelectionComponent.SelectionVariant.CommonMode ? a : b;
         }
 
         private void StartParallax()
@@ -453,7 +467,7 @@ namespace Vectorier.Parallax
         // Untagged objects (folders) are looked through. The first tagged object in a branch
         // is the target and its children just follow it, whatever their layer. At zoom 1,
         // tagged Default / "1" objects wouldn't move anyway, so they're skipped with everything under them.
-        // Inactive objects count too, otherwise enabling one midparallax would make it jump.
+        // Inactive objects count too, otherwise enabling one mid-parallax would make it jump.
         private List<Transform> CollectTargetTransforms()
         {
             var tags = new HashSet<string>(
@@ -486,7 +500,7 @@ namespace Vectorier.Parallax
                 CollectRecursive(t.GetChild(i), tags, skipFactor1, result);
         }
 
-        // Layer names are the factor 0.5. Anything that doesn't parse, like Default, counts as 1.
+        // Layer names are the factor ("0.5"). Anything that doesn't parse, like Default, counts as 1.
         private float GetLayerFactor(int layer)
         {
             if (!_layerFactorCache.TryGetValue(layer, out float factor))
@@ -545,8 +559,8 @@ namespace Vectorier.Parallax
             _targets[index].knownLayerScale = scale;
         }
 
-        // Cheap enough to run every frame, so changes to tracked objects dont wait for the throttled rescan
-        // Reparenting must be caught before SyncLayerSpace, or Unity localScale fixup looks like a user scale
+        // Cheap enough to run every frame, so changes to tracked objects don't wait for the throttled rescan.
+        // Reparenting must be caught before SyncLayerSpace, or Unity's localScale fix-up looks like a user scale.
         private void DetectStructureChanges()
         {
             foreach (var target in _targets)
@@ -580,7 +594,7 @@ namespace Vectorier.Parallax
 
                 if (target.transform == null || !wanted.Contains(target.transform))
                 {
-                    // Dropped because zoom went back to 1, it has to go back to its real size.
+                    // Dropped because zoom went back to 1: it has to go back to its real size.
                     // Any other reason (deleted, untagged, moved under another target) it stays
                     // where it is on screen, which is correct when a parent now carries it.
                     if (zoomTransition && target.transform != null && target.hasApplied)
