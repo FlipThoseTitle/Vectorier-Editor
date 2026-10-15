@@ -9,6 +9,14 @@ namespace Vectorier.ProjectManager
     {
         private const string ProjectsFolderPath = "./Projects";
         private const string UndeletableProject = "Vector";
+        // Folders (relative to the project root) whose .gitkeep should be removed after copying the template
+        private static readonly string[] GitKeepFolders =
+        {
+            "animations/data",
+            "icons/locations",
+            "icons/stories",
+            "xmlroot/levels"
+        };
 
         private List<string> projectList = new List<string>();
         private string selectedProject = null;
@@ -16,7 +24,7 @@ namespace Vectorier.ProjectManager
         // UI State
         private Vector2 leftScrollPosition;
         private Vector2 rightScrollPosition;
-        
+
         // Selected Project Data
         private Texture2D thumbnailTexture;
         private string currentProjectName = "";
@@ -51,7 +59,7 @@ namespace Vectorier.ProjectManager
             {
                 Directory.CreateDirectory(ProjectsFolderPath);
             }
-            
+
             string undeletablePath = $"{ProjectsFolderPath}/{UndeletableProject}";
             if (!Directory.Exists(undeletablePath))
             {
@@ -111,9 +119,9 @@ namespace Vectorier.ProjectManager
             {
                 currentDescription = "";
             }
-            
+
             // Remove focus from text fields to avoid typing into a newly selected project
-            GUI.FocusControl(null); 
+            GUI.FocusControl(null);
         }
 
         private void CheckAndSaveDirtyDescription()
@@ -188,12 +196,12 @@ namespace Vectorier.ProjectManager
             {
                 // Highlight the selected project
                 GUI.backgroundColor = (proj == selectedProject) ? new Color(0.3f, 0.6f, 1f) : Color.white;
-                
+
                 if (GUILayout.Button(proj, EditorStyles.toolbarButton, GUILayout.Height(25)))
                 {
                     LoadProjectData(proj);
                 }
-                
+
                 GUI.backgroundColor = Color.white; // Reset color
             }
             GUILayout.EndScrollView();
@@ -218,19 +226,19 @@ namespace Vectorier.ProjectManager
             // --- Thumbnail (16:9 Aspect Ratio) ---
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
-            
+
             Texture displayTex = thumbnailTexture != null ? thumbnailTexture : EditorGUIUtility.whiteTexture;
-            
+
             // Define 16:9 dimensions
             float imgWidth = 320f;
-            float imgHeight = imgWidth / (16f / 9f); 
-            
+            float imgHeight = imgWidth / (16f / 9f);
+
             // Reserve space for the image
             Rect imageRect = GUILayoutUtility.GetRect(imgWidth, imgHeight, GUILayout.Width(imgWidth), GUILayout.Height(imgHeight));
-            
+
             // Draw the texture fitted inside the 16:9 box without stretching
             GUI.DrawTexture(imageRect, displayTex, ScaleMode.ScaleToFit);
-            
+
             // Overlay an invisible button to capture clicks
             if (GUI.Button(imageRect, new GUIContent("", "Click to select a new thumbnail (.png, .jpg, .jpeg)"), GUIStyle.none))
             {
@@ -243,28 +251,28 @@ namespace Vectorier.ProjectManager
                     SelectAndCopyThumbnail();
                 }
             }
-            
+
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
-            
+
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
             GUILayout.Label("Image (Click to change)", EditorStyles.miniLabel);
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
-            
+
             GUILayout.Space(15);
 
             // --- Name ---
             GUILayout.Label("Name", EditorStyles.boldLabel);
-            
+
             EditorGUI.BeginDisabledGroup(selectedProject == UndeletableProject);
-            
+
             EditorGUI.BeginChangeCheck();
-            
+
             // DelayedTextField only registers changes when Enter is pressed or focus is lost
             currentProjectName = EditorGUILayout.DelayedTextField(currentProjectName);
-            
+
             if (EditorGUI.EndChangeCheck())
             {
                 RenameProject();
@@ -273,22 +281,22 @@ namespace Vectorier.ProjectManager
 
             // --- Description ---
             GUILayout.Label("Description", EditorStyles.boldLabel);
-            
+
             GUI.SetNextControlName("DescriptionTextArea");
-            
+
             // Define a custom GUIStyle that forces word wrapping
             GUIStyle textAreaStyle = new GUIStyle(EditorStyles.textArea);
             textAreaStyle.wordWrap = true;
-            
+
             string newDescription = EditorGUILayout.TextArea(currentDescription, textAreaStyle, GUILayout.Height(80));
-            
+
             // Only flag as dirty if the text actually changed
             if (newDescription != currentDescription)
             {
                 currentDescription = newDescription;
                 isDescriptionDirty = true;
             }
-            
+
             EditorGUI.EndDisabledGroup();
 
             if (isDescriptionDirty && GUI.GetNameOfFocusedControl() != "DescriptionTextArea")
@@ -299,8 +307,8 @@ namespace Vectorier.ProjectManager
             GUILayout.Space(20);
 
             // --- Action Buttons ---
-            if (GUILayout.Button("Edit Project", GUILayout.Height(35))) 
-            { 
+            if (GUILayout.Button("Edit Project", GUILayout.Height(35)))
+            {
                 if (selectedProject == UndeletableProject)
                 {
                     EditorUtility.DisplayDialog("Action Denied", $"The project '{UndeletableProject}' isn't editable.", "OK");
@@ -313,14 +321,14 @@ namespace Vectorier.ProjectManager
             }
 
             GUILayout.Space(5);
-            if (GUILayout.Button("Apply to Snail Runner", GUILayout.Height(35))) 
-            { 
+            if (GUILayout.Button("Apply to Snail Runner", GUILayout.Height(35)))
+            {
                 ProjectManagerApply.ApplyProject(selectedProject);
             }
 
             GUILayout.Space(5);
-            if (GUILayout.Button("Publish as Mod...", GUILayout.Height(35))) 
-            { 
+            if (GUILayout.Button("Publish as Mod...", GUILayout.Height(35)))
+            {
                 ProjectManagerPublish.ShowWindow(selectedProject);
                 this.Close();
             }
@@ -334,7 +342,7 @@ namespace Vectorier.ProjectManager
         private void CreateNewProject()
         {
             EditorUtility.DisplayProgressBar("Creating Project", "Initializing...", 0f);
-            
+
             try
             {
                 string baseName = "New Project";
@@ -347,7 +355,7 @@ namespace Vectorier.ProjectManager
                     counter++;
                 }
 
-                string sourcePath = "Assets/Editor/ProjectManager/ProjectTemplate"; 
+                string sourcePath = "Assets/Editor/ProjectManager/ProjectTemplate";
                 string newProjectPath = $"{ProjectsFolderPath}/{newName}";
 
                 EditorUtility.DisplayProgressBar("Creating Project", $"Copying files for '{newName}'...", 0.5f);
@@ -355,6 +363,9 @@ namespace Vectorier.ProjectManager
                 if (AssetDatabase.IsValidFolder(sourcePath))
                 {
                     FileUtil.CopyFileOrDirectory(sourcePath, newProjectPath);
+
+                    EditorUtility.DisplayProgressBar("Creating Project", "Cleaning up placeholder files...", 0.75f);
+                    RemoveGitKeepFiles(newProjectPath);
                 }
                 else
                 {
@@ -401,7 +412,7 @@ namespace Vectorier.ProjectManager
                     EditorUtility.DisplayProgressBar("Duplicating Project", "Refreshing project list...", 0.9f);
 
                     RefreshProjectList();
-                    LoadProjectData(newName); 
+                    LoadProjectData(newName);
                 }
                 catch (System.Exception e)
                 {
@@ -433,12 +444,12 @@ namespace Vectorier.ProjectManager
                 }
 
                 string imagesPath = $"Assets/Resources/Images/{selectedProject}";
-                
+
                 if (AssetDatabase.IsValidFolder(imagesPath))
                 {
                     AssetDatabase.DeleteAsset(imagesPath);
                 }
-                else if (Directory.Exists(imagesPath)) 
+                else if (Directory.Exists(imagesPath))
                 {
                     Directory.Delete(imagesPath, true);
                     string metaFile = $"{imagesPath}.meta";
@@ -447,10 +458,10 @@ namespace Vectorier.ProjectManager
                         File.Delete(metaFile);
                     }
                 }
-                
+
                 selectedProject = null;
                 RefreshProjectList();
-                
+
                 AssetDatabase.Refresh();
             }
         }
@@ -458,18 +469,18 @@ namespace Vectorier.ProjectManager
         private void RenameProject()
         {
             string sanitizedName = currentProjectName.Trim();
-            
+
             if (string.IsNullOrEmpty(sanitizedName) || sanitizedName == selectedProject) return;
 
             if (selectedProject == UndeletableProject)
             {
-                currentProjectName = selectedProject; 
+                currentProjectName = selectedProject;
                 EditorUtility.DisplayDialog("Action Denied", $"The project '{UndeletableProject}' cannot be renamed.", "OK");
                 return;
             }
 
             // Check for protected names
-            if (sanitizedName.Equals("Vector", System.StringComparison.OrdinalIgnoreCase) || 
+            if (sanitizedName.Equals("Vector", System.StringComparison.OrdinalIgnoreCase) ||
                 sanitizedName.Equals("Editor", System.StringComparison.OrdinalIgnoreCase))
             {
                 EditorUtility.DisplayDialog("Action Denied", $"You cannot name it {sanitizedName}!", "OK");
@@ -489,22 +500,22 @@ namespace Vectorier.ProjectManager
             catch (System.Exception e)
             {
                 Debug.LogWarning($"Failed to rename project: {e.Message}");
-                currentProjectName = selectedProject; 
+                currentProjectName = selectedProject;
             }
         }
 
         private void SelectAndCopyThumbnail()
         {
             string absolutePath = EditorUtility.OpenFilePanelWithFilters(
-                "Select Project Thumbnail", 
-                "", 
+                "Select Project Thumbnail",
+                "",
                 new string[] { "Image Files", "png,jpg,jpeg", "All files", "*" }
             );
-            
+
             if (!string.IsNullOrEmpty(absolutePath))
             {
                 string projPath = $"{ProjectsFolderPath}/{selectedProject}";
-                
+
                 string[] possibleExtensions = { ".png", ".jpg", ".jpeg" };
                 foreach (string ext in possibleExtensions)
                 {
@@ -517,9 +528,36 @@ namespace Vectorier.ProjectManager
 
                 string newExtension = Path.GetExtension(absolutePath).ToLower();
                 string destinationPath = $"{projPath}/thumbnail{newExtension}";
-                
+
                 File.Copy(absolutePath, destinationPath, true);
                 LoadProjectData(selectedProject);
+            }
+        }
+
+        // --- Helpers ---
+
+        private void RemoveGitKeepFiles(string projectPath)
+        {
+            foreach (string folder in GitKeepFolders)
+            {
+                string gitKeepPath = Path.Combine(projectPath, folder, ".gitkeep");
+                try
+                {
+                    if (File.Exists(gitKeepPath))
+                    {
+                        File.Delete(gitKeepPath);
+                    }
+
+                    string metaPath = gitKeepPath + ".meta";
+                    if (File.Exists(metaPath))
+                    {
+                        File.Delete(metaPath);
+                    }
+                }
+                catch (System.Exception e)
+                {
+                    Debug.LogWarning($"Failed to remove '{gitKeepPath}': {e.Message}");
+                }
             }
         }
     }
