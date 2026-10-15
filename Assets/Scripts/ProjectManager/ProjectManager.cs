@@ -7,8 +7,8 @@ namespace Vectorier.ProjectManager
 {
     public class ProjectManager : EditorWindow
     {
-        private const string ProjectsFolderPath = "./Projects";
-        private const string UndeletableProject = "Vector";
+        private const string ProjectsFolderPath = ActiveProject.ProjectsFolderPath;
+        private const string UndeletableProject = ActiveProject.DefaultProject;
         // Folders (relative to the project root) whose .gitkeep should be removed after copying the template
         private static readonly string[] GitKeepFolders =
         {
@@ -46,13 +46,18 @@ namespace Vectorier.ProjectManager
         {
             EnsureDirectories();
             RefreshProjectList();
+            ActiveProject.Changed += OnActiveProjectChanged;
         }
 
         private void OnDisable()
         {
+            ActiveProject.Changed -= OnActiveProjectChanged;
+
             // Ensure we save the description if the user closes the window while typing
             CheckAndSaveDirtyDescription();
         }
+
+        private void OnActiveProjectChanged(string _) => Repaint();
 
         private void EnsureDirectories()
         {
@@ -168,6 +173,7 @@ namespace Vectorier.ProjectManager
             GUILayout.Space(10);
 
             GUILayout.Label("Project List", EditorStyles.boldLabel);
+            GUILayout.Label($"Active: {ActiveProject.Name}", EditorStyles.miniLabel);
 
             // Add/Remove/Duplicate Buttons
             GUILayout.BeginHorizontal();
@@ -196,13 +202,18 @@ namespace Vectorier.ProjectManager
             GUILayout.Space(5);
 
             // Project List Scroll View
+            string activeName = ActiveProject.Name;
             leftScrollPosition = GUILayout.BeginScrollView(leftScrollPosition, "box");
             foreach (string proj in projectList)
             {
                 // Highlight the selected project
                 GUI.backgroundColor = (proj == selectedProject) ? new Color(0.3f, 0.6f, 1f) : Color.white;
 
-                if (GUILayout.Button(proj, EditorStyles.toolbarButton, GUILayout.Height(25)))
+                // Mark the active project with a star
+                string label = proj == activeName ? $"★ {proj}" : proj;
+
+                if (GUILayout.Button(new GUIContent(label, proj == activeName ? "Active project" : null),
+                        EditorStyles.toolbarButton, GUILayout.Height(25)))
                 {
                     LoadProjectData(proj);
                 }
@@ -324,6 +335,17 @@ namespace Vectorier.ProjectManager
 
             GUILayout.Space(20);
 
+            // --- Active Project ---
+            bool isActive = selectedProject == ActiveProject.Name;
+            EditorGUI.BeginDisabledGroup(isActive);
+            if (GUILayout.Button(isActive ? "★ Active Project" : "Set as Active Project", GUILayout.Height(35)))
+            {
+                ActiveProject.Set(selectedProject);
+            }
+            EditorGUI.EndDisabledGroup();
+
+            GUILayout.Space(5);
+
             // --- Action Buttons ---
             if (GUILayout.Button("Edit Project", GUILayout.Height(35)))
             {
@@ -333,6 +355,8 @@ namespace Vectorier.ProjectManager
                 }
                 else
                 {
+                    // Editing a project scopes the editor to it
+                    ActiveProject.Set(selectedProject);
                     ProjectManagerSelection.ShowWindow(selectedProject);
                     this.Close();
                 }
@@ -477,6 +501,9 @@ namespace Vectorier.ProjectManager
                     }
                 }
 
+                // If the deleted project was active, fall back to the default project
+                ActiveProject.HandleDeleted(selectedProject);
+
                 selectedProject = null;
                 RefreshProjectList();
 
@@ -506,13 +533,18 @@ namespace Vectorier.ProjectManager
                 return;
             }
 
-            string oldPath = $"{ProjectsFolderPath}/{selectedProject}";
+            string oldName = selectedProject;
+            string oldPath = $"{ProjectsFolderPath}/{oldName}";
             string newPath = $"{ProjectsFolderPath}/{sanitizedName}";
 
             try
             {
                 Directory.Move(oldPath, newPath);
                 selectedProject = sanitizedName;
+
+                // Keep the active project pointing at the renamed folder
+                ActiveProject.HandleRenamed(oldName, sanitizedName);
+
                 RefreshProjectList();
             }
             catch (System.Exception e)
