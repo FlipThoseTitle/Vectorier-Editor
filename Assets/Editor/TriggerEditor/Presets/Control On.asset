@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 03f2a7d21bf0be946b6957927c9796a3, type: 3}
+  m_Name: Control On
+  m_EditorClassIdentifier: Assembly-CSharp::Vectorier.Trigger.TriggerPresetAsset
+  description: 
+  contentXml: "<Init>\n  <SetVariable Name=\"$Active\" Value=\"1\" />\n  <SetVariable
+    Name=\"$AI\" Value=\"0\" />\n  <SetVariable Name=\"$Node\" Value=\"COM\" />\n 
+    <SetVariable Name=\"Flag1\" Value=\"0\" />\n</Init>\n<Loop>\n  <Events>\n   
+    <Enter />\n  </Events>\n  <Actions>\n    <Control Switch=\"Off\" Model=\"_$Model\"
+    />\n  </Actions>\n</Loop>"
+  variableTypes: []

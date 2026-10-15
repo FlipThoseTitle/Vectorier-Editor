@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 03f2a7d21bf0be946b6957927c9796a3, type: 3}
+  m_Name: Fall Panic (Lose)
+  m_EditorClassIdentifier: Assembly-CSharp::Vectorier.Trigger.TriggerPresetAsset
+  description: 
+  contentXml: "<Init>\n  <SetVariable Name=\"$Active\" Value=\"1\" />\n  <SetVariable
+    Name=\"$AI\" Value=\"-1\" />\n  <SetVariable Name=\"$Node\" Value=\"COM\" />\n 
+    <SetVariable Name=\"Flag1\" Value=\"0\" />\n  <SetVariable Name=\"Time\" Value=\"120\"
+    />\n  <SetVariable Name=\"Start\" Value=\"FlyPanic\" />\n  <SetVariable Name=\"ReversedStart\"
+    Value=\"0\" />\n  <SetVariable Name=\"End\" Value=\"FlyPanic\" />\n  <SetVariable
+    Name=\"ReversedEnd\" Value=\"0\" />\n  <SetVariable Name=\"EndFrame\" Value=\"1\"
+    />\n  <SetVariable Name=\"StartFrame\" Value=\"1\" />\n</Init>\n<Loop Name=\"Player\">\n 
+    <Events>\n    <Enter />\n  </Events>\n  <Conditions>\n    <Equal Value1=\"?getModel[_$Model].AI\"
+    Value2=\"0\" />\n  </Conditions>\n  <Actions>\n    <EndGame Result=\"Loss\" Model=\"_$Model\"
+    Frames=\"_Time\" />\n    <ForceAnimation Name=\"_Start\" Model=\"_$Model\" Frame=\"_StartFrame\"
+    Reversed=\"_ReversedStart\" />\n  </Actions>\n</Loop>\n<Loop Name=\"Hunter\">\n 
+    <Events>\n    <Enter />\n  </Events>\n  <Conditions>\n    <Equal Value1=\"?getModel[_$Model].AI\"
+    Value2=\"0\" Not=\"1\" />\n  </Conditions>\n  <Actions>\n    <ForceAnimation
+    Name=\"_End\" Model=\"_$Model\" Frame=\"_EndFrame\" Reversed=\"_ReversedEnd\"
+    />\n  </Actions>\n</Loop>"
+  variableTypes: []
