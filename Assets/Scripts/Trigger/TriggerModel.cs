@@ -10,7 +10,7 @@ namespace Vectorier.Trigger
 
     public enum ValueMode { Literal, Variable, ModelProp, NodePos }
 
-    // one slot in a condition or an action, covers plain text, _Variable and the ?getModel queries
+    // A single attribute value: literal, _Variable or a ?getModel query.
     public class TValue
     {
         public ValueMode mode = ValueMode.Literal;
@@ -25,6 +25,8 @@ namespace Vectorier.Trigger
         public bool nodeIsVar = true;
         public string node = "$Node";
         public string coord = "worldPositionX";
+
+        public bool uiCustom;   // editor state, remembers "Custom" on the Zoom/AI popups
 
         public static TValue Literal(string s) => new TValue { mode = ValueMode.Literal, text = s ?? "" };
 
@@ -132,8 +134,8 @@ namespace Vectorier.Trigger
         public bool not;
         public TValue a = new TValue();
         public TValue b = new TValue();
-        public string type = "";        // rare Type="Bool" hint, preserved as-is
-        public bool altPair;            // Greater/Less written with Value1/Value2 instead of Value/Than
+        public string type = "";        // some files have Type="Bool", just pass it through
+        public bool altPair;            // Greater/Less that used Value1/Value2, write it back that way
 
         public string op = "And";       // group
         public List<TCond> children = new List<TCond>();
@@ -191,9 +193,8 @@ namespace Vectorier.Trigger
         public List<TCond> conds = new List<TCond>();
         public List<TAct> acts = new List<TAct>();
 
-        // kept so a file that was written a certain way comes back out the same way
-        public bool rootExplicit;                          // <Conditions> wrapped everything in <Operator Type="And">
-        public bool evTagForm, condTagForm, actTagForm;    // template sat on <Events>/<Conditions>/<Actions> itself
+        // round-trip only: the file had Template="..." directly on <Events>/<Conditions>/<Actions>
+        public bool evTagForm, condTagForm, actTagForm;
 
         public string raw = "";
 
@@ -215,11 +216,14 @@ namespace Vectorier.Trigger
     public class TVar
     {
         public string name = "NewVariable";
-        public string value = "0";
+        public string value = "";
+        public VType type = VType.String;
         public bool locked;
+        public bool uiCustom;   // editor only, see TValue.uiCustom
 
         public TVar() { }
         public TVar(string n, string v, bool locked = false) { name = n; value = v; this.locked = locked; }
+        public TVar(string n, string v, VType type) { name = n; value = v; this.type = type; }
     }
 
     // ================= Whole trigger =================
@@ -231,17 +235,27 @@ namespace Vectorier.Trigger
 
         public static readonly string[] LockedNames = { "$Active", "$AI", "$Node", "Flag1" };
 
+        public static bool IsLocked(string n) { return Array.IndexOf(LockedNames, n) >= 0; }
+
+        public static VType LockedType(string n)
+        {
+            switch (n)
+            {
+                case "$Active": return VType.Bool;
+                case "$AI": return VType.AI;
+                case "Flag1": return VType.Int;
+                default: return VType.String;
+            }
+        }
+
         public static TriggerData CreateDefault()
         {
             var d = new TriggerData();
-            d.vars.Add(new TVar("$Active", "1", true));
-            d.vars.Add(new TVar("$AI", "-1", true));
-            d.vars.Add(new TVar("$Node", "COM", true));
-            d.vars.Add(new TVar("Flag1", "0", true));
+            d.EnsureLockedVars();
             return d;
         }
 
-        // the four standard variables always exist and keep their order at the top
+        // make sure the 4 standard vars exist and stay at the top, in this order
         public void EnsureLockedVars()
         {
             for (int i = LockedNames.Length - 1; i >= 0; i--)
@@ -251,11 +265,12 @@ namespace Vectorier.Trigger
                 if (at < 0)
                 {
                     string def = n == "$Active" ? "1" : n == "$AI" ? "-1" : n == "$Node" ? "COM" : "0";
-                    vars.Insert(0, new TVar(n, def, true));
+                    vars.Insert(0, new TVar(n, def, true) { type = LockedType(n) });
                 }
                 else
                 {
                     vars[at].locked = true;
+                    vars[at].type = LockedType(n);
                     var v = vars[at];
                     vars.RemoveAt(at);
                     vars.Insert(0, v);
@@ -271,6 +286,15 @@ namespace Vectorier.Trigger
             for (int i = 0; i < TriggerCatalog.BuiltInVars.Length; i++)
                 if (!list.Contains(TriggerCatalog.BuiltInVars[i])) list.Add(TriggerCatalog.BuiltInVars[i]);
             return list;
+        }
+
+        public VType TypeOf(string name)
+        {
+            var v = vars.Find(x => x.name == name);
+            if (v != null) return v.type;
+            if (name == "$Model") return VType.Model;
+            if (name == "$Key") return VType.Key;
+            return VType.String;
         }
 
         public TriggerData Clone() => Parse(ToXml());
@@ -350,8 +374,9 @@ namespace Vectorier.Trigger
                 }
                 else
                 {
+                    // a single condition doesn't need the <Operator> wrapper
                     XmlElement parent = ce;
-                    bool wrap = L.rootOp == "Or" || L.rootExplicit;
+                    bool wrap = L.conds.Count > 1;
 
                     if (wrap)
                     {
@@ -499,7 +524,7 @@ namespace Vectorier.Trigger
                 return;
             }
 
-            // written in the order the catalog declares, so the xml reads the same every time
+            // catalog order, so the output doesn't shuffle around between saves
             for (int i = 0; i < def.ps.Length; i++)
             {
                 var pd = def.ps[i];
@@ -510,7 +535,7 @@ namespace Vectorier.Trigger
                 el.SetAttribute(pd.attr, v ?? "");
             }
 
-            // anything the catalog doesn't know about but the file had, kept anyway
+            // don't drop attributes we don't know about
             for (int i = 0; i < ps.Count; i++)
             {
                 bool known = false;
@@ -635,11 +660,10 @@ namespace Vectorier.Trigger
 
                 var kids = Elements(cond);
 
-                // a single top level Operator becomes the root And/Or instead of a nested group
+                // a lone top-level <Operator> is just the root And/Or, not a nested group
                 if (L.conds.Count == 0 && kids.Count == 1 && kids[0].Name == "Operator")
                 {
                     L.rootOp = kids[0].GetAttribute("Type") == "Or" ? "Or" : "And";
-                    L.rootExplicit = true;
                     foreach (var c in Elements(kids[0])) L.conds.Add(ReadCond(c));
                 }
                 else
@@ -661,7 +685,7 @@ namespace Vectorier.Trigger
                 foreach (var a in Elements(act)) L.acts.Add(ReadAct(a));
             }
 
-            // loose children like <Sound Name="_Sound"/> sitting straight under <Loop>
+            // some templates put actions straight under <Loop>, e.g. <Sound Name="_Sound"/>
             foreach (XmlNode n in le.ChildNodes)
             {
                 var e = n as XmlElement;

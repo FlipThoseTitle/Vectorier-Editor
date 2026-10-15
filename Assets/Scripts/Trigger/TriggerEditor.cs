@@ -3,6 +3,10 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 using Vectorier.Component;
+using Vectorier.Core;
+using Section = Vectorier.Trigger.TriggerTemplateLibrary.Section;
+using LoopInfo = Vectorier.Trigger.TriggerTemplateLibrary.LoopInfo;
+using UsingVar = Vectorier.Trigger.TriggerTemplateLibrary.UsingVar;
 
 namespace Vectorier.Trigger
 {
@@ -13,16 +17,18 @@ namespace Vectorier.Trigger
         const float RowH = 20f;
         const float SplitW = 5f;
         const float XmlH = 170f;
+        const float VarNameW = 78f;
+        const float VarTypeW = 78f;
 
         TriggerComponent target;
         TriggerData data = TriggerData.CreateDefault();
         bool dirty;
 
         readonly List<TriggerPresetAsset> presets = new List<TriggerPresetAsset>();
-        int presetIdx;                       // 0 is always Default
+        int presetIdx;                       // 0 = Default
         string presetName = "Default";
 
-        float leftW = 280f, loopsH = 260f;
+        float leftW = 330f, loopsH = 260f;
         bool dragV, dragH;
 
         string search = "";
@@ -38,12 +44,17 @@ namespace Vectorier.Trigger
         Vector2 rowDragStart;
 
         bool showXml;
-        Action pending;                      // list edits run after the layout pass
+        Action pending;                      // deferred edit, see ApplyPending
 
-        GUIStyle blockTitle, blockDesc, cardTitle, rowText, rowTextSel, rowIcon, rowIconSel, xmlStyle;
+        GUIStyle blockTitle, blockDesc, cardTitle, xmlStyle;
+        GUIStyle rowText, rowTextDark, rowTextSel, rowIcon, rowIconDark, rowIconSel;
+        GUIStyle summaryHead, summaryLine, missingStyle, toggleText;
+        bool stylesProSkin;
 
-        const int NoSel = -2;                 // "no selection change queued"
-        int pendingSel = NoSel;               // loop selection is applied on the next Layout, never mid-event
+        float paramLabelW = 78f;             // set per card by LabelW()
+
+        const int NoSel = -2;                 // -1 already means nothing selected
+        int pendingSel = NoSel;
         int hoverIdx = -1;
         bool multiSelected;
         string xmlCache = "";
@@ -53,6 +64,12 @@ namespace Vectorier.Trigger
         static readonly string[] TriggerNodes = { "COM", "DetectorH", "DetectorV" };
         static readonly Color RowHoverColor = Color.white;
         static readonly Color RowSelectedColor = new Color(0.24f, 0.49f, 0.91f, 1f);
+
+        // condition slots arent in the catalog, so their defs live here
+        static readonly ParamDef CheckDef = new ParamDef("Value1", "Check").Queries();
+        static readonly ParamDef AgainstDef = new ParamDef("Value2", "Against").Queries();
+        static readonly ParamDef SelObjectDef = new ParamDef("Object", "Put each into");
+        static readonly ParamDef SelFromDef = new ParamDef("From", "List", VType.String, "Equipped");
 
         [MenuItem("Vectorier/Tools/Trigger Editor", false, 27)]
         public static void Open()
@@ -74,6 +91,8 @@ namespace Vectorier.Trigger
         {
             wantsMouseMove = true;
             Selection.selectionChanged += OnSelectionChanged;
+            EditorApplication.hierarchyChanged += OnHierarchyChanged;
+            EditorApplication.projectChanged += OnProjectChanged;
             multiSelected = Selection.gameObjects.Length > 1;
             TriggerTemplateLibrary.Reload();
             RefreshPresets();
@@ -83,7 +102,13 @@ namespace Vectorier.Trigger
         void OnDisable()
         {
             Selection.selectionChanged -= OnSelectionChanged;
+            EditorApplication.hierarchyChanged -= OnHierarchyChanged;
+            EditorApplication.projectChanged -= OnProjectChanged;
         }
+
+        void OnHierarchyChanged() { ValueSources.InvalidateAll(); Repaint(); }
+        void OnFocus() { ValueSources.InvalidateModels(); }
+        void OnProjectChanged() { ValueSources.InvalidateModels(); Repaint(); }
 
         static TriggerComponent FindSelected()
         {
@@ -126,6 +151,7 @@ namespace Vectorier.Trigger
             if (load)
             {
                 data = t ? TriggerData.Parse(t.contentXml) : TriggerData.CreateDefault();
+                if (t) ReadTypes(data, t.variableTypes);
                 if (data.loops.Count > 0) sel = 0;
             }
         }
@@ -134,16 +160,37 @@ namespace Vectorier.Trigger
 
         void Styles()
         {
-            if (blockTitle != null) return;
+            // rebuild on skin change or row text keeps the old skin's colour
+            if (blockTitle != null && stylesProSkin == EditorGUIUtility.isProSkin) return;
+            stylesProSkin = EditorGUIUtility.isProSkin;
 
             blockTitle = new GUIStyle(EditorStyles.boldLabel) { fontSize = 13 };
             blockDesc = new GUIStyle(EditorStyles.miniLabel) { wordWrap = true };
             cardTitle = new GUIStyle(EditorStyles.boldLabel);
 
-            rowText = MakeRowStyle(Color.black, FontStyle.Normal);
+            Color neutral = EditorStyles.label.normal.textColor;
+
+            rowText = MakeRowStyle(neutral, FontStyle.Normal);
+            rowIcon = MakeRowStyle(neutral, FontStyle.Bold);
+            rowTextDark = MakeRowStyle(Color.black, FontStyle.Normal);   // readable on the hover/selection colours
+            rowIconDark = MakeRowStyle(Color.black, FontStyle.Bold);
             rowTextSel = MakeRowStyle(Color.white, FontStyle.Normal);
-            rowIcon = MakeRowStyle(Color.black, FontStyle.Bold);
             rowIconSel = MakeRowStyle(Color.white, FontStyle.Bold);
+
+            // head is derived from line, otherwise the baselines don't match
+            summaryLine = new GUIStyle(EditorStyles.miniLabel) { wordWrap = true, alignment = TextAnchor.UpperLeft };
+            summaryHead = new GUIStyle(summaryLine) { fontStyle = FontStyle.Bold, wordWrap = false };
+
+            // miniBoldLabel sits a pixel off, so build the bold one from miniLabel
+            missingStyle = new GUIStyle(EditorStyles.miniLabel) { fontStyle = FontStyle.Bold };
+
+            // lines up with the checkbox next to it
+            toggleText = new GUIStyle(EditorStyles.miniLabel)
+            {
+                alignment = TextAnchor.MiddleLeft,
+                fixedHeight = EditorGUIUtility.singleLineHeight,
+                margin = new RectOffset(EditorStyles.miniLabel.margin.left, EditorStyles.miniLabel.margin.right, 2, 2)
+            };
 
             xmlStyle = new GUIStyle(EditorStyles.textArea) { wordWrap = false };
         }
@@ -163,11 +210,20 @@ namespace Vectorier.Trigger
             Styles();
             var ev = Event.current;
 
-            // queued edits are applied at the start of a Layout event, so Layout and the event after it
-            // always see the same data (this is what fixes the GUILayout error)
+            bool unsaved = dirty && target;
+            if (hasUnsavedChanges != unsaved)
+            {
+                hasUnsavedChanges = unsaved;
+                saveChangesMessage = unsaved
+                    ? $"'{target.gameObject.name}' has changes that were never applied.\nApply them before closing?"
+                    : "";
+            }
+
+            // only touch data on Layout. changing it between Layout and the next event
+            // is what caused the GUILayout mismatch errors
             if (ev.type == EventType.Layout) ApplyPending();
 
-            // several objects selected: only draw, ignore all input
+            // multi-select: draw greyed out, swallow input
             if (multiSelected && ev.type != EventType.Layout && ev.type != EventType.Repaint) return;
 
             if (ev.type == EventType.MouseLeaveWindow && hoverIdx != -1) { hoverIdx = -1; Repaint(); }
@@ -177,17 +233,15 @@ namespace Vectorier.Trigger
 
             if (multiSelected) { DrawMultiSelectOverlay(); return; }
 
-            // a click nobody handled = click on empty space, release the text field focus
             if (ev.type == EventType.MouseDown && ev.button == 0) ClearFocus();
 
-            // something got queued during an input event, ask for a fresh Layout pass to apply it
             if (ev.type != EventType.Layout && ev.type != EventType.Repaint &&
                 (pending != null || pendingSel != NoSel)) Repaint();
         }
 
         void DrawWindow()
         {
-            bool xml = showXml;      // read once, the XML toggle in the top bar can flip during this event
+            bool xml = showXml;      // cached, the toggle can flip mid-event
 
             DrawTopBar(new Rect(0f, 0f, position.width, TopH));
 
@@ -245,7 +299,7 @@ namespace Vectorier.Trigger
             var p = pending;
             pending = null;
 
-            dirty = true;    // set first so preset loading and Apply can clear it again
+            dirty = true;    // before p(), Apply/LoadPreset clear it themselves
             p();
             Repaint();
         }
@@ -255,19 +309,6 @@ namespace Vectorier.Trigger
             GUI.FocusControl(null);
             GUIUtility.keyboardControl = 0;
             EditorGUIUtility.editingTextField = false;
-            Repaint();
-        }
-
-        // edits queued during the layout pass run here, once everything is drawn
-        void RunPending()
-        {
-            if (pending == null) return;
-
-            var p = pending;
-            pending = null;
-
-            dirty = true;    // set first so preset loading and Apply can clear it again
-            p();
             Repaint();
         }
 
@@ -355,8 +396,12 @@ namespace Vectorier.Trigger
             showXml = GUILayout.Toggle(showXml, new GUIContent("XML", "Preview the XML this will produce"),
                 EditorStyles.toolbarButton, GUILayout.Width(40));
 
-            if (GUILayout.Button(new GUIContent("Reload Templates", "Re-read TriggerTemplates.xml"),
-                    EditorStyles.toolbarButton, GUILayout.Width(110))) TriggerTemplateLibrary.Reload();
+            if (GUILayout.Button(new GUIContent("Reload Templates", "Re-read TriggerTemplates.xml, the model list and the scene's spawn points"),
+                    EditorStyles.toolbarButton, GUILayout.Width(110)))
+            {
+                TriggerTemplateLibrary.Reload();
+                ValueSources.InvalidateAll();
+            }
 
             GUILayout.Space(8);
             if (dirty) GUILayout.Label("Unapplied changes", EditorStyles.miniLabel, GUILayout.Width(110));
@@ -374,8 +419,37 @@ namespace Vectorier.Trigger
             if (!target) return;
             Undo.RecordObject(target, "Apply Trigger");
             target.contentXml = data.ToXml();
+            target.variableTypes = WriteTypes(data);
             EditorUtility.SetDirty(target);
             dirty = false;
+        }
+
+        // types arent in the xml, they're kept in variableTypes on the component/preset
+        static void ReadTypes(TriggerData d, List<TriggerComponent.VariableType> list)
+        {
+            if (list == null) return;
+            foreach (var v in d.vars)
+            {
+                if (v.locked) continue;
+                var e = list.Find(x => x != null && x.name == v.name);
+                if (e != null) v.type = VTypes.FromName(e.type);
+            }
+        }
+
+        static List<TriggerComponent.VariableType> WriteTypes(TriggerData d)
+        {
+            var list = new List<TriggerComponent.VariableType>();
+            foreach (var v in d.vars)
+                if (!v.locked && !string.IsNullOrEmpty(v.name) && v.type != VType.String)
+                    list.Add(new TriggerComponent.VariableType { name = v.name, type = v.type.ToString() });
+            return list;
+        }
+
+        // called from Unity's close prompt (hasUnsavedChanges)
+        public override void SaveChanges()
+        {
+            Apply();
+            base.SaveChanges();
         }
 
         // ================= Presets =================
@@ -421,12 +495,14 @@ namespace Vectorier.Trigger
             {
                 presetName = "Default";
                 data = target ? TriggerData.Parse(target.contentXml) : TriggerData.CreateDefault();
+                if (target) ReadTypes(data, target.variableTypes);
             }
             else
             {
                 var a = presets[idx - 1];
                 presetName = a.name;
                 data = TriggerData.Parse(a.contentXml);
+                ReadTypes(data, a.variableTypes);
             }
 
             sel = data.loops.Count > 0 ? 0 : -1;
@@ -449,6 +525,7 @@ namespace Vectorier.Trigger
 
             var a = CreateInstance<TriggerPresetAsset>();
             a.contentXml = data.ToXml();
+            a.variableTypes = WriteTypes(data);
 
             string path = AssetDatabase.GenerateUniqueAssetPath(PresetFolder + "/NewPreset.asset");
             AssetDatabase.CreateAsset(a, path);
@@ -475,6 +552,7 @@ namespace Vectorier.Trigger
             var a = presets[presetIdx - 1];
             Undo.RecordObject(a, "Save Trigger Preset");
             a.contentXml = data.ToXml();
+            a.variableTypes = WriteTypes(data);
             EditorUtility.SetDirty(a);
             AssetDatabase.SaveAssets();
             dirty = false;
@@ -539,7 +617,7 @@ namespace Vectorier.Trigger
             bool canReorder = string.IsNullOrEmpty(search);
 
             var e = Event.current;
-            bool mouseInList = GUI.enabled && listR.Contains(e.mousePosition);   // outer coordinates, read before the scroll view
+            bool mouseInList = GUI.enabled && listR.Contains(e.mousePosition);   // has to be read before BeginScrollView, coords change inside it
             bool clickedRow = false;
             int hoverNow = -1;
 
@@ -561,19 +639,21 @@ namespace Vectorier.Trigger
                 bool selected = i == sel;
                 if (hovered) hoverNow = i;
 
-                // selected = blue, hover = white, otherwise nothing
                 if (e.type == EventType.Repaint)
                 {
                     if (selected) EditorGUI.DrawRect(row, RowSelectedColor);
                     else if (hovered) EditorGUI.DrawRect(row, RowHoverColor);
                 }
 
-                // black text, white only for a selected row that is also hovered
-                bool whiteText = selected && hovered;
+                // text has to contrast with whatever background the row got
+                GUIStyle txt, ico;
+                if (selected && hovered) { txt = rowTextSel; ico = rowIconSel; }
+                else if (selected || hovered) { txt = rowTextDark; ico = rowIconDark; }
+                else { txt = rowText; ico = rowIcon; }
 
                 var iconR = new Rect(row.x + 4f, row.y + 1f, 16f, RowH - 2f);
                 if (L.kind != LoopKind.Custom)
-                    GUI.Label(iconR, new GUIContent("T", "Built from a template"), whiteText ? rowIconSel : rowIcon);
+                    GUI.Label(iconR, new GUIContent("T", "Built from a template"), ico);
 
                 var nameR = new Rect(row.x + 22f, row.y + 1f, row.width - 26f, RowH - 2f);
 
@@ -600,11 +680,11 @@ namespace Vectorier.Trigger
                 }
                 else
                 {
-                    GUI.Label(nameR, L.Display, whiteText ? rowTextSel : rowText);
+                    GUI.Label(nameR, L.Display, txt);
 
                     if (e.type == EventType.MouseDown && e.button == 0 && overRow)
                     {
-                        pendingSel = i;          // applied on the next Layout, the main panel must not change mid-event
+                        pendingSel = i;          // deferred, the main panel cant switch loops mid event
                         GUI.FocusControl(null);
 
                         if (e.clickCount == 2 && L.kind != LoopKind.FullTemplate)
@@ -623,7 +703,7 @@ namespace Vectorier.Trigger
                 }
             }
 
-            // click on empty space inside the list = deselect
+            // empty space in the list deselects
             if (e.type == EventType.MouseDown && e.button == 0 && mouseInList && !clickedRow &&
                 new Rect(0f, 0f, content.width, Mathf.Max(listR.height, content.height)).Contains(e.mousePosition))
             {
@@ -668,7 +748,7 @@ namespace Vectorier.Trigger
 
             GUI.EndScrollView();
 
-            // repaint only when the hovered row actually changes, not on every mouse move
+            // MouseMove fires a lot, only repaint when the hovered row changes
             if (e.type == EventType.MouseMove && hoverNow != hoverIdx) { hoverIdx = hoverNow; Repaint(); }
             else if (e.type == EventType.Repaint) hoverIdx = hoverNow;
 
@@ -730,19 +810,30 @@ namespace Vectorier.Trigger
 
                 if (v.locked)
                 {
-                    GUILayout.Label(new GUIContent(v.name, LockedHint(v.name)), EditorStyles.boldLabel, GUILayout.Width(78));
+                    GUILayout.Label(new GUIContent(v.name, LockedHint(v.name)), EditorStyles.boldLabel, GUILayout.Width(VarNameW));
                     DrawLockedValue(v);
-                    GUILayout.Space(22);
+                    GUILayout.Space(VarTypeW + 26f);      // keeps columns aligned with the editable rows
                 }
                 else
                 {
-                    string nn = EditorGUILayout.DelayedTextField(v.name, GUILayout.Width(78), GUILayout.MinWidth(50));
+                    string nn = EditorGUILayout.DelayedTextField(v.name, GUILayout.Width(VarNameW), GUILayout.MinWidth(50));
                     if (Event.current.type == EventType.Repaint)
                         GUI.Label(GUILayoutUtility.GetLastRect(), new GUIContent(string.Empty, v.name));
                     if (nn != v.name) { RenameVariable(v.name, nn); Touch(); }
 
-                    string nv = EditorGUILayout.TextField(v.value);
+                    VType t = v.type;      // cached, the popup below can change it
+                    string nv = DrawLiteral(t, v.value, null, ref v.uiCustom, null);
                     if (nv != v.value) { v.value = nv; Touch(); }
+
+                    int ct = Array.IndexOf(VTypes.VariableTypes, t);
+                    int nt = EditorGUILayout.Popup(ct, VTypes.VariableTypeLabels, GUILayout.Width(VarTypeW));
+                    if (nt != ct && nt >= 0)
+                    {
+                        v.type = VTypes.VariableTypes[nt];
+                        v.value = VTypes.Coerce(v.type, v.value, ValueSources.Models);
+                        v.uiCustom = false;
+                        Touch();
+                    }
 
                     int idx = i;
                     if (GUILayout.Button("-", GUILayout.Width(20))) pending = () => data.vars.RemoveAt(idx);
@@ -760,7 +851,7 @@ namespace Vectorier.Trigger
                     string n = "NewVariable";
                     int k = 1;
                     while (data.vars.Exists(x => x.name == n)) n = "NewVariable" + (++k);
-                    data.vars.Add(new TVar(n, "0"));
+                    data.vars.Add(new TVar(n, "", VType.String));
                 };
         }
 
@@ -768,7 +859,7 @@ namespace Vectorier.Trigger
         {
             switch (n)
             {
-                case "$Active": return "Is the trigger switched on? 1 yes, 0 no.";
+                case "$Active": return "Is the trigger switched on? Ticked = 1, unticked = 0.";
                 case "$AI": return "Which AI this trigger reacts to. -1 any, 0 player, 1 hunter, 2 helper.";
                 case "$Node": return "The model's node used to test entry, usually COM.";
                 case "Flag1": return "General purpose flag used by several templates.";
@@ -780,16 +871,18 @@ namespace Vectorier.Trigger
         {
             if (v.name == "$Active")
             {
-                int cur = v.value == "0" ? 1 : 0;
-                int nv = EditorGUILayout.Popup(cur, new[] { "Active (1)", "Inactive (0)" });
-                if (nv != cur) { v.value = nv == 0 ? "1" : "0"; Touch(); }
+                bool on = v.value != "0";
+                bool nb = EditorGUILayout.Toggle(on, GUILayout.Width(18));
+                GUILayout.Label(nb ? "Active" : "Inactive", toggleText);
+                GUILayout.FlexibleSpace();
+                if (nb != on) { v.value = nb ? "1" : "0"; Touch(); }
                 return;
             }
 
             if (v.name == "$AI")
             {
-                string[] labels = { "Any (-1)", "Player (0)", "Hunter (1)", "Custom" };
-                string[] vals = { "-1", "0", "1" };
+                string[] vals = VTypes.AIValues;
+                string[] labels = VTypes.AILabels;
 
                 int matched = Array.IndexOf(vals, v.value);
                 bool custom = aiCustomMode || matched < 0;
@@ -816,8 +909,8 @@ namespace Vectorier.Trigger
                 string s = EditorGUILayout.TextField(v.value);
                 if (s != v.value) { v.value = s; Touch(); }
 
-                var dr = GUILayoutUtility.GetRect(16f, 18f, GUILayout.Width(16));
-                if (EditorGUI.DropdownButton(dr, GUIContent.none, FocusType.Passive, EditorStyles.miniPullDown))
+                var dr = GUILayoutUtility.GetRect(18f, 18f, GUILayout.Width(18));
+                if (ArrowButton(dr))
                 {
                     var m = new GenericMenu();
                     foreach (var n in TriggerNodes)
@@ -835,7 +928,7 @@ namespace Vectorier.Trigger
             if (plain != v.value) { v.value = plain; Touch(); }
         }
 
-        // keeps every _Reference pointing at the renamed variable
+        // also renames every reference to it
         void RenameVariable(string oldName, string newName)
         {
             if (string.IsNullOrWhiteSpace(newName) || oldName == newName) return;
@@ -859,7 +952,7 @@ namespace Vectorier.Trigger
             if (v.mode == ValueMode.Variable && v.varName == o) v.varName = n;
             if (v.modelIsVar && v.model == o) v.model = n;
             if (v.nodeIsVar && v.node == o) v.node = n;
-            if (v.mode == ValueMode.Literal && v.text == o) v.text = n;   // SetVariable Name="..."
+            if (v.mode == ValueMode.Literal && v.text == o) v.text = n;   // Name on Set/Add Variable. also hits any literal that happens to match, careful
         }
 
         static void RenameInCond(TCond c, string o, string n)
@@ -894,7 +987,7 @@ namespace Vectorier.Trigger
             }
 
             var L = data.loops[sel];
-            var kind = L.kind;      // read before the header, the "Build From" popup can change it mid-event
+            var kind = L.kind;      // cached, "Build From" can change it mid-event
 
             DrawLoopHeader(L);
             GUILayout.Space(4);
@@ -960,10 +1053,11 @@ namespace Vectorier.Trigger
             if (nn != L.raw) { L.raw = nn; Touch(); }
         }
 
+        // ---------------- Templates ----------------
+
         void DrawFullTemplate(TLoop L)
         {
-            EditorGUILayout.HelpBox("The template runs as is. Set the required variables in the Variables panel.",
-                MessageType.Info);
+            EditorGUILayout.HelpBox("The whole template runs as it is. Its loops are listed below.", MessageType.Info);
 
             EditorGUILayout.BeginHorizontal();
             GUILayout.Label("Template", GUILayout.Width(74));
@@ -971,7 +1065,7 @@ namespace Vectorier.Trigger
             if (nn != L.template) { L.template = nn; Touch(); }
 
             var dr = GUILayoutUtility.GetRect(20f, 18f, GUILayout.Width(20));
-            if (EditorGUI.DropdownButton(dr, GUIContent.none, FocusType.Passive, EditorStyles.miniPullDown))
+            if (ArrowButton(dr))
             {
                 var m = new GenericMenu();
                 foreach (var t in TriggerTemplateLibrary.Templates)
@@ -985,32 +1079,19 @@ namespace Vectorier.Trigger
             EditorGUILayout.EndHorizontal();
 
             var info = TriggerTemplateLibrary.FindTemplate(L.template);
-            if (info == null) return;
+            if (info == null) { NotFound(L.template); return; }
 
-            GUILayout.Space(6);
-            GUILayout.Label("This template contains", EditorStyles.boldLabel);
-            foreach (var l in info.loops)
-                GUILayout.Label("    " + l.name + (string.IsNullOrEmpty(l.summary) ? "" : "   -   " + l.summary), EditorStyles.miniLabel);
+            GUILayout.Space(8);
+            GUILayout.Label("What this template does", EditorStyles.boldLabel);
+            VariableLegend();
+            foreach (var l in info.loops) DrawLoopCard(l, true);
 
-            if (info.init.Count > 0)
-            {
-                GUILayout.Space(6);
-                GUILayout.Label("Variables it starts with", EditorStyles.boldLabel);
-                foreach (var kv in info.init) GUILayout.Label("    " + kv.Key + " = " + kv.Value, EditorStyles.miniLabel);
-
-                if (GUILayout.Button("Copy those variables into this trigger", GUILayout.Height(20)))
-                    pending = () =>
-                    {
-                        foreach (var kv in info.init)
-                            if (!data.vars.Exists(x => x.name == kv.Key)) data.vars.Add(new TVar(kv.Key, kv.Value));
-                        data.EnsureLockedVars();
-                    };
-            }
+            DrawRequired(TriggerTemplateLibrary.CollectUses(info.loops, ""));
         }
 
         void DrawTemplateLoop(TLoop L)
         {
-            EditorGUILayout.HelpBox("This loop uses a pre-made loop from TriggerTemplates.xml.", MessageType.Info);
+            EditorGUILayout.HelpBox("This loop runs a ready-made loop from TriggerTemplates.xml.", MessageType.Info);
 
             EditorGUILayout.BeginHorizontal();
             GUILayout.Label("Template Loop", GUILayout.Width(90));
@@ -1018,7 +1099,7 @@ namespace Vectorier.Trigger
             if (nn != L.template) { L.template = nn; Touch(); }
 
             var dr = GUILayoutUtility.GetRect(20f, 18f, GUILayout.Width(20));
-            if (EditorGUI.DropdownButton(dr, GUIContent.none, FocusType.Passive, EditorStyles.miniPullDown))
+            if (ArrowButton(dr))
             {
                 var m = new GenericMenu();
                 foreach (var t in TriggerTemplateLibrary.Templates)
@@ -1032,41 +1113,120 @@ namespace Vectorier.Trigger
             }
             EditorGUILayout.EndHorizontal();
 
-            DrawTemplateUses(TriggerTemplateLibrary.Find(L.template));
+            var info = TriggerTemplateLibrary.Find(L.template);
+            if (info == null) { NotFound(L.template); return; }
+
+            GUILayout.Space(8);
+            GUILayout.Label("What this loop does", EditorStyles.boldLabel);
+            VariableLegend();
+            DrawLoopCard(info, false);
+
+            DrawRequired(TriggerTemplateLibrary.CollectUses(new[] { info }, ""));
         }
 
-        void DrawTemplateUses(TriggerTemplateLibrary.LoopInfo info)
+        // read-only summary of a template loop
+        void DrawLoopCard(LoopInfo l, bool showName)
         {
-            if (info == null) return;
+            EditorGUILayout.BeginVertical("box");
+            if (showName) GUILayout.Label(string.IsNullOrEmpty(l.name) ? "(unnamed loop)" : l.name, cardTitle);
 
-            if (!string.IsNullOrEmpty(info.summary))
+            // separator only between sections that actually have lines
+            bool any = false;
+            Section[] order = { Section.When, Section.OnlyIf, Section.Do };
+            string[] heads = { "When", "Only If", "Do" };
+            for (int i = 0; i < order.Length; i++)
             {
-                GUILayout.Space(4);
-                GUILayout.Label(info.summary, EditorStyles.miniLabel);
+                var lines = l.Lines(order[i]);
+                if (lines == null || lines.Count == 0) continue;
+                if (any) Separator();
+                DrawSummary(heads[i], lines);
+                any = true;
+            }
+            if (!any) GUILayout.Label("This loop is empty.", summaryLine);
+
+            EditorGUILayout.EndVertical();
+        }
+
+        bool DrawSummary(string head, List<string> lines)
+        {
+            if (lines == null || lines.Count == 0) return false;
+
+            // header only on the first row so it lines up with the first line
+            for (int i = 0; i < lines.Count; i++)
+            {
+                EditorGUILayout.BeginHorizontal();
+                GUILayout.Label(i == 0 ? head : "", summaryHead, GUILayout.Width(52));
+                GUILayout.Label(lines[i], summaryLine);
+                EditorGUILayout.EndHorizontal();
+            }
+            return true;
+        }
+
+        void VariableLegend()
+        {
+            GUILayout.Label("Names in { } are variables.", blockDesc);
+            Separator();
+        }
+
+        static void Separator()
+        {
+            GUILayout.Space(3);
+            var r = GUILayoutUtility.GetRect(1f, 1f, GUILayout.ExpandWidth(true));
+            if (Event.current.type == EventType.Repaint)
+                EditorGUI.DrawRect(r, EditorGUIUtility.isProSkin ? new Color(1f, 1f, 1f, 0.15f) : new Color(0f, 0f, 0f, 0.2f));
+            GUILayout.Space(3);
+        }
+
+        void NotFound(string template)
+        {
+            if (string.IsNullOrEmpty(template)) return;
+            GUILayout.Label(TriggerTemplateLibrary.LoadFailed
+                    ? "TriggerTemplates.xml couldn't be read."
+                    : "'" + template + "' isn't in TriggerTemplates.xml.", blockDesc);
+        }
+
+        // the template's <Using> vars, plus a button to add the missing ones
+        void DrawRequired(List<UsingVar> uses)
+        {
+            if (uses == null || uses.Count == 0) return;
+
+            GUILayout.Space(8);
+            GUILayout.Label("Required Variables", EditorStyles.boldLabel);
+            GUILayout.Label("The template reads these from the Variables panel. Add the missing ones, then set their values there.", blockDesc);
+
+            EditorGUILayout.BeginHorizontal();
+            GUILayout.Label("Name", EditorStyles.miniBoldLabel, GUILayout.Width(140));
+            GUILayout.Label("Type", EditorStyles.miniBoldLabel, GUILayout.Width(80));
+            GUILayout.Label("Default", EditorStyles.miniBoldLabel, GUILayout.Width(90));
+            GUILayout.Label("Status", EditorStyles.miniBoldLabel);
+            EditorGUILayout.EndHorizontal();
+
+            int missing = 0;
+            foreach (var u in uses)
+            {
+                var have = data.vars.Find(x => x.name == u.name);
+                string status = have == null ? "Missing"
+                              : have.type != u.vtype && !string.IsNullOrEmpty(u.type) ? "Added (as " + have.type + ")"
+                              : "Added";
+                if (have == null) missing++;
+
+                EditorGUILayout.BeginHorizontal();
+                GUILayout.Label(new GUIContent(u.name, u.name), EditorStyles.miniLabel, GUILayout.Width(140));
+                GUILayout.Label(u.vtype.ToString(), EditorStyles.miniLabel, GUILayout.Width(80));
+                GUILayout.Label(string.IsNullOrEmpty(u.def) ? "(empty)" : u.def, EditorStyles.miniLabel, GUILayout.Width(90));
+                GUILayout.Label(status, have == null ? missingStyle : EditorStyles.miniLabel);
+                EditorGUILayout.EndHorizontal();
             }
 
-            if (info.uses.Count == 0) return;
-
-            GUILayout.Space(6);
-            GUILayout.Label("Variables this expects", EditorStyles.boldLabel);
-
-            bool missing = false;
-            foreach (var u in info.uses)
+            if (missing > 0) GUILayout.Space(6);
+            if (missing > 0 && GUILayout.Button("Add Missing Variables (" + missing + ")", GUILayout.Height(20)))
             {
-                bool has = data.vars.Exists(x => x.name == u.name);
-                missing |= !has;
-                GUILayout.Label((has ? "    " : "    missing:  ") + u.name +
-                                (string.IsNullOrEmpty(u.def) ? "" : "   default " + u.def) +
-                                (string.IsNullOrEmpty(u.type) ? "" : "   (" + u.type + ")"), EditorStyles.miniLabel);
-            }
-
-            if (missing && GUILayout.Button("Add the missing variables", GUILayout.Height(20)))
-            {
-                var uses = info.uses;
+                var list = uses;
                 pending = () =>
                 {
-                    foreach (var u in uses)
-                        if (!data.vars.Exists(x => x.name == u.name)) data.vars.Add(new TVar(u.name, u.def));
+                    foreach (var u in list)
+                        if (!data.vars.Exists(x => x.name == u.name))
+                            data.vars.Add(new TVar(u.name, VTypes.Coerce(u.vtype, u.def, ValueSources.Models), u.vtype));
                 };
             }
         }
@@ -1107,10 +1267,11 @@ namespace Vectorier.Trigger
                     if (def != null)
                     {
                         if (!string.IsNullOrEmpty(def.hint)) GUILayout.Label(def.hint, blockDesc);
+                        paramLabelW = LabelW(def.ps);
                         for (int p = 0; p < def.ps.Length; p++) DrawParam(def.ps[p], E.Get(def.ps[p].attr));
                     }
                 }
-                else if (E.kind == EvKind.Block) DrawBlockRef(ref E.template, ref E.prefix, true);
+                else if (E.kind == EvKind.Block) DrawBlockRef(ref E.template, ref E.prefix, Section.When);
                 else DrawRaw(E);
 
                 EditorGUILayout.EndVertical();
@@ -1121,6 +1282,7 @@ namespace Vectorier.Trigger
             EndBlock();
         }
 
+        // no templates here, EventBlock is only read from old files
         void ShowEventMenu(TLoop L)
         {
             var menu = new GenericMenu();
@@ -1142,13 +1304,6 @@ namespace Vectorier.Trigger
                     Repaint();
                 });
             }
-
-            menu.AddSeparator("");
-            AddTemplateItems(menu, "From Template/", l => l.hasEvents, full =>
-            {
-                pending = () => L.events.Add(new TEvent { kind = EvKind.Block, template = full });
-                Repaint();
-            });
 
             menu.ShowAsContext();
         }
@@ -1217,8 +1372,9 @@ namespace Vectorier.Trigger
                             DrawMoveButtons(list, idx);
                             EditorGUILayout.EndHorizontal();
 
-                            DrawParam(new ParamDef("Object", "Put each into"), C.selObject);
-                            DrawParam(new ParamDef("From", "List", ParamKind.Text, "Equipped"), C.selFrom);
+                            paramLabelW = LabelW(SelObjectDef, SelFromDef);
+                            DrawParam(SelObjectDef, C.selObject);
+                            DrawParam(SelFromDef, C.selFrom);
 
                             bool nn = EditorGUILayout.ToggleLeft("None of them may match", C.not);
                             if (nn != C.not) { C.not = nn; Touch(); }
@@ -1235,7 +1391,7 @@ namespace Vectorier.Trigger
                             GUILayout.FlexibleSpace();
                             DrawMoveButtons(list, idx);
                             EditorGUILayout.EndHorizontal();
-                            DrawBlockRef(ref C.template, ref C.prefix, false);
+                            DrawBlockRef(ref C.template, ref C.prefix, Section.OnlyIf);
                             break;
                         }
 
@@ -1265,10 +1421,11 @@ namespace Vectorier.Trigger
 
         void DrawCompare(TCond C, List<TCond> list, int idx)
         {
-            DrawParam(new ParamDef("Value1", "Check"), C.a);
+            paramLabelW = LabelW(CheckDef, AgainstDef);
+            DrawParam(CheckDef, C.a);
 
             EditorGUILayout.BeginHorizontal();
-            GUILayout.Label("", GUILayout.Width(78));
+            GUILayout.Label("", GUILayout.Width(paramLabelW));
 
             int cur = ((int)C.cmp) * 2 + (C.not ? 1 : 0);
             int nv = EditorGUILayout.Popup(cur, CompareLabels, GUILayout.Width(150));
@@ -1278,7 +1435,7 @@ namespace Vectorier.Trigger
             DrawMoveButtons(list, idx);
             EditorGUILayout.EndHorizontal();
 
-            DrawParam(new ParamDef("Value2", "Against"), C.b);
+            DrawParam(AgainstDef, C.b);
         }
 
         void ShowCondMenu(List<TCond> list)
@@ -1288,7 +1445,8 @@ namespace Vectorier.Trigger
             menu.AddItem(new GUIContent("Compare two values"), false,
                 () => { pending = () => list.Add(new TCond { kind = CondKind.Compare }); Repaint(); });
 
-            menu.AddItem(new GUIContent("Group (all of / any of)"), false,
+            // no "/" in these labels, GenericMenu turns it into a submenu
+            menu.AddItem(new GUIContent("Group"), false,
                 () => { pending = () => list.Add(new TCond { kind = CondKind.Group }); Repaint(); });
 
             menu.AddItem(new GUIContent("Look through a list"), false,
@@ -1367,7 +1525,7 @@ namespace Vectorier.Trigger
                     string[] labels = { "One after another", "All at the same time", "Pick at random" };
                     string[] vals = { "Straight", "Sync", "Random" };
 
-                    string order = A.order;     // read once, the popup below changes A.order mid-event
+                    string order = A.order;     // cached, the popup below changes it
                     int cur = Mathf.Max(0, Array.IndexOf(vals, order));
                     int nv = EditorGUILayout.Popup(cur, labels, GUILayout.Width(150));
                     if (nv != cur) { A.order = vals[nv]; Touch(); }
@@ -1390,7 +1548,19 @@ namespace Vectorier.Trigger
                     if (def != null)
                     {
                         if (!string.IsNullOrEmpty(def.hint)) GUILayout.Label(def.hint, blockDesc);
-                        for (int p = 0; p < def.ps.Length; p++) DrawParam(def.ps[p], A.Get(def.ps[p].attr));
+
+                        // Set/Add Variable: the Value editor matches the picked variable's type.
+                        // resolved up front so editing Name mid-event can't change the layout
+                        VType follow = VType.String;
+                        for (int p = 0; p < def.ps.Length; p++)
+                            if (def.ps[p].varName) { follow = data.TypeOf(A.Get(def.ps[p].attr).text); break; }
+
+                        paramLabelW = LabelW(def.ps);
+                        for (int p = 0; p < def.ps.Length; p++)
+                        {
+                            var pd = def.ps[p];
+                            DrawParam(pd, A.Get(pd.attr), pd.typedByVariable ? follow : pd.type);
+                        }
                     }
                 }
                 else if (A.kind == ActKind.Choose)
@@ -1398,7 +1568,7 @@ namespace Vectorier.Trigger
                     DrawActList(A.children);
                     if (GUILayout.Button("+ Add To Group", GUILayout.Height(20))) ShowActMenu(A.children);
                 }
-                else if (A.kind == ActKind.Block) DrawBlockRef(ref A.template, ref A.prefix, false);
+                else if (A.kind == ActKind.Block) DrawBlockRef(ref A.template, ref A.prefix, Section.Do);
                 else
                 {
                     string nr = EditorGUILayout.TextArea(A.raw, GUILayout.MinHeight(38));
@@ -1428,7 +1598,7 @@ namespace Vectorier.Trigger
                 });
             }
 
-            menu.AddSeparator("");
+            // not in the catalog since it has children, added under Flow by hand
             menu.AddItem(new GUIContent("Flow/Run Order Group"), false,
                 () => { pending = () => list.Add(new TAct { kind = ActKind.Choose, order = "Straight" }); Repaint(); });
 
@@ -1444,7 +1614,7 @@ namespace Vectorier.Trigger
 
         // ---------------- Shared bits ----------------
 
-        void AddTemplateItems(GenericMenu menu, string prefix, Func<TriggerTemplateLibrary.LoopInfo, bool> filter, Action<string> pick)
+        void AddTemplateItems(GenericMenu menu, string prefix, Func<LoopInfo, bool> filter, Action<string> pick)
         {
             if (!TriggerTemplateLibrary.Available)
             {
@@ -1502,7 +1672,8 @@ namespace Vectorier.Trigger
                 pending = () => list.RemoveAt(idx);
         }
 
-        void DrawBlockRef(ref string template, ref string prefix, bool isEvent)
+        // ConditionBlock / ActionBlock, or an EventBlock from an older file
+        void DrawBlockRef(ref string template, ref string prefix, Section section)
         {
             EditorGUILayout.BeginHorizontal();
             GUILayout.Label("Template", GUILayout.Width(78));
@@ -1517,7 +1688,18 @@ namespace Vectorier.Trigger
 
             EditorGUILayout.EndHorizontal();
 
-            DrawTemplateUses(TriggerTemplateLibrary.Find(template));
+            var info = TriggerTemplateLibrary.Find(template);
+            if (info == null) { NotFound(template); return; }
+
+            var lines = info.Lines(section);
+            if (lines.Count > 0)
+            {
+                EditorGUILayout.BeginVertical("box");
+                DrawSummary(section == Section.When ? "When" : section == Section.OnlyIf ? "Only If" : "Do", lines);
+                EditorGUILayout.EndVertical();
+            }
+
+            DrawRequired(TriggerTemplateLibrary.CollectUses(new[] { info }, prefix));
         }
 
         void DrawRaw(TEvent E)
@@ -1528,31 +1710,67 @@ namespace Vectorier.Trigger
 
         // ---------------- Value editing ----------------
 
-        void DrawParam(ParamDef pd, TValue v)
+        // widen to the longest label (capped), At spawn point was getting cut
+        static float LabelW(params ParamDef[] ps)
+        {
+            float w = 78f;
+            if (ps != null)
+                foreach (var p in ps)
+                    w = Mathf.Max(w, EditorStyles.label.CalcSize(new GUIContent(p.label)).x + 6f);
+            return Mathf.Min(w, 180f);
+        }
+
+        void DrawParam(ParamDef pd, TValue v) { DrawParam(pd, v, pd.type); }
+
+        void DrawParam(ParamDef pd, TValue v, VType lit)
         {
             EditorGUILayout.BeginHorizontal();
-            GUILayout.Label(new GUIContent(pd.label, pd.hint), GUILayout.Width(78));
-            DrawValue(pd, v);
+            GUILayout.Label(new GUIContent(pd.label, string.IsNullOrEmpty(pd.hint) ? pd.label : pd.hint), GUILayout.Width(paramLabelW));
+            DrawValue(pd, v, lit);
             EditorGUILayout.EndHorizontal();
         }
 
-        static readonly string[] ValueModes = { "Text", "Variable", "Model", "Node" };
-
-        void DrawValue(ParamDef pd, TValue v)
+        static string ModeLabel(ValueMode m, VType lit)
         {
-            // a variable name slot is just a plain name, no underscore and no query
-            if (pd != null && pd.kind == ParamKind.VarName)
+            switch (m)
+            {
+                case ValueMode.Variable: return "Variable";
+                case ValueMode.ModelProp: return "Model";
+                case ValueMode.NodePos: return "Node";
+                default: return VTypes.SlotLabel(lit);
+            }
+        }
+
+        // mode popup + the editor for whichever mode is picked
+        void DrawValue(ParamDef pd, TValue v, VType lit)
+        {
+            // name slots are always a plain name, no mode popup
+            if (pd.varName)
             {
                 string s = EditorGUILayout.TextField(v.text);
                 if (s != v.text) { v.mode = ValueMode.Literal; v.text = s; Touch(); }
-                PickMenu(data.VarNames(), null, picked => { v.mode = ValueMode.Literal; v.text = picked; });
+                VarPicker(pd, lit, picked => { v.mode = ValueMode.Literal; v.text = picked; });
                 return;
             }
 
-            var mode = v.mode;      // read once, the popup below changes v.mode mid-event
-            int m = (int)mode;
-            int nm = EditorGUILayout.Popup(m, ValueModes, GUILayout.Width(70));
-            if (nm != m) { v.mode = (ValueMode)nm; Touch(); }
+            var modes = new List<ValueMode> { ValueMode.Literal, ValueMode.Variable };
+            if (pd.query) { modes.Add(ValueMode.ModelProp); modes.Add(ValueMode.NodePos); }
+
+            var mode = v.mode;      // cached, the popup below changes it
+            if (!modes.Contains(mode)) modes.Add(mode);      // file may have a query where we dont offer one, dont lose it
+
+            var labels = new string[modes.Count];
+            for (int i = 0; i < modes.Count; i++) labels[i] = ModeLabel(modes[i], lit);
+
+            int cur = modes.IndexOf(mode);
+            int nm = EditorGUILayout.Popup(cur, labels, GUILayout.Width(74));
+            if (nm != cur && nm >= 0)
+            {
+                v.mode = modes[nm];
+                if (v.mode == ValueMode.Literal) v.text = VTypes.Coerce(lit, v.text, ValueSources.Models);
+                v.uiCustom = false;
+                Touch();
+            }
 
             switch (mode)
             {
@@ -1560,43 +1778,198 @@ namespace Vectorier.Trigger
                     {
                         string s = EditorGUILayout.TextField(v.varName);
                         if (s != v.varName) { v.varName = s; Touch(); }
-                        PickMenu(data.VarNames(), null, picked => v.varName = picked);
+                        VarPicker(pd, lit, picked => v.varName = picked);
                         break;
                     }
 
                 case ValueMode.ModelProp:
                     {
-                        DrawRef(v, false, TriggerCatalog.CommonModels, 110f);
-                        int cur = Array.IndexOf(TriggerCatalog.ModelProps, v.prop);
-                        int nv = EditorGUILayout.Popup(cur < 0 ? 0 : cur, TriggerCatalog.ModelProps);
-                        if (nv != cur) { v.prop = TriggerCatalog.ModelProps[nv]; Touch(); }
+                        DrawRef(v, false, 110f);
+                        int c = Array.IndexOf(TriggerCatalog.ModelProps, v.prop);
+                        int nv = EditorGUILayout.Popup(c < 0 ? 0 : c, TriggerCatalog.ModelProps);
+                        if (nv != c) { v.prop = TriggerCatalog.ModelProps[nv]; Touch(); }
                         break;
                     }
 
                 case ValueMode.NodePos:
                     {
-                        DrawRef(v, false, TriggerCatalog.CommonModels, 86f);
-                        DrawRef(v, true, TriggerCatalog.CommonNodes, 76f);
-                        int cur = Array.IndexOf(TriggerCatalog.NodeCoords, v.coord);
-                        int nv = EditorGUILayout.Popup(cur < 0 ? 0 : cur, TriggerCatalog.NodeCoords, GUILayout.Width(106));
-                        if (nv != cur) { v.coord = TriggerCatalog.NodeCoords[nv]; Touch(); }
+                        DrawRef(v, false, 86f);
+                        DrawRef(v, true, 76f);
+                        int c = Array.IndexOf(TriggerCatalog.NodeCoords, v.coord);
+                        int nv = EditorGUILayout.Popup(c < 0 ? 0 : c, TriggerCatalog.NodeCoords, GUILayout.Width(106));
+                        if (nv != c) { v.coord = TriggerCatalog.NodeCoords[nv]; Touch(); }
                         break;
                     }
 
                 default:
                     {
-                        string s = EditorGUILayout.TextField(v.text);
-                        if (s != v.text) { v.text = s; Touch(); }
-
-                        if (pd != null && pd.choices != null && pd.choices.Length > 0)
-                            PickMenu(pd.choices, v.text, picked => v.text = picked);
+                        string nv = DrawLiteral(lit, v.text, pd, ref v.uiCustom, picked => v.text = picked);
+                        if (nv != v.text) { v.text = nv; Touch(); }
                         break;
                     }
             }
         }
 
-        // model or node slot, either a plain name or a variable
-        void DrawRef(TValue v, bool nodeSlot, string[] literals, float width)
+        // shared by slots and the Variables panel.
+        // menu picks come in on a later event, so those go through setLater, not the return value
+        string DrawLiteral(VType t, string val, ParamDef pd, ref bool custom, Action<string> setLater)
+        {
+            val = val ?? "";
+
+            switch (t)
+            {
+                case VType.Bool:
+                    {
+                        string on = pd != null ? pd.onValue : "1";
+                        string off = pd != null ? pd.offValue : "0";
+                        bool cur = string.Equals(val, on, StringComparison.OrdinalIgnoreCase) ||
+                                   (on == "1" && string.Equals(val, "true", StringComparison.OrdinalIgnoreCase));
+
+                        bool nb = EditorGUILayout.Toggle(cur, GUILayout.Width(18));
+                        GUILayout.Label(on == "1" ? (nb ? "True" : "False") : (nb ? on : off), toggleText);
+                        GUILayout.FlexibleSpace();
+                        return nb != cur ? (nb ? on : off) : val;
+                    }
+
+                case VType.Int:
+                case VType.UInt:
+                    {
+                        int n;
+                        VTypes.TryInt(val, out n);
+                        if (t == VType.UInt) n = Mathf.Max(0, n);
+
+                        int nn = EditorGUILayout.IntField(n);
+                        if (t == VType.UInt) nn = Mathf.Max(0, nn);
+                        return nn != n ? nn.ToString(VTypes.Inv) : val;
+                    }
+
+                case VType.Number:
+                    {
+                        float f;
+                        VTypes.TryFloat(val, out f);
+                        float nf = EditorGUILayout.FloatField(f);
+                        return nf != f ? VTypes.Num(nf) : val;
+                    }
+
+                case VType.AI:
+                    {
+                        int matched = Array.IndexOf(VTypes.AIValues, val);
+                        bool showCustom = custom || matched < 0;        // cached, the popup can flip custom
+                        int shown = showCustom ? VTypes.AILabels.Length - 1 : matched;
+
+                        string res = val;
+                        int ni = EditorGUILayout.Popup(shown, VTypes.AILabels,
+                            showCustom ? GUILayout.Width(86) : GUILayout.ExpandWidth(true));
+                        if (ni != shown)
+                        {
+                            if (ni == VTypes.AILabels.Length - 1) custom = true;
+                            else { custom = false; res = VTypes.AIValues[ni]; }
+                        }
+
+                        if (showCustom)
+                        {
+                            int n;
+                            if (!VTypes.TryInt(res, out n)) n = -1;
+                            n = Mathf.Max(-1, n);
+                            int nn = Mathf.Max(-1, EditorGUILayout.IntField(n));    // -1 = any
+                            if (nn != n) res = nn.ToString(VTypes.Inv);
+                        }
+                        return res;
+                    }
+
+                case VType.Zoom:
+                    {
+                        int matched = -1;
+                        float zf;
+                        if (VTypes.TryFloat(val, out zf))
+                            for (int i = 0; i < VTypes.ZoomValues.Length; i++)
+                            {
+                                float pz;
+                                VTypes.TryFloat(VTypes.ZoomValues[i], out pz);
+                                if (Mathf.Abs(pz - zf) < 0.0001f) { matched = i; break; }
+                            }
+
+                        bool showCustom = custom || matched < 0;
+                        int shown = showCustom ? VTypes.ZoomLabels.Length - 1 : matched;
+
+                        string res = val;
+                        int ni = EditorGUILayout.Popup(shown, VTypes.ZoomLabels,
+                            showCustom ? GUILayout.Width(86) : GUILayout.ExpandWidth(true));
+                        if (ni != shown)
+                        {
+                            if (ni == VTypes.ZoomLabels.Length - 1) custom = true;
+                            else { custom = false; res = VTypes.ZoomValues[ni]; }
+                        }
+
+                        if (showCustom)
+                        {
+                            float f;
+                            if (!VTypes.TryFloat(res, out f) || f <= 0f) f = 1f;
+                            float nf = Mathf.Max(0.01f, EditorGUILayout.FloatField(f));
+                            if (nf != f) res = VTypes.Num(nf);
+                        }
+                        return res;
+                    }
+
+                case VType.Key:
+                    return StrictPopup(val, VTypes.Keys);
+
+                case VType.Orientation:
+                    return StrictPopup(val, pd != null && pd.choices != null ? pd.choices : VTypes.Orientations);
+
+                case VType.Model:
+                    return StrictPopup(val, ValueSources.ModelChoices);
+
+                case VType.Spawn:
+                    {
+                        var spawns = ValueSources.Spawns;
+                        if (spawns.Count > 0) return StrictPopup(val, spawns);
+
+                        // no Spawntagged objects in the scene, just let them type it
+                        return EditorGUILayout.TextField(val);
+                    }
+
+                case VType.Color:
+                    {
+                        Color c;
+                        string hex = VTypes.NormalizeHex(val);
+                        if (hex == null || !ColorUtility.TryParseHtmlString(hex, out c)) c = Color.white;
+
+                        Color nc = EditorGUILayout.ColorField(GUIContent.none, c, true, true, false);
+                        return nc != c ? "#" + ColorUtility.ToHtmlStringRGBA(nc) : val;
+                    }
+
+                default:   // String, Animation, Sound
+                    {
+                        string s = EditorGUILayout.TextField(val);
+                        if (pd != null && pd.choices != null && pd.choices.Length > 0 && setLater != null)
+                            PickMenu(pd.choices, s, setLater);
+                        return s;
+                    }
+            }
+        }
+
+        // popup limited to options. an unknown value from a file shows as not found
+        // and is left alone until something else is picked
+        static string StrictPopup(string val, IList<string> options)
+        {
+            int idx = VTypes.IndexOf(options, val, false);
+            bool extra = idx < 0 && !string.IsNullOrEmpty(val);
+
+            var shown = new string[options.Count + (extra ? 1 : 0)];
+            for (int i = 0; i < options.Count; i++) shown[i] = options[i];
+            if (extra)
+            {
+                shown[shown.Length - 1] = val + "  (not found)";
+                idx = shown.Length - 1;
+            }
+
+            int ni = EditorGUILayout.Popup(idx, shown);
+            return ni != idx && ni >= 0 && ni < options.Count ? options[ni] : val;
+        }
+
+        // model/node part of a ?getModel query, leading _ means variable
+        void DrawRef(TValue v, bool nodeSlot, float width)
         {
             string shown = nodeSlot ? v.NodeRef : v.ModelRef;
 
@@ -1610,24 +1983,63 @@ namespace Vectorier.Trigger
                 Touch();
             }
 
-            var items = new List<string>();
-            for (int i = 0; i < literals.Length; i++) items.Add("Name/" + literals[i]);
-            foreach (var vn in data.VarNames()) items.Add("Variable/" + vn);
+            if (!PickButton(out var dr)) return;
 
-            PickMenu(items, null, picked =>
+            IList<string> literals = nodeSlot ? (IList<string>)TriggerCatalog.CommonNodes
+                : ValueSources.Models.Count > 0 ? ValueSources.Models : (IList<string>)TriggerCatalog.CommonModels;
+
+            var menu = new GenericMenu();
+            foreach (var lit in literals)
             {
-                bool isVar = picked.StartsWith("Variable/");
-                string name = picked.Substring(picked.IndexOf('/') + 1);
-                if (nodeSlot) { v.nodeIsVar = isVar; v.node = name; }
-                else { v.modelIsVar = isVar; v.model = name; }
-            });
+                string name = lit;
+                menu.AddItem(new GUIContent("Name/" + name), false, () =>
+                {
+                    if (nodeSlot) { v.nodeIsVar = false; v.node = name; }
+                    else { v.modelIsVar = false; v.model = name; }
+                    Touch(); ClearFocus();
+                });
+            }
+            foreach (var vn in data.VarNames())
+            {
+                string name = vn;
+                menu.AddItem(new GUIContent("Variable/" + name), false, () =>
+                {
+                    if (nodeSlot) { v.nodeIsVar = true; v.node = name; }
+                    else { v.modelIsVar = true; v.model = name; }
+                    Touch(); ClearFocus();
+                });
+            }
+            menu.DropDown(dr);
         }
 
-        // little dropdown arrow next to a text field, the callback fires on a later event
+        // matching types first, the rest under Other Types
+        void VarPicker(ParamDef pd, VType lit, Action<string> apply)
+        {
+            if (!PickButton(out var dr)) return;
+
+            bool all = pd == null || pd.query || pd.varName;
+            var fam = VTypes.FamilyOf(lit);
+            var names = data.VarNames();
+
+            var menu = new GenericMenu();
+            for (int pass = 0; pass < 2; pass++)
+                foreach (var n in names)
+                {
+                    var t = data.TypeOf(n);
+                    bool fits = all || VTypes.FamilyOf(t) == fam;
+                    if (fits != (pass == 0)) continue;
+
+                    string name = n;
+                    string label = (pass == 0 ? "" : "Other Types/") + name + "   (" + t + ")";
+                    menu.AddItem(new GUIContent(label), false, () => { apply(name); Touch(); ClearFocus(); });
+                }
+            menu.DropDown(dr);
+        }
+
+        // apply runs later, from the menu callback
         void PickMenu(IList<string> items, string current, Action<string> apply)
         {
-            var dr = GUILayoutUtility.GetRect(16f, 18f, GUILayout.Width(16));
-            if (!EditorGUI.DropdownButton(dr, GUIContent.none, FocusType.Passive, EditorStyles.miniPullDown)) return;
+            if (!PickButton(out var dr)) return;
 
             var menu = new GenericMenu();
             for (int i = 0; i < items.Count; i++)
@@ -1644,6 +2056,32 @@ namespace Vectorier.Trigger
             menu.DropDown(dr);
         }
 
+        static bool PickButton(out Rect dr)
+        {
+            dr = GUILayoutUtility.GetRect(18f, 18f, GUILayout.Width(18));
+            return ArrowButton(dr);
+        }
+
+        // miniPullDown draws the arrow offcentre at this width, so draw it ourselves
+        static Texture arrowTex;
+
+        static bool ArrowButton(Rect r)
+        {
+            bool clicked = GUI.Button(r, GUIContent.none, EditorStyles.miniButton);
+
+            if (Event.current.type == EventType.Repaint)
+            {
+                if (!arrowTex) arrowTex = EditorGUIUtility.IconContent("icon dropdown").image;
+                if (arrowTex)
+                {
+                    float w = Mathf.Min(arrowTex.width, r.width - 4f), h = Mathf.Min(arrowTex.height, r.height - 4f);
+                    var ir = new Rect(Mathf.Round(r.center.x - w * 0.5f), Mathf.Round(r.center.y - h * 0.5f), w, h);
+                    GUI.DrawTexture(ir, arrowTex, ScaleMode.ScaleToFit);
+                }
+            }
+            return clicked;
+        }
+
         // ================= XML strip =================
 
         void DrawXmlStrip(Rect r)
@@ -1651,7 +2089,7 @@ namespace Vectorier.Trigger
             GUI.Box(r, GUIContent.none, EditorStyles.helpBox);
             var pad = new Rect(r.x + 4f, r.y + 4f, r.width - 8f, r.height - 8f);
 
-            // serialise once per layout pass; Layout and the event after it must agree on text and size
+            // only rebuild on Layout so Layout and Repaint agree on the size
             if (Event.current.type == EventType.Layout)
             {
                 xmlCache = data.ToXml();
@@ -1672,6 +2110,69 @@ namespace Vectorier.Trigger
                 GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true));
             EditorGUILayout.EndScrollView();
             GUILayout.EndArea();
+        }
+    }
+
+    // ================= Scene data for the dropdowns =================
+
+    static class ValueSources
+    {
+        static readonly string[] NoModels = { VTypes.NoModel };
+        static List<string> spawns, models;
+
+        public static void InvalidateSpawns() { spawns = null; }
+        public static void InvalidateModels() { models = null; }
+        public static void InvalidateAll() { spawns = null; models = null; }
+
+        // FindObjectsOfTypeAll also returns prefabs and hidden objects, hence the filtering
+        public static List<string> Spawns
+        {
+            get
+            {
+                if (spawns != null) return spawns;
+
+                var set = new SortedSet<string>(StringComparer.Ordinal);
+                foreach (var go in Resources.FindObjectsOfTypeAll<GameObject>())
+                {
+                    if (!go || EditorUtility.IsPersistent(go) || !go.scene.IsValid()) continue;
+                    if ((go.hideFlags & (HideFlags.HideInHierarchy | HideFlags.DontSave)) != 0) continue;
+                    if (go.tag == "Spawn" && !string.IsNullOrEmpty(go.name)) set.Add(go.name);
+                }
+                spawns = new List<string>(set);
+                return spawns;
+            }
+        }
+
+        // from every ExportConfig in the open scene(s), duplicates skipped
+        public static List<string> Models
+        {
+            get
+            {
+                if (models != null) return models;
+
+                models = new List<string>();
+                var seen = new HashSet<string>();
+                foreach (var cfg in Resources.FindObjectsOfTypeAll<ExportConfig>())
+                {
+                    if (!cfg || EditorUtility.IsPersistent(cfg) || !cfg.gameObject.scene.IsValid()) continue;
+                    AddModels(cfg.commonModeModelDefinitions, seen);
+                    AddModels(cfg.hunterModeModelDefinitions, seen);
+                }
+                return models;
+            }
+        }
+
+        static void AddModels(List<ExportConfig.ModelDefinition> defs, HashSet<string> seen)
+        {
+            if (defs == null) return;
+            foreach (var d in defs)
+                if (d != null && !string.IsNullOrEmpty(d.name) && seen.Add(d.name)) models.Add(d.name);
+        }
+
+        // popup cant be empty, show None when there are no models
+        public static IList<string> ModelChoices
+        {
+            get { return Models.Count > 0 ? (IList<string>)Models : NoModels; }
         }
     }
 
