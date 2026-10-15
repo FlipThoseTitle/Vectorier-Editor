@@ -8,6 +8,9 @@ namespace Vectorier.ProjectManager
 {
     public class ProjectManagerAnimations : EditorWindow
     {
+        // Every project's moves file must use this exact name
+        private const string MovesXmlFileName = "moves.xml";
+
         private string activeProjectName = "";
         
         // Data for moves XML
@@ -30,6 +33,9 @@ namespace Vectorier.ProjectManager
             window.Show();
             window.RefreshAnimationList();
         }
+
+        private string AnimationsDir => $"./Projects/{activeProjectName}/animations";
+        private string MovesXmlDestPath => $"{AnimationsDir}/{MovesXmlFileName}";
 
         private void OnGUI()
         {
@@ -216,12 +222,73 @@ namespace Vectorier.ProjectManager
         {
             string filePath = EditorUtility.OpenFilePanel("Select Moves XML", "", "xml");
             if (string.IsNullOrEmpty(filePath)) return;
-            string targetDir = $"./Projects/{activeProjectName}/animations";
-            if (!Directory.Exists(targetDir)) Directory.CreateDirectory(targetDir);
-            string fileName = Path.GetFileName(filePath);
-            string destFile = Path.Combine(targetDir, fileName).Replace("\\", "/");
-            File.Copy(filePath, destFile, true);
-            movesXmlPath = destFile;
+
+            if (!Directory.Exists(AnimationsDir)) Directory.CreateDirectory(AnimationsDir);
+
+            // Always saved as moves.xml, whatever the source is called (e.g. Moves_new.xml)
+            File.Copy(filePath, MovesXmlDestPath, true);
+
+            RemoveOtherMovesXmlFiles();
+            movesXmlPath = MovesXmlDestPath;
+        }
+
+        // Renames an existing wrongly named moves file (e.g. Moves_new.xml) to moves.xml
+        private void EnforceMovesXmlName()
+        {
+            if (!Directory.Exists(AnimationsDir)) return;
+
+            string[] xmlFiles = Directory.GetFiles(AnimationsDir, "*.xml", SearchOption.TopDirectoryOnly);
+
+            // Already correct (exact, case-sensitive name)
+            if (xmlFiles.Any(f => Path.GetFileName(f) == MovesXmlFileName)) 
+            {
+                RemoveOtherMovesXmlFiles();
+                return;
+            }
+
+            if (xmlFiles.Length == 0) return;
+
+            // Prefer a file that looks like a moves file, otherwise take the first xml
+            string source = xmlFiles.FirstOrDefault(f =>
+                                Path.GetFileName(f).StartsWith("moves", System.StringComparison.OrdinalIgnoreCase))
+                            ?? xmlFiles[0];
+
+            try
+            {
+                // Go through a temp name so case-only renames (Moves.xml -> moves.xml) work on Windows/macOS
+                string tempPath = $"{AnimationsDir}/{System.Guid.NewGuid():N}.tmp";
+                File.Move(source, tempPath);
+                File.Move(tempPath, MovesXmlDestPath);
+
+                Debug.Log($"[Vectorier] Renamed '{Path.GetFileName(source)}' to '{MovesXmlFileName}' in project '{activeProjectName}'.");
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogWarning($"[Vectorier] Failed to rename '{source}' to '{MovesXmlFileName}': {e.Message}");
+                return;
+            }
+
+            RemoveOtherMovesXmlFiles();
+        }
+
+        // Only one moves file per project: delete any other xml left in animations/
+        private void RemoveOtherMovesXmlFiles()
+        {
+            if (!Directory.Exists(AnimationsDir)) return;
+
+            foreach (string file in Directory.GetFiles(AnimationsDir, "*.xml", SearchOption.TopDirectoryOnly))
+            {
+                if (Path.GetFileName(file) == MovesXmlFileName) continue;
+
+                try
+                {
+                    File.Delete(file);
+                }
+                catch (System.Exception e)
+                {
+                    Debug.LogWarning($"[Vectorier] Failed to remove old moves file '{file}': {e.Message}");
+                }
+            }
         }
 
         private void HandleDragAndDrop()
@@ -281,7 +348,7 @@ namespace Vectorier.ProjectManager
         {
             if (filePaths.Length == 0) return;
 
-            string targetDir = $"./Projects/{activeProjectName}/animations/data";
+            string targetDir = $"{AnimationsDir}/data";
             if (!Directory.Exists(targetDir)) Directory.CreateDirectory(targetDir);
 
             int progress = 0;
@@ -349,17 +416,15 @@ namespace Vectorier.ProjectManager
             loadedAnimationPaths.Clear();
             movesXmlPath = "";
 
-            string baseAnimDir = $"./Projects/{activeProjectName}/animations";
-            if (Directory.Exists(baseAnimDir))
+            // Fix projects that already have Moves_new.xml (or similar) from before
+            EnforceMovesXmlName();
+
+            if (File.Exists(MovesXmlDestPath))
             {
-                string[] xmlFiles = Directory.GetFiles(baseAnimDir, "*.xml", SearchOption.TopDirectoryOnly);
-                if (xmlFiles.Length > 0)
-                {
-                    movesXmlPath = xmlFiles[0].Replace("\\", "/");
-                }
+                movesXmlPath = MovesXmlDestPath;
             }
 
-            string dataDir = $"./Projects/{activeProjectName}/animations/data";
+            string dataDir = $"{AnimationsDir}/data";
             if (Directory.Exists(dataDir))
             {
                 string[] rawFiles = Directory.GetFiles(dataDir, "*.*", SearchOption.TopDirectoryOnly)
