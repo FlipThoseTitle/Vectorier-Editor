@@ -500,13 +500,36 @@ namespace Vectorier.Parallax
                 CollectRecursive(t.GetChild(i), tags, skipFactor1, result);
         }
 
-        // Layer names are the factor ("0.5"). Anything that doesn't parse, like Default, counts as 1.
+        // Named layers and the factor they stand for.
+        private static readonly Dictionary<string, float> NamedLayerFactors =
+            new Dictionary<string, float>(StringComparer.OrdinalIgnoreCase)
+            {
+                { "Background",         0.05f },
+                { "Far Background",     0.1f },
+                { "Midground",          0.25f },
+                { "Backdrop",           0.5f },
+                { "Near Backdrop",      0.7f },
+                { "Gameplay (Default)", 1f },
+                { "Overlay",            1.00001f },
+                { "Foreground",         1.25f },
+                { "Near Foreground",    1.5f },
+                { "Frontmost",          2f },
+            };
+
+        // A layer is either a named layer ("Backdrop") or a plain number ("0.33").
+        // Anything else, like Default, counts as 1.
         private float GetLayerFactor(int layer)
         {
             if (!_layerFactorCache.TryGetValue(layer, out float factor))
             {
-                if (!float.TryParse(LayerMask.LayerToName(layer), NumberStyles.Float, CultureInfo.InvariantCulture, out factor))
+                string layerName = LayerMask.LayerToName(layer)?.Trim();
+
+                if (string.IsNullOrEmpty(layerName))
                     factor = 1f;
+                else if (!NamedLayerFactors.TryGetValue(layerName, out factor) &&
+                         !float.TryParse(layerName, NumberStyles.Float, CultureInfo.InvariantCulture, out factor))
+                    factor = 1f;
+
                 _layerFactorCache[layer] = factor;
             }
             return factor;

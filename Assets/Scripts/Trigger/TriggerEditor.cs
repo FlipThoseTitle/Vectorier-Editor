@@ -121,7 +121,12 @@ namespace Vectorier.Trigger
         void OnFocus() { ValueSources.InvalidateModels(); ValueSources.InvalidateProject(); }
 
         void OnProjectChanged() { ValueSources.InvalidateModels(); Repaint(); }
-        void OnActiveProjectChanged(string _) { ValueSources.InvalidateProject(); Repaint(); }
+        void OnActiveProjectChanged(string _)
+        {
+            TriggerTemplateLibrary.Reload();
+            ValueSources.InvalidateProject();
+            Repaint();
+        }
 
         static TriggerComponent FindSelected()
         {

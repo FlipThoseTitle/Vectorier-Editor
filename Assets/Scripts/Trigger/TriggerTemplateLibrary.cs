@@ -2,13 +2,17 @@ using System.Collections.Generic;
 using System.IO;
 using System.Xml;
 using UnityEngine;
+using Vectorier.ProjectManager;
 
 namespace Vectorier.Trigger
 {
     // Read only, we never write back to TriggerTemplates.xml.
     public static class TriggerTemplateLibrary
     {
-        public const string Path = "Assets/Editor/TriggerEditor/TriggerTemplates.xml";
+        const string RelativePath = "xmlroot/TriggerTemplates.xml";
+
+        // ./Projects/{active}/xmlroot/TriggerTemplates.xml, falls back to the Vector project if missing
+        public static string Path => ActiveProject.ResolveFile(RelativePath) ?? ActiveProject.GetPath(RelativePath);
 
         public enum Section { When, OnlyIf, Do }
 
