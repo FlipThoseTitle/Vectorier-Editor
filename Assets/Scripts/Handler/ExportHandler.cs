@@ -233,13 +233,10 @@ namespace Vectorier.Handler
             return false;
         }
 
+        // Named layers ("Backdrop") and plain-number layers ("0.33") both become their factor.
         private static string GetLayerFactor(GameObject gameObject)
         {
-            string layerName = LayerMask.LayerToName(gameObject.layer);
-            if (!float.TryParse(layerName, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out float factorValue))
-                factorValue = 1f;
-
-            return factorValue.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            return Element.Element.GetLayerFactorString(gameObject);
         }
 
         private static void ReplaceContent(GameObject source, XmlUtility xml, XmlElement objectElement, ExportMode mode)

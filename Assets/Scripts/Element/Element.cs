@@ -224,13 +224,94 @@ namespace Vectorier.Element
             gameObject.name = name;
         }
 
+        // ================= LAYERS ================= //
+
+        // Named Unity layers and the factor they stand for.
+        // A layer can also be a plain number ("0.33"); anything else, like Default, counts as 1.
+        public static readonly (string LayerName, double Factor)[] NamedLayers =
+        {
+            ("Background",         0.05),
+            ("Far Background",     0.1),
+            ("Midground",          0.25),
+            ("Backdrop",           0.5),
+            ("Near Backdrop",      0.7),
+            ("Gameplay (Default)", 1.0),
+            ("Overlay",            1.00001),
+            ("Foreground",         1.25),
+            ("Near Foreground",    1.5),
+            ("Frontmost",          2.0),
+        };
+
+        private const double FactorTolerance = 1e-9;
+
+        // Factor of a Unity layer name: a named layer, a plain number, or 1.
+        public static float GetLayerFactor(string layerName)
+        {
+            layerName = layerName?.Trim();
+            if (string.IsNullOrEmpty(layerName))
+                return 1f;
+
+            foreach (var (name, factor) in NamedLayers)
+            {
+                if (string.Equals(layerName, name, StringComparison.OrdinalIgnoreCase))
+                    return (float)factor;
+            }
+
+            return float.TryParse(layerName, NumberStyles.Float, CultureInfo.InvariantCulture, out float value) ? value : 1f;
+        }
+
+        public static float GetLayerFactor(GameObject gameObject)
+        {
+            return GetLayerFactor(LayerMask.LayerToName(gameObject.layer));
+        }
+
+        // Factor written for export, e.g. "0.5" or "1.00001".
+        public static string GetLayerFactorString(GameObject gameObject)
+        {
+            return GetLayerFactor(gameObject).ToString(CultureInfo.InvariantCulture);
+        }
+
+        // Finds the Unity layer for a factor. Tries the named layer first, then a plain-number
+        // layer ("0.33"), and for factor 1 also the Default layer. Returns -1 if none exist.
+        public static int GetLayerForFactor(string factor)
+        {
+            string trimmed = factor?.Trim();
+            if (string.IsNullOrEmpty(trimmed))
+                trimmed = "1";
+
+            bool parsed = double.TryParse(trimmed, NumberStyles.Float, CultureInfo.InvariantCulture, out double value);
+
+            if (parsed)
+            {
+                foreach (var (name, layerFactor) in NamedLayers)
+                {
+                    if (Math.Abs(value - layerFactor) < FactorTolerance)
+                    {
+                        int namedLayer = LayerMask.NameToLayer(name);
+                        if (namedLayer != -1)
+                            return namedLayer;
+                        break;
+                    }
+                }
+            }
+
+            int plainLayer = LayerMask.NameToLayer(trimmed);
+            if (plainLayer != -1)
+                return plainLayer;
+
+            if (parsed && Math.Abs(value - 1.0) < FactorTolerance)
+                return LayerMask.NameToLayer("Default");
+
+            return -1;
+        }
+
         public static void ApplyLayer(GameObject gameObject, string factor)
         {
-            int layer = LayerMask.NameToLayer(factor);
+            int layer = GetLayerForFactor(factor);
             if (layer != -1)
                 gameObject.layer = layer;
             else
-                Debug.LogWarning($"Layer '{factor}' does not exist. Platform '{gameObject.name}' assigned to Default layer.");
+                Debug.LogWarning($"No layer found for factor '{factor}'. '{gameObject.name}' assigned to Default layer.");
         }
 
         // Miscellaneous
