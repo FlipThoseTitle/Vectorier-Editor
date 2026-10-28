@@ -2,7 +2,7 @@
 
 <div align="center">
   <h1>
-    Vectorier
+    Vectorier (Unity Version)
   </h1>
 </div>
 
